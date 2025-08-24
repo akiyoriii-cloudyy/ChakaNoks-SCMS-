@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CHAKANOKS - Supply Chain Management Platform</title>
 
-  <!-- ✅ Correct path for CodeIgniter (points to /public/css/styles.css) -->
-<link rel="stylesheet" href="<?= base_url('css/styles.css') ?>">
-
+  <!-- ✅ Correct path for CodeIgniter -->
+  <link rel="stylesheet" href="<?= base_url('css/styles.css') ?>">
 
   <!-- Font Awesome CDN -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -27,24 +26,20 @@
             <div class="logo-text-section"></div>
           </div>
           <h1 class="main-title">Supply Chain Management Platform</h1>
-          <p class="main-description">Streamline your operations, optimize logistics, and gain real-time visibility across your entire supply chain network.</p>
+          <p class="main-description">
+            Streamline your operations, optimize logistics, and gain real-time visibility across your entire supply chain network.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- Right Login/Registration Form -->
+    <!-- Right Login Form -->
     <div class="right-form">
       <div class="form-card">
         <!-- Welcome Header -->
         <div class="welcome-header">
           <h2>Welcome to CHAKANOKS</h2>
           <p>Supply Chain Management Platform</p>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('signin')">Sign In</button>
-          <button class="tab-btn" onclick="switchTab('register')">Register</button>
         </div>
 
         <!-- Sign In Form -->
@@ -77,69 +72,10 @@
           <button class="signin-btn" onclick="handleSignIn()">Sign In to CHAKANOKS</button>
 
           <div class="terms">
-            <p>By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
-          </div>
-        </div>
-
-        <!-- Register Form -->
-        <div id="register-form" class="form-content">
-          <div class="input-group">
-            <label for="register-name">Full Name</label>
-            <div class="input-wrapper">
-              <i class="fas fa-user"></i>
-              <input type="text" id="register-name" placeholder="Enter your full name">
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="register-email">Email Address</label>
-            <div class="input-wrapper">
-              <i class="fas fa-envelope"></i>
-              <input type="email" id="register-email" placeholder="Enter your email">
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="register-position">Position/Role</label>
-            <div class="input-wrapper">
-              <i class="fas fa-user-tie"></i>
-              <select id="register-position" class="form-select">
-                <option value="">Select your position/role</option>
-                <option value="branch">Branch</option>
-                <option value="manager">Manager</option>
-                <option value="inventory">Inventory</option>
-                <option value="staff">Staff</option>
-                <option value="central-office">Central Office</option>
-                <option value="admin">Admin</option>
-                <option value="supplier">Supplier</option>
-                <option value="logistics">Logistics</option>
-                <option value="coordinator">Coordinator</option>
-                <option value="franchise-manager">Franchise Manager</option>
-                <option value="system-administrator">System Administrator (IT)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="register-password">Password</label>
-            <div class="input-wrapper">
-              <i class="fas fa-lock"></i>
-              <input type="password" id="register-password" placeholder="Create a password">
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="register-confirm">Confirm Password</label>
-            <div class="input-wrapper">
-              <i class="fas fa-lock"></i>
-              <input type="password" id="register-confirm" placeholder="Confirm your password">
-            </div>
-          </div>
-
-          <button class="register-btn" onclick="handleRegister()">Create Account</button>
-
-          <div class="terms">
-            <p>By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+            <p>By signing in, you agree to our 
+              <a href="#">Terms of Service</a> and 
+              <a href="#">Privacy Policy</a>
+            </p>
           </div>
         </div>
 
@@ -160,7 +96,7 @@
     </div>
   </div>
 
-  <!-- ✅ Correct path for CodeIgniter (points to /public/js/script.js) -->
-<script src="<?= base_url('js/script.js') ?>"></script>
+  <!-- ✅ Correct path for CodeIgniter -->
+  <script src="<?= base_url('js/script.js') ?>"></script>
 </body>
 </html>

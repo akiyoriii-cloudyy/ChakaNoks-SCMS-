@@ -10,14 +10,34 @@ class BranchSeeder extends Seeder
     {
         $data = [
             [
-                'code' => 'CENTRAL',
-                'name' => 'Central Office',
-                'address' => 'Davao City',
+                'code'    => 'CENTRAL',
+                'name'    => 'Central Office',
+                'address' => 'Poblacion District, Davao City',
             ],
             [
-                'code' => 'MATINA',
-                'name' => 'Matina Branch',
+                'code'    => 'MATINA',
+                'name'    => 'Matina Branch',
                 'address' => 'Matina, Davao City',
+            ],
+            [
+                'code'    => 'TORIL',
+                'name'    => 'Toril Branch',
+                'address' => 'Toril, Davao City',
+            ],
+            [
+                'code'    => 'BUHANGIN',
+                'name'    => 'Buhangin Branch',
+                'address' => 'Buhangin, Davao City',
+            ],
+            [
+                'code'    => 'AGDAO',
+                'name'    => 'Agdao Branch',
+                'address' => 'Agdao, Davao City',
+            ],
+            [
+                'code'    => 'LANANG',
+                'name'    => 'Lanang Branch',
+                'address' => 'Lanang, Davao City',
             ],
         ];
 

@@ -1,40 +1,53 @@
-script.js
-
-// Tab switching functionality
+// ✅ Tab switching functionality
 function switchTab(tabName) {
-  // Remove active class from all tabs and forms
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  // Remove active class from all forms
   document.querySelectorAll('.form-content').forEach(form => form.classList.remove('active'));
-  
-  // Add active class to selected tab and form
-  document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
-  document.getElementById(`${tabName}-form`).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  // Show the correct form
+  const targetForm = document.getElementById(`${tabName}-form`);
+  if (targetForm) {
+    targetForm.classList.add('active');
+  }
+
+  // Activate the tab button only if it exists (signin/register)
+  const targetTab = document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`);
+  if (targetTab) {
+    targetTab.classList.add('active');
+  }
+
+  // ✅ Extra: clear forgot password email when switching back to sign in
+  if (tabName === 'signin') {
+    const forgotEmail = document.getElementById('forgot-email');
+    if (forgotEmail) {
+      forgotEmail.value = '';
+    }
+  }
 }
 
-// Show forgot password form
+// ✅ Show forgot password form
 function showForgotPassword() {
   document.querySelectorAll('.form-content').forEach(form => form.classList.remove('active'));
   document.getElementById('forgot-form').classList.add('active');
 }
 
-// Handle Sign In
+// ✅ Handle Sign In
 function handleSignIn() {
   const email = document.getElementById('signin-email').value.trim();
   const password = document.getElementById('signin-password').value.trim();
   const rememberMe = document.getElementById('remember-me').checked;
-  
-  // Basic validation
+
   if (!email || !password) {
     showNotification('Please fill in all fields', 'error');
     return;
   }
-  
+
   if (!isValidEmail(email)) {
     showNotification('Please enter a valid email address', 'error');
     return;
   }
-  
-  // AJAX call to signin.php
+
+  // AJAX call to signin.php (or your CI controller route)
   const formData = new FormData();
   formData.append('email', email);
   formData.append('password', password);
@@ -53,104 +66,40 @@ function handleSignIn() {
   xhr.send(formData);
 }
 
-// Handle Register
-function handleRegister() {
-  const name = document.getElementById('register-name').value.trim();
-  const email = document.getElementById('register-email').value.trim();
-  const position = document.getElementById('register-position').value.trim();
-  const password = document.getElementById('register-password').value.trim();
-  const confirmPassword = document.getElementById('register-confirm').value.trim();
-  
-  // Basic validation
-  if (!name || !email || !position || !password || !confirmPassword) {
-    showNotification('Please fill in all fields', 'error');
-    return;
-  }
-  
-  if (!isValidEmail(email)) {
-    showNotification('Please enter a valid email address', 'error');
-    return;
-  }
-  
-  if (password.length < 8) {
-    showNotification('Password must be at least 8 characters long', 'error');
-    return;
-  }
-  
-  if (password !== confirmPassword) {
-    showNotification('Passwords do not match', 'error');
-    return;
-  }
-  
-  // AJAX call to register.php
-  const formData = new FormData();
-  formData.append('full_name', name);
-  formData.append('email', email);
-  formData.append('position', position);
-  formData.append('password', password);
-
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", "register.php", true);
-  xhr.onreadystatechange = function () {
-    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-      console.log(this.responseText);
-      if (this.responseText === "New record created successfully") {
-        showNotification('Account created successfully!', 'success');
-      } else {
-        showNotification(this.responseText, 'error');
-      }
-    }
-  }
-  xhr.send(formData);
-}
-
-// Handle Forgot Password
+// ✅ Handle Forgot Password
 function handleForgotPassword() {
   const email = document.getElementById('forgot-email').value.trim();
-  
+
   if (!email) {
     showNotification('Please enter your email address', 'error');
     return;
   }
-  
+
   if (!isValidEmail(email)) {
     showNotification('Please enter a valid email address', 'error');
     return;
   }
-  
-  // Simulate password reset process
+
   showNotification('Password reset link sent to your email!', 'success');
-  
-  // Switch back to sign in tab
-  switchTab('signin');
-  // Clear form
   document.getElementById('forgot-email').value = '';
+
+  // Go back to Sign In after success
+  switchTab('signin');
 }
 
-// Email validation helper
+// ✅ Email validation
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
-// Clear register form
-function clearRegisterForm() {
-  document.getElementById('register-name').value = '';
-  document.getElementById('register-email').value = '';
-  document.getElementById('register-position').value = '';
-  document.getElementById('register-password').value = '';
-  document.getElementById('register-confirm').value = '';
-}
-
-// Notification system
+// ✅ Notification system
 function showNotification(message, type = 'info') {
-  // Remove existing notifications
   const existingNotification = document.querySelector('.notification');
   if (existingNotification) {
     existingNotification.remove();
   }
-  
-  // Create notification element
+
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.innerHTML = `
@@ -159,8 +108,7 @@ function showNotification(message, type = 'info') {
       <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
     </div>
   `;
-  
-  // Add styles
+
   notification.style.cssText = `
     position: fixed;
     top: 20px;
@@ -174,11 +122,9 @@ function showNotification(message, type = 'info') {
     max-width: 400px;
     animation: slideIn 0.3s ease;
   `;
-  
-  // Add to page
+
   document.body.appendChild(notification);
-  
-  // Auto remove after 5 seconds
+
   setTimeout(() => {
     if (notification.parentElement) {
       notification.remove();
@@ -186,7 +132,7 @@ function showNotification(message, type = 'info') {
   }, 3000);
 }
 
-// Add CSS animations
+// ✅ CSS animations for notification
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideIn {
@@ -199,14 +145,14 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Form Enter submit
+// ✅ Enter key submit + input animations
 document.addEventListener('DOMContentLoaded', function() {
   const signinForm = document.getElementById('signin-form');
   signinForm.addEventListener('keypress', function(e) { if (e.key === 'Enter') { handleSignIn(); } });
-  const registerForm = document.getElementById('register-form');
-  registerForm.addEventListener('keypress', function(e) { if (e.key === 'Enter') { handleRegister(); } });
+
   const forgotForm = document.getElementById('forgot-form');
   forgotForm.addEventListener('keypress', function(e) { if (e.key === 'Enter') { handleForgotPassword(); } });
+
   const inputs = document.querySelectorAll('input');
   inputs.forEach(input => {
     input.addEventListener('focus', function(){ this.parentElement.style.transform = 'scale(1.02)'; });
@@ -214,5 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Legacy
-function showForm(id) { switchTab(id); }
+// ✅ Redirect after login
+function redirectToDashboard() {
+  window.location.href = "dashboard.php"; // Change path if needed
+}
