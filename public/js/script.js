@@ -1,27 +1,17 @@
 // ✅ Tab switching functionality
 function switchTab(tabName) {
-  // Remove active class from all forms
   document.querySelectorAll('.form-content').forEach(form => form.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-  // Show the correct form
   const targetForm = document.getElementById(`${tabName}-form`);
-  if (targetForm) {
-    targetForm.classList.add('active');
-  }
+  if (targetForm) targetForm.classList.add('active');
 
-  // Activate the tab button only if it exists (signin/register)
   const targetTab = document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`);
-  if (targetTab) {
-    targetTab.classList.add('active');
-  }
+  if (targetTab) targetTab.classList.add('active');
 
-  // ✅ Extra: clear forgot password email when switching back to sign in
   if (tabName === 'signin') {
     const forgotEmail = document.getElementById('forgot-email');
-    if (forgotEmail) {
-      forgotEmail.value = '';
-    }
+    if (forgotEmail) forgotEmail.value = '';
   }
 }
 
@@ -31,40 +21,7 @@ function showForgotPassword() {
   document.getElementById('forgot-form').classList.add('active');
 }
 
-// ✅ Handle Sign In
-function handleSignIn() {
-  const email = document.getElementById('signin-email').value.trim();
-  const password = document.getElementById('signin-password').value.trim();
-  const rememberMe = document.getElementById('remember-me').checked;
-
-  if (!email || !password) {
-    showNotification('Please fill in all fields', 'error');
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showNotification('Please enter a valid email address', 'error');
-    return;
-  }
-
-  // AJAX call to signin.php (or your CI controller route)
-  const formData = new FormData();
-  formData.append('email', email);
-  formData.append('password', password);
-
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", "signin.php", true);
-  xhr.onreadystatechange = function () {
-    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-      if (this.responseText === "Logged in successfully") {
-        redirectToDashboard();
-      } else {
-        showNotification(this.responseText, 'error');
-      }
-    }
-  }
-  xhr.send(formData);
-}
+// ❌ Removed handleSignIn() because the form now posts directly to CI route
 
 // ✅ Handle Forgot Password
 function handleForgotPassword() {
@@ -82,8 +39,6 @@ function handleForgotPassword() {
 
   showNotification('Password reset link sent to your email!', 'success');
   document.getElementById('forgot-email').value = '';
-
-  // Go back to Sign In after success
   switchTab('signin');
 }
 
@@ -96,9 +51,7 @@ function isValidEmail(email) {
 // ✅ Notification system
 function showNotification(message, type = 'info') {
   const existingNotification = document.querySelector('.notification');
-  if (existingNotification) {
-    existingNotification.remove();
-  }
+  if (existingNotification) existingNotification.remove();
 
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
@@ -126,9 +79,7 @@ function showNotification(message, type = 'info') {
   document.body.appendChild(notification);
 
   setTimeout(() => {
-    if (notification.parentElement) {
-      notification.remove();
-    }
+    if (notification.parentElement) notification.remove();
   }, 3000);
 }
 
@@ -145,13 +96,13 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ✅ Enter key submit + input animations
+// ✅ Input animations
 document.addEventListener('DOMContentLoaded', function() {
-  const signinForm = document.getElementById('signin-form');
-  signinForm.addEventListener('keypress', function(e) { if (e.key === 'Enter') { handleSignIn(); } });
-
+  // ❌ Removed Enter key submit binding to handleSignIn()
   const forgotForm = document.getElementById('forgot-form');
-  forgotForm.addEventListener('keypress', function(e) { if (e.key === 'Enter') { handleForgotPassword(); } });
+  forgotForm.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') handleForgotPassword();
+  });
 
   const inputs = document.querySelectorAll('input');
   inputs.forEach(input => {
@@ -160,7 +111,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// ✅ Redirect after login
-function redirectToDashboard() {
-  window.location.href = "dashboard.php"; // Change path if needed
-}
+// ❌ Removed redirectToDashboard() — redirect is handled by PHP controller

@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
         $buhangin  = $this->db->table('branches')->where('code', 'BUHANGIN')->get()->getRow();
         $agdao = $this->db->table('branches')->where('code', 'AGDAO')->get()->getRow();
         $lanang  = $this->db->table('branches')->where('code', 'LANANG')->get()->getRow();
-
+        
         $data = [
             [
                 'branch_id' => null, // superadmin not tied to a branch
@@ -25,40 +25,34 @@ class UserSeeder extends Seeder
             ],
             [
                 'branch_id' => $central ? $central->id : null,
-                'email'    => 'central.admin@chakanoks.test',
+                'email'    => 'markypadilla04@gmail.com',
                 'password' => password_hash('password123', PASSWORD_DEFAULT),
                 'role'     => 'central_admin',
             ],
             [
                 'branch_id' => $matina ? $matina->id : null,
-                'email'    => 'matina.manager@chakanoks.test',
+                'email'    => 'abbyyygarciaa@gmail.com',
                 'password' => password_hash('password123', PASSWORD_DEFAULT),
                 'role'     => 'branch_manager',
-            ],
-            [
-                'branch_id' => $toril ? $toril->id : null,
-                'email'    => 'abbywakwak.staff@chakanoks.test',
-                'password' => password_hash('password123', PASSWORD_DEFAULT),
-                'role'     => 'staff',
-            ],
+            ],          
             [
                 'branch_id' => $buhangin ? $buhangin->id : null,
-                'email'    => 'Franchise.Manager@chakanoks.test',
+                'email'    => 'akiyorii03@gmail.com',
                 'password' => password_hash('password123', PASSWORD_DEFAULT),
                 'role'     => 'franchise_manager',
             ],
             [
-                'branch_id' => $agdao ? $agdao->id : null,
-                'email'    => 'Inventory.Staff@chakanoks.test',
+                'branch_id' => $toril ? $toril->id : null,
+                'email'    => 'wakwak321@gmail.com',
                 'password' => password_hash('password123', PASSWORD_DEFAULT),
-                'role'     => 'inventory_staff',
+                'role'     => 'inventory_staff',    
             ],
             [
                 'branch_id' => $lanang ? $lanang->id : null,
-                'email'    => 'logisticsCoordinator.staff@chakanoks.test',
+                'email'    => 'Gpalagpalag@gmail.com',
                 'password' => password_hash('password123', PASSWORD_DEFAULT),
                 'role'     => 'logistics_coordinator',
-            ],
+            ],                              
         ];
 
         $this->db->table('users')->insertBatch($data);
