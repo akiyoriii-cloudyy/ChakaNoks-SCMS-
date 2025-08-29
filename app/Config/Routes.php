@@ -30,3 +30,12 @@ $routes->get('manager/dashboard', 'Manager::dashboard');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
 $routes->get('staff/dashboard', 'Staff::dashboard');
+
+$routes->get('inventorystaff/dashboard', 'InventoryStaff::index');
+// (optional) pretty URL for item details if you fetch from DB later:
+$routes->get('inventorystaff/item/(:num)', 'InventoryStaff::show/$1');
+$routes->get('/inventorystaff/dashboard', 'InventoryStaff::dashboard');
+$routes->get('/staff/dashboard', 'InventoryStaff::dashboard');
+return redirect()->to('/inventorystaff/dashboard');
+
+
