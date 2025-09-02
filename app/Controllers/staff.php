@@ -2,10 +2,20 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
+use App\Models\ProductModel;
+use Config\Database;
 
 class Staff extends BaseController
 {
+    protected $db;
+    protected $model;
+
+    public function __construct()
+    {
+        $this->db    = Database::connect();
+        $this->model = new ProductModel();
+    }
+
     public function index()
     {
         return $this->dashboard();
@@ -15,47 +25,130 @@ class Staff extends BaseController
     {
         $session = session();
 
-        // Role guard
-        if (! $session->get('logged_in') || ! in_array($session->get('role'), ['inventorystaff','inventory_staff'])) {
+        // Auth check - allow inventory staff and managers
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
             return redirect()->to('/auth/login');
         }
 
-        // Demo data (replace with DB later)
-        $items = [
-            [
-                'id'=>1,'name'=>'Chicken Wings','category'=>'Poultry','branch'=>'LANANG',
-                'stock_qty'=>75,'unit'=>'kg','min'=>100,'max'=>300,'status'=>'Critical',
-                'supplier'=>'Poultry Plus','updated_ago'=>'2 days ago','date'=>'2025-08-19','expiry'=>'2025-09-02'
-            ],
-            [
-                'id'=>2,'name'=>'Chicken Breast','category'=>'Poultry','branch'=>'MATINA',
-                'stock_qty'=>245,'unit'=>'kg','min'=>150,'max'=>400,'status'=>'Good',
-                'supplier'=>'Quality Meats','updated_ago'=>'3 hours ago','date'=>'2025-08-21','expiry'=>'2025-09-05'
-            ],
-            [
-                'id'=>3,'name'=>'Cooking Oil','category'=>'Cooking Supplies','branch'=>'TORIL',
-                'stock_qty'=>120,'unit'=>'liters','min'=>80,'max'=>300,'status'=>'Low Stock',
-                'supplier'=>'Oil Masters','updated_ago'=>'30 mins. ago','date'=>'2025-08-21','expiry'=>'2026-01-15'
-            ],
-            [
-                'id'=>4,'name'=>'Seasoning Mix','category'=>'Condiments','branch'=>'BUHANGIN',
-                'stock_qty'=>10,'unit'=>'packs','min'=>50,'max'=>200,'status'=>'Critical',
-                'supplier'=>'Spice World','updated_ago'=>'1 hour ago','date'=>'2025-08-21','expiry'=>'2025-09-10'
-            ],
+        // Filters
+        $filters = [
+            'search'         => $this->request->getGet('search'),
+            'branch_address' => $this->request->getGet('branch_address'),
+            'status'         => $this->request->getGet('status'),
+            'date'           => $this->request->getGet('date'),
         ];
 
+        // Get inventory items
+        $items = $this->model->getInventory($filters);
+
+        // Get branches from products table
+        $branches = $this->db->table('products')
+            ->distinct()
+            ->select('branch_address')
+            ->where('branch_address IS NOT NULL')
+            ->where('branch_address !=', '')
+            ->orderBy('branch_address')
+            ->get()
+            ->getResultArray();
+
         return view('dashboards/staff', [
-            'items' => $items,
-            'me'    => [
+            'items'    => $items,
+            'branches' => $branches,
+            'filters'  => $filters,
+            'me'       => [
                 'email' => $session->get('email'),
                 'role'  => $session->get('role'),
             ],
         ]);
     }
 
-    public function item($id)
+    /**
+     * Add new product
+     */
+    public function addProduct()
     {
-        // Later: fetch a single item by id
-        return redirect()->to('/staff/dashboard');
+        // Check authentication - allow inventory staff and managers
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized']);
+        }
+
+        // Get and validate input
+        $name = trim($this->request->getPost('name'));
+        if (empty($name)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Product name is required']);
+        }
+
+        $stock = (int)($this->request->getPost('stock') ?? 0);
+        if ($stock <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Stock quantity must be greater than 0']);
+        }
+
+        $branchAddress = trim($this->request->getPost('branch_address'));
+        if ($branchAddress === 'Unknown Branch') {
+            $branchAddress = null;
+        }
+
+        // Prepare data for insertion
+        $payload = [
+            'name'           => $name,
+            'category'       => $this->request->getPost('category') ?? 'Chicken Parts',
+            'unit'           => $this->request->getPost('unit') ?? 'pcs',
+            'stock_qty'      => $stock,
+            'min_stock'      => (int)($this->request->getPost('min_stock') ?? 0),
+            'max_stock'      => (int)($this->request->getPost('max_stock') ?? 0),
+            'branch_address' => $branchAddress,
+            'expiry'         => $this->request->getPost('expiry') ?: null,
+            'created_by'     => $session->get('id') ?? 1,
+        ];
+
+        try {
+            log_message('debug', 'Add product payload: ' . json_encode($payload));
+            
+            $insertId = $this->model->addProduct($payload);
+            
+            if ($insertId) {
+                return $this->response->setJSON(['status' => 'success', 'id' => $insertId]);
+            } else {
+                $error = $this->db->error();
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'error'  => $error['message'] ?? 'Failed to insert product'
+                ]);
+            }
+            
+        } catch (\Throwable $e) {
+            log_message('error', 'Add product exception: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'error'  => 'Server error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Update stock quantity
+     */
+    public function updateStock($id = null)
+    {
+        // Check authentication - allow inventory staff and managers
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Missing product id']);
+        }
+
+        $qty = (int)($this->request->getPost('stock_qty') ?? 0);
+        $ok  = $this->model->updateStock((int)$id, $qty);
+
+        if ($ok) {
+            return $this->response->setJSON(['status' => 'success']);
+        }
+
+        $err = $this->db->error();
+        return $this->response->setJSON(['status' => 'error', 'error' => $err['message'] ?? 'Update failed']);
     }
 }

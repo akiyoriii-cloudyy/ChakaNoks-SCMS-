@@ -50,30 +50,30 @@ class Auth extends BaseController
         ]);
 
         // ✅ ROLE-BASED REDIRECT
-$role = strtolower($session->get('role'));
+        $role = strtolower($session->get('role'));
 
-switch ($role) {
-    case 'superadmin':
-        return redirect()->to('/superadmin/dashboard');
-    case 'central_admin':
-    case 'centraladmin':
-        return redirect()->to('/centraladmin/dashboard');
-    case 'branch_manager':
-    case 'manager':
-    case 'branchmanager':
-        return redirect()->to('/manager/dashboard');
-    case 'franchisemanager':
-    case 'franchise_manager':
-        return redirect()->to('/franchisemanager/dashboard');
-    case 'logisticscoordinator':
-    case 'logistics_coordinator':
-        return redirect()->to('/logisticscoordinator/dashboard');
-    case 'staff':
-    case 'inventory_staff':
-        return redirect()->to('/staff/dashboard');
-    default:
-        return redirect()->to('/dashboard'); // fallback
-}
+        switch ($role) {
+            case 'superadmin':
+                return redirect()->to('/superadmin/dashboard');
+            case 'central_admin':
+            case 'centraladmin':
+                return redirect()->to('/centraladmin/dashboard');
+            case 'branch_manager':
+            case 'manager':
+            case 'branchmanager':
+                return redirect()->to('/manager/dashboard');
+            case 'franchisemanager':
+            case 'franchise_manager':
+                return redirect()->to('/franchisemanager/dashboard');
+            case 'logisticscoordinator':
+            case 'logistics_coordinator':
+                return redirect()->to('/logisticscoordinator/dashboard');
+            case 'staff':
+            case 'inventory_staff':
+                return redirect()->to('/staff/dashboard');
+            default:
+                return redirect()->to('/dashboard'); // fallback
+        }
 
     }
 

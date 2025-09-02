@@ -28,6 +28,10 @@ $routes->get('staff/dashboard', 'Staff::dashboard');
 $routes->get('inventorystaff/dashboard', 'Staff::dashboard');
 $routes->get('inventorystaff/item/(:num)', 'Staff::item/$1');
 
+// Direct staff routes for easier access
+$routes->post('staff/addProduct', 'Staff::addProduct');
+$routes->post('staff/updateStock/(:num)', 'Staff::updateStock/$1');
+
 
 $routes->group('inventory', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'Staff::index');  
@@ -40,10 +44,12 @@ $routes->group('inventory', ['filter' => 'auth'], function($routes) {
     // Staff Dashboard
     $routes->get('staff', 'Staff::index');
     $routes->get('staff/dashboard', 'Staff::dashboard');
+    $routes->get('staff', 'Staff::dashboard');
 
             // Inventory AJAX APIs
     $routes->get('inventory/items', 'Staff::getItems');
-    $routes->post('inventory/add', 'Staff::add');
-    $routes->post('inventory/updateStock', 'Staff::updateStock');
+    $routes->post('staff/add-product', 'Staff::addProduct');
+    $routes->post('staff/addProduct', 'Staff::addProduct');
+    $routes->post('staff/update-stock/(:num)', 'Staff::updateStock/$1');
     $routes->post('inventory/reportDamage', 'Staff::reportDamage');
  });

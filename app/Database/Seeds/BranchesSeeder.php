@@ -11,26 +11,63 @@ class BranchesSeeder extends Seeder
     {
         $now = Time::now();
 
-        $rows = [
-            ['code' => 'CENTRAL',  'name' => 'Central Office',  'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'MATINA',   'name' => 'Matina Branch',   'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'TORIL',    'name' => 'Toril Branch',    'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'BUHANGIN', 'name' => 'Buhangin Branch', 'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'AGDAO',    'name' => 'Agdao Branch',    'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'LANANG',   'name' => 'Lanang Branch',   'created_at' => $now, 'updated_at' => $now],
+        // ✅ Define branches seed data with real addresses
+        $branches = [
+            [
+                'code'    => 'CENTRAL',
+                'name'    => 'Central Office',
+                'address' => 'Quimpo Boulevard, Ecoland, Davao City, Philippines',
+            ],
+            [
+                'code'    => 'MATINA',
+                'name'    => 'Matina Branch',
+                'address' => 'MacArthur Highway, Matina Crossing, Davao City, Philippines',
+            ],
+            [
+                'code'    => 'TORIL',
+                'name'    => 'Toril Branch',
+                'address' => 'Agton Street, Toril, Davao City, Philippines',
+            ],
+            [
+                'code'    => 'BUHANGIN',
+                'name'    => 'Buhangin Branch',
+                'address' => 'Buhangin Road, Buhangin Proper, Davao City, Philippines',
+            ],
+            [
+                'code'    => 'AGDAO',
+                'name'    => 'Agdao Branch',
+                'address' => 'Lapu-Lapu Street, Agdao, Davao City, Philippines',
+            ],
+            [
+                'code'    => 'LANANG',
+                'name'    => 'Lanang Branch',
+                'address' => 'JP Laurel Avenue, Lanang, Davao City, Philippines',
+            ],
         ];
 
         $tbl = $this->db->table('branches');
 
-        foreach ($rows as $r) {
-            $existing = $tbl->where('code', $r['code'])->get()->getRowArray();
+        foreach ($branches as $b) {
+            $existing = $tbl->where('code', $b['code'])->get()->getRowArray();
 
             if ($existing) {
-                $tbl->where('id', $existing['id'])->update($r);
-                echo "🔄 Updated branch: {$r['code']} ({$r['name']})\n";
+                // 🔄 Update existing branch
+                $tbl->where('id', $existing['id'])->update([
+                    'name'       => $b['name'],
+                    'address'    => $b['address'],
+                    'updated_at' => $now,
+                ]);
+                echo "🔄 Updated branch: {$b['code']} - {$b['name']}\n";
             } else {
-                $tbl->insert($r);
-                echo "✅ Inserted branch: {$r['code']} ({$r['name']})\n";
+                // ✅ Insert new branch
+                $tbl->insert([
+                    'code'       => $b['code'],
+                    'name'       => $b['name'],
+                    'address'    => $b['address'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                echo "✅ Inserted branch: {$b['code']} - {$b['name']}\n";
             }
         }
     }

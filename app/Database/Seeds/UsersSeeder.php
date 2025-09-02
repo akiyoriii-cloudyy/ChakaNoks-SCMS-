@@ -16,10 +16,10 @@ class UsersSeeder extends Seeder
         $agdao     = $this->db->table('branches')->where('code', 'AGDAO')->get()->getRow();
         $lanang    = $this->db->table('branches')->where('code', 'LANANG')->get()->getRow();
 
-        // ✅ Removed `username`
-        $data = [
+        // ✅ Define user seed data
+        $users = [
             [
-                'branch_id' => null, // superadmin not tied to a branch
+                'branch_id' => null,
                 'email'     => 'superadmin1@chakanoks.test',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'superadmin',
@@ -54,8 +54,23 @@ class UsersSeeder extends Seeder
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'logistics_coordinator',
             ],
+            // ✅ New user         
         ];
 
-        $this->db->table('users')->insertBatch($data);
+        $tbl = $this->db->table('users');
+
+        foreach ($users as $u) {
+            $existing = $tbl->where('email', $u['email'])->get()->getRowArray();
+
+            if ($existing) {
+                // 🔄 Update existing
+                $tbl->where('id', $existing['id'])->update($u);
+                echo "🔄 Updated user: {$u['email']}\n";
+            } else {
+                // ✅ Insert new
+                $tbl->insert($u);
+                echo "✅ Inserted user: {$u['email']}\n";
+            }
+        }
     }
 }
