@@ -49,6 +49,7 @@
             <h2>Inventory Management</h2>
             <div class="actions">
                 <button id="btnAdd" class="btn add"><span class="plus">+</span> Add New Item</button>
+                <button id="btnPrintAll" class="btn add">🖨 Print All Reports</button>
                 <input type="date" id="filterDate" class="input date">
                 <div class="filters">
                     <select id="filterBranch" class="input select">
@@ -222,6 +223,7 @@
             <button class="btn ghost" id="btnReportDamaged">Report Damaged</button>
             <button class="btn" id="btnTrackInventory">Track Inventory</button>
             <button class="btn ghost" id="btnCheckExpiry">Check Expiry</button>
+            <button class="btn" id="btnPrintReport">Print Report</button>
         </div>
     </div>
 </div>
@@ -231,5 +233,79 @@
 
 <!-- INVENTORY STAFF JS -->
 <script src="<?= base_url('assets/js/inventorystaff.js') ?>?v=<?= time() ?>"></script>
+
+<script>
+document.getElementById('btnPrintAll').addEventListener('click', function() {
+    // Get all items from your JSON script
+    const items = JSON.parse(document.getElementById('initial-items').textContent);
+
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
+
+    let reportHTML = `
+    <html>
+    <head>
+        <title>Inventory Report — CHAKANOKS</title>
+        <style>
+            @page { size: A4; margin: 20mm; }
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            h1, h2 { text-align: center; margin: 5px 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #333; padding: 8px; text-align: left; font-size: 12px; }
+            th { background-color: #f0f0f0; }
+            .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #555555ff; }
+        </style>
+    </head>
+    <body>
+        <h1>CHAKANOKS</h1>
+        <h2>Inventory Report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Branch</th>
+                    <th>Stock Quantity</th>
+                    <th>Min Stock</th>
+                    <th>Max Stock</th>
+                    <th>Unit</th>
+                    <th>Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    items.forEach(item => {
+        reportHTML += `
+        <tr>
+            <td>${item.name}</td>
+            <td>${item.category}</td>
+            <td>${item.branch_address}</td>
+            <td>${item.stock_qty}</td>
+            <td>${item.min_stock}</td>
+            <td>${item.max_stock}</td>
+            <td>${item.unit}</td>
+            <td>${item.expiry}</td>
+        </tr>
+        `;
+    });
+
+    reportHTML += `
+            </tbody>
+        </table>
+        <div class="footer">Generated on ${formattedDate}</div>
+    </body>
+    </html>
+    `;
+
+    // Open new window and print
+    const printWindow = window.open('', '', 'width=900,height=700');
+    printWindow.document.write(reportHTML);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+});
+</script>
+
 </body>
 </html>
