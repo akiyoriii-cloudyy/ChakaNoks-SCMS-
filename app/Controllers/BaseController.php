@@ -29,30 +29,66 @@ abstract class BaseController extends Controller
     protected $request;
 
     /**
-     * An array of helpers to be loaded automatically upon
-     * class instantiation. These helpers will be available
-     * to all other controllers that extend BaseController.
+     * Automatically loaded helpers
      *
      * @var list<string>
      */
-    protected $helpers = ['url', 'form'];
+    protected $helpers = ['url', 'form', 'text'];
 
     /**
-     * Be sure to declare properties for any property fetch you initialized.
-     * The creation of dynamic property is deprecated in PHP 8.2.
+     * Common services available in all controllers
      */
-    // protected $session;
+    protected $session;
+    protected $email;
 
     /**
-     * @return void
+     * Init controller
+     *
+     * @param RequestInterface  $request
+     * @param ResponseInterface $response
+     * @param LoggerInterface   $logger
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
-        // Do Not Edit This Line
+        // Do not edit this line
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
+        // Load commonly used services
+        $this->session = service('session');   // Session library
+        $this->email   = service('email');     // Email service
 
-        // E.g.: $this->session = service('session');
+        // You can preload more models or libraries here if needed
+        // Example: $this->userModel = new \App\Models\UserModel();
+    }
+
+    /**
+     * Flash message helper for easy redirects
+     *
+     * @param string $key
+     * @param string $message
+     */
+    protected function flash(string $key, string $message)
+    {
+        $this->session->setFlashdata($key, $message);
+    }
+
+    /**
+     * Redirect back with error
+     *
+     * @param string $message
+     */
+    protected function backWithError(string $message)
+    {
+        return redirect()->back()->with('error', $message);
+    }
+
+    /**
+     * Redirect back with success
+     *
+     * @param string $message
+     */
+    protected function backWithSuccess(string $message)
+    {
+        return redirect()->back()->with('success', $message);
     }
 }

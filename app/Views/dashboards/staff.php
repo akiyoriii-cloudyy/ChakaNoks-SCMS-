@@ -305,6 +305,91 @@ document.getElementById('btnPrintAll').addEventListener('click', function() {
     printWindow.focus();
     printWindow.print();
 });
+
+// Print Report for Individual Item
+document.getElementById('btnPrintReport').addEventListener('click', function() {
+    // Get the current item data from the modal
+    const itemName = document.getElementById('viewItemTitle').textContent;
+    const itemCategory = document.getElementById('viewCategory').textContent;
+    const itemBranch = document.getElementById('viewBranch').textContent;
+    const itemStock = document.getElementById('viewStock').textContent;
+    const itemMinMax = document.getElementById('viewMinMax').textContent;
+    const itemStatus = document.getElementById('viewStatus').textContent;
+    const itemUpdated = document.getElementById('viewUpdated').textContent;
+    const itemExpiry = document.getElementById('viewExpiry').textContent;
+
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
+
+    let reportHTML = `
+    <html>
+    <head>
+        <title>Item Report — CHAKANOKS</title>
+        <style>
+            @page { size: A4; margin: 20mm; }
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            h1, h2 { text-align: center; margin: 5px 0; }
+            .item-details { margin: 20px 0; }
+            .detail-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px; border-bottom: 1px solid #eee; }
+            .detail-label { font-weight: bold; }
+            .footer { margin-top: 30px; font-size: 12px; text-align: center; color: #555; }
+            .status-badge { padding: 4px 12px; border-radius: 12px; color: white; font-weight: bold; }
+            .status-critical { background-color: #e74c3c; }
+            .status-low { background-color: #f39c12; }
+            .status-good { background-color: #2ecc71; }
+        </style>
+    </head>
+    <body>
+        <h1>CHAKANOKS</h1>
+        <h2>Item Report</h2>
+        
+        <div class="item-details">
+            <div class="detail-row">
+                <span class="detail-label">Item Name:</span>
+                <span>${itemName}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Category:</span>
+                <span>${itemCategory}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Branch:</span>
+                <span>${itemBranch}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Current Stock:</span>
+                <span>${itemStock}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Min/Max Stock:</span>
+                <span>${itemMinMax}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="status-badge ${itemStatus.toLowerCase().replace(' ', '-')}">${itemStatus}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Last Updated:</span>
+                <span>${itemUpdated}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Expiry Date:</span>
+                <span>${itemExpiry}</span>
+            </div>
+        </div>
+        
+        <div class="footer">Generated on ${formattedDate}</div>
+    </body>
+    </html>
+    `;
+
+    // Open new window and print
+    const printWindow = window.open('', '', 'width=900,height=700');
+    printWindow.document.write(reportHTML);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+});
 </script>
 
 </body>

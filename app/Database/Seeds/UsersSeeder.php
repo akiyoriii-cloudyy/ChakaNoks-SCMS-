@@ -26,13 +26,13 @@ class UsersSeeder extends Seeder
             ],
             [
                 'branch_id' => $central ? $central->id : null,
-                'email'     => 'markypadilla04@gmail.com',
+                'email'     => 'mansuetomarky@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'central_admin',
             ],
             [
                 'branch_id' => $matina ? $matina->id : null,
-                'email'     => 'abbyyygarciaa@gmail.com',
+                'email'     => 'rualesabigail09@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'branch_manager',
             ],
@@ -44,7 +44,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'branch_id' => $toril ? $toril->id : null,
-                'email'     => 'wakwak321@gmail.com',
+                'email'     => 'leo333953@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'inventory_staff',
             ],

@@ -1,0 +1,719 @@
+ERROR - 2025-09-07 12:27:07 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 12:27:07 --> You did not specify a SMTP hostname.
+CRITICAL - 2025-09-07 12:39:38 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: POST, Route: auth/forgot/sendResetLink]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, 30)
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\Forgot.php(93): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-07 12:47:33 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 12:47:33 --> You did not specify a SMTP hostname.
+ERROR - 2025-09-07 12:50:52 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 12:50:52 --> You did not specify a SMTP hostname.
+ERROR - 2025-09-07 12:55:19 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 12:55:19 --> You did not specify a SMTP hostname.
+CRITICAL - 2025-09-07 13:00:04 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: POST, Route: auth/forgot/sendResetLink]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '30')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\Forgot.php(87): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 13:07:44 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "auth/forgot_password.php"
+[Method: GET, Route: auth/forgotPasswordForm]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('auth/forgot_password.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/forgot_password', [], true)
+ 3 APPPATH\Controllers\Auth\Forgot.php(20): view('auth/forgot_password')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->index()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 13:07:49 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "auth/forgot_password.php"
+[Method: GET, Route: auth/forgotPasswordForm]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('auth/forgot_password.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/forgot_password', [], true)
+ 3 APPPATH\Controllers\Auth\Forgot.php(20): view('auth/forgot_password')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->index()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 13:11:52 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "auth/forgot_password.php"
+[Method: GET, Route: auth/forgotPasswordForm]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('auth/forgot_password.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/forgot_password', [], true)
+ 3 APPPATH\Controllers\Auth\Forgot.php(20): view('auth/forgot_password')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->index()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-07 13:14:36 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 13:14:36 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24b160a3ec6sm138327325ad.27 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24b160a3ec6sm138327325ad.27 - gsmtp
+
+ERROR - 2025-09-07 13:21:03 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 13:21:03 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24c8945d8d4sm113971645ad.127 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24c8945d8d4sm113971645ad.127 - gsmtp
+
+ERROR - 2025-09-07 13:41:00 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 13:41:00 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24ccfc56ec1sm76985955ad.59 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24ccfc56ec1sm76985955ad.59 - gsmtp
+
+ERROR - 2025-09-07 13:41:54 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 13:41:54 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24caffd7beesm94683015ad.121 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24caffd7beesm94683015ad.121 - gsmtp
+
+ERROR - 2025-09-07 13:43:42 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 13:43:42 --> 220 smtp.gmail.com ESMTP d9443c01a7336-25303b00703sm17890445ad.117 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-25303b00703sm17890445ad.117 - gsmtp
+
+CRITICAL - 2025-09-07 13:56:03 --> TypeError: preg_match(): Argument #2 ($subject) must be of type string, bool given
+[Method: POST, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Email\Email.php on line 484.
+ 1 SYSTEMPATH\Email\Email.php(484): preg_match('/\\<(.*)\\>/', false, null)
+ 2 APPPATH\Controllers\Auth\EmailTest.php(33): CodeIgniter\Email\Email->setFrom(false, false)
+ 3 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 4 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 5 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-07 13:56:58 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 13:56:58 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7725ad1e9afsm18597820b3a.11 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7725ad1e9afsm18597820b3a.11 - gsmtp
+
+CRITICAL - 2025-09-07 13:57:15 --> TypeError: preg_match(): Argument #2 ($subject) must be of type string, bool given
+[Method: POST, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Email\Email.php on line 484.
+ 1 SYSTEMPATH\Email\Email.php(484): preg_match('/\\<(.*)\\>/', false, null)
+ 2 APPPATH\Controllers\Auth\EmailTest.php(33): CodeIgniter\Email\Email->setFrom(false, false)
+ 3 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 4 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 5 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-07 14:04:27 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:04:27 --> You did not specify a SMTP hostname.
+CRITICAL - 2025-09-07 14:09:39 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: POST, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, 5)
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(42): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:13:55 --> TypeError: CodeIgniter\Config\Services::email(): Argument #2 ($getShared) must be of type bool, array given, called in C:\xampp\htdocs\ChakaNoks-SCMS\system\Config\BaseService.php on line 312
+[Method: POST, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Config\Services.php on line 227.
+ 1 SYSTEMPATH\Config\BaseService.php(312): CodeIgniter\Config\Services::email(null, [...])
+ 2 APPPATH\Controllers\Auth\EmailTest.php(66): CodeIgniter\Config\BaseService::__callStatic('email', [...])
+ 3 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 4 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 5 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-07 14:16:17 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:16:17 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24df9e881casm53248535ad.62 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24df9e881casm53248535ad.62 - gsmtp
+
+ERROR - 2025-09-07 14:16:44 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:16:44 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24b0e860ab5sm146040675ad.5 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24b0e860ab5sm146040675ad.5 - gsmtp
+
+ERROR - 2025-09-07 14:26:28 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:26:28 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-772590e0519sm18442175b3a.84 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-772590e0519sm18442175b3a.84 - gsmtp
+
+CRITICAL - 2025-09-07 14:32:26 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, 30)
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(39): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:38:55 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('ssl://smtp.gmail.com', '465', null, null, 60)
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(39): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-07 14:44:19 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:44:19 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-772396d2b97sm23995238b3a.67 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-772396d2b97sm23995238b3a.67 - gsmtp
+
+ERROR - 2025-09-07 14:44:21 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:44:21 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24b2570cfc8sm131052075ad.76 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24b2570cfc8sm131052075ad.76 - gsmtp
+
+ERROR - 2025-09-07 14:47:02 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:02 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24ccfc56e7esm77616245ad.58 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24ccfc56e7esm77616245ad.58 - gsmtp
+
+ERROR - 2025-09-07 14:47:04 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:04 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24cb28c3126sm96117065ad.65 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24cb28c3126sm96117065ad.65 - gsmtp
+
+ERROR - 2025-09-07 14:47:07 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:07 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7727822817asm13417292b3a.98 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7727822817asm13417292b3a.98 - gsmtp
+
+ERROR - 2025-09-07 14:47:08 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:08 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7722a4e5b44sm25697281b3a.88 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7722a4e5b44sm25697281b3a.88 - gsmtp
+
+ERROR - 2025-09-07 14:47:45 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:45 --> 220 smtp.gmail.com ESMTP 41be03b00d2f7-b4de04a9ea7sm20702756a12.16 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-b4de04a9ea7sm20702756a12.16 - gsmtp
+
+ERROR - 2025-09-07 14:47:47 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:47 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24b1b5e5902sm137942585ad.49 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24b1b5e5902sm137942585ad.49 - gsmtp
+
+ERROR - 2025-09-07 14:47:50 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:50 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24cb28c3147sm93369385ad.73 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24cb28c3147sm93369385ad.73 - gsmtp
+
+ERROR - 2025-09-07 14:47:51 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-07 14:47:51 --> 220 smtp.gmail.com ESMTP 98e67ed59e1d1-32b988eed84sm8873080a91.8 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4456:cff:b00:8598:a0f0:ae21:12d8]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-32b988eed84sm8873080a91.8 - gsmtp
+
+CRITICAL - 2025-09-07 14:48:54 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:48:54 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:51:54 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:51:54 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:52:46 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 14:52:46 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 15:01:19 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-07 15:01:19 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: emailtest/sendtest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')

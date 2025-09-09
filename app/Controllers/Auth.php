@@ -74,7 +74,6 @@ class Auth extends BaseController
             default:
                 return redirect()->to('/dashboard'); // fallback
         }
-
     }
 
     // -------------------- GENERIC DASHBOARD (fallback) --------------------
@@ -109,30 +108,9 @@ class Auth extends BaseController
     }
 
     // -------------------- FORGOT PASSWORD --------------------
-   public function forgotPasswordForm()
+    public function forgotPasswordForm()
     {
-    return view('auth/forgotPasswordForm'); 
+        // This shows the OTP form but action points to Forgot::sendOtp
+        return view('auth/forgotPasswordForm');
     }
-
-    public function forgotPassword()
-    {
-        $email = trim($this->request->getPost('email'));
-
-        if ($email === '') {
-            return redirect()->back()->with('error', 'Please enter your email.');
-        }
-
-        return redirect()->to('/auth/login')
-            ->with('success', 'If that email exists, a reset link has been sent.');
-    }
-
-         public function sendResetLink()
-    {
-        $email = $this->request->getPost('email');
-
-            // TODO: validate if email exists in database
-        // For now, just simulate success
-        return redirect()->to('/auth/login')->with('success', 'Reset link sent to your email!');
-    }
-
 }

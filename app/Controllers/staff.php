@@ -151,4 +151,117 @@ class Staff extends BaseController
         $err = $this->db->error();
         return $this->response->setJSON(['status' => 'error', 'error' => $err['message'] ?? 'Update failed']);
     }
+
+    /**
+     * Receive delivery: increase stock by provided quantity
+     */
+    public function receiveDelivery($id = null)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Missing product id']);
+        }
+
+        $qty = (int)($this->request->getPost('quantity') ?? 0);
+        if ($qty <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Quantity must be greater than 0']);
+        }
+
+        $product = $this->model->find((int)$id);
+        if (!is_array($product)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
+        }
+
+        $newQty = max(0, (int)$product['stock_qty'] + $qty);
+        $ok = $this->model->update((int)$id, [
+            'stock_qty' => $newQty,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        if ($ok) return $this->response->setJSON(['status' => 'success', 'stock_qty' => $newQty]);
+
+        $err = $this->db->error();
+        return $this->response->setJSON(['status' => 'error', 'error' => $err['message'] ?? 'Update failed']);
+    }
+
+    /**
+     * Report damaged: decrease stock by provided quantity
+     */
+    public function reportDamage($id = null)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Missing product id']);
+        }
+
+        $qty = (int)($this->request->getPost('quantity') ?? 0);
+        if ($qty <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Quantity must be greater than 0']);
+        }
+
+        $product = $this->model->find((int)$id);
+        if (!is_array($product)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
+        }
+
+        $newQty = max(0, (int)$product['stock_qty'] - $qty);
+        $ok = $this->model->update((int)$id, [
+            'stock_qty' => $newQty,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        if ($ok) return $this->response->setJSON(['status' => 'success', 'stock_qty' => $newQty]);
+
+        $err = $this->db->error();
+        return $this->response->setJSON(['status' => 'error', 'error' => $err['message'] ?? 'Update failed']);
+    }
+
+    /**
+     * Check expiry status for a product
+     */
+    public function checkExpiry($id = null)
+    {
+        $session = session();
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Missing product id']);
+        }
+
+        $product = $this->model->find((int)$id);
+        if (!$product) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
+        }
+
+        $expiry = $product['expiry'] ?? null;
+        $status = 'No Expiry';
+        $days   = null;
+        if ($expiry) {
+            $exp  = new \DateTime($expiry);
+            $today = new \DateTime();
+            $today->setTime(0,0,0);
+            $diff = (int)$today->diff($exp)->format('%r%a');
+            $days = $diff;
+            if ($diff < 0) $status = 'Expired';
+            elseif ($diff <= 7) $status = 'Expiring Soon';
+            else $status = 'Good';
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'expiry' => $expiry,
+            'days'   => $days,
+            'state'  => $status,
+        ]);
+    }
 }

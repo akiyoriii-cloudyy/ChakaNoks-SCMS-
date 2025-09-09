@@ -191,11 +191,57 @@
         });
     });
 
-    // --------- PLACEHOLDER ACTIONS ---------
-    $('#btnReceiveDelivery').addEventListener('click', () => alert('Receive Delivery clicked'));
-    $('#btnReportDamaged').addEventListener('click', () => alert('Report Damaged clicked'));
-    $('#btnTrackInventory').addEventListener('click', () => alert('Track Branch Inventory clicked'));
-    $('#btnCheckExpiry').addEventListener('click', () => alert('Check Expiry clicked'));
+    // --------- ACTION BUTTONS (wired to backend) ---------
+    $('#btnReceiveDelivery').addEventListener('click', () => {
+        const id = viewModal.dataset.currentId;
+        const qty = prompt('Enter quantity received:');
+        const n = Number(qty);
+        if (!qty || isNaN(n) || n <= 0) return alert('Invalid quantity');
+        fetch('/staff/receiveDelivery/' + id, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ quantity: n })
+        }).then(r => r.json()).then(data => {
+            if (data.status === 'success') location.reload();
+            else alert(data.error || 'Failed to receive delivery');
+        }).catch(e => alert(e.message));
+    });
+
+    $('#btnReportDamaged').addEventListener('click', () => {
+        const id = viewModal.dataset.currentId;
+        const qty = prompt('Enter damaged quantity:');
+        const n = Number(qty);
+        if (!qty || isNaN(n) || n <= 0) return alert('Invalid quantity');
+        fetch('/staff/reportDamage/' + id, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ quantity: n })
+        }).then(r => r.json()).then(data => {
+            if (data.status === 'success') location.reload();
+            else alert(data.error || 'Failed to report damage');
+        }).catch(e => alert(e.message));
+    });
+
+    $('#btnTrackInventory').addEventListener('click', () => {
+        // Apply branch filter for current item's branch
+        const id = viewModal.dataset.currentId;
+        const item = ITEMS.find(x => String(x.id) === String(id));
+        if (!item || !item.branch) return alert('No branch for this item');
+        window.location.href = '/inventory?branch=' + encodeURIComponent(item.branch);
+    });
+
+    $('#btnCheckExpiry').addEventListener('click', () => {
+        const id = viewModal.dataset.currentId;
+        fetch('/inventory/expiry/' + id)
+            .then(r => r.json())
+            .then(data => {
+                if (data.status !== 'success') return alert(data.error || 'Failed to check expiry');
+                const msg = data.expiry
+                    ? `State: ${data.state}\nExpiry: ${data.expiry}\nDays remaining: ${data.days}`
+                    : `State: ${data.state}`;
+                alert(msg);
+            }).catch(e => alert(e.message));
+    });
 
     // --------- ADD PRODUCT ---------
     $('#addForm').addEventListener('submit', e => {

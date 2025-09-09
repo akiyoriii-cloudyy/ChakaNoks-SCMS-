@@ -1,0 +1,77 @@
+__ci_last_regenerate|i:1757318875;_ci_previous_url|s:55:"http://localhost:8080/index.php/auth/forgotPasswordForm";user_id|s:2:"10";email|s:19:"leo333953@gmail.com";role|s:15:"inventory_staff";branch_id|s:1:"3";logged_in|b:1;error|s:3817:"❌ Failed to send email.<br><pre>220 smtp.gmail.com ESMTP d9443c01a7336-24905da3c38sm277339055ad.91 - gsmtp
+&lt;br&gt;&lt;pre&gt;hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+&lt;/pre&gt;&lt;pre&gt;starttls: 220 2.0.0 Ready to start TLS
+&lt;/pre&gt;&lt;pre&gt;hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+&lt;/pre&gt;Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24905da3c38sm277339055ad.91 - gsmtp
+&lt;br&gt;Unable to send email using SMTP. Your server might not be configured to send mail using this method.&lt;br&gt;&lt;pre&gt;Date: Mon, 8 Sep 2025 15:36:08 +0800
+From: &amp;quot;CHAKANOKS SCMS&amp;quot; &amp;lt;chakanoks.system@gmail.com&amp;gt;
+Return-Path: &amp;lt;chakanoks.system@gmail.com&amp;gt;
+To: rualesabigail09@gmail.com
+Subject: =?UTF-8?Q?Password=20Reset=20Request=20=E2=80=94=20Chakanoks=20SCMS?=
+Reply-To: &amp;lt;chakanoks.system@gmail.com&amp;gt;
+User-Agent: CodeIgniter
+X-Sender: chakanoks.system@gmail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &amp;lt;68be8768027b25.08255615@gmail.com&amp;gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&amp;quot;B_ALT_68be8768027d85.87637702&amp;quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_68be8768027d85.87637702
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Hi User,
+ You can reset your password in two ways:
+
+ Click this link (valid for 30 minutes):
+ http://localhost:8080/auth/reset-password?token=0ed290a5f66e283561c437fff0a60b1b85036fa8d4075af4cee155d2db894bf1
+
+ Or use this One-Time Password (OTP) within 10 minutes: 488635
+ Go to the reset page and enter your email, the OTP above, and your new
+password.
+
+
+ If you didn’t request this, you can safely ignore this email.
+
+ — Chakanoks SCMS Team
+
+
+--B_ALT_68be8768027d85.87637702
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+=0A            &amp;lt;p&amp;gt;Hi &amp;lt;b&amp;gt;User&amp;lt;/b&amp;gt;,&amp;lt;/p&amp;gt;=0A            &amp;lt;p&amp;gt;You can reset your p=
+assword in two ways:&amp;lt;/p&amp;gt;=0A            &amp;lt;ol&amp;gt;=0A                &amp;lt;li&amp;gt;Click thi=
+s link (valid for 30 minutes):&amp;lt;br&amp;gt;=0A                    &amp;lt;a href=3D&amp;#039;http://=
+localhost:8080/auth/reset-password?token=3D0ed290a5f66e283561c437fff0a60b1b=
+85036fa8d4075af4cee155d2db894bf1&amp;#039; target=3D&amp;#039;_blank&amp;#039;&amp;gt;http://localhost:8080/a=
+uth/reset-password?token=3D0ed290a5f66e283561c437fff0a60b1b85036fa8d4075af4=
+cee155d2db894bf1&amp;lt;/a&amp;gt;=0A                &amp;lt;/li&amp;gt;=0A                &amp;lt;li&amp;gt;Or use t=
+his One-Time Password (OTP) within 10 minutes: &amp;lt;b&amp;gt;488635&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;=0A        =
+            Go to the reset page and enter your email, the OTP above, and y=
+our new password.=0A                &amp;lt;/li&amp;gt;=0A            &amp;lt;/ol&amp;gt;=0A           =
+ &amp;lt;p&amp;gt;If you didn=E2=80=99t request this, you can safely ignore this email.&amp;lt;/=
+p&amp;gt;=0A            &amp;lt;br&amp;gt;=0A            &amp;lt;p&amp;gt;=E2=80=94 Chakanoks SCMS Team&amp;lt;/p&amp;gt;
+
+--B_ALT_68be8768027d85.87637702--&lt;/pre&gt;</pre>";__ci_vars|a:1:{s:5:"error";s:3:"old";}

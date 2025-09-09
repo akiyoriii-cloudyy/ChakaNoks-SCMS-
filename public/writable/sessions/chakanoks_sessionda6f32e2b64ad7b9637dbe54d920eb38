@@ -1,0 +1,62 @@
+__ci_last_regenerate|i:1757154870;_ci_previous_url|s:55:"http://localhost:8080/index.php/auth/forgotPasswordForm";error|s:2756:"Failed to send email.<br><pre>220 smtp.gmail.com ESMTP d9443c01a7336-24b2570cfb0sm112661795ad.139 - gsmtp
+<br><pre>hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:c8b0:5770:21e7:b6d2]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>starttls: 220 2.0.0 Ready to start TLS
+</pre><pre>hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:c8b0:5770:21e7:b6d2]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre>Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24b2570cfb0sm112661795ad.139 - gsmtp
+<br>Unable to send email using SMTP. Your server might not be configured to send mail using this method.<br><pre>Date: Sat, 6 Sep 2025 18:30:20 +0800
+From: &quot;CHAKANOKS SCMS&quot; &lt;yourapp@gmail.com&gt;
+Return-Path: &lt;yourapp@gmail.com&gt;
+To: gpalagpalag@gmail.com
+Subject: =?UTF-8?Q?Password=20Reset=20Request=20=E2=80=94=20Chakanoks=20SCMS?=
+Reply-To: &lt;yourapp@gmail.com&gt;
+User-Agent: CodeIgniter
+X-Sender: yourapp@gmail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;68bc0d3d04f431.16200862@gmail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_68bc0d3d04f678.11392735&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_68bc0d3d04f678.11392735
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Hi User,
+ Click the link below to reset your password (valid for 30 minutes):
+ http://localhost:8080/auth/reset-password?token=b6c3c93f8d2b7104cfd481c648cc958b4d301af057e7f37bc3df6b9458ef76d9
+ If you didn’t request this, ignore this email.
+
+
+--B_ALT_68bc0d3d04f678.11392735
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+=0A            &lt;p&gt;Hi &lt;b&gt;User&lt;/b&gt;,&lt;/p&gt;=0A            &lt;p&gt;Click the link below=
+ to reset your password (valid for 30 minutes):&lt;/p&gt;=0A            &lt;p&gt;&lt;a hre=
+f=3D&#039;http://localhost:8080/auth/reset-password?token=3Db6c3c93f8d2b7104cfd4=
+81c648cc958b4d301af057e7f37bc3df6b9458ef76d9&#039; target=3D&#039;_blank&#039;&gt;http://loca=
+lhost:8080/auth/reset-password?token=3Db6c3c93f8d2b7104cfd481c648cc958b4d30=
+1af057e7f37bc3df6b9458ef76d9&lt;/a&gt;&lt;/p&gt;=0A            &lt;p&gt;If you didn=E2=80=
+=99t request this, ignore this email.&lt;/p&gt;
+
+--B_ALT_68bc0d3d04f678.11392735--</pre></pre>";__ci_vars|a:1:{s:5:"error";s:3:"old";}
