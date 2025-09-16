@@ -1,0 +1,16 @@
+ERROR - 2025-09-13 11:07:54 --> mysqli_sql_exception: Duplicate column name 'reset_otp' in C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php(327): mysqli->query('ALTER TABLE `us...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('ALTER TABLE `us...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('ALTER TABLE `us...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\Forge.php(772): CodeIgniter\Database\BaseConnection->query('ALTER TABLE `us...')
+#4 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Database\Migrations\2025-09-06-063840_AddPasswordResetToUsers.php(21): CodeIgniter\Database\Forge->addColumn('users', Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(876): App\Database\Migrations\AddPasswordResetToUsers->up()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(182): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', Array)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS--main\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}

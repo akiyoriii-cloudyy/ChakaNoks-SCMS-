@@ -1,0 +1,33 @@
+__ci_last_regenerate|i:1757225371;_ci_previous_url|s:42:"http://localhost:8080/index.php/email-test";error|s:1477:"❌ Failed to send email.<br>You did not specify a SMTP hostname.<br>Unable to send email using SMTP. Your server might not be configured to send mail using this method.<br><pre>Date: Sun, 7 Sep 2025 14:04:27 +0800<br />
+From: &quot;CHAKANOKS SCMS&quot; &lt;chakanoks.system@gmail.com&gt;<br />
+Return-Path: &lt;chakanoks.system@gmail.com&gt;<br />
+To: chakanoks.system@gmail.com<br />
+Subject: =?UTF-8?Q?=E2=9C=85=20Test=20Email=20=E2=80=94=20Chakanoks=20SCMS?=<br />
+Reply-To: &lt;chakanoks.system@gmail.com&gt;<br />
+User-Agent: CodeIgniter<br />
+X-Sender: chakanoks.system@gmail.com<br />
+X-Mailer: CodeIgniter<br />
+X-Priority: 3 (Normal)<br />
+Message-ID: &lt;68bd206b057c87.31976088@gmail.com&gt;<br />
+Mime-Version: 1.0<br />
+<br />
+<br />
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_68bd206b057df9.68788774&quot;<br />
+<br />
+This is a multi-part message in MIME format.<br />
+Your email application may not support this format.<br />
+<br />
+--B_ALT_68bd206b057df9.68788774<br />
+Content-Type: text/plain; charset=UTF-8<br />
+Content-Transfer-Encoding: 8bit<br />
+<br />
+This is a test email from Chakanoks SCMS.<br />
+<br />
+<br />
+--B_ALT_68bd206b057df9.68788774<br />
+Content-Type: text/html; charset=UTF-8<br />
+Content-Transfer-Encoding: quoted-printable<br />
+<br />
+&lt;p&gt;This is a &lt;b&gt;test email&lt;/b&gt; from &lt;u&gt;Chakanoks SCMS&lt;/u&gt;.&lt;/p&gt;<br />
+<br />
+--B_ALT_68bd206b057df9.68788774--</pre>";__ci_vars|a:1:{s:5:"error";s:3:"old";}

@@ -1,0 +1,680 @@
+ERROR - 2025-09-08 13:20:38 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 13:20:38 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24b14206426sm162816155ad.17 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24b14206426sm162816155ad.17 - gsmtp
+
+ERROR - 2025-09-08 13:25:13 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 13:25:13 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-772396d2b97sm26218280b3a.67 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-772396d2b97sm26218280b3a.67 - gsmtp
+
+ERROR - 2025-09-08 14:23:27 --> mysqli_sql_exception: Unknown column 'otp_expires' in 'field list' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` ...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` ...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` ...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` ...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+CRITICAL - 2025-09-08 14:23:27 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+[Method: POST, Route: auth/forgot/sendResetLink]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 2 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 3 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 4 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 5 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:23:27 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'6b78c3df9f87feb3ad546b5ada010d34bea9bd1e7a5cb105971efe562eb6cc09\', `token_expires` = \'2025-09-08 14:53:27\', `reset_otp` = \'150593\', `otp_expires` = \'2025-09-08 14:33:27\', `updated_at` = \'2025-09-08 14:23:27\'
+WHERE `users`.`id` IN (\'10\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'6b78c3df9f87feb3ad546b5ada010d34bea9bd1e7a5cb105971efe562eb6cc09\', `token_expires` = \'2025-09-08 14:53:27\', `reset_otp` = \'150593\', `otp_expires` = \'2025-09-08 14:33:27\', `updated_at` = \'2025-09-08 14:23:27\'
+WHERE `users`.`id` IN (\'10\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 4 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 5 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 6 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 7 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:23:27 --> [Caused by] mysqli_sql_exception: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` SET `reset_token` = \'6b78c3df9f87feb3ad546b5ada010d34bea9bd1e7a5cb105971efe562eb6cc09\', `token_expires` = \'2025-09-08 14:53:27\', `reset_otp` = \'150593\', `otp_expires` = \'2025-09-08 14:33:27\', `updated_at` = \'2025-09-08 14:23:27\'
+WHERE `users`.`id` IN (\'10\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'6b78c3df9f87feb3ad546b5ada010d34bea9bd1e7a5cb105971efe562eb6cc09\', `token_expires` = \'2025-09-08 14:53:27\', `reset_otp` = \'150593\', `otp_expires` = \'2025-09-08 14:33:27\', `updated_at` = \'2025-09-08 14:23:27\'
+WHERE `users`.`id` IN (\'10\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'6b78c3df9f87feb3ad546b5ada010d34bea9bd1e7a5cb105971efe562eb6cc09\', `token_expires` = \'2025-09-08 14:53:27\', `reset_otp` = \'150593\', `otp_expires` = \'2025-09-08 14:33:27\', `updated_at` = \'2025-09-08 14:23:27\'
+WHERE `users`.`id` IN (\'10\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 5 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 6 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 7 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 8 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+15 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-08 14:23:40 --> mysqli_sql_exception: Unknown column 'otp_expires' in 'field list' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` ...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` ...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` ...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` ...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+CRITICAL - 2025-09-08 14:23:40 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+[Method: POST, Route: auth/forgot/sendResetLink]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 2 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 3 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 4 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 5 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:23:40 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'9a6da9f5590f958752e4e7253438683d6e12ed75ee958f5ac31d69e4df72d34c\', `token_expires` = \'2025-09-08 14:53:40\', `reset_otp` = \'104131\', `otp_expires` = \'2025-09-08 14:33:40\', `updated_at` = \'2025-09-08 14:23:40\'
+WHERE `users`.`id` IN (\'10\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'9a6da9f5590f958752e4e7253438683d6e12ed75ee958f5ac31d69e4df72d34c\', `token_expires` = \'2025-09-08 14:53:40\', `reset_otp` = \'104131\', `otp_expires` = \'2025-09-08 14:33:40\', `updated_at` = \'2025-09-08 14:23:40\'
+WHERE `users`.`id` IN (\'10\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 4 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 5 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 6 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 7 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:23:40 --> [Caused by] mysqli_sql_exception: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` SET `reset_token` = \'9a6da9f5590f958752e4e7253438683d6e12ed75ee958f5ac31d69e4df72d34c\', `token_expires` = \'2025-09-08 14:53:40\', `reset_otp` = \'104131\', `otp_expires` = \'2025-09-08 14:33:40\', `updated_at` = \'2025-09-08 14:23:40\'
+WHERE `users`.`id` IN (\'10\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'9a6da9f5590f958752e4e7253438683d6e12ed75ee958f5ac31d69e4df72d34c\', `token_expires` = \'2025-09-08 14:53:40\', `reset_otp` = \'104131\', `otp_expires` = \'2025-09-08 14:33:40\', `updated_at` = \'2025-09-08 14:23:40\'
+WHERE `users`.`id` IN (\'10\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'9a6da9f5590f958752e4e7253438683d6e12ed75ee958f5ac31d69e4df72d34c\', `token_expires` = \'2025-09-08 14:53:40\', `reset_otp` = \'104131\', `otp_expires` = \'2025-09-08 14:33:40\', `updated_at` = \'2025-09-08 14:23:40\'
+WHERE `users`.`id` IN (\'10\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 5 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 6 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 7 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 8 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+15 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-08 14:26:02 --> mysqli_sql_exception: Duplicate column name 'reset_otp' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('ALTER TABLE `us...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('ALTER TABLE `us...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('ALTER TABLE `us...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\Forge.php(772): CodeIgniter\Database\BaseConnection->query('ALTER TABLE `us...')
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\app\Database\Migrations\2025-09-06-063840_AddPasswordResetToUsers.php(21): CodeIgniter\Database\Forge->addColumn('users', Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MigrationRunner.php(876): App\Database\Migrations\AddPasswordResetToUsers->up()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MigrationRunner.php(182): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', Array)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+ERROR - 2025-09-08 14:26:38 --> mysqli_sql_exception: Unknown column 'otp_expires' in 'field list' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` ...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` ...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` ...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` ...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+CRITICAL - 2025-09-08 14:26:38 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+[Method: POST, Route: auth/forgot/sendResetLink]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 2 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 3 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 4 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 5 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:26:38 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'c2ae217648cf280deaf005863372e349d736aa571381ad6bbf1ed2d334733826\', `token_expires` = \'2025-09-08 14:56:38\', `reset_otp` = \'131902\', `otp_expires` = \'2025-09-08 14:36:38\', `updated_at` = \'2025-09-08 14:26:38\'
+WHERE `users`.`id` IN (\'10\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'c2ae217648cf280deaf005863372e349d736aa571381ad6bbf1ed2d334733826\', `token_expires` = \'2025-09-08 14:56:38\', `reset_otp` = \'131902\', `otp_expires` = \'2025-09-08 14:36:38\', `updated_at` = \'2025-09-08 14:26:38\'
+WHERE `users`.`id` IN (\'10\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 4 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 5 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 6 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 7 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:26:38 --> [Caused by] mysqli_sql_exception: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` SET `reset_token` = \'c2ae217648cf280deaf005863372e349d736aa571381ad6bbf1ed2d334733826\', `token_expires` = \'2025-09-08 14:56:38\', `reset_otp` = \'131902\', `otp_expires` = \'2025-09-08 14:36:38\', `updated_at` = \'2025-09-08 14:26:38\'
+WHERE `users`.`id` IN (\'10\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'c2ae217648cf280deaf005863372e349d736aa571381ad6bbf1ed2d334733826\', `token_expires` = \'2025-09-08 14:56:38\', `reset_otp` = \'131902\', `otp_expires` = \'2025-09-08 14:36:38\', `updated_at` = \'2025-09-08 14:26:38\'
+WHERE `users`.`id` IN (\'10\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'c2ae217648cf280deaf005863372e349d736aa571381ad6bbf1ed2d334733826\', `token_expires` = \'2025-09-08 14:56:38\', `reset_otp` = \'131902\', `otp_expires` = \'2025-09-08 14:36:38\', `updated_at` = \'2025-09-08 14:26:38\'
+WHERE `users`.`id` IN (\'10\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 5 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 6 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 7 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 8 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('10', [...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+15 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-08 14:32:33 --> mysqli_sql_exception: Unknown column 'otp_expires' in 'field list' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` ...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` ...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` ...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` ...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('1', Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+CRITICAL - 2025-09-08 14:32:33 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+[Method: POST, Route: auth/forgot/sendResetLink]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 2 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 3 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 4 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 5 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('1', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:32:33 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'6db1b73aa50d4f751dba9f2a64f58d596913867a1d2a396fed1deb46ee6ac4da\', `token_expires` = \'2025-09-08 15:02:33\', `reset_otp` = \'119212\', `otp_expires` = \'2025-09-08 14:42:33\', `updated_at` = \'2025-09-08 14:32:33\'
+WHERE `users`.`id` IN (\'1\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'6db1b73aa50d4f751dba9f2a64f58d596913867a1d2a396fed1deb46ee6ac4da\', `token_expires` = \'2025-09-08 15:02:33\', `reset_otp` = \'119212\', `otp_expires` = \'2025-09-08 14:42:33\', `updated_at` = \'2025-09-08 14:32:33\'
+WHERE `users`.`id` IN (\'1\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 4 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 5 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 6 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 7 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('1', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 14:32:33 --> [Caused by] mysqli_sql_exception: Unknown column 'otp_expires' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `users` SET `reset_token` = \'6db1b73aa50d4f751dba9f2a64f58d596913867a1d2a396fed1deb46ee6ac4da\', `token_expires` = \'2025-09-08 15:02:33\', `reset_otp` = \'119212\', `otp_expires` = \'2025-09-08 14:42:33\', `updated_at` = \'2025-09-08 14:32:33\'
+WHERE `users`.`id` IN (\'1\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `users` SET `reset_token` = \'6db1b73aa50d4f751dba9f2a64f58d596913867a1d2a396fed1deb46ee6ac4da\', `token_expires` = \'2025-09-08 15:02:33\', `reset_otp` = \'119212\', `otp_expires` = \'2025-09-08 14:42:33\', `updated_at` = \'2025-09-08 14:32:33\'
+WHERE `users`.`id` IN (\'1\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `users` SET `reset_token` = \'6db1b73aa50d4f751dba9f2a64f58d596913867a1d2a396fed1deb46ee6ac4da\', `token_expires` = \'2025-09-08 15:02:33\', `reset_otp` = \'119212\', `otp_expires` = \'2025-09-08 14:42:33\', `updated_at` = \'2025-09-08 14:32:33\'
+WHERE `users`.`id` IN (\'1\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `users` SET `reset_token` = :reset_token:, `token_expires` = :token_expires:, `reset_otp` = :reset_otp:, `otp_expires` = :otp_expires:, `updated_at` = :updated_at:
+WHERE `users`.`id` IN :users.id:', [...], false)
+ 5 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 6 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 7 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 8 APPPATH\Controllers\Auth\Forgot.php(69): CodeIgniter\Model->update('1', [...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\Forgot->sendResetLink()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\Forgot))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+15 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-08 14:47:06 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 14:47:06 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-772608b1b5asm19866888b3a.46 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-772608b1b5asm19866888b3a.46 - gsmtp
+
+ERROR - 2025-09-08 14:51:28 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 14:51:28 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7722a26ac0esm28314969b3a.2 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7722a26ac0esm28314969b3a.2 - gsmtp
+
+CRITICAL - 2025-09-08 14:58:00 --> TypeError: fsockopen(): Argument #2 ($port) must be of type int, string given
+[Method: GET, Route: auth/emailtest/sendTest]
+in SYSTEMPATH\Email\Email.php on line 1905.
+ 1 SYSTEMPATH\Email\Email.php(1905): fsockopen('smtp.gmail.com', '587', null, null, '60')
+ 2 SYSTEMPATH\Email\Email.php(1818): CodeIgniter\Email\Email->SMTPConnect()
+ 3 SYSTEMPATH\Email\Email.php(1703): CodeIgniter\Email\Email->sendWithSmtp()
+ 4 SYSTEMPATH\Email\Email.php(1597): CodeIgniter\Email\Email->spoolEmail()
+ 5 APPPATH\Controllers\Auth\EmailTest.php(41): CodeIgniter\Email\Email->send()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth\EmailTest->sendTest()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth\EmailTest))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-08 15:01:44 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 15:01:44 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7725ad1e9afsm21167110b3a.11 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7725ad1e9afsm21167110b3a.11 - gsmtp
+
+ERROR - 2025-09-08 15:01:46 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 15:01:46 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24cb28c3147sm116765215ad.73 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24cb28c3147sm116765215ad.73 - gsmtp
+
+ERROR - 2025-09-08 15:05:16 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 15:05:16 --> 220 smtp.gmail.com ESMTP 41be03b00d2f7-b5238e43c48sm998003a12.52 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-b5238e43c48sm998003a12.52 - gsmtp
+
+ERROR - 2025-09-08 15:36:10 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 15:36:10 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24905da3c38sm277339055ad.91 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24905da3c38sm277339055ad.91 - gsmtp
+
+ERROR - 2025-09-08 16:08:31 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 16:08:31 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7725f9f7b50sm20720618b3a.68 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7725f9f7b50sm20720618b3a.68 - gsmtp
+
+ERROR - 2025-09-08 16:17:20 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 16:17:20 --> 220 smtp.gmail.com ESMTP 98e67ed59e1d1-32a698ad4c1sm16859301a91.5 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:7c82:d567:e8cd:f198]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 534-5.7.9 Application-specific password required. For more information, go to
+534 5.7.9  https://support.google.com/mail/?p=InvalidSecondFactor 98e67ed59e1d1-32a698ad4c1sm16859301a91.5 - gsmtp
+
+CRITICAL - 2025-09-08 16:24:53 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: inventory/expiry/38]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-09-08 16:24:58 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: inventory]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-09-08 20:42:29 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 20:42:29 --> 220 smtp.gmail.com ESMTP 98e67ed59e1d1-329d0d7c4d8sm19690937a91.7 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:59a7:be25:f813:6140]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:59a7:be25:f813:6140]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-329d0d7c4d8sm19690937a91.7 - gsmtp
+
+ERROR - 2025-09-08 21:20:43 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 21:20:43 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7723427c127sm28443559b3a.62 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:59a7:be25:f813:6140]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7723427c127sm28443559b3a.62 - gsmtp
+
+ERROR - 2025-09-08 21:23:24 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 21:23:24 --> 220 smtp.gmail.com ESMTP d9443c01a7336-24cf4b1c906sm94968985ad.87 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:59a7:be25:f813:6140]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+starttls: 220 2.0.0 Ready to start TLS
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:59a7:be25:f813:6140]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-24cf4b1c906sm94968985ad.87 - gsmtp
+
+ERROR - 2025-09-08 22:15:20 --> Email: Unable to send email using SMTP. Your server might not be configured to send mail using this method.
+ERROR - 2025-09-08 22:15:20 --> 220 smtp.gmail.com ESMTP d2e1a72fcca58-7722a26bfe2sm30152154b3a.14 - gsmtp
+
+hello: 250-smtp.gmail.com at your service, [2001:4455:522:2700:59a7:be25:f813:6140]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7722a26bfe2sm30152154b3a.14 - gsmtp
+
