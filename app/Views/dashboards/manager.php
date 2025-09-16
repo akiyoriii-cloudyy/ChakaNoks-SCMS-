@@ -292,7 +292,11 @@
                                     <span class="rating-value">4.3</span>
                                 </div>
                             </td>
+<<<<<<< HEAD
                             <td>₱250,000</td>
+=======
+                            <td>₱230,000</td>
+>>>>>>> 321eb0b69cc7a6221e36f84c953a233f9e2f6c1b
                             <td>
                                 <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
                                     Excellent

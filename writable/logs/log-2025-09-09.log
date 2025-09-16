@@ -159,6 +159,7 @@ WHERE `email` = :email:
 10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
 11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
 12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+<<<<<<< HEAD
 CRITICAL - 2025-09-09 20:56:11 --> CodeIgniter\Cache\Exceptions\CacheException: Cache unable to write to "C:\xampp\htdocs\ChakaNoks-SCMS--main\writable\cache/".
 [Method: GET, Route: /]
 in SYSTEMPATH\Cache\Handlers\FileHandler.php on line 66.
@@ -213,3 +214,5 @@ in SYSTEMPATH\Cache\Handlers\FileHandler.php on line 66.
 22 SYSTEMPATH\Boot.php(349): service('codeigniter')
 23 SYSTEMPATH\Boot.php(130): CodeIgniter\Boot::initializeCodeIgniter()
 24 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+=======
+>>>>>>> 321eb0b69cc7a6221e36f84c953a233f9e2f6c1b
