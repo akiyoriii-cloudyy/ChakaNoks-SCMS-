@@ -147,11 +147,8 @@
                             <option>Chicken Tenderloin</option>
                             <option>Chicken Wing Tip</option>
                             <option>Chicken Wing Flat</option>
-<<<<<<< HEAD
                             <option>Chicken Wing Drumlette</option>
-=======
                             <option>Chicken Wing Drumette</option>
->>>>>>> 321eb0b69cc7a6221e36f84c953a233f9e2f6c1b
                         </optgroup>
                     </select>
                 </div>
