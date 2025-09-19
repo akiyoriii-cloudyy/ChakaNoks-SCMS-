@@ -1,6 +1,6 @@
-/* Central Admin Dashboard Styles */
+/* Logistics Coordinator Dashboard Styles */
 body {
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* Same as Central + Franchise */
   color: white;
   margin: 0;
   font-family: Arial, sans-serif;
