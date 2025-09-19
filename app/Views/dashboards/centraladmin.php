@@ -9,7 +9,17 @@
   <title>Central Admin Dashboard - Chakanok</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<<<<<<< HEAD
   <link rel="stylesheet" href="<?= base_url('assets/css/centraladmin.css') ?>">
+=======
+  <style>
+    body { background: #f8f9fa; }
+    .sidebar { height: 100vh; background: #146214; color: #fff; padding-top: 20px; }
+    .sidebar a { color: #fff; display: block; padding: 10px 20px; margin: 5px 0; border-radius: 8px; text-decoration: none; }
+    .sidebar a:hover { background: #198754; }
+    .logout { color: red; font-weight: bold; }
+  </style>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
 </head>
 <body>
 <div class="container-fluid">
@@ -33,4 +43,10 @@
   </div>
 </div>
 </body>
+<<<<<<< HEAD
+=======
+  <a href="<?= base_url('/auth/logout') ?>">Logout</a>
+</body>
+</html>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
 </html>
