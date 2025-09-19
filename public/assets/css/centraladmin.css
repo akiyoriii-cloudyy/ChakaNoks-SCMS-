@@ -1,0 +1,74 @@
+body {
+  background: #f4f6f9; /* same as your screenshot */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
+}
+
+/* Sidebar */
+.sidebar {
+  height: 100vh;
+  background: #0d581c; /* deep green for better contrast */
+  color: #fff;
+  padding-top: 20px;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+  position: fixed;
+}
+.sidebar h4 {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.sidebar a {
+  color: #fff;
+  display: block;
+  padding: 12px 20px;
+  margin: 6px 15px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease-in-out;
+}
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+.logout {
+  color: #ff4d4d !important;
+  font-weight: bold;
+}
+
+/* Top navbar */
+.topbar {
+  background: #fff;
+  padding: 15px 30px;
+  border-bottom: 1px solid #ddd;
+  margin-left: 16.6667%; /* offset for sidebar col-md-2 */
+}
+.topbar h3 {
+  margin: 0;
+  font-weight: 600;
+  color: #146214;
+}
+
+/* Content */
+.content {
+  margin-left: 16.6667%;
+  padding: 30px;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+.dashboard-card .card-header {
+  background: linear-gradient(90deg, #146214, #198754);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
