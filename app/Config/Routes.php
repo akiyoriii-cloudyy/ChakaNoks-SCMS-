@@ -42,6 +42,7 @@ $routes->get('dashboard', 'Auth::dashboard');
 // ---------- ROLE DASHBOARDS ----------
 $routes->get('superadmin/dashboard', 'Superadmin::dashboard');
 $routes->get('centraladmin/dashboard', 'CentralAdmin::dashboard');
+$routes->get('centraladmin/dashboard/data', 'CentralAdmin::getDashboardDataAPI');
 $routes->get('manager/dashboard', 'Manager::dashboard');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
@@ -67,9 +68,50 @@ $routes->group('inventory', ['filter' => 'auth'], function($routes) {
     $routes->get('staff/dashboard', 'Staff::dashboard');
 
     // Inventory AJAX APIs
-    $routes->get('inventory/items', 'Staff::getItems');
+    $routes->get('items', 'Staff::getItems');
     $routes->post('staff/add-product', 'Staff::addProduct');
     $routes->post('staff/addProduct', 'Staff::addProduct');
     $routes->post('staff/update-stock/(:num)', 'Staff::updateStock/$1');
     $routes->post('inventory/reportDamage', 'Staff::reportDamage');
+});
+
+// ---------- PURCHASING MODULE ----------
+$routes->group('purchase', ['filter' => 'auth'], function($routes) {
+    // Purchase Requests - UI
+    $routes->get('request/new', 'PurchaseController::showForm');
+    $routes->get('request/list', 'PurchaseController::showRequests');
+    // Purchase Requests - API
+    $routes->post('request/create', 'PurchaseController::createRequest');
+    $routes->get('request/api/list', 'PurchaseController::getRequests');
+    $routes->get('request/pending', 'PurchaseController::getPendingRequests');
+    $routes->get('request/(:num)', 'PurchaseController::getRequest/$1');
+    $routes->post('request/(:num)/approve', 'PurchaseController::approveRequest/$1');
+    $routes->post('request/(:num)/reject', 'PurchaseController::rejectRequest/$1');
+    $routes->post('request/(:num)/convert-to-po', 'PurchaseController::convertToPO/$1');
+});
+
+// ---------- SUPPLIER MODULE ----------
+$routes->group('supplier', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'SupplierController::index');
+    $routes->get('list', 'SupplierController::index');
+    $routes->get('(:num)', 'SupplierController::getSupplier/$1');
+    $routes->post('create', 'SupplierController::create');
+    $routes->post('(:num)/update', 'SupplierController::update/$1');
+    $routes->post('(:num)/delete', 'SupplierController::delete/$1');
+    $routes->get('performance', 'SupplierController::getSuppliersWithPerformance');
+});
+
+// ---------- DELIVERY MODULE ----------
+$routes->group('delivery', ['filter' => 'auth'], function($routes) {
+    $routes->post('schedule', 'DeliveryController::scheduleDelivery');
+    $routes->post('(:num)/update-status', 'DeliveryController::updateDeliveryStatus/$1');
+    $routes->post('(:num)/receive', 'DeliveryController::receiveDelivery/$1');
+    $routes->get('(:num)/track', 'DeliveryController::trackDelivery/$1');
+    $routes->get('branch/list', 'DeliveryController::getDeliveriesByBranch');
+    $routes->get('supplier/(:num)/list', 'DeliveryController::getDeliveriesBySupplier/$1');
+});
+
+// ---------- PURCHASE ORDER MODULE ----------
+$routes->group('purchase/order', ['filter' => 'auth'], function($routes) {
+    $routes->get('(:num)/track', 'PurchaseController::trackOrder/$1');
 });

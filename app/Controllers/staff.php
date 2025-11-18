@@ -3,17 +3,20 @@
 namespace App\Controllers;
 
 use App\Models\ProductModel;
+use App\Models\StockTransactionModel;
 use Config\Database;
 
 class Staff extends BaseController
 {
     protected $db;
     protected $model;
+    protected $stockTransactionModel;
 
     public function __construct()
     {
         $this->db    = Database::connect();
         $this->model = new ProductModel();
+        $this->stockTransactionModel = new StockTransactionModel();
     }
 
     public function index()
@@ -59,6 +62,34 @@ class Staff extends BaseController
                 'email' => $session->get('email'),
                 'role'  => $session->get('role'),
             ],
+        ]);
+    }
+
+    /**
+     * Inventory AJAX API: return items for purchase request form and other consumers
+     */
+    public function getItems()
+    {
+        $session = session();
+
+        if (! $session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Not authorized',
+            ]);
+        }
+
+        $filters = [
+            'branch_address' => $this->request->getGet('branch_address') ?? 'all',
+            'status'         => $this->request->getGet('status') ?? null,
+            'search'         => $this->request->getGet('search') ?? null,
+        ];
+
+        $items = $this->model->getInventory($filters);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'items'  => $items,
         ]);
     }
 
@@ -190,6 +221,7 @@ class Staff extends BaseController
 
     /**
      * Report damaged: decrease stock by provided quantity
+     * Implements STOCK-OUT → EXPIRE? → OLDS flow from diagram
      */
     public function reportDamage($id = null)
     {
@@ -207,21 +239,33 @@ class Staff extends BaseController
             return $this->response->setJSON(['status' => 'error', 'error' => 'Quantity must be greater than 0']);
         }
 
+        $reason = $this->request->getPost('reason') ?? 'Damaged/Expired';
         $product = $this->model->find((int)$id);
         if (!is_array($product)) {
             return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
         }
 
-        $newQty = max(0, (int)$product['stock_qty'] - $qty);
-        $ok = $this->model->update((int)$id, [
-            'stock_qty' => $newQty,
-            'updated_at' => date('Y-m-d H:i:s')
-        ]);
+        // Record STOCK-OUT transaction (checks EXPIRE? → OLDS)
+        // This implements: STOCK-OUT → EXPIRE? → OLDS flow from diagram
+        $recorded = $this->stockTransactionModel->recordStockOut(
+            (int)$id,
+            $qty,
+            null, // reference_id
+            'damage_report', // reference_type
+            $session->get('id'), // created_by
+            $reason
+        );
 
-        if ($ok) return $this->response->setJSON(['status' => 'success', 'stock_qty' => $newQty]);
+        if ($recorded) {
+            $product = $this->model->find((int)$id); // Get updated product
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Damage reported. Stock updated (STOCK-OUT → EXPIRE? → OLDS)',
+                'stock_qty' => (int)($product['stock_qty'] ?? 0)
+            ]);
+        }
 
-        $err = $this->db->error();
-        return $this->response->setJSON(['status' => 'error', 'error' => $err['message'] ?? 'Update failed']);
+        return $this->response->setJSON(['status' => 'error', 'error' => 'Failed to record stock transaction']);
     }
 
     /**

@@ -1,0 +1,332 @@
+CRITICAL - 2025-11-15 02:41:54 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: inventory/expiry/38]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+ERROR - 2025-11-15 02:46:33 --> mysqli_sql_exception: Table 'chakanoks_scms.suppliers' doesn't exist in C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT *\nFROM `...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *\nFROM `...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *\nFROM `...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *\nFROM `...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Models\SupplierModel.php(49): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Controllers\centraladmin.php(119): App\Models\SupplierModel->getActiveSuppliers()
+#8 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+#10 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#13 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#14 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#15 C:\xampp\htdocs\ChakaNoks-SCMS--main\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#16 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#17 {main}
+CRITICAL - 2025-11-15 02:46:33 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'chakanoks_scms.suppliers' doesn't exist
+[Method: GET, Route: centraladmin/dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `suppliers`
+WHERE `status` = :status:
+ORDER BY `name` ASC', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\SupplierModel.php(49): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Controllers\centraladmin.php(119): App\Models\SupplierModel->getActiveSuppliers()
+ 6 APPPATH\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+ 7 APPPATH\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 02:46:33 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'chakanoks_scms.suppliers' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `suppliers`
+WHERE `status` = \'active\'
+ORDER BY `name` ASC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `suppliers`
+WHERE `status` = \'active\'
+ORDER BY `name` ASC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `suppliers`
+WHERE `status` = :status:
+ORDER BY `name` ASC', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\SupplierModel.php(49): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Controllers\centraladmin.php(119): App\Models\SupplierModel->getActiveSuppliers()
+ 8 APPPATH\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+ 9 APPPATH\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+16 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 02:46:33 --> [Caused by] mysqli_sql_exception: Table 'chakanoks_scms.suppliers' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT *
+FROM `suppliers`
+WHERE `status` = \'active\'
+ORDER BY `name` ASC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `suppliers`
+WHERE `status` = \'active\'
+ORDER BY `name` ASC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `suppliers`
+WHERE `status` = \'active\'
+ORDER BY `name` ASC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `suppliers`
+WHERE `status` = :status:
+ORDER BY `name` ASC', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\SupplierModel.php(49): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Controllers\centraladmin.php(119): App\Models\SupplierModel->getActiveSuppliers()
+ 9 APPPATH\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+10 APPPATH\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+11 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+12 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+13 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+14 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+15 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+16 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+17 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+ERROR - 2025-11-15 02:47:48 --> mysqli_sql_exception: Duplicate column name 'reset_otp' in C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php(327): mysqli->query('ALTER TABLE `us...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('ALTER TABLE `us...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('ALTER TABLE `us...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\Forge.php(772): CodeIgniter\Database\BaseConnection->query('ALTER TABLE `us...')
+#4 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Database\Migrations\2025-09-06-063840_AddPasswordResetToUsers.php(21): CodeIgniter\Database\Forge->addColumn('users', Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(876): App\Database\Migrations\AddPasswordResetToUsers->up()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(182): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', Array)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS--main\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+ERROR - 2025-11-15 02:48:31 --> mysqli_sql_exception: Duplicate key name 'request_number' in C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php(327): mysqli->query('CREATE TABLE `p...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('CREATE TABLE `p...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('CREATE TABLE `p...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\Forge.php(570): CodeIgniter\Database\BaseConnection->query('CREATE TABLE `p...')
+#4 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Database\Migrations\2025-09-10-100001_CreatePurchaseRequestsTable.php(59): CodeIgniter\Database\Forge->createTable('purchase_reques...', false, Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(876): App\Database\Migrations\CreatePurchaseRequestsTable->up()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(182): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', Array)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS--main\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+ERROR - 2025-11-15 02:48:35 --> mysqli_sql_exception: Table 'chakanoks_scms.purchase_orders' doesn't exist in C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT *\nFROM `...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *\nFROM `...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *\nFROM `...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *\nFROM `...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Models\PurchaseOrderModel.php(79): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Controllers\centraladmin.php(123): App\Models\PurchaseOrderModel->getOrdersByStatus('pending')
+#8 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+#10 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#13 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#14 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#15 C:\xampp\htdocs\ChakaNoks-SCMS--main\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#16 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#17 {main}
+CRITICAL - 2025-11-15 02:48:35 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'chakanoks_scms.purchase_orders' doesn't exist
+[Method: GET, Route: centraladmin/dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `purchase_orders`
+WHERE `status` = :status:
+ORDER BY `order_date` DESC', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PurchaseOrderModel.php(79): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Controllers\centraladmin.php(123): App\Models\PurchaseOrderModel->getOrdersByStatus('pending')
+ 6 APPPATH\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+ 7 APPPATH\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 02:48:35 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'chakanoks_scms.purchase_orders' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `purchase_orders`
+WHERE `status` = \'pending\'
+ORDER BY `order_date` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `purchase_orders`
+WHERE `status` = \'pending\'
+ORDER BY `order_date` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `purchase_orders`
+WHERE `status` = :status:
+ORDER BY `order_date` DESC', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PurchaseOrderModel.php(79): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Controllers\centraladmin.php(123): App\Models\PurchaseOrderModel->getOrdersByStatus('pending')
+ 8 APPPATH\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+ 9 APPPATH\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+16 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 02:48:35 --> [Caused by] mysqli_sql_exception: Table 'chakanoks_scms.purchase_orders' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT *
+FROM `purchase_orders`
+WHERE `status` = \'pending\'
+ORDER BY `order_date` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `purchase_orders`
+WHERE `status` = \'pending\'
+ORDER BY `order_date` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `purchase_orders`
+WHERE `status` = \'pending\'
+ORDER BY `order_date` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `purchase_orders`
+WHERE `status` = :status:
+ORDER BY `order_date` DESC', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PurchaseOrderModel.php(79): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Controllers\centraladmin.php(123): App\Models\PurchaseOrderModel->getOrdersByStatus('pending')
+ 9 APPPATH\Controllers\centraladmin.php(63): App\Controllers\CentralAdmin->getSupplierReports()
+10 APPPATH\Controllers\centraladmin.php(45): App\Controllers\CentralAdmin->getDashboardData()
+11 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\CentralAdmin->dashboard()
+12 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\CentralAdmin))
+13 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+14 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+15 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+16 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+17 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+ERROR - 2025-11-15 02:49:48 --> mysqli_sql_exception: Incorrect table definition; there can be only one auto column and it must be defined as a key in C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MySQLi\Connection.php(327): mysqli->query('CREATE TABLE `s...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('CREATE TABLE `s...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('CREATE TABLE `s...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\Forge.php(570): CodeIgniter\Database\BaseConnection->query('CREATE TABLE `s...')
+#4 C:\xampp\htdocs\ChakaNoks-SCMS--main\app\Database\Migrations\2025-09-10-100008_CreateStockTransactionsTable.php(54): CodeIgniter\Database\Forge->createTable('stock_transacti...', false, Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(876): App\Database\Migrations\CreateStockTransactionsTable->up()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Database\MigrationRunner.php(182): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', Array)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS--main\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS--main\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+CRITICAL - 2025-11-15 03:09:50 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/new]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 03:09:52 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/new]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 03:09:57 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/list]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 03:10:13 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/new]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 03:11:20 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/new]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 03:11:41 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/new]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')
+CRITICAL - 2025-11-15 03:11:59 --> CodeIgniter\Filters\Exceptions\FilterException: "auth" filter must have a matching alias defined.
+[Method: GET, Route: purchase/request/list]
+in SYSTEMPATH\Filters\Filters.php on line 590.
+ 1 SYSTEMPATH\Filters\Filters.php(590): CodeIgniter\Filters\Exceptions\FilterException::forNoAlias('auth')
+ 2 SYSTEMPATH\Filters\Filters.php(641): CodeIgniter\Filters\Filters->enableFilter('auth', 'before')
+ 3 SYSTEMPATH\CodeIgniter.php(467): CodeIgniter\Filters\Filters->enableFilters([...], 'before')
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS--main\\public\\index.php')

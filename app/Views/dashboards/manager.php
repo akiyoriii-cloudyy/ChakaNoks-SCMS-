@@ -15,10 +15,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+    /* Ensure proper spacing and functionality */
+    .dashboard-container {
+        display: flex !important;
+        min-height: 100vh !important;
+    }
+    
+    .sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .header-actions {
+        display: flex !important;
+        gap: 15px !important;
+        align-items: center !important;
+    }
+    
+    .page-header {
+        margin-bottom: 10px !important;
+    }
+    
+    .overview-grid {
+        margin-top: 0 !important;
+        margin-bottom: 40px;
+    }
+    </style>
     
 </head>
 <body>
@@ -38,6 +66,14 @@
                 <a href="<?= base_url('staff/dashboard') ?>" class="nav-item">
                     <i class="fas fa-boxes"></i>
                     <span>Inventory Dashboard</span>
+                </a>
+                <a href="<?= base_url('purchase/request/new') ?>" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Purchase Requests</span>
+                </a>
+                <a href="<?= base_url('purchase/request/list') ?>" class="nav-item">
+                    <i class="fas fa-list"></i>
+                    <span>My Requests</span>
                 </a>
                 <a href="#" class="nav-item">
                     <i class="fas fa-cog"></i>

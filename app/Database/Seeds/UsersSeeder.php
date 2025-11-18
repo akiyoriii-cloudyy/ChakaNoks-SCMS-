@@ -38,7 +38,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'branch_id' => $buhangin ? $buhangin->id : null,
-                'email'     => 'akiyorii03@gmail.com',
+                'email'     => 'imonakoplss@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'franchise_manager',
             ],

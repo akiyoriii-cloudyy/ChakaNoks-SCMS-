@@ -1,9 +1,8 @@
 <?php /** @var array $items */ ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<?= $this->extend('templates/base_template') ?>
+
+<?= $this->section('head') ?>
     <title>Inventory Management — CHAKANOKS</title>
 
     <!-- Styles -->
@@ -11,11 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-<main class="content-pane">
+<?= $this->endSection() ?>
 
-    <!-- Header -->
+<?= $this->section('header') ?>
     <header class="header">
         <nav class="tabs">
             <?php if (($me['role'] ?? '') !== 'inventory_staff'): ?>
@@ -25,23 +22,27 @@
             <?php endif; ?>
         </nav>
 
-            <div class="user-strip" style="display:flex;justify-content:flex-end;align-items:center;gap:15px;padding:10px;">
-                <?php if (in_array($me['role'] ?? '', ['branch_manager', 'manager'])): ?>
-                    <a class="btn" href="<?= base_url('manager/dashboard') ?>" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border-radius: 25px; font-weight: bold; text-decoration: none; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
-                        ← Back to Manager Dashboard
-                    </a>
-                <?php endif; ?>
-                <div class="user-highlight">
-                    <?= esc($me['email'] ?? '') ?>
-                    <div class="role">
-                        <?= esc($me['role'] ?? '') ?>
-                    </div>
-                </div>
-                <a class="btn logout" href="<?= base_url('/auth/logout') ?>" style="background:#e74c3c;color:white;padding:10px 20px;border-radius:25px;font-weight:bold;text-decoration:none;">
-                    Logout
+        <div class="user-strip" style="display:flex;justify-content:flex-end;align-items:center;gap:15px;padding:10px;">
+            <?php if (in_array($me['role'] ?? '', ['branch_manager', 'manager'])): ?>
+                <a class="btn" href="<?= base_url('manager/dashboard') ?>" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border-radius: 25px; font-weight: bold; text-decoration: none; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
+                    ← Back to Manager Dashboard
                 </a>
+            <?php endif; ?>
+            <div class="user-highlight">
+                <?= esc($me['email'] ?? '') ?>
+                <div class="role">
+                    <?= esc($me['role'] ?? '') ?>
+                </div>
             </div>
+            <a class="btn logout" href="<?= base_url('/auth/logout') ?>" style="background:#e74c3c;color:white;padding:10px 20px;border-radius:25px;font-weight:bold;text-decoration:none;">
+                Logout
+            </a>
+        </div>
     </header>
+<?= $this->endSection() ?>
+
+<?= $this->section('body') ?>
+<main class="content-pane">
 
     <!-- Inventory Section -->
     <section class="card">
@@ -227,8 +228,12 @@
             <button class="btn" id="btnPrintReport">Print Report</button>
         </div>
     </div>
+    </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <!-- Initial data for JS -->
 <script id="initial-items" type="application/json"><?= json_encode($items) ?></script>
 
@@ -393,5 +398,4 @@ document.getElementById('btnPrintReport').addEventListener('click', function() {
 });
 </script>
 
-</body>
-</html>
+<?= $this->endSection() ?>

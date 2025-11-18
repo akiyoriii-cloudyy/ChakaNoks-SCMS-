@@ -6,19 +6,29 @@ class AddPasswordResetToUsers extends Migration
 {
     public function up()
     {
-        $fields = [
-            'reset_otp' => [
+        // Check if columns already exist
+        $fieldsInfo = $this->db->getFieldData('users');
+        $existing   = array_map(static function ($f) { return strtolower($f->name); }, $fieldsInfo ?: []);
+        $fields   = [];
+
+        if (! in_array('reset_otp', $existing, true)) {
+            $fields['reset_otp'] = [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
                 'null'       => true,
-            ],
-            'reset_expires' => [
+            ];
+        }
+
+        if (! in_array('reset_expires', $existing, true)) {
+            $fields['reset_expires'] = [
                 'type' => 'DATETIME',
                 'null' => true,
-            ],
-        ];
+            ];
+        }
 
-        $this->forge->addColumn('users', $fields);
+        if ($fields !== []) {
+            $this->forge->addColumn('users', $fields);
+        }
     }
 
     public function down()
