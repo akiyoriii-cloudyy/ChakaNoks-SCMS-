@@ -1,0 +1,44 @@
+CRITICAL - 2025-11-20 07:36:46 --> TypeError: App\Models\PurchaseRequestModel::approveRequest(): Argument #2 ($approvedBy) must be of type int, null given, called in C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php on line 211
+[Method: POST, Route: purchase/request/2/approve]
+in APPPATH\Models\PurchaseRequestModel.php on line 238.
+ 1 APPPATH\Controllers\PurchaseController.php(211): App\Models\PurchaseRequestModel->approveRequest(2, null)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PurchaseController->approveRequest('2')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 07:37:19 --> TypeError: App\Models\PurchaseRequestModel::approveRequest(): Argument #2 ($approvedBy) must be of type int, null given, called in C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php on line 211
+[Method: POST, Route: purchase/request/2/approve]
+in APPPATH\Models\PurchaseRequestModel.php on line 238.
+ 1 APPPATH\Controllers\PurchaseController.php(211): App\Models\PurchaseRequestModel->approveRequest(2, null)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PurchaseController->approveRequest('2')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 07:37:27 --> TypeError: App\Models\PurchaseRequestModel::approveRequest(): Argument #2 ($approvedBy) must be of type int, null given, called in C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php on line 211
+[Method: POST, Route: purchase/request/1/approve]
+in APPPATH\Models\PurchaseRequestModel.php on line 238.
+ 1 APPPATH\Controllers\PurchaseController.php(211): App\Models\PurchaseRequestModel->approveRequest(1, null)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PurchaseController->approveRequest('1')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 07:37:36 --> TypeError: App\Models\PurchaseRequestModel::approveRequest(): Argument #2 ($approvedBy) must be of type int, null given, called in C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php on line 211
+[Method: POST, Route: purchase/request/3/approve]
+in APPPATH\Models\PurchaseRequestModel.php on line 238.
+ 1 APPPATH\Controllers\PurchaseController.php(211): App\Models\PurchaseRequestModel->approveRequest(3, null)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PurchaseController->approveRequest('3')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')

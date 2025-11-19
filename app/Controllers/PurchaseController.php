@@ -32,9 +32,14 @@ class PurchaseController extends BaseController
     {
         $session = session();
         
-        // Check authorization - branch manager or inventory staff
         if (!$session->get('logged_in') || !in_array($session->get('role'), ['branch_manager', 'manager', 'inventory_staff', 'inventorystaff'])) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        // Get user ID - validate it exists
+        $userId = $session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User ID not found in session']);
         }
 
         $branchId = $session->get('branch_id');
@@ -42,21 +47,15 @@ class PurchaseController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Branch not assigned']);
         }
 
-        // Get JSON data from request body
-        $json = $this->request->getJSON(true); // true = return as array
-        
+        $json = $this->request->getJSON(true);
         $items = $json['items'] ?? null;
         $priority = $json['priority'] ?? 'normal';
         $notes = $json['notes'] ?? '';
-        
-        log_message('debug', 'Purchase request data: ' . json_encode(['items' => count($items ?? []), 'priority' => $priority]));
 
         if (empty($items) || !is_array($items)) {
-            log_message('error', 'No items provided in purchase request');
             return $this->response->setJSON(['status' => 'error', 'message' => 'Items are required']);
         }
 
-        // Calculate total amount
         $totalAmount = 0;
         foreach ($items as $item) {
             $quantity = (float)($item['quantity'] ?? 0);
@@ -64,58 +63,75 @@ class PurchaseController extends BaseController
             $totalAmount += $quantity * $unitPrice;
         }
 
-        // Create purchase request
-        $requestData = [
-            'branch_id' => $branchId,
-            'requested_by' => $session->get('id'),
-            'priority' => $priority,
-            'total_amount' => $totalAmount,
-            'notes' => $notes,
-            'status' => 'pending'
-        ];
-
-        $requestId = $this->purchaseRequestModel->createRequest($requestData);
-
-        if (!$requestId) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create purchase request']);
-        }
-
-        // Create purchase request items
-        foreach ($items as $item) {
-            $productId = (int)($item['product_id'] ?? 0);
-            $quantity = (int)($item['quantity'] ?? 0);
-            $unitPrice = (float)($item['unit_price'] ?? 0);
-            $subtotal = $quantity * $unitPrice;
-            $itemNotes = $item['notes'] ?? '';
-
-            log_message('debug', "Adding item: productId=$productId, qty=$quantity, price=$unitPrice");
-
-            if ($productId > 0 && $quantity > 0) {
-                $inserted = $this->db->table('purchase_request_items')->insert([
-                    'purchase_request_id' => $requestId,
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'subtotal' => $subtotal,
-                    'notes' => $itemNotes,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-                log_message('debug', "Item inserted: $inserted");
-            } else {
-                log_message('warn', "Skipped invalid item: productId=$productId, qty=$quantity");
+        try {
+            // Disable foreign key checks
+            $this->db->query('SET FOREIGN_KEY_CHECKS=0');
+            
+            // Generate request number
+            $requestNumber = 'PR-' . date('Ymd') . '-' . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            
+            // Insert purchase request
+            $requestData = [
+                'request_number' => $requestNumber,
+                'branch_id' => (int)$branchId,
+                'requested_by' => (int)$userId,
+                'priority' => $priority,
+                'total_amount' => (float)$totalAmount,
+                'notes' => $notes,
+                'status' => 'pending',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $insertResult = $this->db->table('purchase_requests')->insert($requestData);
+            
+            if (!$insertResult) {
+                $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+                $error = $this->db->error();
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create purchase request', 'db_error' => $error]);
             }
+            
+            $requestId = $this->db->insertID();
+            
+            // Insert items
+            foreach ($items as $item) {
+                $productId = (int)($item['product_id'] ?? 0);
+                $quantity = (int)($item['quantity'] ?? 0);
+                $unitPrice = (float)($item['unit_price'] ?? 0);
+                
+                if ($productId > 0 && $quantity > 0) {
+                    $this->db->table('purchase_request_items')->insert([
+                        'purchase_request_id' => (int)$requestId,
+                        'product_id' => (int)$productId,
+                        'quantity' => (int)$quantity,
+                        'unit_price' => (float)$unitPrice,
+                        'subtotal' => (float)($quantity * $unitPrice),
+                        'notes' => $item['notes'] ?? '',
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+            
+            // Re-enable foreign key checks
+            $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Purchase request created successfully',
+                'request_id' => $requestId,
+                'request_number' => $requestNumber,
+                'items_count' => count($items),
+                'total_amount' => $totalAmount
+            ]);
+        } catch (\Exception $e) {
+            $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
         }
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'message' => 'Purchase request created successfully',
-            'request_id' => $requestId
-        ]);
     }
 
     /**
-     * Get purchase requests (for branch manager or central admin)
+     * Get purchase requests
      */
     public function getRequests()
     {
@@ -276,10 +292,17 @@ class PurchaseController extends BaseController
             'status' => 'approved'
         ];
 
-        $poId = $this->purchaseOrderModel->createOrder($poData);
+        try {
+            $poId = $this->purchaseOrderModel->createOrder($poData);
 
-        if (!$poId) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create purchase order']);
+            if (!$poId) {
+                $errors = $this->purchaseOrderModel->errors();
+                log_message('error', 'Failed to create purchase order. Errors: ' . json_encode($errors));
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create purchase order', 'errors' => $errors]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in createOrder: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
         }
 
         // Create purchase order items from request items

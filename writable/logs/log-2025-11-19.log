@@ -25,3 +25,67 @@ in SYSTEMPATH\Cache\Handlers\FileHandler.php on line 66.
 22 SYSTEMPATH\Boot.php(349): service('codeigniter')
 23 SYSTEMPATH\Boot.php(130): CodeIgniter\Boot::initializeCodeIgniter()
 24 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2025-11-19 23:31:52 --> Failed to create purchase request. Model errors: {"requested_by":"The requested_by field is required."}, DB error: {"code":0,"message":""}
+ERROR - 2025-11-19 23:31:54 --> Failed to create purchase request. Model errors: {"requested_by":"The requested_by field is required."}, DB error: {"code":0,"message":""}
+ERROR - 2025-11-19 23:32:01 --> Failed to create purchase request. Model errors: {"requested_by":"The requested_by field is required."}, DB error: {"code":0,"message":""}
+ERROR - 2025-11-19 23:33:00 --> Failed to create purchase request. Model errors: {"requested_by":"The requested_by field is required."}, DB error: {"code":0,"message":""}
+ERROR - 2025-11-19 23:33:03 --> Failed to create purchase request. Model errors: {"requested_by":"The requested_by field is required."}, DB error: {"code":0,"message":""}
+ERROR - 2025-11-19 23:39:27 --> mysqli_sql_exception: Column 'requested_by' cannot be null in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `pu...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `pu...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `pu...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `pu...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(838): CodeIgniter\Model->doInsert(Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(797): CodeIgniter\BaseModel->insert(Array, true)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Models\PurchaseRequestModel.php(77): CodeIgniter\Model->insert(Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php(93): App\Models\PurchaseRequestModel->createRequest(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\PurchaseController->createRequest()
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#16 {main}
+ERROR - 2025-11-19 23:39:27 --> Exception in createRequest: Column 'requested_by' cannot be null
+ERROR - 2025-11-19 23:39:27 --> Failed to create purchase request. Model errors: {"CodeIgniter\\Database\\MySQLi\\Connection":"Column 'requested_by' cannot be null"}
+ERROR - 2025-11-19 23:39:27 --> DB error: {"code":1048,"message":"Column 'requested_by' cannot be null"}
+ERROR - 2025-11-19 23:41:52 --> mysqli_sql_exception: Column 'requested_by' cannot be null in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `pu...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `pu...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `pu...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `pu...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(838): CodeIgniter\Model->doInsert(Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(797): CodeIgniter\BaseModel->insert(Array, true)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Models\PurchaseRequestModel.php(77): CodeIgniter\Model->insert(Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php(93): App\Models\PurchaseRequestModel->createRequest(Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\PurchaseController->createRequest()
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#16 {main}
+ERROR - 2025-11-19 23:41:52 --> Exception in createRequest: Column 'requested_by' cannot be null
+ERROR - 2025-11-19 23:41:52 --> Failed to create purchase request. Model errors: {"CodeIgniter\\Database\\MySQLi\\Connection":"Column 'requested_by' cannot be null"}
+ERROR - 2025-11-19 23:41:52 --> DB error: {"code":1048,"message":"Column 'requested_by' cannot be null"}
+ERROR - 2025-11-19 23:47:01 --> mysqli_sql_exception: Column 'requested_by' cannot be null in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `pu...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `pu...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `pu...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `pu...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php(76): CodeIgniter\Database\BaseBuilder->insert(Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\PurchaseController->createRequest()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#12 {main}
