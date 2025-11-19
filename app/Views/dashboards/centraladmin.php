@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?= $this->extend('templates/base_template') ?>
 
 <?= $this->section('head') ?>
@@ -53,6 +54,32 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
+=======
+<?php
+// centraladmin.php
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central Admin Dashboard - Chakanok</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<<<<<<< HEAD
+  <link rel="stylesheet" href="<?= base_url('assets/css/centraladmin.css') ?>">
+=======
+  <style>
+    body { background: #f8f9fa; }
+    .sidebar { height: 100vh; background: #146214; color: #fff; padding-top: 20px; }
+    .sidebar a { color: #fff; display: block; padding: 10px 20px; margin: 5px 0; border-radius: 8px; text-decoration: none; }
+    .sidebar a:hover { background: #198754; }
+    .logout { color: red; font-weight: bold; }
+  </style>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
+</head>
+<body>
+>>>>>>> 6e3364b95b5cb4b31807defc91bc8d4193bed064
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -74,6 +101,7 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 <?= $this->endSection() ?>
 
 <?= $this->section('nav') ?>
@@ -468,3 +496,13 @@ $(document).ready(function() {
 });
 </script>
 <?= $this->endSection() ?>
+=======
+</body>
+<<<<<<< HEAD
+=======
+  <a href="<?= base_url('/auth/logout') ?>">Logout</a>
+</body>
+</html>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
+</html>
+>>>>>>> 6e3364b95b5cb4b31807defc91bc8d4193bed064

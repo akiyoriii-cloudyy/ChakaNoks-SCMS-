@@ -1,0 +1,38 @@
+/* Central Admin Dashboard Styles */
+body {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  height: 100vh;
+  background: #146214;
+  color: #fff;
+  padding-top: 20px;
+}
+
+.sidebar a {
+  color: #fff;
+  display: block;
+  padding: 10px 20px;
+  margin: 5px 0;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background: #198754;
+}
+
+.logout {
+  color: red;
+  font-weight: bold;
+}
+
+.card {
+  background: #ffffff;
+  color: #000;
+  border-radius: 12px;
+}

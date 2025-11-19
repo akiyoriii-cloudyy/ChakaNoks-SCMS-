@@ -9,6 +9,9 @@
   <title>Franchise Manager Dashboard - Chakanok</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<<<<<<< HEAD
+  <link rel="stylesheet" href="<?= base_url('assets/css/franchisemanager.css') ?>">
+=======
   <style>
     body { background: #f8f9fa; }
     .sidebar { height: 100vh; background: #146214; color: #fff; padding-top: 20px; }
@@ -16,30 +19,48 @@
     .sidebar a:hover { background: #198754; }
     .logout { color: red; font-weight: bold; }
   </style>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
 </head>
 <body>
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2 sidebar">
+<<<<<<< HEAD
+      <h4 class="text-center">FRANCHISE</h4><hr>
+      <a href="#"><i class="fa-solid fa-store"></i> Store Overview</a>
+      <a href="#"><i class="fa-solid fa-truck"></i> Deliveries</a>
+      <a href="#"><i class="fa-solid fa-file-invoice"></i> Sales Reports</a>
+=======
       <h4 class="text-center">CHAKANOKS</h4><hr>
       <a href="#"><i class="fa-solid fa-store"></i> My Branches</a>
       <a href="#"><i class="fa-solid fa-chart-line"></i> Revenue</a>
       <a href="#"><i class="fa-solid fa-users"></i> Staff</a>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
       <hr>
       <a href="<?= base_url('/auth/logout') ?>" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
     <div class="col-md-10 p-4">
       <h3>Franchise Manager Dashboard</h3>
+<<<<<<< HEAD
+      <p>Manage franchise operations and local sales.</p>
+      <div class="row">
+        <div class="col-md-6"><div class="card p-3 shadow"><h5>Daily Sales</h5><p>₱12,500</p></div></div>
+        <div class="col-md-6"><div class="card p-3 shadow"><h5>Pending Orders</h5><p>8</p></div></div>
+=======
       <p>Oversee your branches and monitor revenue.</p>
       <div class="row">
         <div class="col-md-6"><div class="card p-3 shadow"><h5>Branches</h5><p>8</p></div></div>
         <div class="col-md-6"><div class="card p-3 shadow"><h5>Total Revenue</h5><p>₱2,450,000</p></div></div>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
       </div>
     </div>
   </div>
 </div>
 </body>
+<<<<<<< HEAD
+=======
   <a href="<?= base_url('/auth/logout') ?>">Logout</a>
 </body>
 </html>
+>>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
 </html>
