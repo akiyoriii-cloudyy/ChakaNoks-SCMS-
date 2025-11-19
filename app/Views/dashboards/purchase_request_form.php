@@ -76,7 +76,7 @@
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Items</h5>
-                <button type="button" class="btn btn-sm btn-primary" onclick="addItemRow()">
+                <button type="button" class="btn btn-sm btn-primary" id="addItemBtn" onclick="addItemRow()">
                     <i class="fas fa-plus"></i> Add Item
                 </button>
             </div>
@@ -104,43 +104,84 @@ let itemCount = 0;
 let products = []; // Will be loaded via AJAX
 
 // Load products on page load
-$(document).ready(function() {
+window.addEventListener('load', function() {
+    console.log('=== Purchase Request Form Initializing ===');
     loadProducts();
 });
 
 function loadProducts() {
-    // Always load products via AJAX from inventory API
-    $.get('<?= base_url('inventory/items') ?>', function(data) {
-        if (data.status === 'success') {
-            products = data.items || [];
-            addItemRow(); // Add first row after products are loaded
-        } else {
-            console.error('Failed to load products for purchase request form', data);
+    const url = '<?= base_url('inventory/items') ?>';
+    console.log('📦 Loading products from:', url);
+    
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('📡 Response status:', response.status, response.statusText);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }).fail(function(xhr) {
-        console.error('Error calling inventory/items API', xhr.status, xhr.responseText);
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ API Response:', data);
+        
+        if (data.status === 'success' && data.items && Array.isArray(data.items) && data.items.length > 0) {
+            products = data.items;
+            console.log(`✅ Loaded ${products.length} products`);
+            console.log('First product:', JSON.stringify(products[0]));
+            addItemRow();
+        } else {
+            console.warn('⚠️ No products returned');
+            console.log('Response status:', data.status);
+            console.log('Items:', data.items);
+            addItemRow();
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error loading products:', error);
+        addItemRow();
     });
 }
 
 function addItemRow() {
     itemCount++;
+    console.log('Adding item row', itemCount, 'with', products.length, 'products available');
+    
+    // Build product options
+    let productOptions = '<option value="">Select Product</option>';
+    if (products.length > 0) {
+        products.forEach(function(p) {
+            const productName = p.name || 'Unknown';
+            const branch = p.branch_address || 'N/A';
+            const price = p.price || 0;
+            productOptions += `<option value="${p.id}" data-price="${price}">${productName} (${branch})</option>`;
+        });
+    } else {
+        productOptions += '<option disabled>No products available</option>';
+    }
+    
     const row = `
         <div class="item-row" id="itemRow${itemCount}">
             <div class="row">
                 <div class="col-md-4">
                     <label class="form-label">Product</label>
                     <select class="form-select product-select" name="items[${itemCount}][product_id]" required>
-                        <option value="">Select Product</option>
-                        ${products.map(p => `<option value="${p.id}" data-price="${p.price || 0}">${p.name} (${p.branch_address || 'N/A'})</option>`).join('')}
+                        ${productOptions}
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Quantity</label>
-                    <input type="number" class="form-control quantity-input" name="items[${itemCount}][quantity]" min="1" required onchange="calculateTotal()">
+                    <input type="number" class="form-control quantity-input" name="items[${itemCount}][quantity]" min="1" value="1" required>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Unit Price</label>
-                    <input type="number" class="form-control price-input" name="items[${itemCount}][unit_price]" step="0.01" min="0" required onchange="calculateTotal()">
+                    <input type="number" class="form-control price-input" name="items[${itemCount}][unit_price]" step="0.01" min="0" value="0" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Notes</label>
@@ -155,77 +196,134 @@ function addItemRow() {
             </div>
         </div>
     `;
-    $('#itemsContainer').append(row);
+    document.getElementById('itemsContainer').appendChild(createElementFromHTML(row));
     
     // Auto-fill price when product selected
-    $(`#itemRow${itemCount} .product-select`).on('change', function() {
-        const price = $(this).find('option:selected').data('price');
-        $(this).closest('.item-row').find('.price-input').val(price || 0);
-        calculateTotal();
-    });
+    const selectElement = document.querySelector(`#itemRow${itemCount} .product-select`);
+    if (selectElement) {
+        selectElement.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+            console.log('💰 Product selected, price:', price);
+            const priceInput = this.closest('.item-row').querySelector('.price-input');
+            if (priceInput) {
+                priceInput.value = price.toFixed(2);
+                calculateTotal();
+            }
+        });
+    }
+    
+    // Add event listeners for quantity and price changes
+    const qtyInput = document.querySelector(`#itemRow${itemCount} .quantity-input`);
+    const priceInput = document.querySelector(`#itemRow${itemCount} .price-input`);
+    
+    if (qtyInput) {
+        qtyInput.addEventListener('change', calculateTotal);
+        qtyInput.addEventListener('input', calculateTotal);
+    }
+    
+    if (priceInput) {
+        priceInput.addEventListener('change', calculateTotal);
+        priceInput.addEventListener('input', calculateTotal);
+    }
 }
 
 function removeItemRow(id) {
-    $(`#itemRow${id}`).remove();
-    calculateTotal();
+    const row = document.getElementById(`itemRow${id}`);
+    if (row) {
+        row.remove();
+        calculateTotal();
+    }
+}
+
+function createElementFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+    return div.firstChild;
 }
 
 function calculateTotal() {
     let total = 0;
-    $('.item-row').each(function() {
-        const qty = parseFloat($(this).find('.quantity-input').val()) || 0;
-        const price = parseFloat($(this).find('.price-input').val()) || 0;
-        total += qty * price;
+    document.querySelectorAll('.item-row').forEach(function(row) {
+        const qty = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const price = parseFloat(row.querySelector('.price-input').value) || 0;
+        const subtotal = qty * price;
+        total += subtotal;
+        console.log(`Row: ${qty} x ${price} = ${subtotal}`);
     });
-    $('#totalAmount').text('₱' + total.toFixed(2));
+    console.log(`Total: ${total}`);
+    document.getElementById('totalAmount').textContent = '₱' + total.toFixed(2);
 }
 
-$('#purchaseRequestForm').on('submit', function(e) {
+document.getElementById('purchaseRequestForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log('📝 Submitting purchase request...');
     
     const formData = {
-        priority: $('#priority').val(),
-        notes: $('#notes').val(),
+        priority: document.getElementById('priority').value,
+        notes: document.getElementById('notes').value,
         items: []
     };
     
-    $('.item-row').each(function() {
-        const productId = $(this).find('.product-select').val();
-        const quantity = $(this).find('.quantity-input').val();
-        const unitPrice = $(this).find('.price-input').val();
-        const notes = $(this).find('input[name*="[notes]"]').val();
+    document.querySelectorAll('.item-row').forEach(function(row) {
+        const productId = row.querySelector('.product-select').value;
+        const quantity = row.querySelector('.quantity-input').value;
+        const unitPrice = row.querySelector('.price-input').value;
+        const notesInput = row.querySelector('input[name*="[notes]"]');
+        const notes = notesInput ? notesInput.value : '';
         
-        if (productId && quantity && unitPrice) {
+        console.log(`Processing row: productId=${productId}, qty=${quantity}, price=${unitPrice}`);
+        
+        // Validate that we have a product selected and quantity > 0
+        if (productId && productId !== '' && quantity && parseFloat(quantity) > 0) {
             formData.items.push({
-                product_id: productId,
-                quantity: quantity,
-                unit_price: unitPrice,
+                product_id: parseInt(productId),
+                quantity: parseInt(quantity),
+                unit_price: parseFloat(unitPrice) || 0,
                 notes: notes || ''
             });
+            console.log(`✅ Added item: ${productId}`);
+        } else {
+            console.warn(`⚠️ Skipped row: productId=${productId}, qty=${quantity}`);
         }
     });
     
+    console.log(`📊 Total items collected: ${formData.items.length}`);
+    
     if (formData.items.length === 0) {
-        alert('Please add at least one item');
+        alert('❌ Please add at least one item with a product selected and quantity > 0');
         return;
     }
     
-    $.ajax({
-        url: '<?= base_url('purchase/request/create') ?>',
+    console.log('📤 Sending data:', JSON.stringify(formData));
+    
+    fetch('<?= base_url('purchase/request/create') ?>', {
         method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(formData),
-        success: function(response) {
-            if (response.status === 'success') {
-                alert('Purchase request created successfully!');
-                window.location.href = '<?= base_url('manager/dashboard') ?>';
-            } else {
-                alert('Error: ' + (response.message || 'Unknown error'));
-            }
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
-        error: function() {
-            alert('Error submitting request');
+        credentials: 'same-origin',
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        console.log('📡 Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Server response:', data);
+        if (data.status === 'success') {
+            alert('✅ Purchase request created successfully!');
+            window.location.href = '<?= base_url('manager/dashboard') ?>';
+        } else {
+            console.error('Server error details:', data);
+            alert('❌ Error: ' + (data.message || 'Unknown error'));
         }
+    })
+    .catch(error => {
+        console.error('❌ Error submitting request:', error);
+        console.error('Full error:', error);
+        alert('❌ Error submitting request: ' + error.message);
     });
 });
 </script>

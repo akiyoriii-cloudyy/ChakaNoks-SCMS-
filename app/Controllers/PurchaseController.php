@@ -42,11 +42,17 @@ class PurchaseController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Branch not assigned']);
         }
 
-        $items = $this->request->getPost('items'); // Array of {product_id, quantity, unit_price, notes}
-        $priority = $this->request->getPost('priority') ?? 'normal';
-        $notes = $this->request->getPost('notes') ?? '';
+        // Get JSON data from request body
+        $json = $this->request->getJSON(true); // true = return as array
+        
+        $items = $json['items'] ?? null;
+        $priority = $json['priority'] ?? 'normal';
+        $notes = $json['notes'] ?? '';
+        
+        log_message('debug', 'Purchase request data: ' . json_encode(['items' => count($items ?? []), 'priority' => $priority]));
 
         if (empty($items) || !is_array($items)) {
+            log_message('error', 'No items provided in purchase request');
             return $this->response->setJSON(['status' => 'error', 'message' => 'Items are required']);
         }
 
@@ -82,8 +88,10 @@ class PurchaseController extends BaseController
             $subtotal = $quantity * $unitPrice;
             $itemNotes = $item['notes'] ?? '';
 
+            log_message('debug', "Adding item: productId=$productId, qty=$quantity, price=$unitPrice");
+
             if ($productId > 0 && $quantity > 0) {
-                $this->db->table('purchase_request_items')->insert([
+                $inserted = $this->db->table('purchase_request_items')->insert([
                     'purchase_request_id' => $requestId,
                     'product_id' => $productId,
                     'quantity' => $quantity,
@@ -93,6 +101,9 @@ class PurchaseController extends BaseController
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
+                log_message('debug', "Item inserted: $inserted");
+            } else {
+                log_message('warn', "Skipped invalid item: productId=$productId, qty=$quantity");
             }
         }
 

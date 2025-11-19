@@ -79,18 +79,34 @@ class Staff extends BaseController
             ]);
         }
 
-        $filters = [
-            'branch_address' => $this->request->getGet('branch_address') ?? 'all',
-            'status'         => $this->request->getGet('status') ?? null,
-            'search'         => $this->request->getGet('search') ?? null,
-        ];
+        try {
+            // Get all products from inventory for purchase request dropdown
+            $items = $this->db->table('products')
+                ->select('id, name, category, unit, stock_qty, min_stock, max_stock, price, branch_address, expiry')
+                ->orderBy('name', 'ASC')
+                ->get()
+                ->getResultArray();
 
-        $items = $this->model->getInventory($filters);
+            // Ensure price field exists and is numeric
+            foreach ($items as &$item) {
+                $item['price'] = (float)($item['price'] ?? 0);
+                $item['stock_qty'] = (int)($item['stock_qty'] ?? 0);
+            }
 
-        return $this->response->setJSON([
-            'status' => 'success',
-            'items'  => $items,
-        ]);
+            log_message('debug', 'getItems() returning ' . count($items) . ' products');
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'items'  => $items,
+                'count'  => count($items),
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'getItems() error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Failed to load products: ' . $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -125,12 +141,14 @@ class Staff extends BaseController
             'name'           => $name,
             'category'       => $this->request->getPost('category') ?? 'Chicken Parts',
             'unit'           => $this->request->getPost('unit') ?? 'pcs',
+            'price'          => (float)($this->request->getPost('price') ?? 0),
             'stock_qty'      => $stock,
             'min_stock'      => (int)($this->request->getPost('min_stock') ?? 0),
             'max_stock'      => (int)($this->request->getPost('max_stock') ?? 0),
             'branch_address' => $branchAddress,
             'expiry'         => $this->request->getPost('expiry') ?: null,
             'created_by'     => $session->get('id') ?? 1,
+            'status'         => 'active',
         ];
 
         try {

@@ -3,58 +3,157 @@
 
 <?= $this->section('head') ?>
 <style>
+    :root {
+        --green-1: #2d5016;
+        --green-2: #4a7c2a;
+        --orange-1: #ff6b35;
+        --orange-2: #f7931e;
+        --gold: #ffd700;
+        --card-radius: 18px;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background:
+            linear-gradient(135deg, var(--green-1) 0%, var(--green-2) 45%, #ffffff 45%, #f8f9fa 100%),
+            radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(74, 124, 42, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+            radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #111827;
+    }
+
+    .template-container {
+        min-height: 100vh;
+    }
+
+    .template-header {
+        padding: 20px 32px 10px;
+        background: transparent;
+        color: #f9fafb;
+    }
+
+    .template-body {
+        padding: 0 32px 32px;
+        background: transparent;
+    }
+
     .dashboard-widget {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border-radius: var(--card-radius);
+        padding: 22px 24px;
+        box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.08),
+            0 10px 25px rgba(0, 0, 0, 0.06),
+            0 0 0 1px rgba(255, 255, 255, 0.6) inset;
         margin-bottom: 20px;
-        transition: transform 0.2s;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
+    .dashboard-widget::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0 0, rgba(255, 107, 53, 0.08), transparent 60%),
+                    radial-gradient(circle at 100% 100%, rgba(45, 80, 22, 0.12), transparent 55%);
+        opacity: 0.9;
+        pointer-events: none;
+    }
+
+    .dashboard-widget > * {
+        position: relative;
+        z-index: 1;
+    }
+
     .dashboard-widget:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        transform: translateY(-3px);
+        box-shadow:
+            0 24px 70px rgba(0, 0, 0, 0.12),
+            0 12px 30px rgba(0, 0, 0, 0.08);
     }
+
     .widget-icon {
-        font-size: 2.5rem;
-        opacity: 0.8;
+        font-size: 2.4rem;
+        opacity: 0.9;
     }
+
     .widget-value {
-        font-size: 2rem;
-        font-weight: bold;
-        margin: 10px 0;
+        font-size: 2.1rem;
+        font-weight: 800;
+        margin: 6px 0 4px;
     }
+
     .widget-label {
-        color: #6c757d;
-        font-size: 0.9rem;
+        color: #111827;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
+
     .alert-badge {
         display: inline-block;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: bold;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
     }
-    .alert-critical { background: #dc3545; color: white; }
-    .alert-warning { background: #ffc107; color: #000; }
-    .alert-success { background: #28a745; color: white; }
-    .alert-info { background: #17a2b8; color: white; }
+
+    .alert-critical { background: #dc2626; color: #fff; }
+    .alert-warning { background: #facc15; color: #92400e; }
+    .alert-success { background: #22c55e; color: #052e16; }
+    .alert-info { background: #0ea5e9; color: #f0f9ff; }
+
     .branch-row {
-        border-bottom: 1px solid #e9ecef;
-        padding: 15px 0;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+        padding: 12px 0;
     }
+
     .branch-row:last-child {
         border-bottom: none;
     }
+
     .refresh-indicator {
         font-size: 0.8rem;
-        color: #6c757d;
+        color: #6b7280;
+    }
+
+    .nav-tabs {
+        border-bottom: none;
+        background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
+        border-radius: 999px;
+        padding: 4px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: 999px;
+        color: #6b7280;
+        font-weight: 600;
+        padding: 8px 18px;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, var(--green-1), var(--green-2));
+        color: #f9fafb;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3);
+    }
+
+    .nav-tabs .nav-link i {
+        margin-right: 6px;
     }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-=======
 <?php
 // centraladmin.php
 ?>
@@ -63,23 +162,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Central Admin Dashboard - Chakanok</title>
+  <title>Central Admin Dashboard - Chakanoks</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<<<<<<< HEAD
+
   <link rel="stylesheet" href="<?= base_url('assets/css/centraladmin.css') ?>">
-=======
+
   <style>
-    body { background: #f8f9fa; }
+    body {
+      background:
+        linear-gradient(135deg, #2d5016 0%, #4a7c2a 45%, #ffffff 45%, #f8f9fa 100%),
+        radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(74, 124, 42, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+      color: #111827;
+    }
     .sidebar { height: 100vh; background: #146214; color: #fff; padding-top: 20px; }
-    .sidebar a { color: #fff; display: block; padding: 10px 20px; margin: 5px 0; border-radius: 8px; text-decoration: none; }
+    .sidebar a { color: #fff; display: block; padding: 10px 20px; margin: 5px 0; border-radius: 8px; text-decoration: none; font-weight: 600; }
     .sidebar a:hover { background: #198754; }
     .logout { color: red; font-weight: bold; }
   </style>
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
+
 </head>
 <body>
->>>>>>> 6e3364b95b5cb4b31807defc91bc8d4193bed064
+
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -101,7 +211,6 @@
         </div>
     </div>
 </div>
-<<<<<<< HEAD
 <?= $this->endSection() ?>
 
 <?= $this->section('nav') ?>
@@ -496,13 +605,12 @@ $(document).ready(function() {
 });
 </script>
 <?= $this->endSection() ?>
-=======
+
 </body>
-<<<<<<< HEAD
-=======
+
   <a href="<?= base_url('/auth/logout') ?>">Logout</a>
 </body>
 </html>
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
+
 </html>
->>>>>>> 6e3364b95b5cb4b31807defc91bc8d4193bed064
+

@@ -148,17 +148,7 @@
                             <option>Chicken Tenderloin</option>
                             <option>Chicken Wing Tip</option>
                             <option>Chicken Wing Flat</option>
-<<<<<<< HEAD
-<<<<<<< HEAD
                             <option>Chicken Wing Drumlette</option>
-=======
-                            <option>Chicken Wing Drumette</option>
->>>>>>> 321eb0b69cc7a6221e36f84c953a233f9e2f6c1b
-=======
-                            <option>Chicken Wing Drumlette</option>
-                            <option>Chicken Wing Drumette</option>
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
-                        </optgroup>
                     </select>
                 </div>
                 <div><b>Category</b><input type="text" name="category" value="Chicken Parts" readonly></div>
@@ -193,6 +183,7 @@
                     <div><b>Min Stock</b><input type="number" name="min_stock" required min="1" placeholder="e.g. 100"></div>
                     <div><b>Max Stock</b><input type="number" name="max_stock" required min="1" placeholder="e.g. 300"></div>
                 </div>
+                <div><b>Price (₱)</b><input type="number" name="price" required min="0" step="0.01" placeholder="e.g. 150.00"></div>
                 <div><b>Expiry Date</b><input type="date" name="expiry"></div>
             </div>
             <div class="modal-foot">
@@ -216,6 +207,7 @@
             <div style="display:flex; justify-content:space-between;"><b>Branch:</b> <span id="viewBranch"></span></div>
             <div style="display:flex; justify-content:space-between;"><b>Stock:</b> <span id="viewStock"></span></div>
             <div style="display:flex; justify-content:space-between;"><b>Min/Max:</b> <span id="viewMinMax"></span></div>
+            <div style="display:flex; justify-content:space-between;"><b>Price:</b> <span id="viewPrice"></span></div>
             <div style="display:flex; justify-content:space-between;"><b>Status:</b> <span id="viewStatus" style="padding:2px 8px; border-radius:12px; color:white; background:#2ecc71;"></span></div>
             <div style="display:flex; justify-content:space-between;"><b>Last Updated:</b> <span id="viewUpdated"></span></div>
             <div style="display:flex; justify-content:space-between;"><b>Expiry Date:</b> <span id="viewExpiry"></span></div>

@@ -13,11 +13,13 @@ class ProductModel extends Model
         'name',
         'category',
         'unit',
+        'price',
         'stock_qty',
         'min_stock',
         'max_stock',
         'branch_address',
         'expiry',
+        'status',
         'created_by'
     ];
 

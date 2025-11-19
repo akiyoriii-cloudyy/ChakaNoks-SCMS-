@@ -10,9 +10,6 @@ css.styles
 body { 
   margin: 0;
   padding: 0;
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
   min-height: 100vh; 
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 25%, #ffd700 50%, #ff6b35 75%, #f7931e 100%);
   background-size: 400% 400%;
@@ -173,9 +170,7 @@ body::before {
 .right-form {
   width: 50%;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   padding: 60px 50px;
   position: relative;
   overflow: hidden;
@@ -207,7 +202,7 @@ body::before {
 
 .form-card {
   width: 100%;
-  max-width: 500px;
+  max-width: 100%;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -526,7 +521,7 @@ body::before {
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .container {
     flex-direction: column;
     width: 100%;
