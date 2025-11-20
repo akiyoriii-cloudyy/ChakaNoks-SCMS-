@@ -30,6 +30,17 @@
     .sidebar {
         display: flex !important;
         flex-direction: column !important;
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%) !important;
+    }
+    
+    .sidebar-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%) !important;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .sidebar-nav .nav-item.active {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-left: 4px solid #ffd700 !important;
     }
     
     .header-actions {
@@ -39,7 +50,24 @@
     }
     
     .page-header {
-        margin-bottom: 10px !important;
+        margin-bottom: 30px !important;
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+        padding: 30px 40px;
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(45, 80, 22, 0.2);
+    }
+    
+    .page-title {
+        color: white !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 1rem !important;
     }
     
     .overview-grid {
@@ -91,107 +119,143 @@
         <main class="main-content">
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">Branch Manager Dashboard</h1>
+                    <h1 class="page-title"><i class="fas fa-chart-line" style="margin-right: 12px;"></i>Branch Manager Dashboard</h1>
                     <p class="page-subtitle">Monitor performance, track inventory, and manage operations</p>
                 </div>
                 <div class="header-actions">
-                    <a href="<?= base_url('staff/dashboard') ?>" class="inventory-btn">
+                    <a href="<?= base_url('staff/dashboard') ?>" class="inventory-btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
                         <i class="fas fa-boxes"></i>
                         View Inventory
                     </a>
-                    <a href="<?= base_url('auth/logout') ?>" class="logout-btn">
+                    <a href="<?= base_url('auth/logout') ?>" class="logout-btn" style="background: rgba(255, 107, 53, 0.8); color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 107, 53, 1)'" onmouseout="this.style.background='rgba(255, 107, 53, 0.8)'">
                         <i class="fas fa-sign-out-alt"></i>
                         Logout
                     </a>
                 </div>
             </div>
 
-            <!-- Overview Cards -->
-            <div class="overview-grid">
-                <div class="overview-card">
-                    <div class="card-header">
+            <!-- Row 1: Key Metrics (Central Admin Style) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <!-- Inventory Summary Widget -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
-                            <div class="card-value">₱<?= number_format($data['sales']['today_sales']) ?></div>
-                            <div class="card-label">Today's Sales</div>
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Total Items</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: #2563eb; margin-bottom: 8px;"><?= $data['inventory']['total_items'] ?></div>
+                            <div style="font-size: 0.85rem; color: #666;">Stock Value: ₱<?= number_format($data['inventory']['total_value'], 2) ?></div>
                         </div>
-                        <div class="card-icon sales">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                    </div>
-                    <div class="card-change positive">
-                        <i class="fas fa-arrow-up"></i> +<?= $data['sales']['growth_rate'] ?>% from yesterday
-                    </div>
-                </div>
-
-                <!-- Removed Active Staff card as per request -->
-
-                <div class="overview-card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-value">₱<?= number_format($data['inventory']['total_value']) ?></div>
-                            <div class="card-label">Inventory Value</div>
-                        </div>
-                        <div class="card-icon inventory">
+                        <div style="font-size: 2.5rem; color: #2563eb; opacity: 0.2;">
                             <i class="fas fa-boxes"></i>
                         </div>
                     </div>
-                    <div class="card-change positive">
-                        <i class="fas fa-arrow-up"></i> <?= $data['inventory']['total_items'] ?> items in stock
+                </div>
+
+                <!-- Low Stock Alerts -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Low Stock Items</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b; margin-bottom: 8px;"><?= $data['inventory']['low_stock_items'] ?></div>
+                            <div style="font-size: 0.85rem; color: #666;">Critical: <span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-weight: 600;"><?= $data['inventory']['critical_items'] ?></span></div>
+                        </div>
+                        <div style="font-size: 2.5rem; color: #f59e0b; opacity: 0.2;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
                     </div>
                 </div>
 
-                                 <div class="overview-card">
-                     <div class="card-header">
-                         <div>
-                             <div class="card-value"><?= $data['operations']['customer_satisfaction'] ?>/5</div>
-                             <div class="card-label">Customer Satisfaction</div>
-                         </div>
-                         <div class="card-icon satisfaction">
-                             <i class="fas fa-star"></i>
-                         </div>
-                     </div>
-                     <div class="card-change positive">
-                         <i class="fas fa-arrow-up"></i> Excellent rating
-                     </div>
-                 </div>
+                <!-- Purchase Requests -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Pending Approvals</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: #ef4444; margin-bottom: 8px;"><?= $data['purchaseRequests']['pending_approvals'] ?></div>
+                            <div style="font-size: 0.85rem; color: #666;">Value: ₱<?= number_format($data['purchaseRequests']['total_pending_value'], 2) ?></div>
+                        </div>
+                        <div style="font-size: 2.5rem; color: #ef4444; opacity: 0.2;">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                    </div>
+                </div>
 
-                 <div class="overview-card inventory-preview">
-                     <div class="card-header">
-                         <div>
-                             <div class="card-value"><?= $data['inventory']['critical_items'] + $data['inventory']['low_stock_items'] ?></div>
-                             <div class="card-label">Items Need Attention</div>
-                         </div>
-                         <div class="card-icon inventory-alert">
-                             <i class="fas fa-exclamation-triangle"></i>
-                         </div>
-    </div>
-                     <div class="card-change negative">
-                         <i class="fas fa-arrow-down"></i> 
-                         <a href="<?= base_url('staff/dashboard') ?>" style="color: inherit; text-decoration: none;">
-                             View Inventory Dashboard →
-                         </a>
-      </div>
-    </div>
-  </div>
+                <!-- Deliveries -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">In Transit</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: #0ea5e9; margin-bottom: 8px;"><?= $data['deliveries']['in_transit_deliveries'] ?></div>
+                            <div style="font-size: 0.85rem; color: #666;">Delayed: <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-weight: 600;"><?= $data['deliveries']['delayed_deliveries'] ?></span></div>
+                        </div>
+                        <div style="font-size: 2.5rem; color: #0ea5e9; opacity: 0.2;">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Supplier Reports & Delivery Tracking -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <!-- Supplier Reports Widget -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h5 style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 600;"><i class="fas fa-building" style="color: #2563eb; margin-right: 8px;"></i>Supplier Reports</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Active Suppliers</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #2563eb;"><?= $data['suppliers']['active_suppliers'] ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Total Suppliers</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #666;"><?= $data['suppliers']['total_suppliers'] ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Pending Orders</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #f59e0b;"><?= $data['suppliers']['pending_orders'] ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">On-Time Rate</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;"><?= $data['suppliers']['on_time_delivery_rate'] ?>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Tracking Widget -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h5 style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 600;"><i class="fas fa-truck" style="color: #0ea5e9; margin-right: 8px;"></i>Delivery Tracking</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Pending</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #8b5cf6;"><?= $data['deliveries']['pending_deliveries'] ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Delivered Today</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;"><?= $data['deliveries']['delivered_today'] ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">In Transit</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #0ea5e9;"><?= $data['deliveries']['in_transit_deliveries'] ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Delayed</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #ef4444;"><?= $data['deliveries']['delayed_deliveries'] ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Charts Section -->
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div>
-                            <div class="chart-title">Sales Performance</div>
-                            <div class="chart-subtitle">Hourly sales breakdown</div>
-                        </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">Sales Performance</div>
+                        <div style="font-size: 0.85rem; color: #666;">Hourly sales breakdown</div>
                     </div>
                     <canvas id="salesChart" height="200" style="max-height: 200px;"></canvas>
                 </div>
 
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div>
-                            <div class="chart-title">Inventory Status</div>
-                            <div class="chart-subtitle">Stock level overview</div>
-                        </div>
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">Inventory Status</div>
+                        <div style="font-size: 0.85rem; color: #666;">Stock level overview</div>
                     </div>
                     <canvas id="inventoryChart" height="200" style="max-height: 200px;"></canvas>
                 </div>
@@ -215,130 +279,52 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 600; color: #1a1a2e;">Markypadilla</div>
-                            </td>
-                            <td>Manager</td>
-                            <td>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
+                        <?php if (!empty($data['staff']['top_performers'])): ?>
+                            <?php foreach ($data['staff']['top_performers'] as $performer): ?>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: #1a1a2e;"><?= esc($performer['name']) ?></div>
+                                </td>
+                                <td><?= esc($performer['role']) ?></td>
+                                <td>
+                                    <div class="rating">
+                                        <div class="rating-stars">
+                                            <?php 
+                                            $rating = $performer['rating'] ?? 0;
+                                            $fullStars = floor($rating);
+                                            $hasHalf = ($rating - $fullStars) >= 0.5;
+                                            for ($i = 0; $i < $fullStars; $i++): ?>
+                                                <i class="fas fa-star"></i>
+                                            <?php endfor; ?>
+                                            <?php if ($hasHalf): ?>
+                                                <i class="fas fa-star-half-alt"></i>
+                                            <?php endif; ?>
+                                            <?php for ($i = $fullStars + ($hasHalf ? 1 : 0); $i < 5; $i++): ?>
+                                                <i class="fas fa-star" style="opacity: 0.3;"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <span class="rating-value"><?= number_format($performer['rating'], 1) ?></span>
                                     </div>
-                                    <span class="rating-value">4.8</span>
-                                </div>
-                            </td>
-                            <td>₱350,000</td>
-                    <td>
-                                <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
-                            Excellent
-                        </div>
-                    </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 600; color: #1a1a2e;">AbbyGarciaa</div>
-                            </td>
-                            <td>Inventory staff</td>
-                            <td>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
+                                </td>
+                                <td>₱<?= number_format($performer['sales']) ?></td>
+                                <td>
+                                    <?php 
+                                    $performanceClass = $performer['rating'] >= 4.5 ? 'Excellent' : ($performer['rating'] >= 4.0 ? 'Very Good' : 'Good');
+                                    $performanceColor = $performer['rating'] >= 4.5 ? '#10b981' : ($performer['rating'] >= 4.0 ? '#3b82f6' : '#f59e0b');
+                                    ?>
+                                    <div style="background: linear-gradient(90deg, <?= $performanceColor ?>, <?= $performanceColor ?>cc); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                                        <?= $performanceClass ?>
                                     </div>
-                                    <span class="rating-value">4.6</span>
-                                </div>
-                            </td>
-                            <td>₱85,000</td>
-                            <td>
-                                <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
-                            Excellent
-                        </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 600; color: #1a1a2e;">Louieee</div>
-                            </td>
-                            <td>Server</td>
-                            <td>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <span class="rating-value">4.5</span>
-                                </div>
-                            </td>
-                            <td>₱89,000</td>
-                            <td>
-                                <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
-                                    Excellent
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 600; color: #1a1a2e;">Wakwakk</div>
-                            </td>
-                            <td>Logistics Coordinator</td>
-                            <td>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <span class="rating-value">4.4</span>
-                                </div>
-                            </td>
-                            <td>₱78,500</td>
-                            <td>
-                                <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
-                                    Excellent
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 600; color: #1a1a2e;">Akiyorii</div>
-                            </td>
-                            <td>Assistant Owner</td>
-                            <td>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <span class="rating-value">4.3</span>
-                                </div>
-                            </td>
-
-                            <td>₱250,000</td>
-
-                            <td>₱230,000</td>
-                            
-                            <td>
-                                <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
-                                    Excellent
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                    No staff data available
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -350,17 +336,29 @@
                     <div class="performance-subtitle">Important notifications</div>
                 </div>
                 
-                <?php foreach ($data['operations']['alerts'] as $alert): ?>
-                <div class="alert-item">
-                    <div class="alert-icon <?= $alert['type'] ?>">
-                        <i class="fas fa-<?= $alert['type'] === 'warning' ? 'exclamation-triangle' : ($alert['type'] === 'info' ? 'info-circle' : 'check-circle') ?>"></i>
+                <?php if (!empty($data['operations']['alerts'])): ?>
+                    <?php foreach ($data['operations']['alerts'] as $alert): ?>
+                    <div class="alert-item">
+                        <div class="alert-icon <?= $alert['type'] ?>">
+                            <i class="fas fa-<?= $alert['type'] === 'warning' ? 'exclamation-triangle' : ($alert['type'] === 'info' ? 'info-circle' : 'check-circle') ?>"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-message"><?= esc($alert['message']) ?></div>
+                            <div class="alert-time">Just now</div>
+                        </div>
                     </div>
-                    <div class="alert-content">
-                        <div class="alert-message"><?= esc($alert['message']) ?></div>
-                        <div class="alert-time">Just now</div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert-item">
+                        <div class="alert-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-message">All systems operating normally</div>
+                            <div class="alert-time">Just now</div>
+                        </div>
                     </div>
-                </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </main>
 </div>

@@ -2,40 +2,191 @@
 
 <?= $this->section('head') ?>
 <style>
+    /* Professional gradient background */
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
     .purchase-request-form {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 0 20px;
     }
-    .item-row {
-        border: 1px solid #ddd;
-        padding: 15px;
+
+    /* Card styling */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+        border: none;
+        border-radius: 12px 12px 0 0;
+        padding: 25px;
+        color: white;
+    }
+
+    .card-header h5 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    /* Form controls */
+    .form-label {
+        font-weight: 600;
+        color: #2d5016;
         margin-bottom: 10px;
-        border-radius: 5px;
+        font-size: 0.95rem;
     }
+
+    .form-select, .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #4a7c2a;
+        box-shadow: 0 0 0 3px rgba(74, 124, 42, 0.1);
+        outline: none;
+    }
+
+    /* Item row styling */
+    .item-row {
+        border: 2px solid #f0f0f0;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        background: #fafafa;
+        transition: all 0.3s ease;
+    }
+
+    .item-row:hover {
+        border-color: #4a7c2a;
+        background: #f5f9f0;
+    }
+
     .item-row:last-child {
         margin-bottom: 0;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(45, 80, 22, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(45, 80, 22, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: #ef4444;
+        border: none;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Total amount styling */
+    #totalAmount {
+        color: #2d5016;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    /* Page header */
+    .page-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(45, 80, 22, 0.2);
+    }
+
+    .page-header h2 {
+        margin: 0 0 8px 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .page-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    /* Container styling */
+    .container-fluid {
+        padding: 0;
     }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="container-fluid">
-    <h2>Create Purchase Request</h2>
-    <p class="text-muted">Request products for your branch</p>
+<div class="page-header">
+    <h2><i class="fas fa-shopping-cart" style="margin-right: 12px;"></i>Create Purchase Request</h2>
+    <p>Request products for your branch</p>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('nav') ?>
-<div class="container-fluid">
-    <ul class="nav nav-tabs">
+<div class="container-fluid" style="padding: 0;">
+    <ul class="nav nav-tabs" style="background: white; border-bottom: 2px solid #e0e0e0; border-radius: 0;">
         <li class="nav-item">
-            <a class="nav-link" href="<?= base_url('manager/dashboard') ?>">
+            <a class="nav-link" href="<?= base_url('manager/dashboard') ?>" style="color: #666; transition: all 0.3s ease;">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="#">
+            <a class="nav-link active" href="#" style="color: #2d5016; border-bottom: 3px solid #4a7c2a; font-weight: 600;">
                 <i class="fas fa-shopping-cart"></i> New Purchase Request
             </a>
         </li>
@@ -52,7 +203,20 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="branch" class="form-label">Request For Branch</label>
+                            <select class="form-select" id="branch" name="branch" required>
+                                <option value="">Select Branch</option>
+                                <option value="BUHANGIN Branch, Davao City">BUHANGIN</option>
+                                <option value="TORIL Branch, Davao City">TORIL</option>
+                                <option value="LANANG Branch, Davao City">LANANG</option>
+                                <option value="AGDAO Branch, Davao City">AGDAO</option>
+                                <option value="MATINA Branch, Davao City">MATINA</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="mb-3">
                             <label for="priority" class="form-label">Priority</label>
                             <select class="form-select" id="priority" name="priority" required>
@@ -63,7 +227,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="mb-3">
                             <label for="notes" class="form-label">Notes</label>
                             <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Additional notes..."></textarea>
@@ -90,8 +254,10 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2">
-            <a href="<?= base_url('manager/dashboard') ?>" class="btn btn-secondary">Cancel</a>
+        <div class="d-flex justify-content-end gap-2" style="margin-top: 30px;">
+            <a href="<?= base_url('manager/dashboard') ?>" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-paper-plane"></i> Submit for Approval
             </button>
@@ -158,9 +324,8 @@ function addItemRow() {
     if (products.length > 0) {
         products.forEach(function(p) {
             const productName = p.name || 'Unknown';
-            const branch = p.branch_address || 'N/A';
             const price = p.price || 0;
-            productOptions += `<option value="${p.id}" data-price="${price}">${productName} (${branch})</option>`;
+            productOptions += `<option value="${p.id}" data-price="${price}">${productName}</option>`;
         });
     } else {
         productOptions += '<option disabled>No products available</option>';
@@ -259,7 +424,14 @@ document.getElementById('purchaseRequestForm').addEventListener('submit', functi
     e.preventDefault();
     console.log('📝 Submitting purchase request...');
     
+    const selectedBranch = document.getElementById('branch').value;
+    if (!selectedBranch) {
+        alert('❌ Please select a branch');
+        return;
+    }
+    
     const formData = {
+        branch: selectedBranch,
         priority: document.getElementById('priority').value,
         notes: document.getElementById('notes').value,
         items: []

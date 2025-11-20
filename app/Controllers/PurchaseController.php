@@ -49,12 +49,32 @@ class PurchaseController extends BaseController
 
         $json = $this->request->getJSON(true);
         $items = $json['items'] ?? null;
+        $branchName = $json['branch'] ?? null;
         $priority = $json['priority'] ?? 'normal';
         $notes = $json['notes'] ?? '';
+        
+        if (!$branchName) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Branch is required']);
+        }
 
         if (empty($items) || !is_array($items)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Items are required']);
         }
+
+        // Extract branch code from branch name (e.g., "AGDAO Branch, Davao City" -> "AGDAO")
+        $branchCode = strtoupper(explode(' ', $branchName)[0]);
+        
+        // Get branch ID from database using branch code
+        $branchRecord = $this->db->table('branches')
+            ->where('code', $branchCode)
+            ->get()
+            ->getRow();
+        
+        if (!$branchRecord) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid branch selected']);
+        }
+        
+        $branchId = $branchRecord->id;
 
         $totalAmount = 0;
         foreach ($items as $item) {
@@ -121,6 +141,7 @@ class PurchaseController extends BaseController
                 'message' => 'Purchase request created successfully',
                 'request_id' => $requestId,
                 'request_number' => $requestNumber,
+                'branch' => $branchName,
                 'items_count' => count($items),
                 'total_amount' => $totalAmount
             ]);
@@ -141,8 +162,8 @@ class PurchaseController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
         }
 
+        $userId = $session->get('user_id');
         $role = $session->get('role');
-        $branchId = $session->get('branch_id');
         $status = $this->request->getGet('status');
         $priority = $this->request->getGet('priority');
 
@@ -154,8 +175,17 @@ class PurchaseController extends BaseController
             // Central admin can see all requests
             $requests = $this->purchaseRequestModel->findAll();
         } else {
-            // Branch manager sees only their branch requests
-            $requests = $this->purchaseRequestModel->getRequestsByBranch($branchId, $filters);
+            // Branch managers see requests they created
+            $builder = $this->purchaseRequestModel->where('requested_by', $userId);
+            
+            if (!empty($filters['status'])) {
+                $builder->where('status', $filters['status']);
+            }
+            if (!empty($filters['priority'])) {
+                $builder->where('priority', $filters['priority']);
+            }
+            
+            $requests = $builder->orderBy('created_at', 'DESC')->findAll();
         }
 
         // Get full details for each request
@@ -456,16 +486,21 @@ class PurchaseController extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        $branchId = $session->get('branch_id');
+        $userId = $session->get('user_id');
         $role = $session->get('role');
         
+        // Get requests based on user role
         if (in_array($role, ['central_admin', 'superadmin'])) {
+            // Central admin sees all requests
             $requests = $this->purchaseRequestModel->findAll();
         } else {
-            $requests = $this->purchaseRequestModel->getRequestsByBranch($branchId);
+            // Branch managers see requests they created
+            $requests = $this->purchaseRequestModel->where('requested_by', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->findAll();
         }
 
-        // Get full details
+        // Get full details for each request
         foreach ($requests as &$request) {
             $request = $this->purchaseRequestModel->getRequestWithItems($request['id']);
         }

@@ -382,3 +382,198 @@ in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
  8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
  9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
 10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 23:04:12 --> Error: Call to undefined method App\Controllers\Manager::getPurchaseRequests()
+[Method: GET, Route: manager/dashboard]
+in APPPATH\Controllers\manager.php on line 54.
+ 1 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-11-20 23:31:33 --> mysqli_sql_exception: Table 'chakanoks_scms.sales' doesn't exist in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT SUM(`tot...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT SUM(`tot...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT SUM(`tot...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT SUM(`tot...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\manager.php(113): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\manager.php(45): App\Controllers\Manager->getSalesData()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#14 {main}
+CRITICAL - 2025-11-20 23:31:33 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'chakanoks_scms.sales' doesn't exist
+[Method: GET, Route: manager/dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = :DATE(created_at):', [...], false)
+ 2 APPPATH\Controllers\manager.php(113): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\manager.php(45): App\Controllers\Manager->getSalesData()
+ 4 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 23:31:33 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'chakanoks_scms.sales' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = \'2025-11-20\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = \'2025-11-20\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = :DATE(created_at):', [...], false)
+ 4 APPPATH\Controllers\manager.php(113): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\manager.php(45): App\Controllers\Manager->getSalesData()
+ 6 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+13 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 23:31:33 --> [Caused by] mysqli_sql_exception: Table 'chakanoks_scms.sales' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = \'2025-11-20\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = \'2025-11-20\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = \'2025-11-20\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT SUM(`total_amount`) AS `total_amount`
+FROM `sales`
+WHERE DATE(created_at) = :DATE(created_at):', [...], false)
+ 5 APPPATH\Controllers\manager.php(113): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\manager.php(45): App\Controllers\Manager->getSalesData()
+ 7 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-11-20 23:32:46 --> mysqli_sql_exception: Unknown column 'expiry_date' in 'where clause' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT COUNT(*)...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT COUNT(*)...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT COUNT(*)...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(1733): CodeIgniter\Database\BaseConnection->query('SELECT COUNT(*)...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\manager.php(238): CodeIgniter\Database\BaseBuilder->countAllResults()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\manager.php(51): App\Controllers\Manager->getOperationalData()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#14 {main}
+CRITICAL - 2025-11-20 23:32:46 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'expiry_date' in 'where clause'
+[Method: GET, Route: manager/dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1733): CodeIgniter\Database\BaseConnection->query('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= :expiry_date:
+AND `expiry_date` > :expiry_date.1:', [...], false)
+ 2 APPPATH\Controllers\manager.php(238): CodeIgniter\Database\BaseBuilder->countAllResults()
+ 3 APPPATH\Controllers\manager.php(51): App\Controllers\Manager->getOperationalData()
+ 4 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 23:32:46 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'expiry_date' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= \'2025-11-27\'
+AND `expiry_date` > \'2025-11-20\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= \'2025-11-27\'
+AND `expiry_date` > \'2025-11-20\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1733): CodeIgniter\Database\BaseConnection->query('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= :expiry_date:
+AND `expiry_date` > :expiry_date.1:', [...], false)
+ 4 APPPATH\Controllers\manager.php(238): CodeIgniter\Database\BaseBuilder->countAllResults()
+ 5 APPPATH\Controllers\manager.php(51): App\Controllers\Manager->getOperationalData()
+ 6 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+13 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 23:32:46 --> [Caused by] mysqli_sql_exception: Unknown column 'expiry_date' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= \'2025-11-27\'
+AND `expiry_date` > \'2025-11-20\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= \'2025-11-27\'
+AND `expiry_date` > \'2025-11-20\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= \'2025-11-27\'
+AND `expiry_date` > \'2025-11-20\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1733): CodeIgniter\Database\BaseConnection->query('SELECT COUNT(*) AS `numrows`
+FROM `products`
+WHERE `expiry_date` IS NOT NULL
+AND `expiry_date` <= :expiry_date:
+AND `expiry_date` > :expiry_date.1:', [...], false)
+ 5 APPPATH\Controllers\manager.php(238): CodeIgniter\Database\BaseBuilder->countAllResults()
+ 6 APPPATH\Controllers\manager.php(51): App\Controllers\Manager->getOperationalData()
+ 7 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 23:40:57 --> Error: Call to undefined method CodeIgniter\Database\MySQLi\Connection::raw()
+[Method: GET, Route: manager/dashboard]
+in APPPATH\Controllers\manager.php on line 247.
+ 1 APPPATH\Controllers\manager.php(51): App\Controllers\Manager->getOperationalData()
+ 2 APPPATH\Controllers\manager.php(28): App\Controllers\Manager->getDashboardData()
+ 3 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Manager->dashboard()
+ 4 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Manager))
+ 5 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')

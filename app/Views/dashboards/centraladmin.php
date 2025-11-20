@@ -127,28 +127,47 @@
     .nav-tabs {
         border-bottom: none;
         background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
-        border-radius: 999px;
-        padding: 4px;
+        border-radius: 12px;
+        padding: 8px;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        margin-bottom: 24px;
     }
 
     .nav-tabs .nav-link {
         border: none;
-        border-radius: 999px;
+        border-radius: 8px;
         color: #6b7280;
         font-weight: 600;
-        padding: 8px 18px;
-        transition: all 0.2s ease;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        position: relative;
+    }
+
+    .nav-tabs .nav-link:hover {
+        background: rgba(45, 80, 22, 0.08);
+        color: #2d5016;
+        transform: translateY(-2px);
     }
 
     .nav-tabs .nav-link.active {
         background: linear-gradient(135deg, var(--green-1), var(--green-2));
         color: #f9fafb;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3);
+        box-shadow: 0 10px 25px rgba(45, 80, 22, 0.3);
+        transform: translateY(-2px);
     }
 
     .nav-tabs .nav-link i {
-        margin-right: 6px;
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .nav-tabs .badge {
+        background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+        margin-left: 6px;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 999px;
     }
 </style>
 <?= $this->endSection() ?>
