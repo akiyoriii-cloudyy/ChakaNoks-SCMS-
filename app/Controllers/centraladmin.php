@@ -44,13 +44,49 @@ class CentralAdmin extends BaseController
         // Get dashboard data
         $dashboardData = $this->getDashboardData();
 
+        $activeTab = $this->request->getGet('tab') ?: 'dashboard';
+
         return view('dashboards/centraladmin', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
             ],
-            'data' => $dashboardData
+            'data' => $dashboardData,
+            'activeTab' => $activeTab,
         ]);
+    }
+
+    public function suppliersPage()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        return redirect()->to(base_url('centraladmin/dashboard?tab=suppliers'));
+    }
+
+    public function deliveriesPage()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        return redirect()->to(base_url('centraladmin/dashboard?tab=deliveries'));
+    }
+
+    public function reportsPage()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        return redirect()->to(base_url('centraladmin/dashboard?tab=reports'));
     }
 
     /**
@@ -288,6 +324,40 @@ class CentralAdmin extends BaseController
             'completed_today' => $completedToday,
             'delayed_deliveries' => $delayed,
         ];
+    }
+
+    /**
+     * Detailed deliveries list for central admin Deliveries tab
+     */
+    public function getDeliveriesList()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $status = $this->request->getGet('status');
+
+        $builder = $this->db->table('deliveries d')
+            ->select('d.*, s.name AS supplier_name, b.name AS branch_name')
+            ->join('suppliers s', 's.id = d.supplier_id', 'left')
+            ->join('branches b', 'b.id = d.branch_id', 'left');
+
+        if (!empty($status)) {
+            $builder->where('d.status', $status);
+        }
+
+        $deliveries = $builder
+            ->orderBy('d.scheduled_date', 'DESC')
+            ->limit(100)
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'deliveries' => $deliveries,
+        ]);
     }
 
     /**

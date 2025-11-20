@@ -215,14 +215,15 @@
 
 <?= $this->section('nav') ?>
 <div class="container-fluid">
+    <?php $activeTab = $activeTab ?? 'dashboard'; ?>
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" href="#">
+            <a class="nav-link <?= $activeTab === 'dashboard' ? 'active' : '' ?>" href="#" data-tab="dashboard" onclick="goToDashboard(); return false;">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showPendingRequests()">
+            <a class="nav-link <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>" href="#" data-tab="purchaseRequests" onclick="showPendingRequests(); return false;">
                 <i class="fas fa-shopping-cart"></i> Purchase Requests
                 <?php if ($data['purchaseRequests']['pending_approvals'] > 0): ?>
                     <span class="badge bg-danger"><?= $data['purchaseRequests']['pending_approvals'] ?></span>
@@ -230,17 +231,17 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link <?= $activeTab === 'deliveries' ? 'active' : '' ?>" href="#" data-tab="deliveries" onclick="showDeliveries(); return false;">
                 <i class="fas fa-truck"></i> Deliveries
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link <?= $activeTab === 'suppliers' ? 'active' : '' ?>" href="#" data-tab="suppliers" onclick="showSuppliers(); return false;">
                 <i class="fas fa-building"></i> Suppliers
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link <?= $activeTab === 'reports' ? 'active' : '' ?>" href="#" data-tab="reports" onclick="showReports(); return false;">
                 <i class="fas fa-chart-bar"></i> Reports
             </a>
         </li>
@@ -252,7 +253,7 @@
 <div class="container-fluid mt-4">
     
     <!-- Row 1: Key Metrics -->
-    <div class="row mb-4">
+    <div class="row mb-4" id="dashboardSection">
         <!-- Inventory Summary Widget -->
         <div class="col-md-3">
             <div class="dashboard-widget">
@@ -322,7 +323,7 @@
     <div class="row mb-4">
         <!-- Supplier Reports Widget -->
         <div class="col-md-6">
-            <div class="dashboard-widget">
+            <div class="dashboard-widget" id="suppliersSection">
                 <h5 class="mb-3"><i class="fas fa-building text-primary"></i> Supplier Reports</h5>
                 <div class="row">
                     <div class="col-6 mb-3">
@@ -347,7 +348,7 @@
 
         <!-- Delivery Tracking Widget -->
         <div class="col-md-6">
-            <div class="dashboard-widget">
+            <div class="dashboard-widget" id="deliveriesSection">
                 <h5 class="mb-3"><i class="fas fa-shipping-fast text-info"></i> Delivery Tracking</h5>
                 <div class="row">
                     <div class="col-6 mb-3">
@@ -373,7 +374,7 @@
     <!-- Row 3: Branch Inventory Overview -->
     <div class="row">
         <div class="col-12">
-            <div class="dashboard-widget">
+            <div class="dashboard-widget" id="reportsSection">
                 <h5 class="mb-3"><i class="fas fa-sitemap text-success"></i> Branch Inventory Overview</h5>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -438,11 +439,40 @@
         </div>
     </div>
 
+    <!-- Convert to PO Modal -->
+    <div class="modal fade" id="convertPoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Convert to Purchase Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="poSupplierSelect" class="form-label">Supplier</label>
+                        <select id="poSupplierSelect" class="form-select">
+                            <option value="">Loading suppliers...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="poExpectedDate" class="form-label">Expected Delivery Date</label>
+                        <input type="date" id="poExpectedDate" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitConvertToPO()">Create Purchase Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
 // Auto-refresh dashboard every 30 seconds
 let refreshInterval;
+let currentRequestIdForPO = null;
 
 function refreshDashboard() {
     $.get('<?= base_url('centraladmin/dashboard/data') ?>', function(response) {
@@ -467,6 +497,7 @@ function refreshDashboard() {
 }
 
 function showPendingRequests() {
+    setActiveTab('purchaseRequests');
     $.get('<?= base_url('purchase/request/pending') ?>', function(response) {
         if (response.status === 'success') {
             let html = '<table class="table"><thead><tr><th>Request #</th><th>Branch</th><th>Priority</th><th>Amount</th><th>Actions</th></tr></thead><tbody>';
@@ -494,53 +525,66 @@ function showPendingRequests() {
 }
 
 function convertToPO(requestId) {
-    // Load suppliers
+    currentRequestIdForPO = requestId;
+
+    // Load suppliers into modal dropdown
     $.get('<?= base_url('supplier/list') ?>', function(supplierResponse) {
         if (supplierResponse.status === 'success') {
-            let supplierOptions = '<option value="">Select Supplier</option>';
+            let optionsHtml = '<option value="">Select Supplier</option>';
             supplierResponse.suppliers.forEach(function(supplier) {
                 if (supplier.status === 'active') {
-                    supplierOptions += `<option value="${supplier.id}">${supplier.name}</option>`;
+                    optionsHtml += `<option value="${supplier.id}">${supplier.name}</option>`;
                 }
             });
-            
-            const supplierSelect = prompt('Enter Supplier ID (or use the dropdown):\n\n' + 
-                supplierResponse.suppliers.filter(s => s.status === 'active')
-                    .map(s => `${s.id}: ${s.name}`).join('\n'));
-            
-            if (!supplierSelect) return;
-            
-            const supplierId = parseInt(supplierSelect);
-            if (isNaN(supplierId)) {
-                alert('❌ Invalid supplier ID');
-                return;
-            }
-            
-            const expectedDate = prompt('Expected Delivery Date (YYYY-MM-DD):', 
-                new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]);
-            
-            if (!expectedDate) return;
-            
-            $.post('<?= base_url('purchase/request/') ?>' + requestId + '/convert-to-po', {
-                supplier_id: supplierId,
-                expected_delivery_date: expectedDate,
-                notes: 'Converted from purchase request'
-            }, function(response) {
-                if (response.status === 'success') {
-                    alert('✅ Purchase Order created successfully! Delivery record auto-created.');
-                    showPendingRequests();
-                    refreshDashboard();
-                } else {
-                    alert('❌ Error: ' + (response.message || 'Unknown error'));
-                }
-            }).fail(function(error) {
-                alert('❌ Request failed: ' + error.statusText);
-            });
+
+            $('#poSupplierSelect').html(optionsHtml);
+
+            const defaultDate = new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0];
+            $('#poExpectedDate').val(defaultDate);
+
+            $('#convertPoModal').modal('show');
         } else {
             alert('❌ Failed to load suppliers');
         }
     }).fail(function(error) {
         alert('❌ Failed to load suppliers: ' + error.statusText);
+    });
+}
+
+function submitConvertToPO() {
+    if (!currentRequestIdForPO) {
+        alert('❌ No purchase request selected.');
+        return;
+    }
+
+    const supplierId = $('#poSupplierSelect').val();
+    const expectedDate = $('#poExpectedDate').val();
+
+    if (!supplierId) {
+        alert('❌ Please select a supplier.');
+        return;
+    }
+
+    if (!expectedDate) {
+        alert('❌ Please choose an expected delivery date.');
+        return;
+    }
+
+    $.post('<?= base_url('purchase/request/') ?>' + currentRequestIdForPO + '/convert-to-po', {
+        supplier_id: supplierId,
+        expected_delivery_date: expectedDate,
+        notes: 'Converted from purchase request'
+    }, function(response) {
+        if (response.status === 'success') {
+            $('#convertPoModal').modal('hide');
+            alert('✅ Purchase Order created successfully! Delivery record auto-created.');
+            showPendingRequests();
+            refreshDashboard();
+        } else {
+            alert('❌ Error: ' + (response.message || 'Unknown error'));
+        }
+    }).fail(function(error) {
+        alert('❌ Request failed: ' + error.statusText);
     });
 }
 
@@ -613,8 +657,42 @@ function rejectRequest(id) {
     }
 }
 
+function setActiveTab(tabName) {
+    $('.nav-tabs .nav-link').removeClass('active');
+    $('.nav-tabs .nav-link[data-tab="' + tabName + '"]').addClass('active');
+}
+
+function scrollToSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (!el) return;
+    $('html, body').animate({
+        scrollTop: $(el).offset().top - 80
+    }, 500);
+}
+
+function goToDashboard() {
+    setActiveTab('dashboard');
+    scrollToSection('dashboardSection');
+}
+
+function showDeliveries() {
+    setActiveTab('deliveries');
+    scrollToSection('deliveriesSection');
+}
+
+function showSuppliers() {
+    setActiveTab('suppliers');
+    scrollToSection('suppliersSection');
+}
+
+function showReports() {
+    setActiveTab('reports');
+    scrollToSection('reportsSection');
+}
+
 // Start auto-refresh
 $(document).ready(function() {
+    refreshDashboard();
     refreshInterval = setInterval(refreshDashboard, 30000); // 30 seconds
 });
 </script>
