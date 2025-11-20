@@ -512,7 +512,7 @@ function convertToPO(requestId) {
             
             const supplierId = parseInt(supplierSelect);
             if (isNaN(supplierId)) {
-                alert('Invalid supplier ID');
+                alert('❌ Invalid supplier ID');
                 return;
             }
             
@@ -527,14 +527,20 @@ function convertToPO(requestId) {
                 notes: 'Converted from purchase request'
             }, function(response) {
                 if (response.status === 'success') {
-                    alert('Purchase Order created successfully! Delivery record auto-created.');
+                    alert('✅ Purchase Order created successfully! Delivery record auto-created.');
                     showPendingRequests();
                     refreshDashboard();
                 } else {
-                    alert('Error: ' + (response.message || 'Unknown error'));
+                    alert('❌ Error: ' + (response.message || 'Unknown error'));
                 }
+            }).fail(function(error) {
+                alert('❌ Request failed: ' + error.statusText);
             });
+        } else {
+            alert('❌ Failed to load suppliers');
         }
+    }).fail(function(error) {
+        alert('❌ Failed to load suppliers: ' + error.statusText);
     });
 }
 
@@ -578,10 +584,14 @@ function approveRequest(id) {
     if (confirm('Approve this purchase request?')) {
         $.post('<?= base_url('purchase/request/') ?>' + id + '/approve', function(response) {
             if (response.status === 'success') {
-                alert('Request approved!');
+                alert('✅ Request approved!');
                 showPendingRequests();
                 refreshDashboard();
+            } else {
+                alert('❌ Error: ' + (response.message || 'Unknown error'));
             }
+        }).fail(function(error) {
+            alert('❌ Request failed: ' + error.statusText);
         });
     }
 }
@@ -591,10 +601,14 @@ function rejectRequest(id) {
     if (reason) {
         $.post('<?= base_url('purchase/request/') ?>' + id + '/reject', {reason: reason}, function(response) {
             if (response.status === 'success') {
-                alert('Request rejected!');
+                alert('✅ Request rejected!');
                 showPendingRequests();
                 refreshDashboard();
+            } else {
+                alert('❌ Error: ' + (response.message || 'Unknown error'));
             }
+        }).fail(function(error) {
+            alert('❌ Request failed: ' + error.statusText);
         });
     }
 }

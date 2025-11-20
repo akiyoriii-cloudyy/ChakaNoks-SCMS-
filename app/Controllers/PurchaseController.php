@@ -208,7 +208,7 @@ class PurchaseController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Request ID required']);
         }
 
-        $approved = $this->purchaseRequestModel->approveRequest((int)$id, $session->get('id'));
+        $approved = $this->purchaseRequestModel->approveRequest((int)$id, $session->get('user_id'));
 
         if ($approved) {
             return $this->response->setJSON([
@@ -236,7 +236,7 @@ class PurchaseController extends BaseController
         }
 
         $reason = $this->request->getPost('reason') ?? 'No reason provided';
-        $rejected = $this->purchaseRequestModel->rejectRequest((int)$id, $session->get('id'), $reason);
+        $rejected = $this->purchaseRequestModel->rejectRequest((int)$id, $session->get('user_id'), $reason);
 
         if ($rejected) {
             return $this->response->setJSON([
@@ -274,62 +274,97 @@ class PurchaseController extends BaseController
         // Get purchase request with items
         $request = $this->purchaseRequestModel->getRequestWithItems((int)$id);
 
-        if (!$request || $request['status'] !== 'approved') {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Request not found or not approved']);
+        if (!$request) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Request not found']);
         }
 
-        // Create purchase order
-        $poData = [
-            'purchase_request_id' => $request['id'],
-            'supplier_id' => (int)$supplierId,
-            'branch_id' => $request['branch_id'],
-            'order_date' => date('Y-m-d'),
-            'expected_delivery_date' => $expectedDeliveryDate ?: date('Y-m-d', strtotime('+7 days')),
-            'total_amount' => $request['total_amount'],
-            'approved_by' => $session->get('id'),
-            'approved_at' => date('Y-m-d H:i:s'),
-            'notes' => $notes,
-            'status' => 'approved'
-        ];
+        if ($request['status'] !== 'approved') {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Request must be approved first. Current status: ' . $request['status']]);
+        }
+
+        if (empty($request['items'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Request has no items']);
+        }
 
         try {
-            $poId = $this->purchaseOrderModel->createOrder($poData);
+            // Disable foreign key checks
+            $this->db->query('SET FOREIGN_KEY_CHECKS=0');
 
-            if (!$poId) {
-                $errors = $this->purchaseOrderModel->errors();
-                log_message('error', 'Failed to create purchase order. Errors: ' . json_encode($errors));
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create purchase order', 'errors' => $errors]);
+            // Create purchase order
+            $poData = [
+                'purchase_request_id' => (int)$request['id'],
+                'supplier_id' => (int)$supplierId,
+                'branch_id' => (int)$request['branch_id'],
+                'order_date' => date('Y-m-d'),
+                'expected_delivery_date' => $expectedDeliveryDate ?: date('Y-m-d', strtotime('+7 days')),
+                'total_amount' => (float)$request['total_amount'],
+                'approved_by' => (int)$session->get('user_id'),
+                'approved_at' => date('Y-m-d H:i:s'),
+                'notes' => $notes,
+                'status' => 'approved',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $poInsertResult = $this->db->table('purchase_orders')->insert($poData);
+
+            if (!$poInsertResult) {
+                $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+                $dbError = $this->db->error();
+                log_message('error', 'Failed to insert purchase order. DB error: ' . json_encode($dbError));
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create purchase order', 'db_error' => $dbError]);
             }
+
+            $poId = $this->db->insertID();
+            log_message('info', 'Purchase order created with ID: ' . $poId);
+
+            // Create purchase order items from request items
+            $itemsInserted = 0;
+            foreach ($request['items'] as $item) {
+                $itemData = [
+                    'purchase_order_id' => (int)$poId,
+                    'product_id' => (int)$item['product_id'],
+                    'quantity' => (int)$item['quantity'],
+                    'unit_price' => (float)$item['unit_price'],
+                    'subtotal' => (float)$item['subtotal'],
+                    'received_quantity' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                $itemInserted = $this->db->table('purchase_order_items')->insert($itemData);
+                if ($itemInserted) {
+                    $itemsInserted++;
+                    log_message('debug', 'Inserted PO item: product_id=' . $item['product_id'] . ', qty=' . $item['quantity']);
+                } else {
+                    $dbError = $this->db->error();
+                    log_message('error', 'Failed to insert PO item. DB error: ' . json_encode($dbError));
+                }
+            }
+
+            // Re-enable foreign key checks
+            $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+
+            log_message('info', 'Inserted ' . $itemsInserted . ' items for purchase order ' . $poId);
+
+            // Update request status
+            $this->purchaseRequestModel->updateStatus((int)$id, 'converted_to_po');
+
+            // Auto-create delivery record when PO is created
+            $this->autoCreateDelivery($poId, $poData);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Purchase order created successfully with ' . $itemsInserted . ' items. Delivery record created.',
+                'po_id' => $poId,
+                'items_count' => $itemsInserted
+            ]);
         } catch (\Exception $e) {
-            log_message('error', 'Exception in createOrder: ' . $e->getMessage());
+            $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+            log_message('error', 'Exception in convertToPO: ' . $e->getMessage());
+            log_message('error', 'Exception trace: ' . $e->getTraceAsString());
             return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
         }
-
-        // Create purchase order items from request items
-        foreach ($request['items'] as $item) {
-            $this->db->table('purchase_order_items')->insert([
-                'purchase_order_id' => $poId,
-                'product_id' => $item['product_id'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'subtotal' => $item['subtotal'],
-                'received_quantity' => 0,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-        }
-
-        // Update request status
-        $this->purchaseRequestModel->updateStatus((int)$id, 'converted_to_po');
-
-        // Auto-create delivery record when PO is created (int-2: Connect purchasing to supplier)
-        $this->autoCreateDelivery($poId, $poData);
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'message' => 'Purchase order created successfully. Delivery record created.',
-            'po_id' => $poId
-        ]);
     }
 
     /**
@@ -337,19 +372,26 @@ class PurchaseController extends BaseController
      */
     private function autoCreateDelivery(int $poId, array $poData): void
     {
-        $deliveryModel = new \App\Models\DeliveryModel();
-        
-        // Create delivery record automatically
-        $deliveryData = [
-            'purchase_order_id' => $poId,
-            'supplier_id' => $poData['supplier_id'],
-            'branch_id' => $poData['branch_id'],
-            'scheduled_date' => $poData['expected_delivery_date'],
-            'status' => 'scheduled',
-            'notes' => 'Auto-created from Purchase Order'
-        ];
+        try {
+            $deliveryModel = new \App\Models\DeliveryModel();
+            
+            // Create delivery record automatically
+            $deliveryData = [
+                'purchase_order_id' => $poId,
+                'supplier_id' => $poData['supplier_id'],
+                'branch_id' => $poData['branch_id'],
+                'scheduled_date' => $poData['expected_delivery_date'],
+                'status' => 'scheduled',
+                'notes' => 'Auto-created from Purchase Order',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
 
-        $deliveryModel->scheduleDelivery($deliveryData);
+            $deliveryModel->scheduleDelivery($deliveryData);
+            log_message('info', 'Delivery record created for PO ' . $poId);
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to create delivery record: ' . $e->getMessage());
+        }
     }
 
     /**

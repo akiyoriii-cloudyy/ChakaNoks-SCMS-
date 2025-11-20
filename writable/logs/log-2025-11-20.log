@@ -42,3 +42,14 @@ in APPPATH\Models\PurchaseRequestModel.php on line 238.
  6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
  7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
  8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+CRITICAL - 2025-11-20 07:56:22 --> TypeError: App\Models\PurchaseRequestModel::rejectRequest(): Argument #2 ($approvedBy) must be of type int, null given, called in C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php on line 239
+[Method: POST, Route: purchase/request/2/reject]
+in APPPATH\Models\PurchaseRequestModel.php on line 247.
+ 1 APPPATH\Controllers\PurchaseController.php(239): App\Models\PurchaseRequestModel->rejectRequest(2, null, 'Expired')
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PurchaseController->rejectRequest('2')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
