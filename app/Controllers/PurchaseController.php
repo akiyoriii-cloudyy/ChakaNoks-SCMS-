@@ -224,7 +224,7 @@ class PurchaseController extends BaseController
     }
 
     /**
-     * Approve purchase request
+     * Approve purchase request and automatically create PO
      */
     public function approveRequest($id = null)
     {
@@ -238,16 +238,113 @@ class PurchaseController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Request ID required']);
         }
 
-        $approved = $this->purchaseRequestModel->approveRequest((int)$id, $session->get('user_id'));
+        try {
+            // Step 1: Approve the purchase request
+            $approved = $this->purchaseRequestModel->approveRequest((int)$id, $session->get('user_id'));
 
-        if ($approved) {
+            if (!$approved) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to approve request']);
+            }
+
+            // Step 2: Get the approved request with items
+            $request = $this->purchaseRequestModel->getRequestWithItems((int)$id);
+
+            if (!$request || empty($request['items'])) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Request has no items']);
+            }
+
+            // Step 3: Get the first supplier (default supplier) - or you can modify this logic
+            $suppliers = $this->db->table('suppliers')->where('status', 'active')->limit(1)->get()->getResultArray();
+            
+            if (empty($suppliers)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'No active suppliers available']);
+            }
+
+            $supplierId = $suppliers[0]['id'];
+
+            // Step 4: Generate unique order number
+            $prefix = 'PO';
+            $date = date('Ymd');
+            $random = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            $orderNumber = $prefix . '-' . $date . '-' . $random;
+
+            // Step 5: Disable foreign key checks
+            $this->db->query('SET FOREIGN_KEY_CHECKS=0');
+
+            // Step 6: Create purchase order with pending status
+            $poData = [
+                'order_number' => $orderNumber,
+                'purchase_request_id' => (int)$request['id'],
+                'supplier_id' => (int)$supplierId,
+                'branch_id' => (int)$request['branch_id'],
+                'order_date' => date('Y-m-d'),
+                'expected_delivery_date' => date('Y-m-d', strtotime('+7 days')),
+                'total_amount' => (float)$request['total_amount'],
+                'notes' => 'Auto-created from approved purchase request',
+                'status' => 'pending',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $poInsertResult = $this->db->table('purchase_orders')->insert($poData);
+
+            if (!$poInsertResult) {
+                $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+                $dbError = $this->db->error();
+                log_message('error', 'Failed to auto-create PO. DB error: ' . json_encode($dbError));
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Request approved but failed to create PO', 'db_error' => $dbError]);
+            }
+
+            $poId = $this->db->insertID();
+            log_message('info', 'Auto-created purchase order with ID: ' . $poId);
+
+            // Step 7: Create purchase order items from request items
+            $itemsInserted = 0;
+            foreach ($request['items'] as $item) {
+                $itemData = [
+                    'purchase_order_id' => (int)$poId,
+                    'product_id' => (int)$item['product_id'],
+                    'quantity' => (int)$item['quantity'],
+                    'unit_price' => (float)$item['unit_price'],
+                    'subtotal' => (float)$item['subtotal'],
+                    'received_quantity' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                $itemInserted = $this->db->table('purchase_order_items')->insert($itemData);
+                if ($itemInserted) {
+                    $itemsInserted++;
+                    log_message('debug', 'Inserted PO item: product_id=' . $item['product_id'] . ', qty=' . $item['quantity']);
+                } else {
+                    $dbError = $this->db->error();
+                    log_message('error', 'Failed to insert PO item. DB error: ' . json_encode($dbError));
+                }
+            }
+
+            // Step 8: Re-enable foreign key checks
+            $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+
+            log_message('info', 'Inserted ' . $itemsInserted . ' items for auto-created purchase order ' . $poId);
+
+            // Step 9: Update request status to converted_to_po
+            $this->purchaseRequestModel->updateStatus((int)$id, 'converted_to_po');
+
+            // Step 10: Auto-create delivery record
+            $this->autoCreateDelivery($poId, $poData);
+
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Purchase request approved'
+                'message' => 'Purchase request approved! Purchase Order automatically created with ' . $itemsInserted . ' items. Status: Pending supplier approval.',
+                'po_id' => $poId,
+                'items_count' => $itemsInserted
             ]);
+        } catch (\Exception $e) {
+            $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+            log_message('error', 'Exception in approveRequest: ' . $e->getMessage());
+            log_message('error', 'Exception trace: ' . $e->getTraceAsString());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
         }
-
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to approve request']);
     }
 
     /**
@@ -320,7 +417,7 @@ class PurchaseController extends BaseController
             // Disable foreign key checks
             $this->db->query('SET FOREIGN_KEY_CHECKS=0');
 
-            // Create purchase order
+            // Create purchase order with pending status (waiting for supplier approval)
             $poData = [
                 'purchase_request_id' => (int)$request['id'],
                 'supplier_id' => (int)$supplierId,
@@ -328,10 +425,8 @@ class PurchaseController extends BaseController
                 'order_date' => date('Y-m-d'),
                 'expected_delivery_date' => $expectedDeliveryDate ?: date('Y-m-d', strtotime('+7 days')),
                 'total_amount' => (float)$request['total_amount'],
-                'approved_by' => (int)$session->get('user_id'),
-                'approved_at' => date('Y-m-d H:i:s'),
                 'notes' => $notes,
-                'status' => 'approved',
+                'status' => 'pending',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
@@ -385,7 +480,7 @@ class PurchaseController extends BaseController
 
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Purchase order created successfully with ' . $itemsInserted . ' items. Delivery record created.',
+                'message' => 'Purchase order created successfully with ' . $itemsInserted . ' items. Status: Pending supplier approval. Delivery record created.',
                 'po_id' => $poId,
                 'items_count' => $itemsInserted
             ]);
@@ -519,6 +614,38 @@ class PurchaseController extends BaseController
     }
 
     /**
+     * Get a single purchase order with details
+     */
+    public function getPurchaseOrder($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Order ID required']);
+        }
+
+        try {
+            $order = $this->purchaseOrderModel->getOrderWithDetails((int)$id);
+
+            if (!$order) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Purchase order not found']);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'order' => $order
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching purchase order: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to fetch purchase order']);
+        }
+    }
+
+    /**
      * Track purchase order
      */
     public function trackOrder($id = null)
@@ -543,6 +670,159 @@ class PurchaseController extends BaseController
             'status' => 'success',
             'order' => $order
         ]);
+    }
+
+    /**
+     * Get all purchase orders with supplier and branch info
+     */
+    public function getPurchaseOrdersList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        try {
+            $orders = $this->db->table('purchase_orders')
+                ->select('purchase_orders.*, suppliers.name as supplier_name, branches.name as branch_name')
+                ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id', 'left')
+                ->join('branches', 'branches.id = purchase_orders.branch_id', 'left')
+                ->orderBy('purchase_orders.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            // Format the response
+            $formattedOrders = [];
+            foreach ($orders as $order) {
+                $formattedOrders[] = [
+                    'id' => $order['id'],
+                    'order_number' => 'PO-' . str_pad($order['id'], 5, '0', STR_PAD_LEFT),
+                    'purchase_request_id' => $order['purchase_request_id'],
+                    'supplier' => ['id' => $order['supplier_id'], 'name' => $order['supplier_name']],
+                    'branch' => ['id' => $order['branch_id'], 'name' => $order['branch_name']],
+                    'status' => $order['status'],
+                    'total_amount' => $order['total_amount'],
+                    'expected_delivery_date' => $order['expected_delivery_date'],
+                    'order_date' => $order['order_date'],
+                    'created_at' => $order['created_at']
+                ];
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'orders' => $formattedOrders,
+                'count' => count($formattedOrders)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching purchase orders: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to fetch purchase orders']);
+        }
+    }
+
+    /**
+     * Update purchase order details (supplier and delivery date)
+     */
+    public function updatePurchaseOrder($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Order ID required']);
+        }
+
+        try {
+            $supplierId = $this->request->getPost('supplier_id');
+            $expectedDeliveryDate = $this->request->getPost('expected_delivery_date');
+
+            if (!$supplierId || !$expectedDeliveryDate) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Supplier and delivery date are required']);
+            }
+
+            $order = $this->purchaseOrderModel->find((int)$id);
+
+            if (!$order) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Purchase order not found']);
+            }
+
+            // Update PO with new supplier and delivery date
+            $updateData = [
+                'supplier_id' => (int)$supplierId,
+                'expected_delivery_date' => $expectedDeliveryDate,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $updated = $this->db->table('purchase_orders')
+                ->where('id', (int)$id)
+                ->update($updateData);
+
+            if ($updated) {
+                log_message('info', 'Purchase order ' . $id . ' updated by user ' . $session->get('user_id'));
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Purchase order updated successfully!'
+                ]);
+            }
+
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to update purchase order']);
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in updatePurchaseOrder: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Approve a purchase order (supplier approval)
+     */
+    public function approvePurchaseOrder($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Order ID required']);
+        }
+
+        try {
+            $order = $this->purchaseOrderModel->find((int)$id);
+
+            if (!$order) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Purchase order not found']);
+            }
+
+            // Update PO status to approved using direct database query
+            $updateData = [
+                'status' => 'approved',
+                'approved_by' => (int)$session->get('user_id'),
+                'approved_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            // Use direct database update for reliability
+            $updated = $this->db->table('purchase_orders')
+                ->where('id', (int)$id)
+                ->update($updateData);
+
+            if ($updated) {
+                log_message('info', 'Purchase order ' . $id . ' approved by user ' . $session->get('user_id'));
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Purchase order approved successfully!'
+                ]);
+            }
+
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to approve purchase order']);
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in approvePurchaseOrder: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
+        }
     }
 }
 

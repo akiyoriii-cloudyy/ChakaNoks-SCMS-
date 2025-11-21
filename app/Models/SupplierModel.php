@@ -16,7 +16,9 @@ class SupplierModel extends Model
         'phone',
         'address',
         'payment_terms',
-        'status'
+        'status',
+        'created_at',
+        'updated_at'
     ];
 
     protected $useTimestamps = true;

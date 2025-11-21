@@ -250,6 +250,11 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>" href="#" data-tab="purchaseOrders" onclick="showPurchaseOrders(); return false;">
+                <i class="fas fa-file-invoice"></i> Purchase Orders
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link <?= $activeTab === 'deliveries' ? 'active' : '' ?>" href="#" data-tab="deliveries" onclick="showDeliveries(); return false;">
                 <i class="fas fa-truck"></i> Deliveries
             </a>
@@ -390,7 +395,21 @@
         </div>
     </div>
 
-    <!-- Row 3: Branch Inventory Overview -->
+    <!-- Row 3: Purchase Orders Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-widget" id="purchaseOrdersSection">
+                <h5 class="mb-3"><i class="fas fa-file-invoice text-warning"></i> Purchase Orders</h5>
+                <div class="table-responsive">
+                    <div id="purchaseOrdersContent">
+                        <p class="text-muted">Click on Purchase Orders tab to load data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Branch Inventory Overview -->
     <div class="row">
         <div class="col-12">
             <div class="dashboard-widget" id="reportsSection">
@@ -458,29 +477,123 @@
         </div>
     </div>
 
-    <!-- Convert to PO Modal -->
-    <div class="modal fade" id="convertPoModal" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- Edit Purchase Order Modal -->
+    <div class="modal fade" id="editPoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Convert to Purchase Order</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Purchase Order Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="poSupplierSelect" class="form-label">Supplier</label>
-                        <select id="poSupplierSelect" class="form-select">
-                            <option value="">Loading suppliers...</option>
+                        <label class="form-label"><strong>Purchase Request #:</strong></label>
+                        <input type="text" class="form-control" id="editPoRequestNumber" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Branch:</strong></label>
+                        <input type="text" class="form-control" id="editPoBranch" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Total Amount:</strong></label>
+                        <input type="text" class="form-control" id="editPoAmount" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Select Supplier:</strong></label>
+                        <select class="form-control" id="editPoSupplierSelect" onchange="displayEditSupplierDetails()">
+                            <option value="">-- Choose a Supplier --</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="poExpectedDate" class="form-label">Expected Delivery Date</label>
-                        <input type="date" id="poExpectedDate" class="form-control">
+                        <label class="form-label"><strong>Expected Delivery Date:</strong></label>
+                        <input type="date" class="form-control" id="editPoExpectedDate">
+                    </div>
+                    <div id="editSupplierDetailsCard" class="card mt-3" style="display: none;">
+                        <div class="card-header" style="background: #f3f4f6;">
+                            <strong>Supplier Details</strong>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Contact Person:</strong> <span id="editSupplierContactPerson">-</span></p>
+                            <p><strong>Email:</strong> <span id="editSupplierEmail">-</span></p>
+                            <p><strong>Phone:</strong> <span id="editSupplierPhone">-</span></p>
+                            <p><strong>Payment Terms:</strong> <span id="editSupplierPaymentTerms">-</span></p>
+                            <p><strong>Address:</strong> <span id="editSupplierAddress">-</span></p>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitConvertToPO()">Create Purchase Order</button>
+                    <button type="button" class="btn btn-success" onclick="submitEditPO()"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Convert to PO Modal -->
+    <div class="modal fade" id="convertPoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice"></i> Convert to Purchase Order</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding: 25px;">
+                    <!-- Supplier Selection -->
+                    <div class="mb-4">
+                        <label for="poSupplierSelect" class="form-label fw-bold">Select Supplier</label>
+                        <select id="poSupplierSelect" class="form-select" onchange="displaySupplierDetails()" style="border: 2px solid #e0e0e0; padding: 12px;">
+                            <option value="">-- Choose a Supplier --</option>
+                        </select>
+                    </div>
+
+                    <!-- Supplier Details Card -->
+                    <div id="supplierDetailsCard" style="display: none; background: #f8f9fa; border-left: 4px solid #2d5016; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h6 class="mb-3" style="color: #2d5016; font-weight: 700;"><i class="fas fa-building"></i> Supplier Information</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <small class="text-muted">Contact Person</small>
+                                <div id="supplierContactPerson" style="font-weight: 600; color: #333;">-</div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <small class="text-muted">Email</small>
+                                <div id="supplierEmail" style="font-weight: 600; color: #333;">-</div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <small class="text-muted">Phone</small>
+                                <div id="supplierPhone" style="font-weight: 600; color: #333;">-</div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <small class="text-muted">Payment Terms</small>
+                                <div id="supplierPaymentTerms" style="font-weight: 600; color: #333;">-</div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <small class="text-muted">Address</small>
+                                <div id="supplierAddress" style="font-weight: 600; color: #333;">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expected Delivery Date -->
+                    <div class="mb-4">
+                        <label for="poExpectedDate" class="form-label fw-bold">Expected Delivery Date</label>
+                        <input type="date" id="poExpectedDate" class="form-control" style="border: 2px solid #e0e0e0; padding: 12px;">
+                    </div>
+
+                    <!-- Request Summary -->
+                    <div id="requestSummaryCard" style="background: #e8f5e9; border-left: 4px solid #4a7c2a; padding: 15px; border-radius: 8px;">
+                        <h6 class="mb-2" style="color: #2d5016; font-weight: 700;"><i class="fas fa-list"></i> Request Summary</h6>
+                        <div id="requestSummaryContent" style="font-size: 0.95rem; color: #333;">
+                            <p class="mb-1"><strong>Request #:</strong> <span id="poRequestNumber">-</span></p>
+                            <p class="mb-1"><strong>Branch:</strong> <span id="poRequestBranch">-</span></p>
+                            <p class="mb-0"><strong>Total Amount:</strong> <span id="poRequestAmount" style="color: #2d5016; font-weight: 700;">₱0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #e0e0e0;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitConvertToPO()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none;">
+                        <i class="fas fa-check-circle"></i> Create Purchase Order
+                    </button>
                 </div>
             </div>
         </div>
@@ -531,7 +644,6 @@ function showPendingRequests() {
                         <button class="btn btn-sm btn-success" onclick="approveRequest(${req.id})">Approve</button>
                         <button class="btn btn-sm btn-danger" onclick="rejectRequest(${req.id})">Reject</button>
                         <button class="btn btn-sm btn-info" onclick="viewRequest(${req.id})">View</button>
-                        <button class="btn btn-sm btn-warning" onclick="convertToPO(${req.id})">Convert to PO</button>
                     </td>
                 </tr>`;
             });
@@ -546,10 +658,20 @@ function showPendingRequests() {
 function convertToPO(requestId) {
     currentRequestIdForPO = requestId;
 
+    // Load request details for summary
+    $.get('<?= base_url('purchase/request/') ?>' + requestId, function(requestResponse) {
+        if (requestResponse.status === 'success') {
+            const req = requestResponse.request;
+            $('#poRequestNumber').text(req.request_number);
+            $('#poRequestBranch').text(req.branch ? req.branch.name : 'N/A');
+            $('#poRequestAmount').text('₱' + parseFloat(req.total_amount || 0).toFixed(2));
+        }
+    });
+
     // Load suppliers into modal dropdown
     $.get('<?= base_url('supplier/list') ?>', function(supplierResponse) {
         if (supplierResponse.status === 'success') {
-            let optionsHtml = '<option value="">Select Supplier</option>';
+            let optionsHtml = '<option value="">-- Choose a Supplier --</option>';
             supplierResponse.suppliers.forEach(function(supplier) {
                 if (supplier.status === 'active') {
                     optionsHtml += `<option value="${supplier.id}">${supplier.name}</option>`;
@@ -561,12 +683,42 @@ function convertToPO(requestId) {
             const defaultDate = new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0];
             $('#poExpectedDate').val(defaultDate);
 
+            // Hide supplier details initially
+            $('#supplierDetailsCard').hide();
             $('#convertPoModal').modal('show');
         } else {
             alert('❌ Failed to load suppliers');
         }
     }).fail(function(error) {
         alert('❌ Failed to load suppliers: ' + error.statusText);
+    });
+}
+
+function displaySupplierDetails() {
+    const supplierId = $('#poSupplierSelect').val();
+    
+    if (!supplierId) {
+        $('#supplierDetailsCard').hide();
+        return;
+    }
+
+    // Fetch supplier details
+    $.get('<?= base_url('supplier/') ?>' + supplierId, function(response) {
+        if (response.status === 'success') {
+            const supplier = response.supplier;
+            
+            $('#supplierContactPerson').text(supplier.contact_person || '-');
+            $('#supplierEmail').text(supplier.email || '-');
+            $('#supplierPhone').text(supplier.phone || '-');
+            $('#supplierPaymentTerms').text(supplier.payment_terms || '-');
+            $('#supplierAddress').text(supplier.address || '-');
+            
+            $('#supplierDetailsCard').show();
+        } else {
+            $('#supplierDetailsCard').hide();
+        }
+    }).fail(function() {
+        $('#supplierDetailsCard').hide();
     });
 }
 
@@ -707,6 +859,184 @@ function showSuppliers() {
 function showReports() {
     setActiveTab('reports');
     scrollToSection('reportsSection');
+}
+
+function showPurchaseOrders() {
+    setActiveTab('purchaseOrders');
+    scrollToSection('purchaseOrdersSection');
+    
+    // Show loading message
+    $('#purchaseOrdersContent').html('<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading purchase orders...</p>');
+    
+    $.get('<?= base_url('purchase/order/list') ?>', function(response) {
+        if (response.status === 'success') {
+            let html = '<div class="table-responsive"><table class="table table-hover table-striped"><thead class="table-light"><tr><th>PO #</th><th>Request #</th><th>Supplier</th><th>Branch</th><th>Status</th><th>Amount</th><th>Expected Delivery</th><th>Actions</th></tr></thead><tbody>';
+            
+            if (response.orders && response.orders.length > 0) {
+                response.orders.forEach(function(order) {
+                    const statusBadge = order.status === 'pending' ? 'warning' : order.status === 'approved' ? 'success' : 'secondary';
+                    const statusIcon = order.status === 'pending' ? '⏳' : order.status === 'approved' ? '✅' : '❓';
+                    html += `<tr>
+                        <td><strong>${order.order_number || 'PO-' + order.id}</strong></td>
+                        <td><span class="badge bg-light text-dark">PR-${order.purchase_request_id}</span></td>
+                        <td>${order.supplier ? order.supplier.name : 'N/A'}</td>
+                        <td>${order.branch ? order.branch.name : 'N/A'}</td>
+                        <td><span class="badge bg-${statusBadge}">${statusIcon} ${order.status.toUpperCase()}</span></td>
+                        <td><strong>₱${parseFloat(order.total_amount || 0).toFixed(2)}</strong></td>
+                        <td>${order.expected_delivery_date || 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewPurchaseOrder(${order.id})"><i class="fas fa-eye"></i> View</button>
+                            ${order.status === 'pending' ? `<button class="btn btn-sm btn-warning" onclick="showEditPoModal(${order.id}, 'PR-${order.purchase_request_id}', '${order.branch ? order.branch.name : 'N/A'}', ${order.total_amount}, ${order.supplier_id})"><i class="fas fa-edit"></i> Edit</button>` : ''}
+                            ${order.status === 'pending' ? `<button class="btn btn-sm btn-success" onclick="approvePurchaseOrder(${order.id})"><i class="fas fa-check"></i> Approve</button>` : ''}
+                        </td>
+                    </tr>`;
+                });
+            } else {
+                html += '<tr><td colspan="8" class="text-center text-muted py-4"><i class="fas fa-inbox"></i> No purchase orders found</td></tr>';
+            }
+            
+            html += '</tbody></table></div>';
+            $('#purchaseOrdersContent').html(html);
+        } else {
+            $('#purchaseOrdersContent').html('<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error loading purchase orders: ' + response.message + '</div>');
+        }
+    }).fail(function(error) {
+        $('#purchaseOrdersContent').html('<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Failed to load purchase orders</div>');
+        console.error('Error:', error);
+    });
+}
+
+function viewPurchaseOrder(id) {
+    $.get('<?= base_url('purchase/order/') ?>' + id, function(response) {
+        if (response.status === 'success') {
+            const order = response.order;
+            let details = `PO #: ${order.order_number || 'PO-' + order.id}\n`;
+            details += `Status: ${order.status}\n`;
+            details += `Supplier: ${order.supplier ? order.supplier.name : 'N/A'}\n`;
+            details += `Branch: ${order.branch ? order.branch.name : 'N/A'}\n`;
+            details += `Amount: ₱${parseFloat(order.total_amount || 0).toFixed(2)}\n`;
+            details += `Expected Delivery: ${order.expected_delivery_date || 'N/A'}`;
+            alert(details);
+        }
+    });
+}
+
+let currentEditPoId = null;
+
+function showEditPoModal(poId, requestNumber, branch, amount, currentSupplierId) {
+    currentEditPoId = poId;
+    $('#editPoRequestNumber').val(requestNumber);
+    $('#editPoBranch').val(branch);
+    $('#editPoAmount').val('₱' + parseFloat(amount || 0).toFixed(2));
+    
+    // Load suppliers
+    $.get('<?= base_url('supplier/list') ?>', function(response) {
+        if (response.status === 'success') {
+            let optionsHtml = '<option value="">-- Choose a Supplier --</option>';
+            response.suppliers.forEach(function(supplier) {
+                if (supplier.status === 'active') {
+                    const selected = supplier.id === currentSupplierId ? 'selected' : '';
+                    optionsHtml += `<option value="${supplier.id}" ${selected}>${supplier.name}</option>`;
+                }
+            });
+            $('#editPoSupplierSelect').html(optionsHtml);
+            
+            // Set default delivery date (7 days from now)
+            const defaultDate = new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0];
+            $('#editPoExpectedDate').val(defaultDate);
+            
+            $('#editPoModal').modal('show');
+        } else {
+            alert('❌ Failed to load suppliers');
+        }
+    }).fail(function() {
+        alert('❌ Failed to load suppliers');
+    });
+}
+
+function displayEditSupplierDetails() {
+    const supplierId = $('#editPoSupplierSelect').val();
+    
+    if (!supplierId) {
+        $('#editSupplierDetailsCard').hide();
+        return;
+    }
+
+    $.get('<?= base_url('supplier/') ?>' + supplierId, function(response) {
+        if (response.status === 'success') {
+            const supplier = response.supplier;
+            
+            $('#editSupplierContactPerson').text(supplier.contact_person || '-');
+            $('#editSupplierEmail').text(supplier.email || '-');
+            $('#editSupplierPhone').text(supplier.phone || '-');
+            $('#editSupplierPaymentTerms').text(supplier.payment_terms || '-');
+            $('#editSupplierAddress').text(supplier.address || '-');
+            
+            $('#editSupplierDetailsCard').show();
+        } else {
+            $('#editSupplierDetailsCard').hide();
+        }
+    }).fail(function() {
+        $('#editSupplierDetailsCard').hide();
+    });
+}
+
+function submitEditPO() {
+    if (!currentEditPoId) {
+        alert('❌ No purchase order selected.');
+        return;
+    }
+
+    const supplierId = $('#editPoSupplierSelect').val();
+    const expectedDate = $('#editPoExpectedDate').val();
+
+    if (!supplierId) {
+        alert('❌ Please select a supplier.');
+        return;
+    }
+
+    if (!expectedDate) {
+        alert('❌ Please choose an expected delivery date.');
+        return;
+    }
+
+    $.post('<?= base_url('purchase/order/') ?>' + currentEditPoId + '/update', {
+        supplier_id: supplierId,
+        expected_delivery_date: expectedDate
+    }, function(response) {
+        if (response.status === 'success') {
+            $('#editPoModal').modal('hide');
+            alert('✅ Purchase Order updated successfully!');
+            showPurchaseOrders();
+            refreshDashboard();
+        } else {
+            alert('❌ Error: ' + (response.message || 'Unknown error'));
+        }
+    }).fail(function(error) {
+        alert('❌ Request failed: ' + error.statusText);
+    });
+}
+
+function approvePurchaseOrder(id) {
+    if (confirm('Approve this purchase order?')) {
+        const url = '<?= base_url('purchase/order/') ?>' + id + '/approve';
+        console.log('Approving PO with URL:', url);
+        
+        $.post(url, function(response) {
+            console.log('Response:', response);
+            if (response.status === 'success') {
+                alert('✅ ' + response.message);
+                showPurchaseOrders();
+                refreshDashboard();
+            } else {
+                alert('❌ Error: ' + (response.message || 'Unknown error'));
+                console.error('Error response:', response);
+            }
+        }).fail(function(error) {
+            console.error('Request failed:', error);
+            alert('❌ Request failed: ' + error.statusText + '. Check console for details.');
+        });
+    }
 }
 
 // Start auto-refresh

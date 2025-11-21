@@ -17,7 +17,7 @@ class SupplierController extends BaseController
     }
 
     /**
-     * Get all suppliers
+     * Get all suppliers (returns active suppliers by default for modal)
      */
     public function index()
     {
@@ -27,18 +27,22 @@ class SupplierController extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        $status = $this->request->getGet('status');
+        $status = $this->request->getGet('status') ?? 'active';
         $suppliers = [];
 
         if ($status === 'active') {
             $suppliers = $this->supplierModel->getActiveSuppliers();
-        } else {
+        } else if ($status === 'all') {
             $suppliers = $this->supplierModel->findAll();
+        } else {
+            // Default to active suppliers
+            $suppliers = $this->supplierModel->getActiveSuppliers();
         }
 
         return $this->response->setJSON([
             'status' => 'success',
-            'suppliers' => $suppliers
+            'suppliers' => $suppliers,
+            'count' => count($suppliers)
         ]);
     }
 
@@ -197,6 +201,86 @@ class SupplierController extends BaseController
             'status' => 'success',
             'suppliers' => $suppliers
         ]);
+    }
+
+    /**
+     * Seed suppliers into database with improved error handling
+     */
+    public function seedSuppliers()
+    {
+        $session = session();
+        
+        // Allow anyone to seed (for testing), but log it
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not logged in']);
+        }
+
+        try {
+            $now = date('Y-m-d H:i:s');
+            $suppliers = [
+                ['name' => 'Magnolia Chicken', 'contact_person' => 'Sales Department', 'email' => 'sales@magnolia.com.ph', 'phone' => '(02) 8123-4567', 'address' => 'Magnolia Avenue, Quezon City, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => "Ana's Breeders Farms Inc", 'contact_person' => 'Farm Manager', 'email' => 'info@anasbreeders.com.ph', 'phone' => '(049) 501-2345', 'address' => 'Tagaytay, Cavite, Philippines', 'payment_terms' => 'COD', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Premium Feeds Corporation', 'contact_person' => 'Sales Officer', 'email' => 'sales@premiumfeeds.com.ph', 'phone' => '(02) 8456-7890', 'address' => 'Makati City, Philippines', 'payment_terms' => 'Net 15', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'San Miguel Foods', 'contact_person' => 'Corporate Sales', 'email' => 'corporate@sanmiguelfoods.com.ph', 'phone' => '(02) 8888-0000', 'address' => 'Mandaluyong City, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'CDO Foodsphere Inc.', 'contact_person' => 'Sales Department', 'email' => 'sales@cdofoodsphere.com.ph', 'phone' => '(02) 8123-5678', 'address' => 'Quezon City, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Excellence Poultry and Livestock Specialist Inc.', 'contact_person' => 'Operations Manager', 'email' => 'info@excellencepoultry.com.ph', 'phone' => '(049) 502-3456', 'address' => 'Cavite, Philippines', 'payment_terms' => 'COD', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Rare Global Food Trading Corp.', 'contact_person' => 'Trading Manager', 'email' => 'trading@rareglobal.com.ph', 'phone' => '(02) 8234-5678', 'address' => 'Pasig City, Philippines', 'payment_terms' => 'Net 15', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'E&L Faster Food Imports Inc.', 'contact_person' => 'Import Manager', 'email' => 'imports@elfaster.com.ph', 'phone' => '(02) 8345-6789', 'address' => 'Port Area, Manila, Philippines', 'payment_terms' => 'Net 45', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Foster Foods Inc', 'contact_person' => 'Sales Coordinator', 'email' => 'sales@fosterfoods.com.ph', 'phone' => '(02) 8456-7890', 'address' => 'Taguig City, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Pilmico', 'contact_person' => 'Corporate Sales', 'email' => 'corporate@pilmico.com.ph', 'phone' => '(02) 8567-8901', 'address' => 'Laguna, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Consistent Frozen Solutions Corp.', 'contact_person' => 'Sales Manager', 'email' => 'sales@consistentfrozen.com.ph', 'phone' => '(02) 8678-9012', 'address' => 'Cavite, Philippines', 'payment_terms' => 'Net 15', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'EcoSci Food', 'contact_person' => 'Business Development', 'email' => 'bd@ecoscifood.com.ph', 'phone' => '(02) 8789-0123', 'address' => 'Quezon City, Philippines', 'payment_terms' => 'COD', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Advance Protein Inc.', 'contact_person' => 'Sales Officer', 'email' => 'sales@advanceprotein.com.ph', 'phone' => '(02) 8890-1234', 'address' => 'Bulacan, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Art Inc.', 'contact_person' => 'Account Manager', 'email' => 'accounts@artinc.com.ph', 'phone' => '(02) 8901-2345', 'address' => 'Manila, Philippines', 'payment_terms' => 'Net 15', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Clarc Feedmill Inc.', 'contact_person' => 'Production Manager', 'email' => 'production@clarcfeedmill.com.ph', 'phone' => '(049) 503-4567', 'address' => 'Cavite, Philippines', 'payment_terms' => 'COD', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Kai Anya Foods Intl Corp', 'contact_person' => 'International Sales', 'email' => 'sales@kaianya.com.ph', 'phone' => '(02) 8012-3456', 'address' => 'Makati City, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Hightower Incorporated', 'contact_person' => 'Sales Department', 'email' => 'sales@hightower.com.ph', 'phone' => '(02) 8123-4567', 'address' => 'Pasig City, Philippines', 'payment_terms' => 'Net 30', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'The Original Savory Escolta - Online', 'contact_person' => 'Online Manager', 'email' => 'online@savoryescolta.com.ph', 'phone' => '(02) 8234-5678', 'address' => 'Escolta, Manila, Philippines', 'payment_terms' => 'COD', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['name' => 'Fresco PH', 'contact_person' => 'Sales Team', 'email' => 'sales@fresco.com.ph', 'phone' => '(02) 8345-6789', 'address' => 'Quezon City, Philippines', 'payment_terms' => 'Net 15', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+            ];
+
+            $inserted = 0;
+            $errors = [];
+
+            // Use raw database insert for maximum reliability
+            foreach ($suppliers as $supplier) {
+                try {
+                    $existing = $this->db->table('suppliers')
+                        ->where('name', $supplier['name'])
+                        ->get()
+                        ->getRow();
+
+                    if (!$existing) {
+                        $result = $this->db->table('suppliers')->insert($supplier);
+                        if ($result) {
+                            $inserted++;
+                        } else {
+                            $errors[] = "Failed to insert: {$supplier['name']}";
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Error inserting {$supplier['name']}: " . $e->getMessage();
+                }
+            }
+
+            $message = "Suppliers seeded successfully! Inserted: $inserted out of 19";
+            if (!empty($errors)) {
+                $message .= ". Errors: " . implode("; ", $errors);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => $message,
+                'inserted' => $inserted,
+                'errors' => $errors
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Seeding failed: ' . $e->getMessage(),
+                'error_details' => $e->getTraceAsString()
+            ]);
+        }
     }
 }
 

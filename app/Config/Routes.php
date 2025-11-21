@@ -98,6 +98,7 @@ $routes->group('purchase', ['filter' => 'auth'], function($routes) {
 $routes->group('supplier', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'SupplierController::index');
     $routes->get('list', 'SupplierController::index');
+    $routes->get('seed', 'SupplierController::seedSuppliers');
     $routes->get('(:num)', 'SupplierController::getSupplier/$1');
     $routes->post('create', 'SupplierController::create');
     $routes->post('(:num)/update', 'SupplierController::update/$1');
@@ -117,5 +118,9 @@ $routes->group('delivery', ['filter' => 'auth'], function($routes) {
 
 // ---------- PURCHASE ORDER MODULE ----------
 $routes->group('purchase/order', ['filter' => 'auth'], function($routes) {
+    $routes->get('list', 'PurchaseController::getPurchaseOrdersList');
+    $routes->post('(:num)/update', 'PurchaseController::updatePurchaseOrder/$1');
+    $routes->post('(:num)/approve', 'PurchaseController::approvePurchaseOrder/$1');
     $routes->get('(:num)/track', 'PurchaseController::trackOrder/$1');
+    $routes->get('(:num)', 'PurchaseController::getPurchaseOrder/$1');
 });
