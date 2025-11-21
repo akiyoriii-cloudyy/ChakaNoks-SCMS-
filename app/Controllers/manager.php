@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Models\ProductModel;
 use Config\Database;
+use Exception;
 
 class Manager extends BaseController
 {
@@ -24,36 +25,44 @@ class Manager extends BaseController
             return redirect()->to('/auth/login');
         }
 
+        $branchId = $session->get('branch_id');
+        if (empty($branchId)) {
+            $session->setFlashdata('error', 'Branch assignment missing. Please contact the central admin.');
+            return redirect()->back();
+        }
+
         // Get dashboard data
-        $dashboardData = $this->getDashboardData();
+        $dashboardData = $this->getDashboardData((int)$branchId);
 
         return view('dashboards/manager', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
+                'branch_id' => $branchId,
             ],
             'data' => $dashboardData
         ]);
     }
 
-    private function getDashboardData(): array
+    private function getDashboardData(int $branchId): array
     {
         return [
-            'inventory' => $this->getInventorySummary(),
+            'inventory' => $this->getInventorySummary($branchId),
             'sales' => $this->getSalesData(),
-            'suppliers' => $this->getSupplierReports(),
-            'deliveries' => $this->getDeliveryTracking(),
-            'purchaseRequests' => $this->getPurchaseRequests(),
-            'operations' => $this->getOperationalData(),
+            'suppliers' => $this->getSupplierReports($branchId),
+            'deliveries' => $this->getDeliveryTracking($branchId),
+            'purchaseRequests' => $this->getPurchaseRequests($branchId),
+            'operations' => $this->getOperationalData($branchId),
         ];
     }
 
-    private function getInventorySummary()
+    private function getInventorySummary(int $branchId)
     {
         try {
             // Get all products with their prices and stock quantities
             $items = $this->db->table('products')
                 ->select('id, name, stock_qty, price, status, expiry, min_stock')
+                ->where('branch_id', $branchId)
                 ->get()
                 ->getResultArray();
             
@@ -239,7 +248,7 @@ class Manager extends BaseController
         ];
     }
 
-    private function getOperationalData()
+    private function getOperationalData(int $branchId)
     {
         try {
             $alerts = [];
@@ -247,6 +256,7 @@ class Manager extends BaseController
             // Check for items expiring within 7 days (using 'expiry' column)
             try {
                 $expiringItems = $this->db->table('products')
+                    ->where('branch_id', $branchId)
                     ->where('expiry IS NOT NULL')
                     ->where('expiry <=', date('Y-m-d', strtotime('+7 days')))
                     ->where('expiry >', date('Y-m-d'))
@@ -264,6 +274,7 @@ class Manager extends BaseController
                 // Get all products and check in PHP instead of SQL
                 $lowStockProducts = $this->db->table('products')
                     ->select('id, stock_qty, min_stock')
+                    ->where('branch_id', $branchId)
                     ->get()
                     ->getResultArray();
                 
@@ -287,6 +298,7 @@ class Manager extends BaseController
                 $tables = $this->db->listTables();
                 if (in_array('purchase_orders', $tables)) {
                     $pendingOrders = $this->db->table('purchase_orders')
+                        ->where('branch_id', $branchId)
                         ->where('status', 'pending')
                         ->countAllResults();
                     
@@ -302,6 +314,7 @@ class Manager extends BaseController
             try {
                 if (in_array('deliveries', $tables)) {
                     $deliveredToday = $this->db->table('deliveries')
+                        ->where('branch_id', $branchId)
                         ->where('DATE(actual_delivery_date)', date('Y-m-d'))
                         ->where('status', 'delivered')
                         ->countAllResults();
@@ -339,11 +352,11 @@ class Manager extends BaseController
         }
     }
 
-    private function getPurchaseRequests()
+    private function getPurchaseRequests(int $branchId)
     {
         try {
             $purchaseRequestModel = model('PurchaseRequestModel');
-            $requests = $purchaseRequestModel->findAll();
+            $requests = $purchaseRequestModel->where('branch_id', $branchId)->findAll();
             
             $pending = 0;
             $approved = 0;
@@ -380,7 +393,7 @@ class Manager extends BaseController
         }
     }
 
-    private function getSupplierReports(): array
+    private function getSupplierReports(int $branchId): array
     {
         try {
             // Get pending and in-transit orders
@@ -390,10 +403,12 @@ class Manager extends BaseController
             $tables = $this->db->listTables();
             if (in_array('purchase_orders', $tables)) {
                 $pendingOrders = $this->db->table('purchase_orders')
+                    ->where('branch_id', $branchId)
                     ->where('status', 'pending')
                     ->countAllResults();
                 
                 $inTransitOrders = $this->db->table('purchase_orders')
+                    ->where('branch_id', $branchId)
                     ->where('status', 'in_transit')
                     ->countAllResults();
             }
@@ -405,6 +420,7 @@ class Manager extends BaseController
             
             if (in_array('deliveries', $tables)) {
                 $deliveries = $this->db->table('deliveries')
+                    ->where('branch_id', $branchId)
                     ->where('status', 'delivered')
                     ->get()
                     ->getResultArray();
@@ -451,7 +467,7 @@ class Manager extends BaseController
         }
     }
 
-    private function getDeliveryTracking(): array
+    private function getDeliveryTracking(int $branchId): array
     {
         try {
             $tables = $this->db->listTables();
@@ -469,23 +485,28 @@ class Manager extends BaseController
             $today = date('Y-m-d');
             
             $pending = $this->db->table('deliveries')
+                ->where('branch_id', $branchId)
                 ->where('status', 'pending')
                 ->countAllResults();
             
             $inTransit = $this->db->table('deliveries')
+                ->where('branch_id', $branchId)
                 ->where('status', 'in_transit')
                 ->countAllResults();
             
             $deliveredToday = $this->db->table('deliveries')
+                ->where('branch_id', $branchId)
                 ->where('DATE(actual_delivery_date)', $today)
                 ->where('status', 'delivered')
                 ->countAllResults();
             
             $delayed = $this->db->table('deliveries')
+                ->where('branch_id', $branchId)
                 ->where('status', 'delayed')
                 ->countAllResults();
             
             $total = $this->db->table('deliveries')
+                ->where('branch_id', $branchId)
                 ->countAllResults();
             
             return [

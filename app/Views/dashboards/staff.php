@@ -53,16 +53,25 @@
                 <button id="btnPrintAll" class="btn add">🖨 Print All Reports</button>
                 <input type="date" id="filterDate" class="input date">
                 <div class="filters">
-                    <select id="filterBranch" class="input select">
-    <option value="all">All Branches</option>
-    <?php if (!empty($branches) && is_array($branches)): ?>
-        <?php foreach ($branches as $b): ?>
-            <option value="<?= esc($b['branch_address']) ?>">
-                <?= esc($b['branch_address']) ?>
-            </option>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</select>
+                    <select id="filterBranch" class="input select" <?= !empty($branchScope['enforced']) ? 'disabled' : '' ?>>
+                        <?php if (empty($branchScope['enforced'])): ?>
+                            <option value="all">All Branches</option>
+                        <?php endif; ?>
+                        <?php foreach ($branches as $b): ?>
+                            <?php
+                                $value = (string)$b['id'];
+                                $selected = false;
+                                if (!empty($branchScope['enforced'])) {
+                                    $selected = (int)$branchScope['branch_id'] === (int)$b['id'];
+                                } else {
+                                    $selected = (string)($filters['branch_id'] ?? 'all') === $value;
+                                }
+                            ?>
+                            <option value="<?= esc($value) ?>" <?= $selected ? 'selected' : '' ?>>
+                                <?= esc($b['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                     <select id="filterStatus" class="input select">
                         <option value="all">All Status</option>
                         <option value="Critical">Critical</option>
@@ -156,16 +165,23 @@
                 <!-- Fixed Branch Select -->
                 <div>
                     <b>Branch</b>
-                    <label for="branch_address"></label>
-<select name="branch_address" class="form-control" required>
-    <option value="">Select Branch</option>
-    <?php foreach ($branches as $b): ?>
-        <option value="<?= esc($b['branch_address']) ?>"
-            <?= ($filters['branch_address'] ?? '') === $b['branch_address'] ? 'selected' : '' ?>>
-            <?= esc($b['branch_address']) ?>
-        </option>
-    <?php endforeach; ?>
-</select>
+                    <select name="branch_id" class="form-control" required <?= !empty($branchScope['enforced']) ? 'disabled' : '' ?>>
+                        <option value="">Select Branch</option>
+                        <?php foreach ($branches as $b): ?>
+                            <?php
+                                $value = (string)$b['id'];
+                                $selected = !empty($branchScope['enforced'])
+                                    ? ((int)$branchScope['branch_id'] === (int)$b['id'])
+                                    : ((string)($filters['branch_id'] ?? $branchScope['branch_id'] ?? '') === $value);
+                            ?>
+                            <option value="<?= esc($value) ?>" <?= $selected ? 'selected' : '' ?>>
+                                <?= esc($b['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php if (!empty($branchScope['enforced'])): ?>
+                        <input type="hidden" name="branch_id" value="<?= esc($branchScope['branch_id']) ?>">
+                    <?php endif; ?>
                 </div>
                 <div>
                     <b>Stock</b>
@@ -286,7 +302,7 @@ document.getElementById('btnPrintAll').addEventListener('click', function() {
         <tr>
             <td>${item.name}</td>
             <td>${item.category}</td>
-            <td>${item.branch_address}</td>
+            <td>${item.branch_label || item.branch_address || ''}</td>
             <td>${item.stock_qty}</td>
             <td>${item.min_stock}</td>
             <td>${item.max_stock}</td>

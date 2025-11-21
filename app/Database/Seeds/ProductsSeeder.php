@@ -11,6 +11,12 @@ class ProductsSeeder extends Seeder
     {
         $now = Time::now();
 
+        $branchRows = $this->db->table('branches')->select('id, code')->get()->getResultArray();
+        $branchMap = [];
+        foreach ($branchRows as $branchRow) {
+            $branchMap[strtoupper($branchRow['code'])] = $branchRow['id'];
+        }
+
         // ✅ Get all inventory staff users
         $invUsers = $this->db->table('users')
             ->where('role', 'inventory_staff')
@@ -45,16 +51,23 @@ class ProductsSeeder extends Seeder
             ['name' => 'Chicken Tenderloin', 'category' => 'Chicken Parts', 'branch_address' => 'TORIL Branch, Davao City', 'stock_qty' => 250, 'unit' => 'kg', 'price' => 290.00, 'min_stock' => 50, 'max_stock' => 600, 'expiry' => date('Y-m-d', strtotime('+88 days'))],
             ['name' => 'Chicken Wing Tip', 'category' => 'Chicken Parts', 'branch_address' => 'BUHANGIN Branch, Davao City', 'stock_qty' => 180, 'unit' => 'kg', 'price' => 160.00, 'min_stock' => 40, 'max_stock' => 400, 'expiry' => date('Y-m-d', strtotime('+86 days'))],
             ['name' => 'Chicken Wing Flat', 'category' => 'Chicken Parts', 'branch_address' => 'AGDAO Branch, Davao City', 'stock_qty' => 200, 'unit' => 'kg', 'price' => 170.00, 'min_stock' => 40, 'max_stock' => 450, 'expiry' => date('Y-m-d', strtotime('+85 days'))],
-            ['name' => 'Chicken Wing Drumette', 'category' => 'Chicken Parts', 'branch_address' => 'LANANG Branch, Davao City', 'stock_qty' => 220, 'unit' => 'kg', 'price' => 175.00, 'min_stock' => 50, 'max_stock' => 500, 'expiry' => date('Y-m-d', strtotime('+84 days'))],
+            // Match name exactly as in UI list
+            ['name' => 'Chicken Wing Drumlette', 'category' => 'Chicken Parts', 'branch_address' => 'LANANG Branch, Davao City', 'stock_qty' => 220, 'unit' => 'kg', 'price' => 175.00, 'min_stock' => 50, 'max_stock' => 500, 'expiry' => date('Y-m-d', strtotime('+84 days'))],
         ];
 
         $tbl = $this->db->table('products');
 
         foreach ($items as $p) {
+            $branchCode = null;
+            if (!empty($p['branch_address'])) {
+                $branchCode = strtoupper(strtok($p['branch_address'], ' '));
+            }
+
             $row = [
                 'name'           => $p['name'],
                 'category'       => $p['category'],
                 'branch_address' => $p['branch_address'],
+                'branch_id'      => $branchCode && isset($branchMap[$branchCode]) ? $branchMap[$branchCode] : null,
                 'created_by'     => $defaultUser,
                 'stock_qty'      => $p['stock_qty'],
                 'unit'           => $p['unit'],

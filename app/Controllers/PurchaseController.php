@@ -464,7 +464,11 @@ class PurchaseController extends BaseController
 
         // Get products for this branch
         $branchId = $session->get('branch_id');
-        $products = $this->productModel->getInventory(['branch_address' => 'all']);
+        $productFilters = [];
+        if ($branchId) {
+            $productFilters['branch_id'] = $branchId;
+        }
+        $products = $this->productModel->getInventory($productFilters);
 
         return view('dashboards/purchase_request_form', [
             'me' => [

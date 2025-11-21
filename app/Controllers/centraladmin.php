@@ -204,9 +204,9 @@ class CentralAdmin extends BaseController
         $overview = [];
 
         foreach ($branches as $branch) {
-            // Get products for this branch (using branch_address for now)
+            // Get products for this branch
             $branchProducts = $this->db->table('products')
-                ->like('branch_address', $branch['name'])
+                ->where('branch_id', $branch['id'])
                 ->get()
                 ->getResultArray();
 

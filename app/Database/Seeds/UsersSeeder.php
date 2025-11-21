@@ -37,6 +37,36 @@ class UsersSeeder extends Seeder
                 'role'      => 'branch_manager',
             ],
             [
+                'branch_id' => $matina ? $matina->id : null,
+                'email'     => 'matina.manager@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'branch_manager',
+            ],
+            [
+                'branch_id' => $toril ? $toril->id : null,
+                'email'     => 'toril.manager@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'branch_manager',
+            ],
+            [
+                'branch_id' => $buhangin ? $buhangin->id : null,
+                'email'     => 'buhangin.manager@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'branch_manager',
+            ],
+            [
+                'branch_id' => $agdao ? $agdao->id : null,
+                'email'     => 'agdao.manager@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'branch_manager',
+            ],
+            [
+                'branch_id' => $lanang ? $lanang->id : null,
+                'email'     => 'lanang.manager@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'branch_manager',
+            ],
+            [
                 'branch_id' => $buhangin ? $buhangin->id : null,
                 'email'     => 'imonakoplss@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),

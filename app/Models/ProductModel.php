@@ -10,6 +10,7 @@ class ProductModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
+        'branch_id',
         'name',
         'category',
         'unit',
@@ -29,68 +30,42 @@ class ProductModel extends Model
     protected $returnType    = 'array';
 
     /**
-     * Add a product
-     */
-    public function addProduct(array $data)
-    {
-        try {
-            log_message('debug', 'ProductModel::addProduct data: ' . json_encode($data));
-            
-            // Ensure timestamps are set
-            $now = date('Y-m-d H:i:s');
-            $data['created_at'] = $now;
-            $data['updated_at'] = $now;
-            
-            $result = $this->insert($data);
-            
-            if ($result !== false) {
-                $insertId = $this->getInsertID();
-                log_message('debug', 'Product inserted successfully with ID: ' . $insertId);
-                return $insertId;
-            }
-            
-            $error = $this->db->error();
-            log_message('error', 'Product insert failed. DB Error: ' . json_encode($error));
-            return false;
-            
-        } catch (\Exception $e) {
-            log_message('error', 'Product insert exception: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Get inventory with filters
      */
     public function getInventory(array $filters = []): array
     {
         $builder = $this->builder();
+        $builder->select('products.*, branches.name AS branch_name, branches.code AS branch_code, branches.address AS branch_location');
+        $builder->join('branches', 'branches.id = products.branch_id', 'left');
 
-        // Branch filter
-        if (!empty($filters['branch_address']) && $filters['branch_address'] !== 'all') {
-            $builder->where('branch_address', $filters['branch_address']);
+        // Branch filter (ID preferred, fallback to legacy address filter)
+        if (!empty($filters['branch_id']) && $filters['branch_id'] !== 'all') {
+            $builder->where('products.branch_id', (int)$filters['branch_id']);
+        } elseif (!empty($filters['branch_address']) && $filters['branch_address'] !== 'all') {
+            $builder->where('products.branch_address', $filters['branch_address']);
         }
 
         // Status filter
         if (!empty($filters['status']) && $filters['status'] !== 'all') {
-            $builder->where('status', $filters['status']);
+            $builder->where('products.status', $filters['status']);
         }
 
         // Date filter
         if (!empty($filters['date'])) {
-            $builder->where('DATE(created_at)', $filters['date']);
+            $builder->where('DATE(products.created_at)', $filters['date']);
         }
 
         // Search filter
         if (!empty($filters['search'])) {
             $builder->groupStart()
-                ->like('name', $filters['search'])
-                ->orLike('category', $filters['search'])
-                ->orLike('branch_address', $filters['search'])
+                ->like('products.name', $filters['search'])
+                ->orLike('products.category', $filters['search'])
+                ->orLike('products.branch_address', $filters['search'])
+                ->orLike('branches.name', $filters['search'])
                 ->groupEnd();
         }
 
-        $items = $builder->orderBy('created_at', 'DESC')->get()->getResultArray();
+        $items = $builder->orderBy('products.created_at', 'DESC')->get()->getResultArray();
         
         // Process each item for accurate data
         foreach ($items as &$item) {
@@ -104,6 +79,11 @@ class ProductModel extends Model
             $item['stock_qty'] = (int)($item['stock_qty'] ?? 0);
             $item['min_stock'] = (int)($item['min_stock'] ?? 0);
             $item['max_stock'] = (int)($item['max_stock'] ?? 0);
+
+            // Provide a consistent branch label for UI
+            $item['branch_label'] = $item['branch_name']
+                ?? $item['branch_address']
+                ?? ($item['branch_code'] ?? 'Unassigned');
         }
         
         return $items;

@@ -87,9 +87,9 @@
     function renderTable(list) {
         const tbody = $("#invBody");
         tbody.innerHTML = list.map(item => `
-            <tr data-id="${item.id}" data-branch="${item.branch}" data-status="${item.status}" data-date="${item.date}" data-stockqty="${item.stock_qty}" data-unit="${item.unit}" data-expiry="${item.expiry || ''}">
+            <tr data-id="${item.id}" data-branch="${item.branch_id || ''}" data-status="${item.status}" data-date="${item.date}" data-stockqty="${item.stock_qty}" data-unit="${item.unit}" data-expiry="${item.expiry || ''}">
                 <td><div class="cell-title">${item.name}</div><div class="cell-sub">${item.category}</div></td>
-                <td>${item.branch || ''}</td>
+                <td>${item.branch_label || ''}</td>
                 <td><div class="cell-title">${item.stock_qty} ${item.unit || ''}</div><div class="cell-sub">Min: ${item.min_stock} / Max: ${item.max_stock}</div></td>
                 <td><span class="badge ${statusClass(item.status)}">${item.status}</span></td>
                 <td>${item.updated_ago || 'Unknown'}</td>
@@ -119,19 +119,19 @@
     // --------- FILTERING ---------
     function applyFilters() {
         const q = ($("#searchBox").value || "").toLowerCase().trim();
-        const branch = $("#filterBranch").value;
+        const branch = ($("#filterBranch") ? $("#filterBranch").value : 'all') || 'all';
         const status = $("#filterStatus").value;
         const dateVal = $("#filterDate").value;
 
         FILTERED = ITEMS.filter(it => {
             if (branch !== "all") {
-                if (it.branch !== branch) return false;
+                if (String(it.branch_id ?? '') !== branch) return false;
             }
             if (status !== "all" && it.status !== status) return false;
             if (dateVal && toISODate(it.date) !== dateVal) return false;
             if (!q) return true;
 
-            const blob = `${it.name} ${it.category} ${it.branch || ''}`.toLowerCase();
+            const blob = `${it.name} ${it.category} ${it.branch_label || ''}`.toLowerCase();
             return blob.includes(q);
         });
 
@@ -153,7 +153,7 @@
 
         $('#viewItemTitle').textContent = item.name;
         $('#viewCategory').textContent = item.category;
-        $('#viewBranch').textContent = item.branch || '';
+        $('#viewBranch').textContent = item.branch_label || '';
         $('#viewStock').textContent = item.stock_qty + ' ' + (item.unit || '');
         $('#viewMinMax').textContent = `Min: ${item.min_stock} / Max: ${item.max_stock}`;
         $('#viewStatus').textContent = item.status;
@@ -226,8 +226,8 @@
         // Apply branch filter for current item's branch
         const id = viewModal.dataset.currentId;
         const item = ITEMS.find(x => String(x.id) === String(id));
-        if (!item || !item.branch) return alert('No branch for this item');
-        window.location.href = '/inventory?branch=' + encodeURIComponent(item.branch);
+        if (!item || !item.branch_id) return alert('No branch for this item');
+        window.location.href = '/inventory?branch_id=' + encodeURIComponent(item.branch_id);
     });
 
     $('#btnCheckExpiry').addEventListener('click', () => {
@@ -286,7 +286,8 @@
         ITEMS = ITEMS.map(i => {
             return {
                 ...i,
-                branch: i.branch_address || '',
+                branch_label: i.branch_label || i.branch_name || i.branch_address || '',
+                branch_id: i.branch_id || null,
                 stock_qty: i.stock_qty || 0,
                 status: statusOf(i.stock_qty || 0, i.min_stock, i.max_stock, i.expiry),
                 updated_at: i.updated_at || i.created_at || new Date().toISOString(),
@@ -295,7 +296,7 @@
         });
 
         const urlParams = new URLSearchParams(window.location.search);
-        const branchParam = urlParams.get('branch');
+        const branchParam = urlParams.get('branch_id') || urlParams.get('branch');
         if (branchParam) {
             const branchSelect = $("#filterBranch");
             if(branchSelect) branchSelect.value = branchParam;

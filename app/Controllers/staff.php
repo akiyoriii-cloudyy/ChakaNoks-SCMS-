@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ProductModel;
 use App\Models\StockTransactionModel;
+use App\Models\BranchModel;
 use Config\Database;
 
 class Staff extends BaseController
@@ -11,12 +12,14 @@ class Staff extends BaseController
     protected $db;
     protected $model;
     protected $stockTransactionModel;
+    protected $branchModel;
 
     public function __construct()
     {
         $this->db    = Database::connect();
         $this->model = new ProductModel();
         $this->stockTransactionModel = new StockTransactionModel();
+        $this->branchModel = new BranchModel();
     }
 
     public function index()
@@ -33,31 +36,41 @@ class Staff extends BaseController
             return redirect()->to('/auth/login');
         }
 
+        $role = strtolower($session->get('role'));
+        $branchId = $session->get('branch_id');
+        $enforceBranchScope = $branchId && in_array($role, ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager']);
+
         // Filters
         $filters = [
             'search'         => $this->request->getGet('search'),
             'branch_address' => $this->request->getGet('branch_address'),
             'status'         => $this->request->getGet('status'),
             'date'           => $this->request->getGet('date'),
+            'branch_id'      => $this->request->getGet('branch_id'),
         ];
+
+        if ($enforceBranchScope) {
+            $filters['branch_id'] = $branchId;
+        }
 
         // Get inventory items
         $items = $this->model->getInventory($filters);
 
-        // Get branches from products table
-        $branches = $this->db->table('products')
-            ->distinct()
-            ->select('branch_address')
-            ->where('branch_address IS NOT NULL')
-            ->where('branch_address !=', '')
-            ->orderBy('branch_address')
-            ->get()
-            ->getResultArray();
+        // Get branches from branches table
+        $branches = $this->branchModel
+            ->select('id, name, code, address')
+            ->orderBy('name')
+            ->findAll();
 
         return view('dashboards/staff', [
             'items'    => $items,
             'branches' => $branches,
             'filters'  => $filters,
+            'branchScope' => [
+                'enforced' => (bool)$enforceBranchScope,
+                'branch_id' => $branchId,
+                'role' => $role,
+            ],
             'me'       => [
                 'email' => $session->get('email'),
                 'role'  => $session->get('role'),
@@ -80,9 +93,9 @@ class Staff extends BaseController
         }
 
         try {
-            // Get all products from inventory for purchase request dropdown
+            // Get ALL products for purchase request dropdown (no branch restriction)
             $items = $this->db->table('products')
-                ->select('id, name, category, unit, stock_qty, min_stock, max_stock, price, branch_address, expiry')
+                ->select('id, name, category, unit, stock_qty, min_stock, max_stock, price, branch_address, branch_id, expiry')
                 ->orderBy('name', 'ASC')
                 ->get()
                 ->getResultArray();
@@ -131,12 +144,22 @@ class Staff extends BaseController
             return $this->response->setJSON(['status' => 'error', 'error' => 'Stock quantity must be greater than 0']);
         }
 
-        $branchAddress = trim($this->request->getPost('branch_address'));
-        if ($branchAddress === 'Unknown Branch') {
-            $branchAddress = null;
+        $branchId = (int)($this->request->getPost('branch_id') ?? 0);
+        if (!$branchId && $session->get('branch_id')) {
+            $branchId = (int)$session->get('branch_id');
+        }
+
+        if ($branchId <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Branch selection is required']);
+        }
+
+        $branch = $this->branchModel->find($branchId);
+        if (!$branch) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Invalid branch selected']);
         }
 
         // Prepare data for insertion
+        $now = date('Y-m-d H:i:s');
         $payload = [
             'name'           => $name,
             'category'       => $this->request->getPost('category') ?? 'Chicken Parts',
@@ -145,27 +168,39 @@ class Staff extends BaseController
             'stock_qty'      => $stock,
             'min_stock'      => (int)($this->request->getPost('min_stock') ?? 0),
             'max_stock'      => (int)($this->request->getPost('max_stock') ?? 0),
-            'branch_address' => $branchAddress,
+            'branch_id'      => $branchId,
+            'branch_address' => trim(($branch['name'] ?? '') . ' — ' . ($branch['address'] ?? '')),
             'expiry'         => $this->request->getPost('expiry') ?: null,
-            'created_by'     => $session->get('id') ?? 1,
+            'created_by'     => $session->get('user_id') ?? null,
             'status'         => 'active',
+            'created_at'     => $now,
+            'updated_at'     => $now,
         ];
 
         try {
             log_message('debug', 'Add product payload: ' . json_encode($payload));
-            
-            $insertId = $this->model->addProduct($payload);
-            
-            if ($insertId) {
-                return $this->response->setJSON(['status' => 'success', 'id' => $insertId]);
-            } else {
+
+            $this->db->transStart();
+            $insertId = $this->model->insert($payload, true);
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false || !$insertId) {
                 $error = $this->db->error();
+                log_message('error', 'Add product insert failed: ' . json_encode($error));
                 return $this->response->setJSON([
                     'status' => 'error',
-                    'error'  => $error['message'] ?? 'Failed to insert product'
+                    'error'  => $error['message'] ?? 'Failed to insert product into database'
                 ]);
             }
-            
+
+            $product = $this->model->find($insertId);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'id'      => $insertId,
+                'product' => $product
+            ]);
+
         } catch (\Throwable $e) {
             log_message('error', 'Add product exception: ' . $e->getMessage());
             return $this->response->setJSON([
@@ -225,6 +260,14 @@ class Staff extends BaseController
             return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
         }
 
+        if (!$this->canAccessProduct($session, $product)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized to manage this branch inventory']);
+        }
+
+        if (!$this->canAccessProduct($session, $product)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized to manage this branch inventory']);
+        }
+
         $newQty = max(0, (int)$product['stock_qty'] + $qty);
         $ok = $this->model->update((int)$id, [
             'stock_qty' => $newQty,
@@ -261,6 +304,10 @@ class Staff extends BaseController
         $product = $this->model->find((int)$id);
         if (!is_array($product)) {
             return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
+        }
+
+        if (!$this->canAccessProduct($session, $product)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized to manage this branch inventory']);
         }
 
         // Record STOCK-OUT transaction (checks EXPIRE? → OLDS)
@@ -305,6 +352,10 @@ class Staff extends BaseController
             return $this->response->setJSON(['status' => 'error', 'error' => 'Product not found']);
         }
 
+        if (!$this->canAccessProduct($session, $product)) {
+            return $this->response->setJSON(['status' => 'error', 'error' => 'Not authorized to view this branch inventory']);
+        }
+
         $expiry = $product['expiry'] ?? null;
         $status = 'No Expiry';
         $days   = null;
@@ -325,5 +376,24 @@ class Staff extends BaseController
             'days'   => $days,
             'state'  => $status,
         ]);
+    }
+
+    private function canAccessProduct($session, array $product): bool
+    {
+        $branchId = $session->get('branch_id');
+        if (!$branchId) {
+            return true;
+        }
+
+        $role = strtolower($session->get('role'));
+        if (!in_array($role, ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return true;
+        }
+
+        if (empty($product['branch_id'])) {
+            return true;
+        }
+
+        return (int)$product['branch_id'] === (int)$branchId;
     }
 }
