@@ -180,11 +180,10 @@ class Staff extends BaseController
         try {
             log_message('debug', 'Add product payload: ' . json_encode($payload));
 
-            $this->db->transStart();
-            $insertId = $this->model->insert($payload, true);
-            $this->db->transComplete();
+            $builder = $this->db->table('products');
+            $result = $builder->insert($payload, true);
 
-            if ($this->db->transStatus() === false || !$insertId) {
+            if ($result === false) {
                 $error = $this->db->error();
                 log_message('error', 'Add product insert failed: ' . json_encode($error));
                 return $this->response->setJSON([
@@ -192,6 +191,8 @@ class Staff extends BaseController
                     'error'  => $error['message'] ?? 'Failed to insert product into database'
                 ]);
             }
+
+            $insertId = $this->db->insertID();
 
             $product = $this->model->find($insertId);
 
