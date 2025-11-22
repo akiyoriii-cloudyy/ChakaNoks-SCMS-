@@ -74,7 +74,7 @@
     .dashboard-widget:hover {
         transform: translateY(-3px);
         box-shadow:
-            0 24px 70px rgba(0, 0, 0, 0.12),
+            0 24px 70px rgba(249, 248, 248, 0.12),
             0 12px 30px rgba(0, 0, 0, 0.08);
     }
 
@@ -152,9 +152,14 @@
 
     .nav-tabs .nav-link.active {
         background: linear-gradient(135deg, var(--green-1), var(--green-2));
-        color: #f9fafb;
+        color: #ffffff !important;
         box-shadow: 0 10px 25px rgba(45, 80, 22, 0.3);
         transform: translateY(-2px);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .nav-tabs .nav-link.active i {
+        color: #ffffff !important;
     }
 
     .nav-tabs .nav-link i {
@@ -212,8 +217,8 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h2>Central Office Dashboard</h2>
-            <p class="text-muted mb-0">Real-time monitoring of all branches and operations</p>
+            <h2 style="color: #ffffff !important; font-weight: 700; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Central Office Dashboard</h2>
+            <p class="mb-0" style="color: rgba(255, 255, 255, 0.8) !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Real-time monitoring of all branches and operations</p>
         </div>
         <div class="d-flex align-items-center gap-3">
             <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboard()">
