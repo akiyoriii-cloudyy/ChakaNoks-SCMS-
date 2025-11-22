@@ -35,8 +35,8 @@
       <h3>Superadmin Dashboard</h3>
       <p>Welcome, Superadmin! You have full control over the system.</p>
       <div class="row">
-        <div class="col-md-4"><div class="card p-3 shadow"><h5>Total Users</h5><p>1,230</p></div></div>
-        <div class="col-md-4"><div class="card p-3 shadow"><h5>Branches</h5><p>56</p></div></div>
+        <div class="col-md-4"><div class="card p-3 shadow"><h5>Total Users</h5><p>1,250</p></div></div>
+        <div class="col-md-4"><div class="card p-3 shadow"><h5>Branches</h5><p>6</p></div></div>
         <div class="col-md-4"><div class="card p-3 shadow"><h5>Revenue</h5><p>₱5,000,000</p></div></div>
       </div>
     </div>
