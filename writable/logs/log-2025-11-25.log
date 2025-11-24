@@ -1,0 +1,10 @@
+ERROR - 2025-11-25 00:35:24 --> Exception in approveRequest: Undefined array key "items"
+ERROR - 2025-11-25 00:35:24 --> Exception trace: #0 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\PurchaseController.php(329): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array...', 'C:\\xampp\\htdocs...', 329)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\PurchaseController->approveRequest('6')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PurchaseController))
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#8 {main}

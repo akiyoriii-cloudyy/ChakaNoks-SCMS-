@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ProductModel;
 use App\Models\StockTransactionModel;
 use App\Models\BranchModel;
+use App\Models\CategoryModel;
 use Config\Database;
 
 class Staff extends BaseController
@@ -43,7 +44,6 @@ class Staff extends BaseController
         // Filters
         $filters = [
             'search'         => $this->request->getGet('search'),
-            'branch_address' => $this->request->getGet('branch_address'),
             'status'         => $this->request->getGet('status'),
             'date'           => $this->request->getGet('date'),
             'branch_id'      => $this->request->getGet('branch_id'),
@@ -94,9 +94,12 @@ class Staff extends BaseController
 
         try {
             // Get ALL products for purchase request dropdown (no branch restriction)
+            // Normalized: Use JOINs to get category and branch information
             $items = $this->db->table('products')
-                ->select('id, name, category, unit, stock_qty, min_stock, max_stock, price, branch_address, branch_id, expiry')
-                ->orderBy('name', 'ASC')
+                ->select('products.id, products.name, categories.name AS category, products.unit, products.stock_qty, products.min_stock, products.max_stock, products.price, products.branch_id, products.expiry, branches.name AS branch_name, branches.address AS branch_address')
+                ->join('categories', 'categories.id = products.category_id', 'left')
+                ->join('branches', 'branches.id = products.branch_id', 'left')
+                ->orderBy('products.name', 'ASC')
                 ->get()
                 ->getResultArray();
 
@@ -158,23 +161,40 @@ class Staff extends BaseController
             return $this->response->setJSON(['status' => 'error', 'error' => 'Invalid branch selected']);
         }
 
-        // Prepare data for insertion
+        // Get or create category
+        $categoryName = $this->request->getPost('category') ?? 'Chicken Parts';
+        $categoryModel = new CategoryModel();
+        $category = $categoryModel->where('name', $categoryName)->first();
+        
+        $categoryId = null;
+        if ($category) {
+            $categoryId = $category['id'];
+        } else {
+            // Create category if it doesn't exist
+            $categoryModel->insert([
+                'name' => $categoryName,
+                'status' => 'active',
+                'created_by' => $session->get('user_id') ?? null,
+            ]);
+            $categoryId = $categoryModel->getInsertID();
+        }
+
+        // Prepare data for insertion (normalized - no branch_address or category)
         $now = date('Y-m-d H:i:s');
         $payload = [
             'name'           => $name,
-            'category'       => $this->request->getPost('category') ?? 'Chicken Parts',
-            'unit'           => $this->request->getPost('unit') ?? 'pcs',
-            'price'          => (float)($this->request->getPost('price') ?? 0),
-            'stock_qty'      => $stock,
-            'min_stock'      => (int)($this->request->getPost('min_stock') ?? 0),
-            'max_stock'      => (int)($this->request->getPost('max_stock') ?? 0),
-            'branch_id'      => $branchId,
-            'branch_address' => trim(($branch['name'] ?? '') . ' — ' . ($branch['address'] ?? '')),
-            'expiry'         => $this->request->getPost('expiry') ?: null,
-            'created_by'     => $session->get('user_id') ?? null,
-            'status'         => 'active',
-            'created_at'     => $now,
-            'updated_at'     => $now,
+            'category_id'   => $categoryId,
+            'unit'          => $this->request->getPost('unit') ?? 'pcs',
+            'price'         => (float)($this->request->getPost('price') ?? 0),
+            'stock_qty'     => $stock,
+            'min_stock'     => (int)($this->request->getPost('min_stock') ?? 0),
+            'max_stock'     => (int)($this->request->getPost('max_stock') ?? 0),
+            'branch_id'     => $branchId,
+            'expiry'        => $this->request->getPost('expiry') ?: null,
+            'created_by'    => $session->get('user_id') ?? null,
+            'status'        => 'active',
+            'created_at'    => $now,
+            'updated_at'    => $now,
         ];
 
         try {

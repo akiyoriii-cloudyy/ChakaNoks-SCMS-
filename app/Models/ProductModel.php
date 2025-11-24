@@ -12,13 +12,12 @@ class ProductModel extends Model
     protected $allowedFields = [
         'branch_id',
         'name',
-        'category',
+        'category_id',
         'unit',
         'price',
         'stock_qty',
         'min_stock',
         'max_stock',
-        'branch_address',
         'expiry',
         'status',
         'created_by'
@@ -35,14 +34,13 @@ class ProductModel extends Model
     public function getInventory(array $filters = []): array
     {
         $builder = $this->builder();
-        $builder->select('products.*, branches.name AS branch_name, branches.code AS branch_code, branches.address AS branch_location');
+        $builder->select('products.*, branches.name AS branch_name, branches.code AS branch_code, branches.address AS branch_location, categories.name AS category');
         $builder->join('branches', 'branches.id = products.branch_id', 'left');
+        $builder->join('categories', 'categories.id = products.category_id', 'left');
 
-        // Branch filter (ID preferred, fallback to legacy address filter)
+        // Branch filter (by ID only - normalized)
         if (!empty($filters['branch_id']) && $filters['branch_id'] !== 'all') {
             $builder->where('products.branch_id', (int)$filters['branch_id']);
-        } elseif (!empty($filters['branch_address']) && $filters['branch_address'] !== 'all') {
-            $builder->where('products.branch_address', $filters['branch_address']);
         }
 
         // Status filter
@@ -59,9 +57,9 @@ class ProductModel extends Model
         if (!empty($filters['search'])) {
             $builder->groupStart()
                 ->like('products.name', $filters['search'])
-                ->orLike('products.category', $filters['search'])
-                ->orLike('products.branch_address', $filters['search'])
+                ->orLike('categories.name', $filters['search'])
                 ->orLike('branches.name', $filters['search'])
+                ->orLike('branches.address', $filters['search'])
                 ->groupEnd();
         }
 
@@ -79,11 +77,10 @@ class ProductModel extends Model
             $item['stock_qty'] = (int)($item['stock_qty'] ?? 0);
             $item['min_stock'] = (int)($item['min_stock'] ?? 0);
             $item['max_stock'] = (int)($item['max_stock'] ?? 0);
+            $item['price'] = (float)($item['price'] ?? 0);
 
-            // Provide a consistent branch label for UI
-            $item['branch_label'] = $item['branch_name']
-                ?? $item['branch_address']
-                ?? ($item['branch_code'] ?? 'Unassigned');
+            // Provide a consistent branch label for UI (normalized - from branches table)
+            $item['branch_label'] = $item['branch_name'] ?? ($item['branch_code'] ?? 'Unassigned');
         }
         
         return $items;

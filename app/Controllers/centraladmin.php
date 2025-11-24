@@ -204,6 +204,14 @@ class CentralAdmin extends BaseController
         $overview = [];
 
         foreach ($branches as $branch) {
+            // Exclude "central" branch (case-insensitive check)
+            $branchName = strtolower($branch['name'] ?? '');
+            $branchCode = strtolower($branch['code'] ?? '');
+            
+            if (strpos($branchName, 'central') !== false || strpos($branchCode, 'central') !== false) {
+                continue; // Skip central branch
+            }
+
             // Get products for this branch
             $branchProducts = $this->db->table('products')
                 ->where('branch_id', $branch['id'])
@@ -252,13 +260,16 @@ class CentralAdmin extends BaseController
                 'branch_id' => $branch['id'],
                 'branch_name' => $branch['name'],
                 'branch_code' => $branch['code'],
+                'branch_address' => $branch['address'] ?? '',
                 'total_products' => $totalProducts,
+                'low_stock' => $lowStockCount,
                 'low_stock_items' => $lowStockCount,
                 'critical_alerts' => $criticalCount,
             ];
         }
 
-        return $overview;
+        // Limit to 5 branches only
+        return array_slice($overview, 0, 5);
     }
 
     /**

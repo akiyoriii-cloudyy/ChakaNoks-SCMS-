@@ -20,6 +20,7 @@ class PurchaseRequestModel extends Model
         'approved_by',
         'approved_at',
         'rejection_reason',
+        'selected_supplier_id',
         'created_at',
         'updated_at'
     ];

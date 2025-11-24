@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\ProductModel;
+use App\Models\SupplierModel;
 use Config\Database;
 use Exception;
 
@@ -9,11 +10,13 @@ class Manager extends BaseController
 {
     protected $db;
     protected $model;
+    protected $supplierModel;
 
     public function __construct()
     {
         $this->db = Database::connect();
         $this->model = new ProductModel();
+        $this->supplierModel = new SupplierModel();
     }
 
     public function dashboard()
@@ -59,12 +62,8 @@ class Manager extends BaseController
     private function getInventorySummary(int $branchId)
     {
         try {
-            // Get all products with their prices and stock quantities
-            $items = $this->db->table('products')
-                ->select('id, name, stock_qty, price, status, expiry, min_stock')
-                ->where('branch_id', $branchId)
-                ->get()
-                ->getResultArray();
+            // Use ProductModel's getInventory method for accurate status calculation
+            $items = $this->model->getInventory(['branch_id' => $branchId]);
             
             $summary = [
                 'total_items' => count($items),
@@ -77,34 +76,31 @@ class Manager extends BaseController
             ];
 
             foreach ($items as $item) {
-                $stock_qty = $item['stock_qty'] ?? 0;
-                $price = $item['price'] ?? 0;
-                $min_stock = $item['min_stock'] ?? 10;
-                $status = $item['status'] ?? 'active';
-                $expiry = $item['expiry'];
+                $stock_qty = (int)($item['stock_qty'] ?? 0);
+                $price = (float)($item['price'] ?? 0);
+                $status = trim($item['status'] ?? 'Good');
                 
-                // Determine item status
-                if ($stock_qty == 0) {
+                // Use the calculated status from ProductModel (normalized database)
+                if (in_array($status, ['Critical', 'Out of Stock', 'Expired'])) {
                     $summary['critical_items']++;
-                } elseif ($stock_qty <= $min_stock) {
+                } elseif (in_array($status, ['Low Stock', 'Expiring Soon'])) {
                     $summary['low_stock_items']++;
                 } else {
+                    // Default to good stock for 'Good' status or any other status
                     $summary['good_stock_items']++;
                 }
                 
                 // Check expiry status
-                if ($expiry) {
-                    $today = date('Y-m-d');
-                    $expiry_date = $expiry;
-                    if ($expiry_date < $today) {
-                        $summary['expired_items']++;
-                    } elseif ($expiry_date <= date('Y-m-d', strtotime('+7 days'))) {
-                        $summary['expiring_soon']++;
-                    }
+                if ($status === 'Expired') {
+                    $summary['expired_items']++;
+                } elseif ($status === 'Expiring Soon') {
+                    $summary['expiring_soon']++;
                 }
                 
-                // Calculate total value using actual product price
-                $summary['total_value'] += $stock_qty * $price;
+                // Calculate total value using actual product price from database
+                // Use actual price if available, otherwise use a default
+                $itemPrice = $price > 0 ? $price : 150;
+                $summary['total_value'] += $stock_qty * $itemPrice;
             }
 
             return $summary;
@@ -365,12 +361,17 @@ class Manager extends BaseController
             $totalValue = 0;
             
             foreach ($requests as $req) {
-                if ($req['status'] === 'pending') {
+                $status = trim($req['status'] ?? '');
+                if ($status === 'pending') {
                     $pending++;
-                    $totalValue += $req['total_amount'] ?? 0;
-                } elseif ($req['status'] === 'approved') $approved++;
-                elseif ($req['status'] === 'rejected') $rejected++;
-                elseif ($req['status'] === 'converted_to_po') $converted++;
+                    $totalValue += (float)($req['total_amount'] ?? 0);
+                } elseif ($status === 'approved') {
+                    $approved++;
+                } elseif ($status === 'rejected') {
+                    $rejected++;
+                } elseif ($status === 'converted_to_po') {
+                    $converted++;
+                }
             }
             
             return [
@@ -442,9 +443,19 @@ class Manager extends BaseController
             
             $onTimeRate = $totalDeliveries > 0 ? round(($onTimeDeliveries / $totalDeliveries) * 100, 2) : 0;
             
+            // Get actual supplier counts from database
+            $activeSuppliers = [];
+            $allSuppliers = [];
+            try {
+                $activeSuppliers = $this->supplierModel->getActiveSuppliers();
+                $allSuppliers = $this->supplierModel->findAll();
+            } catch (Exception $e) {
+                log_message('error', 'Error getting suppliers: ' . $e->getMessage());
+            }
+            
             return [
-                'active_suppliers' => 5,
-                'total_suppliers' => 8,
+                'active_suppliers' => count($activeSuppliers),
+                'total_suppliers' => count($allSuppliers),
                 'pending_orders' => $pendingOrders,
                 'in_transit_orders' => $inTransitOrders,
                 'on_time_delivery_rate' => $onTimeRate,
@@ -500,10 +511,22 @@ class Manager extends BaseController
                 ->where('status', 'delivered')
                 ->countAllResults();
             
+            // Calculate delayed deliveries: scheduled date passed but not delivered
+            $today = date('Y-m-d');
             $delayed = $this->db->table('deliveries')
+                ->where('branch_id', $branchId)
+                ->where('scheduled_date <', $today)
+                ->whereNotIn('status', ['delivered', 'cancelled'])
+                ->countAllResults();
+            
+            // Also count explicitly marked as delayed
+            $explicitDelayed = $this->db->table('deliveries')
                 ->where('branch_id', $branchId)
                 ->where('status', 'delayed')
                 ->countAllResults();
+            
+            // Use the higher count (either calculated or explicit)
+            $delayedCount = max($delayed, $explicitDelayed);
             
             $total = $this->db->table('deliveries')
                 ->where('branch_id', $branchId)
@@ -513,7 +536,7 @@ class Manager extends BaseController
                 'pending_deliveries' => $pending,
                 'in_transit_deliveries' => $inTransit,
                 'delivered_today' => $deliveredToday,
-                'delayed_deliveries' => $delayed,
+                'delayed_deliveries' => $delayedCount,
                 'total_deliveries' => $total,
             ];
         } catch (Exception $e) {
@@ -526,5 +549,37 @@ class Manager extends BaseController
                 'total_deliveries' => 0,
             ];
         }
+    }
+
+    /**
+     * Settings page for manager
+     */
+    public function settings()
+    {
+        $session = session();
+
+        // Auth check
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        $branchId = $session->get('branch_id');
+        if (empty($branchId)) {
+            $session->setFlashdata('error', 'Branch assignment missing. Please contact the central admin.');
+            return redirect()->back();
+        }
+
+        // Get branch information
+        $branchModel = model('BranchModel');
+        $branch = $branchModel->find($branchId);
+
+        return view('dashboards/manager_settings', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+                'branch_id' => $branchId,
+            ],
+            'branch' => $branch
+        ]);
     }
 }

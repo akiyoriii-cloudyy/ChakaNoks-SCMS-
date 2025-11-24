@@ -86,34 +86,120 @@
     // --------- RENDERING ---------
     function renderTable(list) {
         const tbody = $("#invBody");
-        tbody.innerHTML = list.map(item => `
-            <tr data-id="${item.id}" data-branch="${item.branch_id || ''}" data-status="${item.status}" data-date="${item.date}" data-stockqty="${item.stock_qty}" data-unit="${item.unit}" data-expiry="${item.expiry || ''}">
-                <td><div class="cell-title">${item.name}</div><div class="cell-sub">${item.category}</div></td>
-                <td>${item.branch_label || ''}</td>
-                <td><div class="cell-title">${item.stock_qty} ${item.unit || ''}</div><div class="cell-sub">Min: ${item.min_stock} / Max: ${item.max_stock}</div></td>
-                <td><span class="badge ${statusClass(item.status)}">${item.status}</span></td>
-                <td>${item.updated_ago || 'Unknown'}</td>
-                <td class="right"><button class="link viewBtn" data-id="${item.id}">View</button></td>
+        if (!tbody) {
+            console.error('Table body not found');
+            return;
+        }
+        
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No inventory items found</td></tr>';
+            renderCounts([]);
+            return;
+        }
+        
+        tbody.innerHTML = list.map(item => {
+            // Ensure status is properly set
+            const status = (item.status || 'Good').trim();
+            const statusCls = statusClass(status);
+            const statusBadge = status ? `<span class="badge ${statusCls}">${status}</span>` : '<span class="badge neutral">-</span>';
+            
+            const stockQty = parseInt(item.stock_qty || 0, 10);
+            const minStock = parseInt(item.min_stock || 0, 10);
+            const maxStock = parseInt(item.max_stock || 0, 10);
+            const unit = item.unit || 'pcs';
+            
+            return `
+            <tr data-id="${item.id}" data-branch="${item.branch_id || ''}" data-status="${status}" data-date="${item.date || ''}" data-stockqty="${stockQty}" data-unit="${unit}" data-expiry="${item.expiry || ''}">
+                <td><div class="cell-title" style="font-weight: 600; color: #2d5016;">${item.name || 'N/A'}</div><div class="cell-sub" style="color: #6b7280; font-size: 0.875rem;">${item.category || 'N/A'}</div></td>
+                <td style="font-weight: 500;">${item.branch_label || item.branch_name || 'N/A'}</td>
+                <td><div class="cell-title" style="font-weight: 600; color: #2d5016;">${stockQty.toLocaleString()} ${unit}</div><div class="cell-sub" style="color: #6b7280; font-size: 0.875rem;">Min: ${minStock.toLocaleString()} / Max: ${maxStock.toLocaleString()}</div></td>
+                <td>${statusBadge}</td>
+                <td style="color: #6b7280;">${item.updated_ago || 'Unknown'}</td>
+                <td class="right"><button class="btn btn-sm btn-info viewBtn" data-id="${item.id}" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">View</button></td>
             </tr>
-        `).join("");
+            `;
+        }).join("");
+        
+        // Render counts after table is rendered
         renderCounts(list);
     }
 
     function renderCounts(list) {
         const counts = { critical: 0, low: 0, good: 0, total: list.length };
+        
+        // Count items by status - be very explicit about status matching
         list.forEach(i => {
-            if (i.status === "Critical" || i.status === "Out of Stock" || i.status === "Expired") {
+            const status = String(i.status || '').trim();
+            
+            // Check for critical statuses (case-sensitive)
+            if (status === "Critical" || status === "Out of Stock" || status === "Expired") {
                 counts.critical++;
-            } else if (i.status === "Low Stock" || i.status === "Expiring Soon") {
+            } 
+            // Check for low stock statuses
+            else if (status === "Low Stock" || status === "Expiring Soon") {
                 counts.low++;
-            } else {
+            } 
+            // Everything else (including "Good" and empty) counts as good
+            else {
                 counts.good++;
             }
         });
-        $("#pillCritical .pill-num").textContent = counts.critical;
-        $("#pillLow .pill-num").textContent = counts.low;
-        $("#pillGood .pill-num").textContent = counts.good;
-        $("#pillTotal .pill-num").textContent = counts.total;
+        
+        // Update summary cards - IDs are directly on the summary-value divs
+        const pillCritical = document.getElementById('pillCritical');
+        const pillLow = document.getElementById('pillLow');
+        const pillGood = document.getElementById('pillGood');
+        const pillTotal = document.getElementById('pillTotal');
+        
+        if (pillCritical) {
+            pillCritical.textContent = String(counts.critical);
+            console.log('Updated pillCritical:', counts.critical);
+        } else {
+            console.error('pillCritical element not found');
+        }
+        
+        if (pillLow) {
+            pillLow.textContent = String(counts.low);
+            console.log('Updated pillLow:', counts.low);
+        } else {
+            console.error('pillLow element not found');
+        }
+        
+        if (pillGood) {
+            pillGood.textContent = String(counts.good);
+            console.log('Updated pillGood:', counts.good);
+        } else {
+            console.error('pillGood element not found');
+        }
+        
+        if (pillTotal) {
+            pillTotal.textContent = String(counts.total);
+            console.log('Updated pillTotal:', counts.total);
+        } else {
+            console.error('pillTotal element not found');
+        }
+        
+        // Also update item count
+        const itemCount = document.getElementById('itemCount');
+        if (itemCount) {
+            itemCount.textContent = `${counts.total} item${counts.total !== 1 ? 's' : ''}`;
+        }
+        
+        // Debug logging
+        console.log('=== Summary Counts ===');
+        console.log('Total items in list:', list.length);
+        console.log('Critical:', counts.critical);
+        console.log('Low Stock:', counts.low);
+        console.log('Good Stock:', counts.good);
+        console.log('Total:', counts.total);
+        
+        // Log status breakdown for debugging
+        const statusBreakdown = {};
+        list.forEach(i => {
+            const status = String(i.status || 'Unknown').trim();
+            statusBreakdown[status] = (statusBreakdown[status] || 0) + 1;
+        });
+        console.log('Status breakdown:', statusBreakdown);
     }
 
     // --------- FILTERING ---------
@@ -149,29 +235,74 @@
     // --------- VIEW ITEM DETAILS ---------
     function openViewModal(itemId) {
         const item = ITEMS.find(x => x.id == itemId);
-        if (!item) return alert('Item not found');
+        if (!item) {
+            alert('Item not found');
+            return;
+        }
 
-        $('#viewItemTitle').textContent = item.name;
-        $('#viewCategory').textContent = item.category;
-        $('#viewBranch').textContent = item.branch_label || '';
-        $('#viewStock').textContent = item.stock_qty + ' ' + (item.unit || '');
-        $('#viewMinMax').textContent = `Min: ${item.min_stock} / Max: ${item.max_stock}`;
-        $('#viewStatus').textContent = item.status;
-        $('#viewUpdated').textContent = item.updated_ago;
-        $('#viewExpiry').textContent = item.expiry || 'N/A';
+        const status = item.status || 'Good';
+        const statusCls = statusClass(status);
+        
+        // Update modal content
+        const viewItemTitle = $('#viewItemTitle');
+        const viewCategory = $('#viewCategory');
+        const viewBranch = $('#viewBranch');
+        const viewStock = $('#viewStock');
+        const viewMinMax = $('#viewMinMax');
+        const viewStatus = $('#viewStatus');
+        const viewUpdated = $('#viewUpdated');
+        const viewExpiry = $('#viewExpiry');
+        const viewPrice = $('#viewPrice');
+        
+        if (viewItemTitle) viewItemTitle.textContent = item.name || 'N/A';
+        if (viewCategory) viewCategory.textContent = item.category || 'N/A';
+        if (viewBranch) viewBranch.textContent = item.branch_label || item.branch_name || 'N/A';
+        if (viewStock) viewStock.textContent = (item.stock_qty || 0) + ' ' + (item.unit || '');
+        if (viewMinMax) viewMinMax.textContent = `Min: ${item.min_stock || 0} / Max: ${item.max_stock || 0}`;
+        if (viewPrice) viewPrice.textContent = item.price ? '₱' + parseFloat(item.price).toFixed(2) : 'N/A';
+        
+        // Update status with badge class
+        if (viewStatus) {
+            viewStatus.textContent = status;
+            viewStatus.className = 'badge ' + statusCls;
+        }
+        
+        if (viewUpdated) viewUpdated.textContent = item.updated_ago || 'Unknown';
+        if (viewExpiry) viewExpiry.textContent = item.expiry || 'N/A';
 
-        $('#updateStockContainer').style.display = 'none';
-        $('#updateStockInput').value = item.stock_qty;
+        const updateStockContainer = $('#updateStockContainer');
+        const updateStockInput = $('#updateStockInput');
+        if (updateStockContainer) updateStockContainer.style.display = 'none';
+        if (updateStockInput) updateStockInput.value = item.stock_qty || 0;
 
-        viewModal.hidden = false;
-        viewModal.dataset.currentId = itemId;
+        if (viewModal) {
+            viewModal.hidden = false;
+            viewModal.style.display = 'flex';
+            viewModal.dataset.currentId = itemId;
+        }
     }
 
     document.addEventListener('click', e => {
         if (e.target.classList.contains('viewBtn')) openViewModal(e.target.dataset.id);
     });
 
-    $('#viewClose').addEventListener('click', () => viewModal.hidden = true);
+    $('#viewClose')?.addEventListener('click', () => {
+        if (viewModal) {
+            viewModal.hidden = true;
+            viewModal.style.display = 'none';
+        }
+    });
+    
+    // Close modal when clicking backdrop
+    const viewBackdrop = viewModal?.querySelector('.backdrop');
+    if (viewBackdrop) {
+        viewBackdrop.addEventListener('click', () => {
+            if (viewModal) {
+                viewModal.hidden = true;
+                viewModal.style.display = 'none';
+            }
+        });
+    }
 
     // --------- STOCK ACTIONS ---------
     $('#btnUpdateStock').addEventListener('click', () => $('#updateStockContainer').style.display = 'flex');
@@ -284,15 +415,48 @@
         }
 
         ITEMS = ITEMS.map(i => {
-            return {
+            // Use status from server (calculated by ProductModel) if available, otherwise calculate
+            const serverStatus = (i.status || '').trim();
+            const calculatedStatus = statusOf(i.stock_qty || 0, i.min_stock, i.max_stock, i.expiry);
+            
+            // Validate server status against known statuses
+            const validStatuses = ['Good', 'Low Stock', 'Critical', 'Out of Stock', 'Expired', 'Expiring Soon'];
+            const finalStatus = serverStatus && validStatuses.includes(serverStatus) 
+                ? serverStatus 
+                : (calculatedStatus || 'Good');
+            
+            // Ensure accurate numeric values
+            const stockQty = parseInt(i.stock_qty || 0, 10);
+            const minStock = parseInt(i.min_stock || 0, 10);
+            const maxStock = parseInt(i.max_stock || 0, 10);
+            const price = parseFloat(i.price || 0);
+            
+            const processedItem = {
                 ...i,
                 branch_label: i.branch_label || i.branch_name || i.branch_address || '',
                 branch_id: i.branch_id || null,
-                stock_qty: i.stock_qty || 0,
-                status: statusOf(i.stock_qty || 0, i.min_stock, i.max_stock, i.expiry),
+                stock_qty: stockQty,
+                min_stock: minStock,
+                max_stock: maxStock,
+                price: price,
+                status: finalStatus,
                 updated_at: i.updated_at || i.created_at || new Date().toISOString(),
                 updated_ago: i.updated_ago || i.created_ago || humanizeAgo(i.updated_at || i.created_at || new Date())
             };
+            
+            // Debug log for first item
+            if (ITEMS.indexOf(i) === 0) {
+                console.log('Sample processed item:', {
+                    id: processedItem.id,
+                    name: processedItem.name,
+                    status: processedItem.status,
+                    serverStatus: serverStatus,
+                    calculatedStatus: calculatedStatus,
+                    finalStatus: finalStatus
+                });
+            }
+            
+            return processedItem;
         });
 
         const urlParams = new URLSearchParams(window.location.search);

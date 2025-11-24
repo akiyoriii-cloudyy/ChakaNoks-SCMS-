@@ -6,6 +6,8 @@ use App\Models\PurchaseRequestModel;
 use App\Models\PurchaseOrderModel;
 use App\Models\ProductModel;
 use App\Models\BranchModel;
+use App\Models\AccountsPayableModel;
+use App\Models\SupplierModel;
 use Config\Database;
 
 class PurchaseController extends BaseController
@@ -15,6 +17,8 @@ class PurchaseController extends BaseController
     protected $purchaseOrderModel;
     protected $productModel;
     protected $branchModel;
+    protected $accountsPayableModel;
+    protected $supplierModel;
 
     public function __construct()
     {
@@ -23,6 +27,8 @@ class PurchaseController extends BaseController
         $this->purchaseOrderModel = new PurchaseOrderModel();
         $this->productModel = new ProductModel();
         $this->branchModel = new BranchModel();
+        $this->accountsPayableModel = new AccountsPayableModel();
+        $this->supplierModel = new SupplierModel();
     }
 
     /**
@@ -247,20 +253,49 @@ class PurchaseController extends BaseController
             }
 
             // Step 2: Get the approved request with items
-            $request = $this->purchaseRequestModel->getRequestWithItems((int)$id);
+            $requestWithItems = $this->purchaseRequestModel->getRequestWithItems((int)$id);
 
-            if (!$request || empty($request['items'])) {
+            if (!$requestWithItems || empty($requestWithItems['items'])) {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Request has no items']);
             }
 
-            // Step 3: Get the first supplier (default supplier) - or you can modify this logic
-            $suppliers = $this->db->table('suppliers')->where('status', 'active')->limit(1)->get()->getResultArray();
-            
-            if (empty($suppliers)) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'No active suppliers available']);
-            }
+            // Store items separately
+            $requestItems = $requestWithItems['items'];
 
-            $supplierId = $suppliers[0]['id'];
+            // Step 3: Get supplier ID from selected_supplier_id or request or use default
+            $request = $this->purchaseRequestModel->find((int)$id);
+            $supplierId = null;
+            
+            // First check if supplier was already selected
+            if (!empty($request['selected_supplier_id'])) {
+                $supplierId = (int)$request['selected_supplier_id'];
+            } 
+            // Then check if supplier_id is provided in POST
+            elseif ($this->request->getPost('supplier_id')) {
+                $supplierId = (int)$this->request->getPost('supplier_id');
+            }
+            
+            if ($supplierId) {
+                // Validate that the supplier exists and is active
+                $supplier = $this->db->table('suppliers')
+                    ->where('id', $supplierId)
+                    ->where('status', 'active')
+                    ->get()
+                    ->getRowArray();
+                
+                if (!$supplier) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Selected supplier not found or inactive']);
+                }
+            } else {
+                // Fallback to first active supplier if none selected
+                $suppliers = $this->db->table('suppliers')->where('status', 'active')->limit(1)->get()->getResultArray();
+                
+                if (empty($suppliers)) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'No active suppliers available. Please select a supplier first.']);
+                }
+
+                $supplierId = (int)$suppliers[0]['id'];
+            }
 
             // Step 4: Generate unique order number
             $prefix = 'PO';
@@ -300,7 +335,7 @@ class PurchaseController extends BaseController
 
             // Step 7: Create purchase order items from request items
             $itemsInserted = 0;
-            foreach ($request['items'] as $item) {
+            foreach ($requestItems as $item) {
                 $itemData = [
                     'purchase_order_id' => (int)$poId,
                     'product_id' => (int)$item['product_id'],
@@ -345,6 +380,55 @@ class PurchaseController extends BaseController
             log_message('error', 'Exception trace: ' . $e->getTraceAsString());
             return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Accept/Select supplier for purchase request (without approving)
+     */
+    public function acceptSupplier($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Request ID required']);
+        }
+
+        $supplierId = $this->request->getPost('supplier_id');
+        
+        if (!$supplierId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Supplier ID required']);
+        }
+
+        // Validate that the supplier exists and is active
+        $supplier = $this->db->table('suppliers')
+            ->where('id', (int)$supplierId)
+            ->where('status', 'active')
+            ->get()
+            ->getRowArray();
+        
+        if (!$supplier) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Selected supplier not found or inactive']);
+        }
+
+        // Update purchase request with selected supplier
+        $updated = $this->purchaseRequestModel->update((int)$id, [
+            'selected_supplier_id' => (int)$supplierId,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        if ($updated) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Supplier selected successfully',
+                'supplier_name' => $supplier['name']
+            ]);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to select supplier']);
     }
 
     /**
@@ -697,15 +781,24 @@ class PurchaseController extends BaseController
             foreach ($orders as $order) {
                 $formattedOrders[] = [
                     'id' => $order['id'],
-                    'order_number' => 'PO-' . str_pad($order['id'], 5, '0', STR_PAD_LEFT),
+                    'order_number' => $order['order_number'] ?? ('PO-' . str_pad($order['id'], 5, '0', STR_PAD_LEFT)),
                     'purchase_request_id' => $order['purchase_request_id'],
-                    'supplier' => ['id' => $order['supplier_id'], 'name' => $order['supplier_name']],
-                    'branch' => ['id' => $order['branch_id'], 'name' => $order['branch_name']],
-                    'status' => $order['status'],
-                    'total_amount' => $order['total_amount'],
+                    'supplier' => [
+                        'id' => $order['supplier_id'], 
+                        'name' => $order['supplier_name'] ?? 'N/A'
+                    ],
+                    'branch' => [
+                        'id' => $order['branch_id'], 
+                        'name' => $order['branch_name'] ?? 'N/A'
+                    ],
+                    'status' => $order['status'] ?? 'pending',
+                    'total_amount' => (float)($order['total_amount'] ?? 0),
                     'expected_delivery_date' => $order['expected_delivery_date'],
+                    'actual_delivery_date' => $order['actual_delivery_date'],
                     'order_date' => $order['order_date'],
-                    'created_at' => $order['created_at']
+                    'created_at' => $order['created_at'],
+                    'approved_by' => $order['approved_by'],
+                    'approved_at' => $order['approved_at']
                 ];
             }
 
@@ -812,9 +905,13 @@ class PurchaseController extends BaseController
 
             if ($updated) {
                 log_message('info', 'Purchase order ' . $id . ' approved by user ' . $session->get('user_id'));
+                
+                // Create accounts payable entry
+                $this->createAccountsPayableEntry((int)$id, $order, $session->get('user_id'));
+                
                 return $this->response->setJSON([
                     'status' => 'success',
-                    'message' => 'Purchase order approved successfully!'
+                    'message' => 'Purchase order approved successfully! Accounts payable entry created.'
                 ]);
             }
 
@@ -822,6 +919,66 @@ class PurchaseController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Exception in approvePurchaseOrder: ' . $e->getMessage());
             return $this->response->setJSON(['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Create accounts payable entry when purchase order is approved
+     */
+    private function createAccountsPayableEntry(int $purchaseOrderId, array $order, int $createdBy): bool
+    {
+        try {
+            // Check if accounts payable entry already exists
+            $existing = $this->accountsPayableModel
+                ->where('purchase_order_id', $purchaseOrderId)
+                ->first();
+            
+            if ($existing) {
+                log_message('info', 'Accounts payable entry already exists for PO ' . $purchaseOrderId);
+                return true;
+            }
+
+            // Get supplier to get payment terms
+            $supplier = $this->supplierModel->find($order['supplier_id']);
+            $paymentTerms = $supplier['payment_terms'] ?? 'Net 30';
+            
+            // Calculate due date based on payment terms
+            $invoiceDate = date('Y-m-d'); // Use approval date as invoice date
+            $dueDate = $this->accountsPayableModel->calculateDueDate($paymentTerms, $invoiceDate);
+            
+            // Create accounts payable entry
+            $apData = [
+                'purchase_order_id' => $purchaseOrderId,
+                'supplier_id' => (int)$order['supplier_id'],
+                'branch_id' => (int)$order['branch_id'],
+                'invoice_number' => null, // Can be updated later when invoice is received
+                'invoice_date' => $invoiceDate,
+                'due_date' => $dueDate,
+                'amount' => (float)$order['total_amount'],
+                'paid_amount' => 0.00,
+                'balance' => (float)$order['total_amount'],
+                'payment_status' => 'unpaid',
+                'payment_date' => null,
+                'payment_method' => null,
+                'payment_reference' => null,
+                'notes' => 'Auto-created from approved purchase order: ' . $order['order_number'],
+                'created_by' => $createdBy,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $apId = $this->accountsPayableModel->insert($apData);
+            
+            if ($apId) {
+                log_message('info', 'Accounts payable entry created with ID: ' . $apId . ' for PO ' . $purchaseOrderId);
+                return true;
+            } else {
+                log_message('error', 'Failed to create accounts payable entry for PO ' . $purchaseOrderId);
+                return false;
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Exception creating accounts payable entry: ' . $e->getMessage());
+            return false;
         }
     }
 }

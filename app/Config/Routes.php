@@ -48,6 +48,7 @@ $routes->get('centraladmin/suppliers', 'CentralAdmin::suppliersPage');
 $routes->get('centraladmin/deliveries', 'CentralAdmin::deliveriesPage');
 $routes->get('centraladmin/reports', 'CentralAdmin::reportsPage');
 $routes->get('manager/dashboard', 'Manager::dashboard');
+$routes->get('manager/settings', 'Manager::settings');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
 
@@ -89,6 +90,7 @@ $routes->group('purchase', ['filter' => 'auth'], function($routes) {
     $routes->get('request/api/list', 'PurchaseController::getRequests');
     $routes->get('request/pending', 'PurchaseController::getPendingRequests');
     $routes->get('request/(:num)', 'PurchaseController::getRequest/$1');
+    $routes->post('request/(:num)/accept-supplier', 'PurchaseController::acceptSupplier/$1');
     $routes->post('request/(:num)/approve', 'PurchaseController::approveRequest/$1');
     $routes->post('request/(:num)/reject', 'PurchaseController::rejectRequest/$1');
     $routes->post('request/(:num)/convert-to-po', 'PurchaseController::convertToPO/$1');
@@ -123,4 +125,14 @@ $routes->group('purchase/order', ['filter' => 'auth'], function($routes) {
     $routes->post('(:num)/approve', 'PurchaseController::approvePurchaseOrder/$1');
     $routes->get('(:num)/track', 'PurchaseController::trackOrder/$1');
     $routes->get('(:num)', 'PurchaseController::getPurchaseOrder/$1');
+});
+
+// ---------- ACCOUNTS PAYABLE MODULE ----------
+$routes->group('accounts-payable', ['filter' => 'auth'], function($routes) {
+    $routes->get('list', 'AccountsPayableController::getAccountsPayableList');
+    $routes->get('summary', 'AccountsPayableController::getSummary');
+    $routes->get('backfill', 'AccountsPayableController::backfillAccountsPayable');
+    $routes->get('(:num)', 'AccountsPayableController::getAccountsPayable/$1');
+    $routes->post('(:num)/update-invoice', 'AccountsPayableController::updateInvoice/$1');
+    $routes->post('(:num)/record-payment', 'AccountsPayableController::recordPayment/$1');
 });

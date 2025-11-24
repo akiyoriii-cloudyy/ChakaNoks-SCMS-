@@ -30,11 +30,16 @@
             <p class="text-muted mb-0">Schedule and track deliveries</p>
         </div>
         <div class="d-flex align-items-center gap-3">
-            <div class="text-end">
-                <div style="font-weight: 600; color: #2ecc71;"><?= esc(session()->get('email') ?? '') ?></div>
-                <small class="text-muted"><?= esc(session()->get('role') ?? '') ?></small>
+            <div class="user-profile-card" style="background: linear-gradient(135deg, rgba(45, 80, 22, 0.95) 0%, rgba(74, 124, 42, 0.95) 100%); border-radius: 12px; padding: 12px 16px; margin-right: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 12px;">
+                <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                    <i class="fas fa-user-circle" style="font-size: 28px; color: white;"></i>
+                </div>
+                <div class="user-info" style="min-width: 0;">
+                    <div class="user-name" style="font-size: 0.85rem; font-weight: 600; color: white; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc(session()->get('email') ?? 'User') ?></div>
+                    <div class="user-role" style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;"><?= esc(ucwords(str_replace('_', ' ', session()->get('role') ?? 'User'))) ?></div>
+                </div>
             </div>
-            <a href="<?= base_url('auth/logout') ?>" class="btn btn-danger btn-sm">
+            <a href="<?= base_url('auth/logout') ?>" class="btn btn-sm" style="background: linear-gradient(135deg, rgba(45, 80, 22, 0.9) 0%, rgba(74, 124, 42, 0.9) 100%); border: none; color: white; border-radius: 8px; padding: 8px 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='linear-gradient(135deg, rgba(45, 80, 22, 1) 0%, rgba(74, 124, 42, 1) 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(45, 80, 22, 0.9) 0%, rgba(74, 124, 42, 0.9) 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)';">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
