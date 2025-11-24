@@ -1,3 +1,189 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<?= $this->extend('templates/base_template') ?>
+
+<?= $this->section('head') ?>
+<style>
+    :root {
+        --green-1: #2d5016;
+        --green-2: #4a7c2a;
+        --orange-1: #ff6b35;
+        --orange-2: #f7931e;
+        --gold: #ffd700;
+        --card-radius: 18px;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background:
+            linear-gradient(135deg, var(--green-1) 0%, var(--green-2) 45%, #ffffff 45%, #f8f9fa 100%),
+            radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(74, 124, 42, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+            radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #111827;
+    }
+
+    .template-container {
+        min-height: 100vh;
+    }
+
+    .template-header {
+        padding: 20px 32px 10px;
+        background: transparent;
+        color: #f9fafb;
+    }
+
+    .template-body {
+        padding: 0 32px 32px;
+        background: transparent;
+    }
+
+    .dashboard-widget {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border-radius: var(--card-radius);
+        padding: 22px 24px;
+        box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.08),
+            0 10px 25px rgba(0, 0, 0, 0.06),
+            0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dashboard-widget::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0 0, rgba(255, 107, 53, 0.08), transparent 60%),
+                    radial-gradient(circle at 100% 100%, rgba(45, 80, 22, 0.12), transparent 55%);
+        opacity: 0.9;
+        pointer-events: none;
+    }
+
+    .dashboard-widget > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .dashboard-widget:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 24px 70px rgba(249, 248, 248, 0.12),
+            0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .widget-icon {
+        font-size: 2.4rem;
+        opacity: 0.9;
+    }
+
+    .widget-value {
+        font-size: 2.1rem;
+        font-weight: 800;
+        margin: 6px 0 4px;
+    }
+
+    .widget-label {
+        color: #111827;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .alert-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .alert-critical { background: #dc2626; color: #fff; }
+    .alert-warning { background: #facc15; color: #92400e; }
+    .alert-success { background: #22c55e; color: #052e16; }
+    .alert-info { background: #0ea5e9; color: #f0f9ff; }
+
+    .branch-row {
+        border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+        padding: 12px 0;
+    }
+
+    .branch-row:last-child {
+        border-bottom: none;
+    }
+
+    .refresh-indicator {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .nav-tabs {
+        border-bottom: none;
+        background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
+        border-radius: 12px;
+        padding: 8px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        margin-bottom: 24px;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: 8px;
+        color: #6b7280;
+        font-weight: 600;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        position: relative;
+    }
+
+    .nav-tabs .nav-link:hover {
+        background: rgba(45, 80, 22, 0.08);
+        color: #2d5016;
+        transform: translateY(-2px);
+    }
+
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, var(--green-1), var(--green-2));
+        color: #ffffff !important;
+        box-shadow: 0 10px 25px rgba(45, 80, 22, 0.3);
+        transform: translateY(-2px);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .nav-tabs .nav-link.active i {
+        color: #ffffff !important;
+    }
+
+    .nav-tabs .nav-link i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .nav-tabs .badge {
+        background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+        margin-left: 6px;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 999px;
+    }
+</style>
+<?= $this->endSection() ?>
+
+<?= $this->section('header') ?>
+<?php
+// centraladmin.php
+?>
+>>>>>>> 1a04d05a4a57569b9423ae0be8612098ab5b9c3c
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -130,6 +316,7 @@
   </style>
 </head>
 <body>
+<<<<<<< HEAD
     <div class="dashboard-wrapper">
         <!-- Sidebar -->
         <aside class="dashboard-sidebar">
@@ -143,6 +330,23 @@
                         <p class="logo-subtitle">Supply Chain Management</p>
                     </div>
                 </div>
+=======
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 style="color: #ffffff !important; font-weight: 700; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Central Office Dashboard</h2>
+            <p class="mb-0" style="color: rgba(255, 255, 255, 0.8) !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Real-time monitoring of all branches and operations</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <span class="refresh-indicator" id="lastRefresh">Last updated: Just now</span>
+            <div class="text-end">
+                <div style="font-weight: 600; color: #2ecc71;"><?= esc(session()->get('email') ?? '') ?></div>
+                <small class="text-muted"><?= esc(session()->get('role') ?? '') ?></small>
+>>>>>>> 1a04d05a4a57569b9423ae0be8612098ab5b9c3c
             </div>
             
             <nav class="sidebar-nav">
