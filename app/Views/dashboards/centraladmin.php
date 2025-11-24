@@ -445,8 +445,13 @@
                         <div class="card-header">
                             <h3 class="card-title">Purchase Orders</h3>
                 </div>
-                        <div id="purchaseOrdersContent">
-                            <!-- Content loaded via JavaScript -->
+                        <div id="purchaseOrdersContent" style="padding: 20px;">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading purchase orders...</p>
+                            </div>
                     </div>
                     </div>
                     </div>
@@ -456,8 +461,13 @@
                         <div class="card-header">
                             <h3 class="card-title">Deliveries</h3>
                     </div>
-                        <div id="deliveriesContent">
-                            <!-- Content loaded via JavaScript -->
+                        <div id="deliveriesContent" style="padding: 20px;">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading deliveries...</p>
+                            </div>
                     </div>
                         </div>
                         </div>
@@ -467,8 +477,13 @@
                         <div class="card-header">
                             <h3 class="card-title">Suppliers</h3>
                     </div>
-                        <div id="suppliersContent">
-                            <!-- Content loaded via JavaScript -->
+                        <div id="suppliersContent" style="padding: 20px;">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading suppliers...</p>
+                            </div>
             </div>
         </div>
     </div>
@@ -509,8 +524,13 @@
                         <div class="card-header">
                             <h3 class="card-title">Reports</h3>
                     </div>
-                        <div id="reportsContent">
-                            <!-- Content loaded via JavaScript -->
+                        <div id="reportsContent" style="padding: 20px;">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading reports...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -525,55 +545,55 @@
 <script>
         // Tab switching
         function goToDashboard() {
-            $('.tab-content').removeClass('active').hide();
-            $('#dashboardSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#dashboardSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="dashboard"]').addClass('active');
         }
 
         function showPendingRequests() {
-            $('.tab-content').removeClass('active').hide();
-            $('#purchaseRequestsSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#purchaseRequestsSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="purchaseRequests"]').addClass('active');
             loadPendingRequests();
         }
 
         function showPurchaseOrders() {
-            $('.tab-content').removeClass('active').hide();
-            $('#purchaseOrdersSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#purchaseOrdersSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="purchaseOrders"]').addClass('active');
             loadPurchaseOrders();
         }
 
         function showDeliveries() {
-            $('.tab-content').removeClass('active').hide();
-            $('#deliveriesSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#deliveriesSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="deliveries"]').addClass('active');
             loadDeliveries();
         }
 
         function showSuppliers() {
-            $('.tab-content').removeClass('active').hide();
-            $('#suppliersSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#suppliersSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="suppliers"]').addClass('active');
             loadSuppliers();
         }
 
         function showAccountsPayable() {
-            $('.tab-content').removeClass('active').hide();
-            $('#accountsPayableSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#accountsPayableSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="accountsPayable"]').addClass('active');
             loadAccountsPayable();
         }
 
         function showReports() {
-            $('.tab-content').removeClass('active').hide();
-            $('#reportsSection').addClass('active').show();
+            $('.tab-content').removeClass('active').css('display', 'none');
+            $('#reportsSection').addClass('active').css('display', 'block');
             $('.nav-link').removeClass('active');
             $('[data-tab="reports"]').addClass('active');
             loadReports();
