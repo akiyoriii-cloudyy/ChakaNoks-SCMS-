@@ -47,6 +47,44 @@ class SupplierController extends BaseController
     }
 
     /**
+     * Show suppliers list page
+     */
+    public function showSuppliersList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        // Fetch suppliers data server-side
+        try {
+            $suppliers = $this->supplierModel->getActiveSuppliers();
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching suppliers: ' . $e->getMessage());
+            $suppliers = [];
+        }
+
+        // Get pending approvals for sidebar badge
+        $purchaseRequestModel = new \App\Models\PurchaseRequestModel();
+        $pendingRequests = $purchaseRequestModel->getPendingRequests();
+        $dashboardData = [
+            'purchaseRequests' => [
+                'pending_approvals' => count($pendingRequests)
+            ]
+        ];
+
+        return view('dashboards/suppliers_list', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+            ],
+            'suppliers' => $suppliers,
+            'data' => $dashboardData
+        ]);
+    }
+
+    /**
      * Get supplier by ID
      */
     public function getSupplier($id = null)
@@ -189,18 +227,31 @@ class SupplierController extends BaseController
      */
     public function getSuppliersWithPerformance()
     {
-        $session = session();
-        
-        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        try {
+            $session = session();
+            
+            if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+            }
+
+            $suppliers = $this->supplierModel->getSuppliersWithPerformance();
+
+            log_message('debug', 'Suppliers with performance: ' . count($suppliers) . ' suppliers found');
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'suppliers' => $suppliers,
+                'count' => count($suppliers)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error in getSuppliersWithPerformance: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load suppliers: ' . $e->getMessage(),
+                'suppliers' => []
+            ]);
         }
-
-        $suppliers = $this->supplierModel->getSuppliersWithPerformance();
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'suppliers' => $suppliers
-        ]);
     }
 
     /**

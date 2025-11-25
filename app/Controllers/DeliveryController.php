@@ -363,5 +363,236 @@ class DeliveryController extends BaseController
             'deliveries' => $deliveries
         ]);
     }
+
+    /**
+     * Confirm delivery - Branch Manager confirms delivery receipt
+     */
+    public function confirmDelivery($id = null)
+    {
+        $session = session();
+        
+        // Only branch managers can confirm deliveries
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Delivery ID required']);
+        }
+
+        $actualDeliveryDate = $this->request->getPost('actual_delivery_date');
+        $receivedByText = $this->request->getPost('received_by'); // This is text/email from form
+        $receivedAt = $this->request->getPost('received_at');
+
+        if (!$actualDeliveryDate || !$receivedByText || !$receivedAt) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'All fields are required']);
+        }
+
+        // Get user ID from session (received_by must be user ID, not email)
+        $userId = $session->get('user_id') ?? $session->get('id');
+        if (!$userId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User ID not found in session']);
+        }
+
+        // Get delivery
+        $delivery = $this->deliveryModel->find((int)$id);
+
+        if (!$delivery) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Delivery not found']);
+        }
+
+        // Verify branch access
+        $branchId = $session->get('branch_id');
+        if ($delivery['branch_id'] != $branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'You can only confirm deliveries for your branch']);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            // Get delivery with items
+            $delivery = $this->deliveryModel->trackDelivery((int)$id);
+            
+            if (!$delivery || empty($delivery['items'])) {
+                $db->transRollback();
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Delivery items not found']);
+            }
+
+            // Update delivery with confirmation details
+            // received_by must be user ID (integer), not email/text
+            $updateData = [
+                'actual_delivery_date' => $actualDeliveryDate,
+                'received_by' => (int)$userId, // Use user ID from session
+                'received_at' => $receivedAt,
+                'status' => 'delivered',
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->deliveryModel->update((int)$id, $updateData);
+
+            // Record STOCK-IN for all delivery items
+            $stockInCount = 0;
+            
+            foreach ($delivery['items'] as $item) {
+                $productId = (int)($item['product_id'] ?? 0);
+                $expectedQty = (int)($item['expected_quantity'] ?? 0);
+                $receivedQty = (int)($item['received_quantity'] ?? 0);
+                
+                // Use received quantity if available, otherwise use expected quantity
+                $quantityToStock = $receivedQty > 0 ? $receivedQty : $expectedQty;
+                
+                if ($productId > 0 && $quantityToStock > 0) {
+                    // Get product to check if it exists and belongs to branch
+                    $product = $this->productModel->find($productId);
+                    
+                    if (!$product) {
+                        log_message('warning', 'Product ' . $productId . ' not found when confirming delivery ' . $id);
+                        continue;
+                    }
+                    
+                    // Check if product belongs to this branch, if not, create/update it
+                    if (empty($product['branch_id']) || $product['branch_id'] != $branchId) {
+                        // Update product to belong to this branch
+                        $this->productModel->update($productId, [
+                            'branch_id' => $branchId
+                        ]);
+                        log_message('info', 'Updated product ' . $productId . ' branch_id to ' . $branchId . ' during delivery confirmation');
+                    }
+                    
+                    $expiryDate = $product['expiry'] ?? null;
+                    
+                    // Record STOCK-IN transaction (NEW STOCK)
+                    $stockInRecorded = $this->stockTransactionModel->recordStockIn(
+                        $productId,
+                        $quantityToStock,
+                        $id, // reference_id (delivery_id)
+                        'delivery', // reference_type
+                        $userId, // created_by
+                        $expiryDate
+                    );
+                    
+                    if ($stockInRecorded) {
+                        $stockInCount++;
+                        
+                        // Update delivery item received quantity if not already set
+                        if ($receivedQty == 0) {
+                            $db->table('delivery_items')
+                                ->where('delivery_id', $id)
+                                ->where('product_id', $productId)
+                                ->update([
+                                    'received_quantity' => $quantityToStock,
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                        }
+                    } else {
+                        log_message('error', 'Failed to record stock-in for product ' . $productId . ' in delivery ' . $id);
+                    }
+                }
+            }
+
+            // Update purchase order status if all items received
+            if (!empty($delivery['purchase_order_id'])) {
+                $this->checkAndUpdatePOStatus($delivery['purchase_order_id']);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Transaction failed']);
+            }
+
+            log_message('info', 'Delivery ' . $id . ' confirmed by branch manager. Stock-IN recorded for ' . $stockInCount . ' items.');
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Delivery confirmed successfully. Stock-IN recorded for ' . $stockInCount . ' items.'
+            ]);
+        } catch (\Exception $e) {
+            $db->transRollback();
+            log_message('error', 'Error confirming delivery: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Show deliveries list page
+     */
+    public function showDeliveriesList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin', 'logistics_coordinator'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        // Fetch deliveries data server-side
+        $branchId = $session->get('branch_id');
+        $role = $session->get('role');
+        
+        try {
+            // For central admin, get all deliveries; for others, filter by branch
+            $builder = $this->db->table('deliveries')
+                ->select('deliveries.*, purchase_orders.order_number, suppliers.name as supplier_name, branches.name as branch_name')
+                ->join('purchase_orders', 'purchase_orders.id = deliveries.purchase_order_id', 'left')
+                ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id', 'left')
+                ->join('branches', 'branches.id = deliveries.branch_id', 'left');
+            
+            if ($branchId && !in_array($role, ['central_admin', 'superadmin'])) {
+                $builder->where('deliveries.branch_id', $branchId);
+            }
+            
+            $deliveries = $builder->orderBy('deliveries.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            // Format the data
+            $formattedDeliveries = [];
+            foreach ($deliveries as $delivery) {
+                $formattedDeliveries[] = [
+                    'id' => $delivery['id'],
+                    'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
+                    'purchase_order' => [
+                        'id' => $delivery['purchase_order_id'],
+                        'order_number' => $delivery['order_number'] ?? 'N/A'
+                    ],
+                    'supplier' => [
+                        'id' => $delivery['supplier_id'] ?? null,
+                        'name' => $delivery['supplier_name'] ?? 'N/A'
+                    ],
+                    'branch' => [
+                        'id' => $delivery['branch_id'],
+                        'name' => $delivery['branch_name'] ?? 'N/A'
+                    ],
+                    'status' => $delivery['status'] ?? 'scheduled',
+                    'scheduled_date' => $delivery['scheduled_date'],
+                    'actual_delivery_date' => $delivery['actual_delivery_date'],
+                    'driver_name' => $delivery['driver_name'],
+                    'vehicle_info' => $delivery['vehicle_info'],
+                    'created_at' => $delivery['created_at']
+                ];
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching deliveries: ' . $e->getMessage());
+            $formattedDeliveries = [];
+        }
+
+        // Get pending approvals for sidebar badge (only for central admin)
+        $dashboardData = ['purchaseRequests' => ['pending_approvals' => 0]];
+        if (in_array($role, ['central_admin', 'superadmin'])) {
+            $purchaseRequestModel = new \App\Models\PurchaseRequestModel();
+            $pendingRequests = $purchaseRequestModel->getPendingRequests();
+            $dashboardData['purchaseRequests']['pending_approvals'] = count($pendingRequests);
+        }
+
+        return view('dashboards/deliveries_list', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+            ],
+            'deliveries' => $formattedDeliveries,
+            'data' => $dashboardData
+        ]);
+    }
 }
 

@@ -206,9 +206,33 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active">
+                <?php 
+                $currentSection = $currentSection ?? 'inventory';
+                $baseUrl = base_url('staff/dashboard');
+                ?>
+                <a href="<?= $baseUrl ?>?section=inventory" class="nav-item <?= $currentSection === 'inventory' ? 'active' : '' ?>">
                     <i class="fas fa-boxes"></i>
                     <span>Inventory</span>
+                </a>
+                <a href="<?= $baseUrl ?>?section=stock-in" class="nav-item <?= $currentSection === 'stock-in' ? 'active' : '' ?>">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Stock In</span>
+                </a>
+                <a href="<?= $baseUrl ?>?section=stock-out" class="nav-item <?= $currentSection === 'stock-out' ? 'active' : '' ?>">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Stock Out</span>
+                </a>
+                <a href="<?= $baseUrl ?>?section=deliveries" class="nav-item <?= $currentSection === 'deliveries' ? 'active' : '' ?>">
+                    <i class="fas fa-truck"></i>
+                    <span>Deliveries</span>
+                </a>
+                <a href="<?= $baseUrl ?>?section=damaged" class="nav-item <?= $currentSection === 'damaged' ? 'active' : '' ?>">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Damaged/Expired</span>
+                </a>
+                <a href="<?= base_url('purchase/request/new') ?>" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Purchase Requests</span>
                 </a>
                 <?php if (in_array($me['role'] ?? '', ['branch_manager', 'manager'])): ?>
                     <a href="<?= base_url('manager/dashboard') ?>" class="nav-item">
@@ -216,14 +240,6 @@
                         <span>Manager Dashboard</span>
                     </a>
                 <?php endif; ?>
-                <a href="<?= base_url('purchase/request/new') ?>" class="nav-item">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Purchase Requests</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Reports</span>
-                </a>
             </nav>
             
             <div class="sidebar-footer">
@@ -306,7 +322,7 @@
                 </div>
 
                 <!-- Inventory Table -->
-                <div class="content-card">
+                <div class="content-card" style="display: <?= ($currentSection ?? 'inventory') === 'inventory' ? 'block' : 'none' ?>;">
                     <div class="card-header">
                         <h3 class="card-title">Inventory Items</h3>
                         <div class="card-actions">
@@ -349,6 +365,167 @@
                         </div>
                     </div>
                 </div>
+                </div>
+                <!-- End Inventory Section -->
+
+                <!-- Stock In Section -->
+                <div id="stock-in-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'stock-in' ? 'block' : 'none' ?>;">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-arrow-up"></i> Stock In</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <form id="stockInForm">
+                                <div class="mb-3">
+                                    <label for="stockInProduct" class="form-label">Select Product</label>
+                                    <select class="form-control" id="stockInProduct" required>
+                                        <option value="">Select a product...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockInQuantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="stockInQuantity" min="1" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockInReference" class="form-label">Reference (Optional)</label>
+                                    <input type="text" class="form-control" id="stockInReference" placeholder="e.g., Delivery #, Adjustment, etc.">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockInNotes" class="form-label">Notes (Optional)</label>
+                                    <textarea class="form-control" id="stockInNotes" rows="3" placeholder="Additional notes..."></textarea>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="submitStockIn()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none;">
+                                    <i class="fas fa-check"></i> Record Stock In
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Stock In Section -->
+
+                <!-- Stock Out Section -->
+                <div id="stock-out-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'stock-out' ? 'block' : 'none' ?>;">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-arrow-down"></i> Stock Out</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <form id="stockOutForm">
+                                <div class="mb-3">
+                                    <label for="stockOutProduct" class="form-label">Select Product</label>
+                                    <select class="form-control" id="stockOutProduct" required>
+                                        <option value="">Select a product...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockOutQuantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="stockOutQuantity" min="1" required>
+                                    <small class="form-text text-muted">Available stock: <span id="stockOutAvailable">0</span></small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockOutReason" class="form-label">Reason</label>
+                                    <select class="form-control" id="stockOutReason" required>
+                                        <option value="">Select reason...</option>
+                                        <option value="sale">Sale</option>
+                                        <option value="damaged">Damaged</option>
+                                        <option value="expired">Expired</option>
+                                        <option value="waste">Waste</option>
+                                        <option value="transfer">Transfer to Another Branch</option>
+                                        <option value="adjustment">Inventory Adjustment</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3" id="stockOutOtherReasonDiv" style="display: none;">
+                                    <label for="stockOutOtherReason" class="form-label">Specify Reason</label>
+                                    <input type="text" class="form-control" id="stockOutOtherReason" placeholder="Enter reason...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockOutNotes" class="form-label">Notes (Optional)</label>
+                                    <textarea class="form-control" id="stockOutNotes" rows="3" placeholder="Additional notes..."></textarea>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="submitStockOut()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none;">
+                                    <i class="fas fa-check"></i> Record Stock Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Stock Out Section -->
+
+                <!-- Deliveries Section -->
+                <div id="deliveries-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'deliveries' ? 'block' : 'none' ?>;">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-truck"></i> Pending Deliveries</h3>
+                        </div>
+                        <div class="table-responsive" style="padding: 0;">
+                            <table class="table" id="deliveriesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Delivery #</th>
+                                        <th>Purchase Order</th>
+                                        <th>Supplier</th>
+                                        <th>Scheduled Date</th>
+                                        <th>Status</th>
+                                        <th style="text-align: right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deliveriesBody">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 20px; color: #999;">Loading deliveries...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Deliveries Section -->
+
+                <!-- Damaged/Expired Section -->
+                <div id="damaged-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'damaged' ? 'block' : 'none' ?>;">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> Report Damaged/Expired Goods</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <form id="damagedForm">
+                                <div class="mb-3">
+                                    <label for="damagedProduct" class="form-label">Select Product</label>
+                                    <select class="form-control" id="damagedProduct" required>
+                                        <option value="">Select a product...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="damagedQuantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="damagedQuantity" min="1" required>
+                                    <small class="form-text text-muted">Available stock: <span id="damagedAvailable">0</span></small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="damagedReason" class="form-label">Reason</label>
+                                    <select class="form-control" id="damagedReason" required>
+                                        <option value="">Select reason...</option>
+                                        <option value="Damaged">Damaged</option>
+                                        <option value="Expired">Expired</option>
+                                        <option value="Damaged/Expired">Damaged/Expired</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3" id="damagedOtherReasonDiv" style="display: none;">
+                                    <label for="damagedOtherReason" class="form-label">Specify Reason</label>
+                                    <input type="text" class="form-control" id="damagedOtherReason" placeholder="Enter reason...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="damagedNotes" class="form-label">Notes (Optional)</label>
+                                    <textarea class="form-control" id="damagedNotes" rows="3" placeholder="Additional notes..."></textarea>
+                                </div>
+                                <button type="button" class="btn btn-warning" onclick="submitDamaged()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; color: white;">
+                                    <i class="fas fa-exclamation-triangle"></i> Report Damaged/Expired
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Damaged/Expired Section -->
             </div>
         </main>
     </div>
@@ -544,6 +721,261 @@
             document.getElementById('viewItemModal').style.display = 'none';
         });
 
+        // View Item Modal Action Buttons - Override inventorystaff.js handlers
+        let currentViewProductId = null;
+        
+        // Store product ID when viewing item - override the openViewModal function from inventorystaff.js
+        const viewModal = document.getElementById('viewItemModal');
+        if (viewModal) {
+            // Intercept when modal is shown to store product ID
+            const originalOpenViewModal = window.openViewModal;
+            if (originalOpenViewModal) {
+                window.openViewModal = function(itemId) {
+                    currentViewProductId = itemId;
+                    if (viewModal) {
+                        viewModal.setAttribute('data-current-id', itemId);
+                    }
+                    return originalOpenViewModal(itemId);
+                };
+            }
+            
+            // Also watch for changes to data-current-id attribute
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'data-current-id') {
+                        currentViewProductId = viewModal.getAttribute('data-current-id');
+                    }
+                });
+            });
+            observer.observe(viewModal, { attributes: true, attributeFilter: ['data-current-id'] });
+            
+            // Get initial value if already set
+            if (viewModal.getAttribute('data-current-id')) {
+                currentViewProductId = viewModal.getAttribute('data-current-id');
+            }
+        }
+        
+        // Update Stock button
+        document.getElementById('btnUpdateStock')?.addEventListener('click', function() {
+            const container = document.getElementById('updateStockContainer');
+            if (container.style.display === 'none' || !container.style.display) {
+                container.style.display = 'flex';
+                const stockText = document.getElementById('viewStock').textContent;
+                const currentStock = parseInt(stockText.split(' ')[0]) || 0;
+                document.getElementById('updateStockInput').value = currentStock;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Save Stock button
+        document.getElementById('saveStockBtn')?.addEventListener('click', function() {
+            const newQty = parseInt(document.getElementById('updateStockInput').value);
+            if (isNaN(newQty) || newQty < 0) {
+                alert('Please enter a valid stock quantity');
+                return;
+            }
+            
+            const productId = currentViewProductId || (viewModal ? viewModal.getAttribute('data-current-id') : null);
+            if (!productId) {
+                alert('Product ID not found');
+                return;
+            }
+
+            $.ajax({
+                url: '<?= base_url('staff/updateStock/') ?>' + productId,
+                method: 'POST',
+                data: { stock_qty: newQty },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Stock updated successfully!');
+                        document.getElementById('viewItemModal').hidden = true;
+                        document.getElementById('viewItemModal').style.display = 'none';
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.error || 'Failed to update stock'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error updating stock';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        });
+
+        // Cancel Stock Update button
+        document.getElementById('cancelStockBtn')?.addEventListener('click', function() {
+            document.getElementById('updateStockContainer').style.display = 'none';
+        });
+
+        // Receive Delivery button - override inventorystaff.js handler
+        setTimeout(function() {
+            const btnReceiveDelivery = document.getElementById('btnReceiveDelivery');
+            const viewModal = document.getElementById('viewItemModal');
+            
+            if (btnReceiveDelivery && viewModal) {
+                // Clone button to remove existing listeners
+                const newBtn = btnReceiveDelivery.cloneNode(true);
+                btnReceiveDelivery.parentNode.replaceChild(newBtn, btnReceiveDelivery);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (!viewModal.getAttribute('data-current-id')) {
+                        alert('Please select a product first');
+                        return;
+                    }
+                    
+                    const productId = viewModal.getAttribute('data-current-id');
+                    const stockText = document.getElementById('viewStock').textContent;
+                    const currentStock = parseInt(stockText.split(' ')[0]) || 0;
+                    
+                    // Prompt for quantity
+                    const qty = prompt('Enter quantity received (Current stock: ' + currentStock + '):');
+                    const n = parseInt(qty);
+                    if (!qty || isNaN(n) || n <= 0) {
+                        return;
+                    }
+                    
+                    $.ajax({
+                        url: '<?= base_url('staff/receiveDelivery/') ?>' + productId,
+                        method: 'POST',
+                        data: { quantity: n },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                alert('Delivery received successfully! Stock updated.');
+                                viewModal.hidden = true;
+                                viewModal.style.display = 'none';
+                                location.reload();
+                            } else {
+                                alert('Error: ' + (response.error || 'Failed to receive delivery'));
+                            }
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error receiving delivery';
+                            alert('Error: ' + errorMsg);
+                        }
+                    });
+                });
+            }
+        }, 1000);
+
+        // Report Damaged button - override inventorystaff.js handler
+        setTimeout(function() {
+            const btnReportDamaged = document.getElementById('btnReportDamaged');
+            const viewModal = document.getElementById('viewItemModal');
+            
+            if (btnReportDamaged && viewModal) {
+                // Clone button to remove existing listeners
+                const newBtn = btnReportDamaged.cloneNode(true);
+                btnReportDamaged.parentNode.replaceChild(newBtn, btnReportDamaged);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (!viewModal.getAttribute('data-current-id')) {
+                        alert('Please select a product first');
+                        return;
+                    }
+                    
+                    const productId = viewModal.getAttribute('data-current-id');
+                    const stockText = document.getElementById('viewStock').textContent;
+                    const currentStock = parseInt(stockText.split(' ')[0]) || 0;
+                    
+                    // Prompt for quantity
+                    const qty = prompt('Enter damaged/expired quantity (Available: ' + currentStock + '):');
+                    const n = parseInt(qty);
+                    if (!qty || isNaN(n) || n <= 0) {
+                        return;
+                    }
+                    if (n > currentStock) {
+                        alert('Quantity cannot exceed available stock');
+                        return;
+                    }
+                    
+                    // Prompt for reason
+                    const reason = prompt('Enter reason (Damaged/Expired/Other):') || 'Damaged/Expired';
+                    
+                    $.ajax({
+                        url: '<?= base_url('staff/reportDamage/') ?>' + productId,
+                        method: 'POST',
+                        data: {
+                            quantity: n,
+                            reason: reason
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                alert('Damaged/expired goods reported successfully!');
+                                viewModal.hidden = true;
+                                viewModal.style.display = 'none';
+                                location.reload();
+                            } else {
+                                alert('Error: ' + (response.error || 'Failed to report damaged goods'));
+                            }
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error reporting damaged goods';
+                            alert('Error: ' + errorMsg);
+                        }
+                    });
+                });
+            }
+        }, 1000);
+
+        // Track Inventory button
+        document.getElementById('btnTrackInventory')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('Inventory tracking feature coming soon!');
+        });
+
+        // Check Expiry button
+        document.getElementById('btnCheckExpiry')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const productId = currentViewProductId || (viewModal ? viewModal.getAttribute('data-current-id') : null);
+            if (!productId) {
+                alert('Product ID not found');
+                return;
+            }
+            
+            $.ajax({
+                url: '<?= base_url('staff/checkExpiry/') ?>' + productId,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        let message = 'Expiry Status: ' + response.state;
+                        if (response.days !== null) {
+                            if (response.days < 0) {
+                                message += '\nExpired ' + Math.abs(response.days) + ' days ago';
+                            } else if (response.days === 0) {
+                                message += '\nExpires today!';
+                            } else {
+                                message += '\nExpires in ' + response.days + ' days';
+                            }
+                        }
+                        if (response.expiry) {
+                            message += '\nExpiry Date: ' + response.expiry;
+                        }
+                        alert(message);
+                    } else {
+                        alert('Error: ' + (response.error || 'Failed to check expiry'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error checking expiry';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        });
+
         // Print All Reports
         document.getElementById('btnPrintAll')?.addEventListener('click', function() {
             const items = JSON.parse(document.getElementById('initial-items').textContent);
@@ -665,6 +1097,430 @@
             printWindow.focus();
             printWindow.print();
         });
+
+        // Load section-specific data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSection = urlParams.get('section') || '<?= $currentSection ?? 'inventory' ?>';
+            
+            // Ensure sections are properly shown/hidden
+            const sections = ['inventory', 'stock-in', 'stock-out', 'deliveries', 'damaged'];
+            sections.forEach(function(section) {
+                const sectionEl = document.getElementById(section + '-section');
+                if (sectionEl) {
+                    sectionEl.style.display = (currentSection === section) ? 'block' : 'none';
+                }
+            });
+            
+            // Show/hide filter card only for inventory section
+            const filterCard = document.querySelector('.filter-card');
+            if (filterCard && currentSection !== 'inventory') {
+                filterCard.style.display = 'none';
+            }
+            
+            // Show/hide inventory table card only for inventory section
+            const inventoryCard = document.querySelector('#inventory-section .content-card');
+            if (inventoryCard && currentSection !== 'inventory') {
+                inventoryCard.style.display = 'none';
+            }
+            
+            // Load section-specific data
+            if (currentSection === 'deliveries') {
+                loadDeliveries();
+            } else if (currentSection === 'stock-in' || currentSection === 'stock-out' || currentSection === 'damaged') {
+                loadProductsForSection(currentSection);
+                
+                // Pre-select product if coming from view item modal
+                if (currentSection === 'damaged') {
+                    const damagedProductId = sessionStorage.getItem('damagedProductId');
+                    if (damagedProductId) {
+                        setTimeout(function() {
+                            $('#damagedProduct').val(damagedProductId).trigger('change');
+                            sessionStorage.removeItem('damagedProductId');
+                        }, 500);
+                    }
+                }
+            }
+            
+            // Ensure branch filter is disabled for inventory staff
+            <?php if (!empty($branchScope['enforced'])): ?>
+            const branchSelect = document.getElementById('filterBranch');
+            if (branchSelect) {
+                branchSelect.disabled = true;
+                branchSelect.style.cursor = 'not-allowed';
+                branchSelect.style.opacity = '0.7';
+            }
+            <?php endif; ?>
+        });
+        
+        // Load products for stock in/out/damaged sections
+        function loadProductsForSection(section) {
+            const productSelect = document.getElementById(section === 'stock-in' ? 'stockInProduct' : 
+                                                          section === 'stock-out' ? 'stockOutProduct' : 
+                                                          'damagedProduct');
+            
+            if (!productSelect) return;
+            
+            $.ajax({
+                url: '<?= base_url('staff/api/get-branch-products') ?>',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        productSelect.innerHTML = '<option value="">Select a product...</option>';
+                        response.products.forEach(function(product) {
+                            const option = document.createElement('option');
+                            option.value = product.id;
+                            option.textContent = product.name + ' (Stock: ' + product.stock_qty + ' ' + (product.unit || '') + ')';
+                            option.setAttribute('data-stock', product.stock_qty);
+                            productSelect.appendChild(option);
+                        });
+                    }
+                },
+                error: function() {
+                    alert('Error loading products');
+                }
+            });
+        }
+        
+        // Stock quantity change handlers
+        $(document).on('change', '#stockOutProduct, #damagedProduct', function() {
+            const selectedOption = $(this).find('option:selected');
+            const availableStock = selectedOption.attr('data-stock') || 0;
+            const availableSpan = $(this).attr('id') === 'stockOutProduct' ? $('#stockOutAvailable') : $('#damagedAvailable');
+            availableSpan.text(availableStock);
+            const qtyInput = $(this).attr('id') === 'stockOutProduct' ? $('#stockOutQuantity') : $('#damagedQuantity');
+            qtyInput.attr('max', availableStock);
+        });
+        
+        // Reason change handlers
+        $(document).on('change', '#stockOutReason', function() {
+            if ($(this).val() === 'other') {
+                $('#stockOutOtherReasonDiv').show();
+                $('#stockOutOtherReason').prop('required', true);
+            } else {
+                $('#stockOutOtherReasonDiv').hide();
+                $('#stockOutOtherReason').prop('required', false);
+            }
+        });
+        
+        $(document).on('change', '#damagedReason', function() {
+            if ($(this).val() === 'Other') {
+                $('#damagedOtherReasonDiv').show();
+                $('#damagedOtherReason').prop('required', true);
+            } else {
+                $('#damagedOtherReasonDiv').hide();
+                $('#damagedOtherReason').prop('required', false);
+            }
+        });
+        
+        // Submit Stock In
+        function submitStockIn() {
+            const productId = $('#stockInProduct').val();
+            const quantity = parseInt($('#stockInQuantity').val());
+            const reference = $('#stockInReference').val();
+            const notes = $('#stockInNotes').val();
+            
+            if (!productId || !quantity || quantity <= 0) {
+                alert('Please select a product and enter a valid quantity');
+                return;
+            }
+            
+            $.ajax({
+                url: '<?= base_url('staff/api/stock-in') ?>',
+                method: 'POST',
+                data: {
+                    product_id: productId,
+                    quantity: quantity,
+                    reference: reference,
+                    notes: notes
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Stock in recorded successfully!');
+                        $('#stockInForm')[0].reset();
+                        loadProductsForSection('stock-in');
+                        // Refresh inventory if on inventory section
+                        if (document.getElementById('inventory-section').style.display !== 'none') {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to record stock in'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error recording stock in';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        // Submit Stock Out
+        function submitStockOut() {
+            const productId = $('#stockOutProduct').val();
+            const quantity = parseInt($('#stockOutQuantity').val());
+            const reason = $('#stockOutReason').val();
+            const otherReason = $('#stockOutOtherReason').val();
+            const notes = $('#stockOutNotes').val();
+            
+            if (!productId || !quantity || quantity <= 0) {
+                alert('Please select a product and enter a valid quantity');
+                return;
+            }
+            
+            if (!reason) {
+                alert('Please select a reason');
+                return;
+            }
+            
+            const finalReason = reason === 'other' ? otherReason : reason;
+            if (reason === 'other' && !finalReason) {
+                alert('Please specify the reason');
+                return;
+            }
+            
+            $.ajax({
+                url: '<?= base_url('staff/api/stock-out') ?>',
+                method: 'POST',
+                data: {
+                    product_id: productId,
+                    quantity: quantity,
+                    reason: finalReason,
+                    notes: notes
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Stock out recorded successfully!');
+                        $('#stockOutForm')[0].reset();
+                        $('#stockOutOtherReasonDiv').hide();
+                        loadProductsForSection('stock-out');
+                        // Refresh inventory if on inventory section
+                        if (document.getElementById('inventory-section').style.display !== 'none') {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to record stock out'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error recording stock out';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        // Submit Damaged/Expired
+        function submitDamaged() {
+            const productId = $('#damagedProduct').val();
+            const quantity = parseInt($('#damagedQuantity').val());
+            const reason = $('#damagedReason').val();
+            const otherReason = $('#damagedOtherReason').val();
+            const notes = $('#damagedNotes').val();
+            
+            if (!productId || !quantity || quantity <= 0) {
+                alert('Please select a product and enter a valid quantity');
+                return;
+            }
+            
+            if (!reason) {
+                alert('Please select a reason');
+                return;
+            }
+            
+            const finalReason = reason === 'Other' ? otherReason : reason;
+            if (reason === 'Other' && !finalReason) {
+                alert('Please specify the reason');
+                return;
+            }
+            
+            $.ajax({
+                url: '<?= base_url('staff/reportDamage/') ?>' + productId,
+                method: 'POST',
+                data: {
+                    quantity: quantity,
+                    reason: finalReason + (notes ? ': ' + notes : '')
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Damaged/expired goods reported successfully!');
+                        $('#damagedForm')[0].reset();
+                        $('#damagedOtherReasonDiv').hide();
+                        loadProductsForSection('damaged');
+                        // Refresh inventory if on inventory section
+                        if (document.getElementById('inventory-section').style.display !== 'none') {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + (response.error || 'Failed to report damaged goods'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error reporting damaged goods';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        // Load deliveries
+        function loadDeliveries() {
+            $.ajax({
+                url: '<?= base_url('staff/api/get-deliveries') ?>',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const tbody = $('#deliveriesBody');
+                        tbody.empty();
+                        
+                        if (response.deliveries.length === 0) {
+                            tbody.html('<tr><td colspan="6" style="text-align: center; padding: 20px; color: #999;">No pending deliveries found</td></tr>');
+                            return;
+                        }
+                        
+                        response.deliveries.forEach(function(delivery) {
+                            const statusBadge = delivery.status === 'scheduled' ? 'badge-warning' : 
+                                               delivery.status === 'in_transit' ? 'badge-info' : 'badge-secondary';
+                            const statusText = delivery.status.charAt(0).toUpperCase() + delivery.status.slice(1).replace('_', ' ');
+                            
+                            const row = `
+                                <tr>
+                                    <td>${delivery.delivery_number}</td>
+                                    <td>${delivery.purchase_order?.order_number || 'N/A'}</td>
+                                    <td>${delivery.supplier?.name || 'N/A'}</td>
+                                    <td>${delivery.scheduled_date || 'N/A'}</td>
+                                    <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                                    <td style="text-align: right;">
+                                        <button class="btn btn-sm btn-primary" onclick="receiveDelivery(${delivery.id})">
+                                            <i class="fas fa-check"></i> Receive
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            tbody.append(row);
+                        });
+                    }
+                },
+                error: function() {
+                    $('#deliveriesBody').html('<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">Error loading deliveries</td></tr>');
+                }
+            });
+        }
+        
+        // Receive delivery
+        function receiveDelivery(deliveryId) {
+            $.ajax({
+                url: '<?= base_url('delivery/') ?>' + deliveryId + '/details',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const delivery = response.delivery;
+                        let itemsHtml = '<form id="receiveDeliveryForm">';
+                        itemsHtml += '<input type="hidden" name="delivery_id" value="' + delivery.id + '">';
+                        itemsHtml += '<h6>Delivery Items:</h6>';
+                        itemsHtml += '<table class="table table-sm">';
+                        itemsHtml += '<thead><tr><th>Product</th><th>Expected</th><th>Received</th><th>Condition</th><th>Notes</th></tr></thead>';
+                        itemsHtml += '<tbody>';
+                        
+                        if (delivery.items && delivery.items.length > 0) {
+                            delivery.items.forEach(function(item) {
+                                itemsHtml += '<tr>';
+                                itemsHtml += '<td>' + (item.product?.name || 'N/A') + '</td>';
+                                itemsHtml += '<td>' + item.expected_quantity + '</td>';
+                                itemsHtml += '<td><input type="number" name="items[' + item.product_id + '][received_quantity]" value="' + item.expected_quantity + '" min="0" max="' + item.expected_quantity + '" class="form-control form-control-sm" required></td>';
+                                itemsHtml += '<td><select name="items[' + item.product_id + '][condition_status]" class="form-control form-control-sm"><option value="good">Good</option><option value="damaged">Damaged</option><option value="expired">Expired</option><option value="partial">Partial</option></select></td>';
+                                itemsHtml += '<td><input type="text" name="items[' + item.product_id + '][notes]" class="form-control form-control-sm" placeholder="Notes..."></td>';
+                                itemsHtml += '<input type="hidden" name="items[' + item.product_id + '][product_id]" value="' + item.product_id + '">';
+                                itemsHtml += '</tr>';
+                            });
+                        }
+                        
+                        itemsHtml += '</tbody></table>';
+                        itemsHtml += '<div style="margin-top: 20px; text-align: right;">';
+                        itemsHtml += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> ';
+                        itemsHtml += '<button type="button" class="btn btn-primary" onclick="submitReceiveDelivery()">Confirm Receive</button>';
+                        itemsHtml += '</div>';
+                        itemsHtml += '</form>';
+                        
+                        $('#receiveDeliveryContent').html(itemsHtml);
+                        $('#receiveDeliveryModal').modal('show');
+                    } else {
+                        alert('Error loading delivery details');
+                    }
+                },
+                error: function() {
+                    alert('Error loading delivery details');
+                }
+            });
+        }
+        
+        // Submit receive delivery
+        function submitReceiveDelivery() {
+            const deliveryId = $('#receiveDeliveryForm input[name="delivery_id"]').val();
+            
+            // Convert form data to proper format
+            const items = [];
+            $('input[name^="items["]').each(function() {
+                const name = $(this).attr('name');
+                const matches = name.match(/items\[(\d+)\]\[(\w+)\]/);
+                if (matches) {
+                    const productId = matches[1];
+                    const field = matches[2];
+                    let item = items.find(i => i.product_id == productId);
+                    if (!item) {
+                        item = { product_id: parseInt(productId) };
+                        items.push(item);
+                    }
+                    if (field === 'received_quantity') {
+                        item.received_quantity = parseInt($(this).val());
+                    } else if (field === 'condition_status') {
+                        item.condition_status = $(this).val();
+                    } else if (field === 'notes') {
+                        item.notes = $(this).val();
+                    }
+                }
+            });
+            
+            // Also get condition_status from selects
+            $('select[name^="items["]').each(function() {
+                const name = $(this).attr('name');
+                const matches = name.match(/items\[(\d+)\]\[(\w+)\]/);
+                if (matches && matches[2] === 'condition_status') {
+                    const productId = matches[1];
+                    const item = items.find(i => i.product_id == productId);
+                    if (item) {
+                        item.condition_status = $(this).val();
+                    }
+                }
+            });
+            
+            $.ajax({
+                url: '<?= base_url('delivery/') ?>' + deliveryId + '/receive',
+                method: 'POST',
+                data: { items: items },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Delivery received successfully! Stock updated.');
+                        $('#receiveDeliveryModal').modal('hide');
+                        loadDeliveries();
+                        // Refresh inventory if on inventory section
+                        if (document.getElementById('inventory-section').style.display !== 'none') {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to receive delivery'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error receiving delivery';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
     </script>
 </body>
 </html>

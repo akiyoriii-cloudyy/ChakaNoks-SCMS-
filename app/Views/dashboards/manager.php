@@ -55,6 +55,15 @@
                     <i class="fas fa-list"></i>
                     <span>My Requests</span>
                 </a>
+                <a href="<?= base_url('manager/deliveries') ?>" class="nav-item">
+                    <i class="fas fa-truck"></i>
+                    <span>Deliveries</span>
+                    <?php if (isset($data['deliveries']['pending_deliveries']) && $data['deliveries']['pending_deliveries'] > 0): ?>
+                        <span class="badge" style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: auto;">
+                            <?= $data['deliveries']['pending_deliveries'] ?>
+                        </span>
+                    <?php endif; ?>
+                </a>
                 <a href="<?= base_url('manager/settings') ?>" class="nav-item">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>

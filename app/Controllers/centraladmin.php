@@ -86,7 +86,16 @@ class CentralAdmin extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        return redirect()->to(base_url('centraladmin/dashboard?tab=reports'));
+        // Get dashboard data for reports
+        $dashboardData = $this->getDashboardData();
+
+        return view('dashboards/reports', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+            ],
+            'data' => $dashboardData,
+        ]);
     }
 
     /**
@@ -200,17 +209,18 @@ class CentralAdmin extends BaseController
      */
     private function getBranchInventoryOverview(): array
     {
-        $branches = $this->branchModel->getAllBranches();
+        // Get all branches ordered by name, excluding Central Office
+        $branches = $this->db->table('branches')
+            ->where('code !=', 'CENTRAL')
+            ->where('name !=', 'Central Office')
+            ->orderBy('name', 'ASC')
+            ->get()
+            ->getResultArray();
+        
         $overview = [];
 
         foreach ($branches as $branch) {
-            // Exclude "central" branch (case-insensitive check)
-            $branchName = strtolower($branch['name'] ?? '');
-            $branchCode = strtolower($branch['code'] ?? '');
-            
-            if (strpos($branchName, 'central') !== false || strpos($branchCode, 'central') !== false) {
-                continue; // Skip central branch
-            }
+            // All branches here are already filtered (Central excluded)
 
             // Get products for this branch
             $branchProducts = $this->db->table('products')
@@ -268,7 +278,15 @@ class CentralAdmin extends BaseController
             ];
         }
 
-        // Limit to 5 branches only
+        // Sort by total_products descending, then by name ascending
+        usort($overview, function($a, $b) {
+            if ($b['total_products'] != $a['total_products']) {
+                return $b['total_products'] - $a['total_products'];
+            }
+            return strcmp($a['branch_name'], $b['branch_name']);
+        });
+        
+        // Limit to 5 branches only (ensures Toril is included if it has products)
         return array_slice($overview, 0, 5);
     }
 
@@ -351,24 +369,37 @@ class CentralAdmin extends BaseController
         $status = $this->request->getGet('status');
 
         $builder = $this->db->table('deliveries d')
-            ->select('d.*, s.name AS supplier_name, b.name AS branch_name')
+            ->select('d.*, s.name AS supplier_name, b.name AS branch_name, po.order_number')
             ->join('suppliers s', 's.id = d.supplier_id', 'left')
-            ->join('branches b', 'b.id = d.branch_id', 'left');
+            ->join('branches b', 'b.id = d.branch_id', 'left')
+            ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left');
 
-        if (!empty($status)) {
+        if (!empty($status) && $status !== 'all') {
             $builder->where('d.status', $status);
         }
 
-        $deliveries = $builder
-            ->orderBy('d.scheduled_date', 'DESC')
-            ->limit(100)
-            ->get()
-            ->getResultArray();
+        try {
+            $deliveries = $builder
+                ->orderBy('d.scheduled_date', 'DESC')
+                ->limit(100)
+                ->get()
+                ->getResultArray();
 
-        return $this->response->setJSON([
-            'status' => 'success',
-            'deliveries' => $deliveries,
-        ]);
+            log_message('debug', 'Deliveries list: ' . count($deliveries) . ' deliveries found');
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'deliveries' => $deliveries,
+                'count' => count($deliveries)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error in getDeliveriesList: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load deliveries: ' . $e->getMessage(),
+                'deliveries' => []
+            ]);
+        }
     }
 
     /**

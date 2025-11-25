@@ -42,6 +42,35 @@ class AccountsPayableModel extends Model
     ];
 
     /**
+     * Generate unique invoice number
+     * Format: INV-YYYYMMDD-XXXXX (e.g., INV-20251125-00001)
+     */
+    public function generateInvoiceNumber(): string
+    {
+        $prefix = 'INV';
+        $date = date('Ymd');
+        $random = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+        $invoiceNumber = $prefix . '-' . $date . '-' . $random;
+        
+        // Ensure unique invoice number
+        $maxAttempts = 10;
+        $attempts = 0;
+        while ($this->where('invoice_number', $invoiceNumber)->first() && $attempts < $maxAttempts) {
+            $random = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+            $invoiceNumber = $prefix . '-' . $date . '-' . $random;
+            $attempts++;
+        }
+        
+        // If still not unique after max attempts, add timestamp
+        if ($this->where('invoice_number', $invoiceNumber)->first()) {
+            $timestamp = time();
+            $invoiceNumber = $prefix . '-' . $date . '-' . substr($timestamp, -5);
+        }
+        
+        return $invoiceNumber;
+    }
+
+    /**
      * Get accounts payable with related data
      */
     public function getAccountsPayableWithDetails(array $filters = []): array
@@ -72,6 +101,18 @@ class AccountsPayableModel extends Model
         if (!empty($filters['overdue'])) {
             $builder->where('accounts_payable.due_date <', date('Y-m-d'))
                     ->where('accounts_payable.payment_status !=', 'paid');
+        }
+
+        if (!empty($filters['invoice_filter'])) {
+            if ($filters['invoice_filter'] === 'with_invoice') {
+                $builder->where('accounts_payable.invoice_number IS NOT NULL')
+                        ->where('accounts_payable.invoice_number !=', '');
+            } elseif ($filters['invoice_filter'] === 'without_invoice') {
+                $builder->groupStart()
+                        ->where('accounts_payable.invoice_number IS NULL')
+                        ->orWhere('accounts_payable.invoice_number', '')
+                        ->groupEnd();
+            }
         }
 
         if (!empty($filters['id'])) {

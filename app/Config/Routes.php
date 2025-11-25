@@ -48,7 +48,11 @@ $routes->get('centraladmin/suppliers', 'CentralAdmin::suppliersPage');
 $routes->get('centraladmin/deliveries', 'CentralAdmin::deliveriesPage');
 $routes->get('centraladmin/reports', 'CentralAdmin::reportsPage');
 $routes->get('manager/dashboard', 'Manager::dashboard');
+$routes->get('manager/deliveries', 'Manager::deliveries');
+$routes->get('manager/stock-out', 'Manager::stockOut');
 $routes->get('manager/settings', 'Manager::settings');
+$routes->get('manager/api/search-products', 'Manager::searchProducts');
+$routes->post('manager/api/stock-out', 'Manager::recordStockOut');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
 
@@ -59,6 +63,14 @@ $routes->get('inventorystaff/item/(:num)', 'Staff::item/$1');
 
 $routes->post('staff/addProduct', 'Staff::addProduct');
 $routes->post('staff/updateStock/(:num)', 'Staff::updateStock/$1');
+$routes->post('staff/receiveDelivery/(:num)', 'Staff::receiveDelivery/$1');
+$routes->post('staff/reportDamage/(:num)', 'Staff::reportDamage/$1');
+$routes->get('staff/checkExpiry/(:num)', 'Staff::checkExpiry/$1');
+$routes->get('staff/api/get-branch-products', 'Staff::getBranchProducts');
+$routes->post('staff/api/stock-in', 'Staff::recordStockIn');
+$routes->post('staff/api/stock-out', 'Staff::recordStockOut');
+$routes->get('staff/api/get-deliveries', 'Staff::getDeliveries');
+$routes->get('delivery/(:num)/details', 'DeliveryController::trackDelivery/$1');
 
 // ---------- INVENTORY GROUP ----------
 $routes->group('inventory', ['filter' => 'auth'], function($routes) {
@@ -98,8 +110,9 @@ $routes->group('purchase', ['filter' => 'auth'], function($routes) {
 
 // ---------- SUPPLIER MODULE ----------
 $routes->group('supplier', ['filter' => 'auth'], function($routes) {
+    $routes->get('list', 'SupplierController::showSuppliersList');
     $routes->get('/', 'SupplierController::index');
-    $routes->get('list', 'SupplierController::index');
+    $routes->get('api/list', 'SupplierController::index');
     $routes->get('seed', 'SupplierController::seedSuppliers');
     $routes->get('(:num)', 'SupplierController::getSupplier/$1');
     $routes->post('create', 'SupplierController::create');
@@ -108,19 +121,22 @@ $routes->group('supplier', ['filter' => 'auth'], function($routes) {
     $routes->get('performance', 'SupplierController::getSuppliersWithPerformance');
 });
 
-// ---------- DELIVERY MODULE ----------
-$routes->group('delivery', ['filter' => 'auth'], function($routes) {
-    $routes->post('schedule', 'DeliveryController::scheduleDelivery');
-    $routes->post('(:num)/update-status', 'DeliveryController::updateDeliveryStatus/$1');
-    $routes->post('(:num)/receive', 'DeliveryController::receiveDelivery/$1');
-    $routes->get('(:num)/track', 'DeliveryController::trackDelivery/$1');
-    $routes->get('branch/list', 'DeliveryController::getDeliveriesByBranch');
-    $routes->get('supplier/(:num)/list', 'DeliveryController::getDeliveriesBySupplier/$1');
-});
+    // ---------- DELIVERY MODULE ----------
+    $routes->group('delivery', ['filter' => 'auth'], function($routes) {
+        $routes->get('branch/list', 'DeliveryController::showDeliveriesList');
+        $routes->get('api/branch/list', 'DeliveryController::getDeliveriesByBranch');
+        $routes->post('schedule', 'DeliveryController::scheduleDelivery');
+        $routes->post('(:num)/update-status', 'DeliveryController::updateDeliveryStatus/$1');
+        $routes->post('(:num)/receive', 'DeliveryController::receiveDelivery/$1');
+        $routes->post('(:num)/confirm', 'DeliveryController::confirmDelivery/$1');
+        $routes->get('(:num)/track', 'DeliveryController::trackDelivery/$1');
+        $routes->get('supplier/(:num)/list', 'DeliveryController::getDeliveriesBySupplier/$1');
+    });
 
 // ---------- PURCHASE ORDER MODULE ----------
 $routes->group('purchase/order', ['filter' => 'auth'], function($routes) {
-    $routes->get('list', 'PurchaseController::getPurchaseOrdersList');
+    $routes->get('list', 'PurchaseController::showPurchaseOrdersList');
+    $routes->get('api/list', 'PurchaseController::getPurchaseOrdersList');
     $routes->post('(:num)/update', 'PurchaseController::updatePurchaseOrder/$1');
     $routes->post('(:num)/approve', 'PurchaseController::approvePurchaseOrder/$1');
     $routes->get('(:num)/track', 'PurchaseController::trackOrder/$1');
@@ -129,7 +145,8 @@ $routes->group('purchase/order', ['filter' => 'auth'], function($routes) {
 
 // ---------- ACCOUNTS PAYABLE MODULE ----------
 $routes->group('accounts-payable', ['filter' => 'auth'], function($routes) {
-    $routes->get('list', 'AccountsPayableController::getAccountsPayableList');
+    $routes->get('list', 'AccountsPayableController::showAccountsPayableList');
+    $routes->get('api/list', 'AccountsPayableController::getAccountsPayableList');
     $routes->get('summary', 'AccountsPayableController::getSummary');
     $routes->get('backfill', 'AccountsPayableController::backfillAccountsPayable');
     $routes->get('(:num)', 'AccountsPayableController::getAccountsPayable/$1');

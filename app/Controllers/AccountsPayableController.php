@@ -41,6 +41,7 @@ class AccountsPayableController extends BaseController
             $supplierId = $this->request->getGet('supplier_id');
             $branchId = $this->request->getGet('branch_id');
             $overdue = $this->request->getGet('overdue');
+            $invoiceFilter = $this->request->getGet('invoice_filter');
             
             if ($paymentStatus && $paymentStatus !== 'all') {
                 $filters['payment_status'] = $paymentStatus;
@@ -53,6 +54,9 @@ class AccountsPayableController extends BaseController
             }
             if ($overdue === 'true' || $overdue === '1') {
                 $filters['overdue'] = true;
+            }
+            if ($invoiceFilter && $invoiceFilter !== 'all') {
+                $filters['invoice_filter'] = $invoiceFilter;
             }
 
             $accountsPayable = $this->accountsPayableModel->getAccountsPayableWithDetails($filters);
@@ -118,6 +122,101 @@ class AccountsPayableController extends BaseController
     }
 
     /**
+     * Show accounts payable list page
+     */
+    public function showAccountsPayableList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        // Fetch accounts payable data server-side
+        try {
+            $builder = $this->db->table('accounts_payable')
+                ->select('accounts_payable.*, suppliers.name as supplier_name, purchase_orders.order_number')
+                ->join('suppliers', 'suppliers.id = accounts_payable.supplier_id', 'left')
+                ->join('purchase_orders', 'purchase_orders.id = accounts_payable.purchase_order_id', 'left');
+            
+            // Apply filters
+            $paymentStatus = $this->request->getGet('payment_status');
+            $invoiceFilter = $this->request->getGet('invoice_filter');
+            
+            if ($paymentStatus && $paymentStatus !== 'all') {
+                $builder->where('accounts_payable.payment_status', $paymentStatus);
+            }
+            
+            if ($invoiceFilter && $invoiceFilter !== 'all') {
+                if ($invoiceFilter === 'with_invoice') {
+                    $builder->where('accounts_payable.invoice_number IS NOT NULL')
+                            ->where('accounts_payable.invoice_number !=', '');
+                } elseif ($invoiceFilter === 'without_invoice') {
+                    $builder->groupStart()
+                            ->where('accounts_payable.invoice_number IS NULL')
+                            ->orWhere('accounts_payable.invoice_number', '')
+                            ->groupEnd();
+                }
+            }
+            
+            $accountsPayable = $builder->orderBy('accounts_payable.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            // Format the data
+            $formattedAP = [];
+            foreach ($accountsPayable as $ap) {
+                $totalAmount = (float)($ap['amount'] ?? 0);
+                $paidAmount = (float)($ap['paid_amount'] ?? 0);
+                $balance = (float)($ap['balance'] ?? ($totalAmount - $paidAmount));
+                
+                $formattedAP[] = [
+                    'id' => $ap['id'],
+                    'invoice_number' => $ap['invoice_number'] ?? null,
+                    'supplier' => [
+                        'id' => $ap['supplier_id'],
+                        'name' => $ap['supplier_name'] ?? 'N/A'
+                    ],
+                    'purchase_order' => [
+                        'id' => $ap['purchase_order_id'],
+                        'order_number' => $ap['order_number'] ?? 'N/A'
+                    ],
+                    'total_amount' => $totalAmount,
+                    'paid_amount' => $paidAmount,
+                    'balance' => $balance,
+                    'payment_status' => $ap['payment_status'] ?? 'unpaid',
+                    'payment_date' => $ap['payment_date'] ?? null,
+                    'payment_method' => $ap['payment_method'] ?? null,
+                    'payment_reference' => $ap['payment_reference'] ?? null,
+                    'due_date' => $ap['due_date'],
+                    'created_at' => $ap['created_at']
+                ];
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching accounts payable: ' . $e->getMessage());
+            $formattedAP = [];
+        }
+
+        // Get pending approvals for sidebar badge
+        $purchaseRequestModel = new \App\Models\PurchaseRequestModel();
+        $pendingRequests = $purchaseRequestModel->getPendingRequests();
+        $dashboardData = [
+            'purchaseRequests' => [
+                'pending_approvals' => count($pendingRequests)
+            ]
+        ];
+
+        return view('dashboards/accounts_payable_list', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+            ],
+            'accounts_payable' => $formattedAP,
+            'data' => $dashboardData
+        ]);
+    }
+
+    /**
      * Get accounts payable by ID with details
      */
     public function getAccountsPayable($id = null)
@@ -174,8 +273,14 @@ class AccountsPayableController extends BaseController
         $invoiceNumber = $this->request->getPost('invoice_number');
         $invoiceDate = $this->request->getPost('invoice_date');
 
-        if (!$invoiceNumber || !$invoiceDate) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Invoice number and date are required']);
+        // If invoice number is not provided, generate one automatically
+        if (empty($invoiceNumber)) {
+            $invoiceNumber = $this->accountsPayableModel->generateInvoiceNumber();
+        }
+        
+        // If invoice date is not provided, use current date
+        if (empty($invoiceDate)) {
+            $invoiceDate = date('Y-m-d');
         }
 
         try {
@@ -202,7 +307,8 @@ class AccountsPayableController extends BaseController
             if ($updated) {
                 return $this->response->setJSON([
                     'status' => 'success',
-                    'message' => 'Invoice information updated successfully'
+                    'message' => 'Invoice information updated successfully',
+                    'invoice_number' => $invoiceNumber // Return the invoice number (generated or provided)
                 ]);
             }
 
@@ -385,12 +491,15 @@ class AccountsPayableController extends BaseController
                 $invoiceDate = $order['approved_at'] ? date('Y-m-d', strtotime($order['approved_at'])) : date('Y-m-d');
                 $dueDate = $this->accountsPayableModel->calculateDueDate($paymentTerms, $invoiceDate);
                 
+                // Generate invoice number
+                $invoiceNumber = $this->accountsPayableModel->generateInvoiceNumber();
+                
                 // Create accounts payable entry
                 $apData = [
                     'purchase_order_id' => $order['id'],
                     'supplier_id' => (int)$order['supplier_id'],
                     'branch_id' => (int)$order['branch_id'],
-                    'invoice_number' => null,
+                    'invoice_number' => $invoiceNumber, // Auto-generated invoice number
                     'invoice_date' => $invoiceDate,
                     'due_date' => $dueDate,
                     'amount' => (float)$order['total_amount'],

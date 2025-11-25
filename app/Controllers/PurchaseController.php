@@ -162,47 +162,78 @@ class PurchaseController extends BaseController
      */
     public function getRequests()
     {
-        $session = session();
-        
-        if (!$session->get('logged_in')) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
-        }
-
-        $userId = $session->get('user_id');
-        $role = $session->get('role');
-        $status = $this->request->getGet('status');
-        $priority = $this->request->getGet('priority');
-
-        $filters = [];
-        if ($status) $filters['status'] = $status;
-        if ($priority) $filters['priority'] = $priority;
-
-        if (in_array($role, ['central_admin', 'superadmin'])) {
-            // Central admin can see all requests
-            $requests = $this->purchaseRequestModel->findAll();
-        } else {
-            // Branch managers see requests they created
-            $builder = $this->purchaseRequestModel->where('requested_by', $userId);
+        try {
+            $session = session();
             
-            if (!empty($filters['status'])) {
-                $builder->where('status', $filters['status']);
+            if (!$session->get('logged_in')) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
             }
-            if (!empty($filters['priority'])) {
-                $builder->where('priority', $filters['priority']);
+
+            $userId = $session->get('user_id');
+            $role = $session->get('role');
+            $status = $this->request->getGet('status');
+            $priority = $this->request->getGet('priority');
+
+            $filters = [];
+            if ($status) $filters['status'] = $status;
+            if ($priority) $filters['priority'] = $priority;
+
+            if (in_array($role, ['central_admin', 'superadmin'])) {
+                // Central admin can see all requests
+                $builder = $this->purchaseRequestModel;
+                
+                if (!empty($filters['status']) && $status !== 'all') {
+                    $builder = $builder->where('status', $filters['status']);
+                }
+                if (!empty($filters['priority']) && $priority !== 'all') {
+                    $builder = $builder->where('priority', $filters['priority']);
+                }
+                
+                $requests = $builder->orderBy('created_at', 'DESC')->findAll();
+            } else {
+                // Branch managers see requests they created
+                $builder = $this->purchaseRequestModel->where('requested_by', $userId);
+                
+                if (!empty($filters['status']) && $status !== 'all') {
+                    $builder->where('status', $filters['status']);
+                }
+                if (!empty($filters['priority']) && $priority !== 'all') {
+                    $builder->where('priority', $filters['priority']);
+                }
+                
+                $requests = $builder->orderBy('created_at', 'DESC')->findAll();
             }
-            
-            $requests = $builder->orderBy('created_at', 'DESC')->findAll();
-        }
 
-        // Get full details for each request
-        foreach ($requests as &$request) {
-            $request = $this->purchaseRequestModel->getRequestWithItems($request['id']);
-        }
+            // Get full details for each request
+            $detailedRequests = [];
+            foreach ($requests as $request) {
+                try {
+                    $detailed = $this->purchaseRequestModel->getRequestWithItems($request['id']);
+                    if ($detailed) {
+                        $detailedRequests[] = $detailed;
+                    }
+                } catch (\Exception $e) {
+                    log_message('error', 'Error loading request ' . $request['id'] . ': ' . $e->getMessage());
+                    // Continue with other requests
+                }
+            }
 
-        return $this->response->setJSON([
-            'status' => 'success',
-            'requests' => $requests
-        ]);
+            log_message('debug', 'Purchase requests API: Returning ' . count($detailedRequests) . ' requests');
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'requests' => $detailedRequests,
+                'count' => count($detailedRequests)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in getRequests: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load purchase requests: ' . $e->getMessage(),
+                'requests' => []
+            ]);
+        }
     }
 
     /**
@@ -243,6 +274,11 @@ class PurchaseController extends BaseController
         if (!$id) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Request ID required']);
         }
+
+        // Get delivery details from POST
+        $driverName = $this->request->getPost('driver_name');
+        $vehicleInfo = $this->request->getPost('vehicle_info');
+        $scheduledDeliveryDate = $this->request->getPost('scheduled_delivery_date');
 
         try {
             // Step 1: Approve the purchase request
@@ -365,8 +401,13 @@ class PurchaseController extends BaseController
             // Step 9: Update request status to converted_to_po
             $this->purchaseRequestModel->updateStatus((int)$id, 'converted_to_po');
 
-            // Step 10: Auto-create delivery record
-            $this->autoCreateDelivery($poId, $poData);
+            // Step 10: Auto-create delivery record with delivery details
+            $deliveryDetails = [
+                'driver_name' => $driverName,
+                'vehicle_info' => $vehicleInfo,
+                'scheduled_delivery_date' => $scheduledDeliveryDate
+            ];
+            $this->autoCreateDelivery($poId, $poData, $deliveryDetails);
 
             return $this->response->setJSON([
                 'status' => 'success',
@@ -559,8 +600,13 @@ class PurchaseController extends BaseController
             // Update request status
             $this->purchaseRequestModel->updateStatus((int)$id, 'converted_to_po');
 
-            // Auto-create delivery record when PO is created
-            $this->autoCreateDelivery($poId, $poData);
+            // Auto-create delivery record when PO is created (with delivery details if provided)
+            $deliveryDetails = [
+                'driver_name' => $this->request->getPost('driver_name'),
+                'vehicle_info' => $this->request->getPost('vehicle_info'),
+                'scheduled_delivery_date' => $expectedDeliveryDate
+            ];
+            $this->autoCreateDelivery($poId, $poData, $deliveryDetails);
 
             return $this->response->setJSON([
                 'status' => 'success',
@@ -577,19 +623,21 @@ class PurchaseController extends BaseController
     }
 
     /**
-     * Auto-create delivery record when PO is approved (int-2)
+     * Auto-create delivery record when PO is approved
      */
-    private function autoCreateDelivery(int $poId, array $poData): void
+    private function autoCreateDelivery(int $poId, array $poData, array $deliveryDetails = []): void
     {
         try {
             $deliveryModel = new \App\Models\DeliveryModel();
             
-            // Create delivery record automatically
+            // Create delivery record automatically with delivery details
             $deliveryData = [
                 'purchase_order_id' => $poId,
                 'supplier_id' => $poData['supplier_id'],
                 'branch_id' => $poData['branch_id'],
-                'scheduled_date' => $poData['expected_delivery_date'],
+                'scheduled_date' => $deliveryDetails['scheduled_delivery_date'] ?? $poData['expected_delivery_date'],
+                'driver_name' => $deliveryDetails['driver_name'] ?? null,
+                'vehicle_info' => $deliveryDetails['vehicle_info'] ?? null,
                 'status' => 'scheduled',
                 'notes' => 'Auto-created from Purchase Order',
                 'created_at' => date('Y-m-d H:i:s'),
@@ -597,7 +645,7 @@ class PurchaseController extends BaseController
             ];
 
             $deliveryModel->scheduleDelivery($deliveryData);
-            log_message('info', 'Delivery record created for PO ' . $poId);
+            log_message('info', 'Delivery record created for PO ' . $poId . ' with delivery details');
         } catch (\Exception $e) {
             log_message('error', 'Failed to create delivery record: ' . $e->getMessage());
         }
@@ -688,12 +736,20 @@ class PurchaseController extends BaseController
             $request = $this->purchaseRequestModel->getRequestWithItems($request['id']);
         }
 
+        // Get pending approvals for sidebar badge (only for central admin)
+        $dashboardData = ['purchaseRequests' => ['pending_approvals' => 0]];
+        if (in_array($role, ['central_admin', 'superadmin'])) {
+            $pendingRequests = $this->purchaseRequestModel->getPendingRequests();
+            $dashboardData['purchaseRequests']['pending_approvals'] = count($pendingRequests);
+        }
+
         return view('dashboards/purchase_requests_list', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
             ],
-            'requests' => $requests
+            'requests' => $requests,
+            'data' => $dashboardData
         ]);
     }
 
@@ -802,6 +858,8 @@ class PurchaseController extends BaseController
                 ];
             }
 
+            log_message('debug', 'Purchase orders API: Returning ' . count($formattedOrders) . ' orders');
+
             return $this->response->setJSON([
                 'status' => 'success',
                 'orders' => $formattedOrders,
@@ -809,8 +867,82 @@ class PurchaseController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error fetching purchase orders: ' . $e->getMessage());
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to fetch purchase orders']);
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to fetch purchase orders: ' . $e->getMessage(),
+                'orders' => []
+            ]);
         }
+    }
+
+    /**
+     * Show purchase orders list page
+     */
+    public function showPurchaseOrdersList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        // Fetch purchase orders data server-side
+        try {
+            $orders = $this->db->table('purchase_orders')
+                ->select('purchase_orders.*, suppliers.name as supplier_name, branches.name as branch_name')
+                ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id', 'left')
+                ->join('branches', 'branches.id = purchase_orders.branch_id', 'left')
+                ->orderBy('purchase_orders.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            // Format the data
+            $formattedOrders = [];
+            foreach ($orders as $order) {
+                $formattedOrders[] = [
+                    'id' => $order['id'],
+                    'order_number' => $order['order_number'] ?? ('PO-' . str_pad($order['id'], 5, '0', STR_PAD_LEFT)),
+                    'purchase_request_id' => $order['purchase_request_id'],
+                    'supplier' => [
+                        'id' => $order['supplier_id'], 
+                        'name' => $order['supplier_name'] ?? 'N/A'
+                    ],
+                    'branch' => [
+                        'id' => $order['branch_id'], 
+                        'name' => $order['branch_name'] ?? 'N/A'
+                    ],
+                    'status' => $order['status'] ?? 'pending',
+                    'total_amount' => (float)($order['total_amount'] ?? 0),
+                    'expected_delivery_date' => $order['expected_delivery_date'],
+                    'actual_delivery_date' => $order['actual_delivery_date'],
+                    'order_date' => $order['order_date'],
+                    'created_at' => $order['created_at'],
+                    'approved_by' => $order['approved_by'],
+                    'approved_at' => $order['approved_at']
+                ];
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching purchase orders: ' . $e->getMessage());
+            $formattedOrders = [];
+        }
+
+        // Get pending approvals for sidebar badge
+        $pendingRequests = $this->purchaseRequestModel->getPendingRequests();
+        $dashboardData = [
+            'purchaseRequests' => [
+                'pending_approvals' => count($pendingRequests)
+            ]
+        ];
+
+        return view('dashboards/purchase_orders_list', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+            ],
+            'orders' => $formattedOrders,
+            'data' => $dashboardData
+        ]);
     }
 
     /**
@@ -946,12 +1078,15 @@ class PurchaseController extends BaseController
             $invoiceDate = date('Y-m-d'); // Use approval date as invoice date
             $dueDate = $this->accountsPayableModel->calculateDueDate($paymentTerms, $invoiceDate);
             
+            // Generate invoice number
+            $invoiceNumber = $this->accountsPayableModel->generateInvoiceNumber();
+            
             // Create accounts payable entry
             $apData = [
                 'purchase_order_id' => $purchaseOrderId,
                 'supplier_id' => (int)$order['supplier_id'],
                 'branch_id' => (int)$order['branch_id'],
-                'invoice_number' => null, // Can be updated later when invoice is received
+                'invoice_number' => $invoiceNumber, // Auto-generated invoice number
                 'invoice_date' => $invoiceDate,
                 'due_date' => $dueDate,
                 'amount' => (float)$order['total_amount'],

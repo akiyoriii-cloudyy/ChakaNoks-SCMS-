@@ -552,6 +552,107 @@ class Manager extends BaseController
     }
 
     /**
+     * Deliveries page for manager - to confirm deliveries
+     */
+    public function deliveries()
+    {
+        $session = session();
+
+        // Auth check
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        $branchId = $session->get('branch_id');
+        if (empty($branchId)) {
+            $session->setFlashdata('error', 'Branch assignment missing. Please contact the central admin.');
+            return redirect()->back();
+        }
+
+        // Get pending and in-transit deliveries for this branch
+        try {
+            $deliveries = $this->db->table('deliveries d')
+                ->select('d.*, po.order_number, s.name as supplier_name')
+                ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left')
+                ->join('suppliers s', 's.id = d.supplier_id', 'left')
+                ->where('d.branch_id', $branchId)
+                ->whereIn('d.status', ['scheduled', 'in_transit', 'pending'])
+                ->orderBy('d.scheduled_date', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            // Format deliveries
+            $formattedDeliveries = [];
+            foreach ($deliveries as $delivery) {
+                $formattedDeliveries[] = [
+                    'id' => $delivery['id'],
+                    'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
+                    'purchase_order' => ['id' => $delivery['purchase_order_id'], 'order_number' => $delivery['order_number'] ?? 'N/A'],
+                    'supplier' => ['id' => $delivery['supplier_id'], 'name' => $delivery['supplier_name'] ?? 'N/A'],
+                    'status' => $delivery['status'] ?? 'scheduled',
+                    'scheduled_date' => $delivery['scheduled_date'],
+                    'actual_delivery_date' => $delivery['actual_delivery_date'],
+                    'driver_name' => $delivery['driver_name'],
+                    'vehicle_info' => $delivery['vehicle_info'],
+                    'received_by' => $delivery['received_by'],
+                    'received_at' => $delivery['received_at'],
+                    'notes' => $delivery['notes'],
+                    'created_at' => $delivery['created_at']
+                ];
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error fetching deliveries: ' . $e->getMessage());
+            $formattedDeliveries = [];
+        }
+
+        // Get dashboard data for sidebar
+        $dashboardData = $this->getDashboardData((int)$branchId);
+
+        return view('dashboards/manager_deliveries', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+                'branch_id' => $branchId,
+                'user_id' => $session->get('user_id') ?? $session->get('id'),
+            ],
+            'deliveries' => $formattedDeliveries,
+            'data' => $dashboardData
+        ]);
+    }
+
+    /**
+     * Stock Out page for manager
+     */
+    public function stockOut()
+    {
+        $session = session();
+
+        // Auth check
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return redirect()->to('/auth/login');
+        }
+
+        $branchId = $session->get('branch_id');
+        if (empty($branchId)) {
+            $session->setFlashdata('error', 'Branch assignment missing. Please contact the central admin.');
+            return redirect()->back();
+        }
+
+        // Get dashboard data for sidebar
+        $dashboardData = $this->getDashboardData((int)$branchId);
+
+        return view('dashboards/manager_stock_out', [
+            'me' => [
+                'email' => $session->get('email'),
+                'role' => $session->get('role'),
+                'branch_id' => $branchId,
+                'user_id' => $session->get('user_id') ?? $session->get('id'),
+            ],
+            'data' => $dashboardData
+        ]);
+    }
+
+    /**
      * Settings page for manager
      */
     public function settings()
@@ -581,5 +682,131 @@ class Manager extends BaseController
             ],
             'branch' => $branch
         ]);
+    }
+
+    /**
+     * Search products for stock out
+     */
+    public function searchProducts()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $query = $this->request->getGet('q');
+
+        if (empty($query) || strlen($query) < 2) {
+            return $this->response->setJSON(['status' => 'success', 'products' => []]);
+        }
+
+        try {
+            $products = $this->db->table('products')
+                ->where('branch_id', $branchId)
+                ->where('stock_qty >', 0)
+                ->groupStart()
+                    ->like('name', $query)
+                    ->orLike('code', $query)
+                ->groupEnd()
+                ->limit(10)
+                ->get()
+                ->getResultArray();
+
+            $formattedProducts = [];
+            foreach ($products as $product) {
+                $formattedProducts[] = [
+                    'id' => $product['id'],
+                    'name' => $product['name'],
+                    'code' => $product['code'] ?? '',
+                    'stock_qty' => (int)($product['stock_qty'] ?? 0),
+                    'unit' => $product['unit'] ?? ''
+                ];
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'products' => $formattedProducts
+            ]);
+        } catch (Exception $e) {
+            log_message('error', 'Error searching products: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error searching products']);
+        }
+    }
+
+    /**
+     * Record stock out
+     */
+    public function recordStockOut()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $items = $this->request->getPost('items');
+
+        if (empty($items) || !is_array($items)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Items are required']);
+        }
+
+        $stockTransactionModel = new \App\Models\StockTransactionModel();
+        $userId = $session->get('user_id') ?? $session->get('id');
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            $recordedCount = 0;
+            
+            foreach ($items as $item) {
+                $productId = (int)($item['product_id'] ?? 0);
+                $quantity = (int)($item['quantity'] ?? 0);
+                $reason = $item['reason'] ?? 'other';
+                $notes = $item['notes'] ?? '';
+
+                if ($productId > 0 && $quantity > 0) {
+                    // Verify product belongs to branch
+                    $product = $this->db->table('products')
+                        ->where('id', $productId)
+                        ->where('branch_id', $branchId)
+                        ->get()
+                        ->getRowArray();
+
+                    if ($product && $product['stock_qty'] >= $quantity) {
+                        // Record STOCK-OUT transaction
+                        $stockOutRecorded = $stockTransactionModel->recordStockOut(
+                            $productId,
+                            $quantity,
+                            null, // reference_id
+                            'stock_out', // reference_type
+                            $userId, // created_by
+                            $reason . ($notes ? ': ' . $notes : '') // notes
+                        );
+
+                        if ($stockOutRecorded) {
+                            $recordedCount++;
+                        }
+                    }
+                }
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Transaction failed']);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Stock out recorded successfully for ' . $recordedCount . ' item(s)'
+            ]);
+        } catch (Exception $e) {
+            $db->transRollback();
+            log_message('error', 'Error recording stock out: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
+        }
     }
 }

@@ -62,6 +62,9 @@ class Staff extends BaseController
             ->orderBy('name')
             ->findAll();
 
+        // Get current section from URL or default to inventory
+        $section = $this->request->getGet('section') ?? 'inventory';
+
         return view('dashboards/staff', [
             'items'    => $items,
             'branches' => $branches,
@@ -74,7 +77,9 @@ class Staff extends BaseController
             'me'       => [
                 'email' => $session->get('email'),
                 'role'  => $session->get('role'),
+                'branch_id' => $branchId,
             ],
+            'currentSection' => $section,
         ]);
     }
 
@@ -416,5 +421,210 @@ class Staff extends BaseController
         }
 
         return (int)$product['branch_id'] === (int)$branchId;
+    }
+
+    /**
+     * Get branch products for stock in/out/damaged sections
+     */
+    public function getBranchProducts()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        if (!$branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Branch assignment missing']);
+        }
+
+        try {
+            $products = $this->db->table('products')
+                ->select('products.id, products.name, products.stock_qty, products.unit')
+                ->where('products.branch_id', $branchId)
+                ->orderBy('products.name', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'products' => $products
+            ]);
+        } catch (Exception $e) {
+            log_message('error', 'Error getting branch products: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error loading products']);
+        }
+    }
+
+    /**
+     * Record stock in
+     */
+    public function recordStockIn()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $productId = (int)($this->request->getPost('product_id') ?? 0);
+        $quantity = (int)($this->request->getPost('quantity') ?? 0);
+        $reference = $this->request->getPost('reference') ?? '';
+        $notes = $this->request->getPost('notes') ?? '';
+
+        if ($productId <= 0 || $quantity <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid product or quantity']);
+        }
+
+        // Verify product belongs to branch
+        $product = $this->model->find($productId);
+        if (!$product) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Product not found']);
+        }
+
+        if (!$this->canAccessProduct($session, $product)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized to manage this product']);
+        }
+
+        $userId = $session->get('user_id') ?? $session->get('id');
+        $expiryDate = $product['expiry'] ?? null;
+
+        // Record STOCK-IN transaction
+        $stockInRecorded = $this->stockTransactionModel->recordStockIn(
+            $productId,
+            $quantity,
+            null, // reference_id
+            $reference ?: 'stock_in', // reference_type
+            $userId, // created_by
+            $expiryDate
+        );
+
+        if ($stockInRecorded) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Stock in recorded successfully'
+            ]);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record stock in']);
+    }
+
+    /**
+     * Record stock out
+     */
+    public function recordStockOut()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $productId = (int)($this->request->getPost('product_id') ?? 0);
+        $quantity = (int)($this->request->getPost('quantity') ?? 0);
+        $reason = $this->request->getPost('reason') ?? 'other';
+        $notes = $this->request->getPost('notes') ?? '';
+
+        if ($productId <= 0 || $quantity <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid product or quantity']);
+        }
+
+        // Verify product belongs to branch
+        $product = $this->model->find($productId);
+        if (!$product) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Product not found']);
+        }
+
+        if (!$this->canAccessProduct($session, $product)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized to manage this product']);
+        }
+
+        if ($product['stock_qty'] < $quantity) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Insufficient stock. Available: ' . $product['stock_qty']]);
+        }
+
+        $userId = $session->get('user_id') ?? $session->get('id');
+        $finalNotes = $reason . ($notes ? ': ' . $notes : '');
+
+        // Record STOCK-OUT transaction
+        $stockOutRecorded = $this->stockTransactionModel->recordStockOut(
+            $productId,
+            $quantity,
+            null, // reference_id
+            'stock_out', // reference_type
+            $userId, // created_by
+            $finalNotes
+        );
+
+        if ($stockOutRecorded) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Stock out recorded successfully'
+            ]);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record stock out']);
+    }
+
+    /**
+     * Get deliveries for branch
+     */
+    public function getDeliveries()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        if (!$branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Branch assignment missing']);
+        }
+
+        try {
+            $deliveries = $this->db->table('deliveries d')
+                ->select('d.*, po.order_number, s.name as supplier_name')
+                ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left')
+                ->join('suppliers s', 's.id = d.supplier_id', 'left')
+                ->where('d.branch_id', $branchId)
+                ->whereIn('d.status', ['scheduled', 'in_transit', 'pending'])
+                ->orderBy('d.scheduled_date', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $formattedDeliveries = [];
+            foreach ($deliveries as $delivery) {
+                $formattedDeliveries[] = [
+                    'id' => $delivery['id'],
+                    'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
+                    'purchase_order' => [
+                        'id' => $delivery['purchase_order_id'],
+                        'order_number' => $delivery['order_number'] ?? 'N/A'
+                    ],
+                    'supplier' => [
+                        'id' => $delivery['supplier_id'],
+                        'name' => $delivery['supplier_name'] ?? 'N/A'
+                    ],
+                    'status' => $delivery['status'] ?? 'scheduled',
+                    'scheduled_date' => $delivery['scheduled_date'],
+                    'actual_delivery_date' => $delivery['actual_delivery_date'],
+                    'driver_name' => $delivery['driver_name'],
+                    'vehicle_info' => $delivery['vehicle_info'],
+                    'notes' => $delivery['notes']
+                ];
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'deliveries' => $formattedDeliveries
+            ]);
+        } catch (Exception $e) {
+            log_message('error', 'Error getting deliveries: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error loading deliveries']);
+        }
     }
 }

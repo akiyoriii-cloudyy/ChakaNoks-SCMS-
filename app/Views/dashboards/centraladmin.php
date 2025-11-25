@@ -1,189 +1,3 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<?= $this->extend('templates/base_template') ?>
-
-<?= $this->section('head') ?>
-<style>
-    :root {
-        --green-1: #2d5016;
-        --green-2: #4a7c2a;
-        --orange-1: #ff6b35;
-        --orange-2: #f7931e;
-        --gold: #ffd700;
-        --card-radius: 18px;
-    }
-
-    body {
-        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-        background:
-            linear-gradient(135deg, var(--green-1) 0%, var(--green-2) 45%, #ffffff 45%, #f8f9fa 100%),
-            radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(74, 124, 42, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
-            radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
-            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
-        background-attachment: fixed;
-        min-height: 100vh;
-        color: #111827;
-    }
-
-    .template-container {
-        min-height: 100vh;
-    }
-
-    .template-header {
-        padding: 20px 32px 10px;
-        background: transparent;
-        color: #f9fafb;
-    }
-
-    .template-body {
-        padding: 0 32px 32px;
-        background: transparent;
-    }
-
-    .dashboard-widget {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.9) 100%);
-        border-radius: var(--card-radius);
-        padding: 22px 24px;
-        box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.08),
-            0 10px 25px rgba(0, 0, 0, 0.06),
-            0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-        margin-bottom: 20px;
-        position: relative;
-        overflow: hidden;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .dashboard-widget::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at 0 0, rgba(255, 107, 53, 0.08), transparent 60%),
-                    radial-gradient(circle at 100% 100%, rgba(45, 80, 22, 0.12), transparent 55%);
-        opacity: 0.9;
-        pointer-events: none;
-    }
-
-    .dashboard-widget > * {
-        position: relative;
-        z-index: 1;
-    }
-
-    .dashboard-widget:hover {
-        transform: translateY(-3px);
-        box-shadow:
-            0 24px 70px rgba(249, 248, 248, 0.12),
-            0 12px 30px rgba(0, 0, 0, 0.08);
-    }
-
-    .widget-icon {
-        font-size: 2.4rem;
-        opacity: 0.9;
-    }
-
-    .widget-value {
-        font-size: 2.1rem;
-        font-weight: 800;
-        margin: 6px 0 4px;
-    }
-
-    .widget-label {
-        color: #111827;
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .alert-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 700;
-    }
-
-    .alert-critical { background: #dc2626; color: #fff; }
-    .alert-warning { background: #facc15; color: #92400e; }
-    .alert-success { background: #22c55e; color: #052e16; }
-    .alert-info { background: #0ea5e9; color: #f0f9ff; }
-
-    .branch-row {
-        border-bottom: 1px solid rgba(229, 231, 235, 0.9);
-        padding: 12px 0;
-    }
-
-    .branch-row:last-child {
-        border-bottom: none;
-    }
-
-    .refresh-indicator {
-        font-size: 0.8rem;
-        color: #6b7280;
-    }
-
-    .nav-tabs {
-        border-bottom: none;
-        background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
-        border-radius: 12px;
-        padding: 8px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        margin-bottom: 24px;
-    }
-
-    .nav-tabs .nav-link {
-        border: none;
-        border-radius: 8px;
-        color: #6b7280;
-        font-weight: 600;
-        padding: 12px 20px;
-        transition: all 0.3s ease;
-        font-size: 0.95rem;
-        position: relative;
-    }
-
-    .nav-tabs .nav-link:hover {
-        background: rgba(45, 80, 22, 0.08);
-        color: #2d5016;
-        transform: translateY(-2px);
-    }
-
-    .nav-tabs .nav-link.active {
-        background: linear-gradient(135deg, var(--green-1), var(--green-2));
-        color: #ffffff !important;
-        box-shadow: 0 10px 25px rgba(45, 80, 22, 0.3);
-        transform: translateY(-2px);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    
-    .nav-tabs .nav-link.active i {
-        color: #ffffff !important;
-    }
-
-    .nav-tabs .nav-link i {
-        margin-right: 8px;
-        font-size: 1.1rem;
-    }
-
-    .nav-tabs .badge {
-        background: linear-gradient(135deg, #dc2626, #ef4444) !important;
-        margin-left: 6px;
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        border-radius: 999px;
-    }
-</style>
-<?= $this->endSection() ?>
-
-<?= $this->section('header') ?>
-<?php
-// centraladmin.php
-?>
->>>>>>> 1a04d05a4a57569b9423ae0be8612098ab5b9c3c
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,12 +23,50 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/dashboard-pro.css') ?>">
     
     <style>
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-tabs { border-bottom: none; background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%); border-radius: 12px; padding: 8px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12); margin-bottom: 24px; }
-        .nav-tabs .nav-link { border: none; border-radius: 8px; color: #6b7280; font-weight: 600; padding: 12px 20px; transition: all 0.3s ease; }
-        .nav-tabs .nav-link:hover { background: rgba(45, 80, 22, 0.08); color: #2d5016; transform: translateY(-2px); }
-        .nav-tabs .nav-link.active { background: linear-gradient(135deg, #2d5016, #4a7c2a); color: #f9fafb; box-shadow: 0 10px 25px rgba(45, 80, 22, 0.3); }
+        /* Ensure navigation is ALWAYS visible */
+        .dashboard-sidebar,
+        .sidebar-nav,
+        .nav-item {
+            visibility: visible !important;
+            display: block !important;
+        }
+        
+        /* Content sections */
+        .content-section {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d5016;
+            margin: 0;
+        }
+        
+        .form-select {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
         
         /* Priority Badge Styles */
         .priority-badge {
@@ -316,7 +168,6 @@
   </style>
 </head>
 <body>
-<<<<<<< HEAD
     <div class="dashboard-wrapper">
         <!-- Sidebar -->
         <aside class="dashboard-sidebar">
@@ -330,55 +181,41 @@
                         <p class="logo-subtitle">Supply Chain Management</p>
                     </div>
                 </div>
-=======
-
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2 style="color: #ffffff !important; font-weight: 700; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Central Office Dashboard</h2>
-            <p class="mb-0" style="color: rgba(255, 255, 255, 0.8) !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Real-time monitoring of all branches and operations</p>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboard()">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-            <span class="refresh-indicator" id="lastRefresh">Last updated: Just now</span>
-            <div class="text-end">
-                <div style="font-weight: 600; color: #2ecc71;"><?= esc(session()->get('email') ?? '') ?></div>
-                <small class="text-muted"><?= esc(session()->get('role') ?? '') ?></small>
->>>>>>> 1a04d05a4a57569b9423ae0be8612098ab5b9c3c
             </div>
             
             <nav class="sidebar-nav">
-                <?php $activeTab = $activeTab ?? 'dashboard'; ?>
-                <a href="<?= base_url('centraladmin/dashboard?tab=dashboard') ?>" class="nav-item <?= $activeTab === 'dashboard' ? 'active' : '' ?>">
+                <?php 
+                $currentUrl = current_url();
+                $isDashboard = strpos($currentUrl, 'centraladmin/dashboard') !== false && strpos($currentUrl, '?tab=') === false;
+                ?>
+                <a href="<?= base_url('centraladmin/dashboard') ?>" class="nav-item <?= $isDashboard ? 'active' : '' ?>">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="<?= base_url('centraladmin/dashboard?tab=purchaseRequests') ?>" class="nav-item <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>">
+                <a href="<?= base_url('purchase/request/list') ?>" class="nav-item <?= strpos($currentUrl, 'purchase/request') !== false ? 'active' : '' ?>">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Purchase Requests</span>
                     <?php if (($data['purchaseRequests']['pending_approvals'] ?? 0) > 0): ?>
                         <span class="badge badge-danger" style="margin-left: auto; background: rgba(239, 68, 68, 0.2); color: #ef4444;"><?= $data['purchaseRequests']['pending_approvals'] ?></span>
                     <?php endif; ?>
                 </a>
-                <a href="<?= base_url('centraladmin/dashboard?tab=purchaseOrders') ?>" class="nav-item <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>">
+                <a href="<?= base_url('purchase/order/list') ?>" class="nav-item <?= strpos($currentUrl, 'purchase/order') !== false ? 'active' : '' ?>">
                     <i class="fas fa-file-invoice"></i>
                     <span>Purchase Orders</span>
                 </a>
-                <a href="<?= base_url('centraladmin/dashboard?tab=deliveries') ?>" class="nav-item <?= $activeTab === 'deliveries' ? 'active' : '' ?>">
+                <a href="<?= base_url('delivery/branch/list') ?>" class="nav-item <?= strpos($currentUrl, 'delivery') !== false ? 'active' : '' ?>">
                     <i class="fas fa-truck"></i>
                     <span>Deliveries</span>
                 </a>
-                <a href="<?= base_url('centraladmin/dashboard?tab=suppliers') ?>" class="nav-item <?= $activeTab === 'suppliers' ? 'active' : '' ?>">
+                <a href="<?= base_url('supplier/list') ?>" class="nav-item <?= strpos($currentUrl, 'supplier') !== false ? 'active' : '' ?>">
                     <i class="fas fa-building"></i>
                     <span>Suppliers</span>
                 </a>
-                <a href="<?= base_url('centraladmin/dashboard?tab=accountsPayable') ?>" class="nav-item <?= $activeTab === 'accountsPayable' ? 'active' : '' ?>">
+                <a href="<?= base_url('accounts-payable/list') ?>" class="nav-item <?= strpos($currentUrl, 'accounts-payable') !== false ? 'active' : '' ?>">
                     <i class="fas fa-money-check-alt"></i>
                     <span>Accounts Payable</span>
                 </a>
-                <a href="<?= base_url('centraladmin/dashboard?tab=reports') ?>" class="nav-item <?= $activeTab === 'reports' ? 'active' : '' ?>">
+                <a href="<?= base_url('centraladmin/reports') ?>" class="nav-item <?= strpos($currentUrl, 'centraladmin/reports') !== false ? 'active' : '' ?>">
                     <i class="fas fa-chart-bar"></i>
                     <span>Reports</span>
                 </a>
@@ -389,18 +226,18 @@
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div class="user-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
                             <i class="fas fa-user-circle" style="font-size: 32px; color: white;"></i>
-                        </div>
+        </div>
                         <div class="user-info" style="flex: 1; min-width: 0;">
                             <div class="user-name" style="font-size: 0.9rem; font-weight: 600; color: white; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc($me['email'] ?? 'User') ?></div>
                             <div class="user-role" style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;"><?= esc(ucwords(str_replace('_', ' ', $me['role'] ?? 'User'))) ?></div>
-                        </div>
+            </div>
                     </div>
                 </div>
                 <a href="<?= base_url('/auth/logout') ?>" class="logout-btn" style="background: linear-gradient(135deg, rgba(45, 80, 22, 0.9) 0%, rgba(74, 124, 42, 0.9) 100%); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='linear-gradient(135deg, rgba(45, 80, 22, 1) 0%, rgba(74, 124, 42, 1) 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(45, 80, 22, 0.9) 0%, rgba(74, 124, 42, 0.9) 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)';">
                     <i class="fas fa-sign-out-alt" style="font-size: 1rem;"></i>
                     <span style="font-size: 0.9rem;">Logout</span>
-                </a>
-            </div>
+            </a>
+        </div>
         </aside>
 
         <!-- Main Content -->
@@ -422,50 +259,8 @@
             </header>
 
             <div class="dashboard-content">
-                <!-- Tab Navigation -->
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'dashboard' ? 'active' : '' ?>" href="#" data-tab="dashboard" onclick="goToDashboard(); return false;">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>" href="#" data-tab="purchaseRequests" onclick="showPendingRequests(); return false;">
-                <i class="fas fa-shopping-cart"></i> Purchase Requests
-                            <?php if (($data['purchaseRequests']['pending_approvals'] ?? 0) > 0): ?>
-                    <span class="badge bg-danger"><?= $data['purchaseRequests']['pending_approvals'] ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>" href="#" data-tab="purchaseOrders" onclick="showPurchaseOrders(); return false;">
-                <i class="fas fa-file-invoice"></i> Purchase Orders
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'deliveries' ? 'active' : '' ?>" href="#" data-tab="deliveries" onclick="showDeliveries(); return false;">
-                <i class="fas fa-truck"></i> Deliveries
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'suppliers' ? 'active' : '' ?>" href="#" data-tab="suppliers" onclick="showSuppliers(); return false;">
-                <i class="fas fa-building"></i> Suppliers
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'accountsPayable' ? 'active' : '' ?>" href="#" data-tab="accountsPayable" onclick="showAccountsPayable(); return false;">
-                <i class="fas fa-money-check-alt"></i> Accounts Payable
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $activeTab === 'reports' ? 'active' : '' ?>" href="#" data-tab="reports" onclick="showReports(); return false;">
-                <i class="fas fa-chart-bar"></i> Reports
-            </a>
-        </li>
-    </ul>
-
-                <!-- Dashboard Tab -->
-                <div class="tab-content <?= $activeTab === 'dashboard' ? 'active' : '' ?>" id="dashboardSection">
+                <!-- Dashboard Content -->
+                <div class="tab-content active" id="dashboardSection" style="display: block !important;">
                     <!-- Key Metrics -->
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -567,7 +362,7 @@
                                     Branch Overview
                                     <span style="margin-left: auto; font-size: 0.875rem; font-weight: 500; opacity: 0.9;">5 Active Branches</span>
                                 </h3>
-                            </div>
+                    </div>
                             <div id="branchOverviewContent" style="padding: 20px;">
                                 <?php if (!empty($data['branches'])): ?>
                                     <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
@@ -577,12 +372,12 @@
                                                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                                                     <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(45, 80, 22, 0.3);">
                                                         <i class="fas fa-store" style="color: white; font-size: 1.25rem;"></i>
-                                                    </div>
+                    </div>
                                                     <div style="flex: 1; min-width: 0;">
                                                         <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc($branch['branch_name']) ?></h4>
                                                         <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b; font-weight: 500;"><?= esc($branch['branch_code']) ?></p>
-                                                    </div>
-                                                </div>
+                            </div>
+                        </div>
                                                 <?php if (!empty($branch['branch_address'])): ?>
                                                     <p style="margin: 0 0 12px 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
                                                         <i class="fas fa-map-marker-alt" style="color: #2d5016; margin-right: 6px;"></i>
@@ -593,225 +388,209 @@
                                                     <div>
                                                         <p style="margin: 0; font-size: 0.7rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Products</p>
                                                         <h3 style="margin: 4px 0 0 0; font-size: 1.25rem; font-weight: 700; color: #2d5016;"><?= number_format($branch['total_products']) ?></h3>
-                                                    </div>
+                    </div>
                                                     <div>
                                                         <p style="margin: 0; font-size: 0.7rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Low Stock</p>
                                                         <h3 style="margin: 4px 0 0 0; font-size: 1.25rem; font-weight: 700; color: #f59e0b;"><?= number_format($branch['low_stock'] ?? $branch['low_stock_items'] ?? 0) ?></h3>
-                                                    </div>
+                </div>
                                                     <div>
                                                         <p style="margin: 0; font-size: 0.7rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Critical</p>
                                                         <h3 style="margin: 4px 0 0 0; font-size: 1.25rem; font-weight: 700; color: #dc2626;"><?= number_format($branch['critical_alerts'] ?? 0) ?></h3>
-                                                    </div>
-                                                </div>
-                                            </div>
+            </div>
+        </div>
+    </div>
                                         <?php endforeach; ?>
-                                    </div>
+                    </div>
                                 <?php else: ?>
                                     <div style="text-align: center; padding: 40px 20px; color: #64748b;">
                                         <i class="fas fa-store" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
                                         <p style="margin: 0; font-size: 1rem; font-weight: 500;">No branch data available</p>
-                                    </div>
+                </div>
                                 <?php endif; ?>
-                            </div>
-                        </div>
+            </div>
+        </div>
     </div>
 
-                <!-- Other Tab Contents (Purchase Requests, Orders, etc.) -->
-                <div class="tab-content <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>" id="purchaseRequestsSection" style="display: none;">
+                <!-- Purchase Requests Tab -->
+                <div class="tab-content <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>" id="purchaseRequestsSection" style="<?= $activeTab === 'purchaseRequests' ? 'display: block !important;' : 'display: none !important;' ?>">
                     <div class="content-card">
-                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 class="card-title">Purchase Requests</h3>
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 class="card-title" style="margin: 0;">Purchase Requests</h3>
                             <div style="display: flex; gap: 10px;">
-                                <select id="requestStatusFilter" class="form-select" style="width: auto; min-width: 150px; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: white;">
+                                <select id="requestStatusFilter" class="form-select" style="width: auto; min-width: 150px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;">
                                     <option value="all">All Requests</option>
                                     <option value="pending">Pending</option>
                                     <option value="approved">Approved</option>
                                     <option value="rejected">Rejected</option>
                                     <option value="converted_to_po">Converted to PO</option>
                                 </select>
-                                <select id="requestPriorityFilter" class="form-select" style="width: auto; min-width: 120px; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: white;">
+                                <select id="requestPriorityFilter" class="form-select" style="width: auto; min-width: 120px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;">
                                     <option value="all">All Priorities</option>
                                     <option value="urgent">Urgent</option>
                                     <option value="high">High</option>
                                     <option value="normal">Normal</option>
                                     <option value="low">Low</option>
-                        </select>
-                </div>
-                </div>
-                        <div id="pendingRequestsContent" style="padding: 20px;">
-                            <!-- Content loaded via JavaScript -->
-            </div>
-        </div>
-    </div>
-
-                <div class="tab-content <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>" id="purchaseOrdersSection" style="display: none;">
-                    <div class="content-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Purchase Orders</h3>
-                </div>
-                        <div id="purchaseOrdersContent" style="padding: 20px;">
+                                </select>
+                            </div>
+                        </div>
+                        <div id="pendingRequestsContent" style="padding: 20px; min-height: 200px;">
                             <div class="text-center p-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2">Loading purchase requests...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purchase Orders Tab -->
+                <div class="tab-content <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>" id="purchaseOrdersSection" style="<?= $activeTab === 'purchaseOrders' ? 'display: block !important;' : 'display: none !important;' ?>">
+                    <div class="content-card">
+                        <div class="card-header" style="margin-bottom: 20px;">
+                            <h3 class="card-title" style="margin: 0;">Purchase Orders</h3>
+                        </div>
+                        <div id="purchaseOrdersContent" style="padding: 20px; min-height: 200px;">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status"></div>
                                 <p class="mt-2">Loading purchase orders...</p>
                             </div>
+                        </div>
                     </div>
-                    </div>
-                    </div>
+                </div>
 
-                <div class="tab-content <?= $activeTab === 'deliveries' ? 'active' : '' ?>" id="deliveriesSection" style="display: none;">
+                <!-- Deliveries Tab -->
+                <div class="tab-content <?= $activeTab === 'deliveries' ? 'active' : '' ?>" id="deliveriesSection" style="<?= $activeTab === 'deliveries' ? 'display: block !important;' : 'display: none !important;' ?>">
                     <div class="content-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Deliveries</h3>
-                    </div>
-                        <div id="deliveriesContent" style="padding: 20px;">
+                        <div class="card-header" style="margin-bottom: 20px;">
+                            <h3 class="card-title" style="margin: 0;">Deliveries</h3>
+                        </div>
+                        <div id="deliveriesContent" style="padding: 20px; min-height: 200px;">
                             <div class="text-center p-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
+                                <div class="spinner-border text-primary" role="status"></div>
                                 <p class="mt-2">Loading deliveries...</p>
                             </div>
+                        </div>
                     </div>
-                        </div>
-                        </div>
+                </div>
 
-                <div class="tab-content <?= $activeTab === 'suppliers' ? 'active' : '' ?>" id="suppliersSection" style="display: none;">
+                <!-- Suppliers Tab -->
+                <div class="tab-content <?= $activeTab === 'suppliers' ? 'active' : '' ?>" id="suppliersSection" style="<?= $activeTab === 'suppliers' ? 'display: block !important;' : 'display: none !important;' ?>">
                     <div class="content-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Suppliers</h3>
-                    </div>
-                        <div id="suppliersContent" style="padding: 20px;">
+                        <div class="card-header" style="margin-bottom: 20px;">
+                            <h3 class="card-title" style="margin: 0;">Suppliers</h3>
+                        </div>
+                        <div id="suppliersContent" style="padding: 20px; min-height: 200px;">
                             <div class="text-center p-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
+                                <div class="spinner-border text-primary" role="status"></div>
                                 <p class="mt-2">Loading suppliers...</p>
                             </div>
-            </div>
-        </div>
-    </div>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="tab-content <?= $activeTab === 'accountsPayable' ? 'active' : '' ?>" id="accountsPayableSection" style="display: <?= $activeTab === 'accountsPayable' ? 'block' : 'none' ?>;">
+                <!-- Accounts Payable Tab -->
+                <div class="tab-content <?= $activeTab === 'accountsPayable' ? 'active' : '' ?>" id="accountsPayableSection" style="<?= $activeTab === 'accountsPayable' ? 'display: block !important;' : 'display: none !important;' ?>">
                     <div class="content-card">
-                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 class="card-title">Accounts Payable</h3>
-                            <div style="display: flex; gap: 10px;">
-                                <select id="apStatusFilter" class="form-select" style="width: auto; min-width: 150px; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2); color: white;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 class="card-title" style="margin: 0;">Accounts Payable</h3>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <select id="apStatusFilter" class="form-select" style="width: auto; min-width: 150px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;">
                                     <option value="all">All Status</option>
                                     <option value="unpaid">Unpaid</option>
                                     <option value="partial">Partial</option>
                                     <option value="paid">Paid</option>
                                     <option value="overdue">Overdue</option>
-                        </select>
+                                </select>
+                                <select id="apInvoiceFilter" class="form-select" style="width: auto; min-width: 150px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;">
+                                    <option value="all">All Invoices</option>
+                                    <option value="with_invoice">With Invoice #</option>
+                                    <option value="without_invoice">Without Invoice #</option>
+                                </select>
                                 <button class="btn btn-sm btn-info" onclick="backfillAccountsPayable()" style="background: #17a2b8; border: none; padding: 8px 16px; border-radius: 6px; color: white;">
                                     <i class="fas fa-sync"></i> Backfill
                                 </button>
-                                <button class="btn btn-sm btn-primary" onclick="loadAccountsPayableSummary()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none; padding: 8px 16px; border-radius: 6px; color: white;">
-                                    <i class="fas fa-chart-line"></i> Summary
-                                </button>
-                    </div>
                             </div>
-                        <div id="accountsPayableContent" style="padding: 20px;">
+                        </div>
+                        <div id="accountsPayableContent" style="padding: 20px; min-height: 200px;">
                             <div class="text-center p-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                            </div>
+                                <div class="spinner-border text-primary" role="status"></div>
                                 <p class="mt-2">Loading accounts payable...</p>
-                            </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                <div class="tab-content <?= $activeTab === 'reports' ? 'active' : '' ?>" id="reportsSection" style="display: none;">
+                <!-- Reports Tab -->
+                <div class="tab-content <?= $activeTab === 'reports' ? 'active' : '' ?>" id="reportsSection" style="<?= $activeTab === 'reports' ? 'display: block !important;' : 'display: none !important;' ?>">
                     <div class="content-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Reports</h3>
-                    </div>
-                        <div id="reportsContent" style="padding: 20px;">
+                        <div class="card-header" style="margin-bottom: 20px;">
+                            <h3 class="card-title" style="margin: 0;">Reports</h3>
+                        </div>
+                        <div id="reportsContent" style="padding: 20px; min-height: 200px;">
                             <div class="text-center p-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
+                                <div class="spinner-border text-primary" role="status"></div>
                                 <p class="mt-2">Loading reports...</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                </div>
+
+        </div>
         </main>
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Load jQuery FIRST before Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-        // Tab switching
-        function goToDashboard() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#dashboardSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="dashboard"]').addClass('active');
-        }
-
-        function showPendingRequests() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#purchaseRequestsSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="purchaseRequests"]').addClass('active');
-            loadPendingRequests();
-        }
-
-        function showPurchaseOrders() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#purchaseOrdersSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="purchaseOrders"]').addClass('active');
-            loadPurchaseOrders();
-        }
-
-        function showDeliveries() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#deliveriesSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="deliveries"]').addClass('active');
-            loadDeliveries();
-        }
-
-        function showSuppliers() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#suppliersSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="suppliers"]').addClass('active');
-            loadSuppliers();
-        }
-
-        function showAccountsPayable() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#accountsPayableSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="accountsPayable"]').addClass('active');
-            loadAccountsPayable();
-        }
-
-        function showReports() {
-            $('.tab-content').removeClass('active').css('display', 'none');
-            $('#reportsSection').addClass('active').css('display', 'block');
-            $('.nav-link').removeClass('active');
-            $('[data-tab="reports"]').addClass('active');
-            loadReports();
-        }
-
         function refreshDashboard() {
             location.reload();
         }
 
+        // Load data when page loads based on active tab
+        function loadTabData() {
+            const activeTab = '<?= $activeTab ?? 'dashboard' ?>';
+            
+            if (activeTab === 'purchaseRequests') {
+                if (typeof loadPendingRequests === 'function') {
+                    loadPendingRequests();
+                }
+            } else if (activeTab === 'purchaseOrders') {
+                if (typeof loadPurchaseOrders === 'function') {
+                    loadPurchaseOrders();
+                }
+            } else if (activeTab === 'deliveries') {
+                if (typeof loadDeliveries === 'function') {
+                    loadDeliveries();
+                }
+            } else if (activeTab === 'suppliers') {
+                if (typeof loadSuppliers === 'function') {
+                    loadSuppliers();
+                }
+            } else if (activeTab === 'accountsPayable') {
+                if (typeof loadAccountsPayable === 'function') {
+                    loadAccountsPayable();
+                }
+            } else if (activeTab === 'reports') {
+                if (typeof loadReports === 'function') {
+                    loadReports();
+                }
+            }
+        }
+
         function loadPendingRequests() {
+            console.log('loadPendingRequests called');
             const statusFilter = $('#requestStatusFilter').val() || 'all';
             const priorityFilter = $('#requestPriorityFilter').val() || 'all';
             
-            $('#pendingRequestsContent').html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading purchase requests...</p></div>');
+            const contentDiv = $('#pendingRequestsContent');
+            if (!contentDiv.length) {
+                console.error('pendingRequestsContent div not found!');
+        return;
+    }
+
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading purchase requests...</p></div>');
             
             let url = '<?= base_url('purchase/request/api/list') ?>';
             const params = [];
@@ -819,17 +598,26 @@
             if (priorityFilter !== 'all') params.push('priority=' + encodeURIComponent(priorityFilter));
             if (params.length > 0) url += '?' + params.join('&');
             
+            console.log('Loading from URL:', url);
+            
             $.ajax({
                 url: url,
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success' && response.requests) {
+                    console.log('Purchase requests response:', response);
+                    console.log('Response type:', typeof response);
+                    console.log('Response status:', response.status);
+                    console.log('Response requests:', response.requests);
+                    console.log('Response requests type:', typeof response.requests);
+                    console.log('Response requests length:', response.requests ? response.requests.length : 'N/A');
+                    
+                    if (response && response.status === 'success' && Array.isArray(response.requests)) {
                         let html = '<div class="table-responsive"><table class="table" style="margin-bottom: 0;"><thead><tr style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;"><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Request #</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Branch</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Priority</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Status</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Total Amount</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Date</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Actions</th></tr></thead><tbody>';
                         
                         if (response.requests.length === 0) {
                             html += '<tr><td colspan="7" style="text-align: center; padding: 60px 20px; color: #999;"><i class="fas fa-inbox fa-4x" style="color: #ddd; margin-bottom: 20px; display: block;"></i><h5 style="margin-top: 20px; color: #666;">No purchase requests found</h5><p style="color: #999;">No requests match the selected filters</p></td></tr>';
-                        } else {
+        } else {
             response.requests.forEach(function(req) {
                                 const priority = (req.priority || 'normal').toLowerCase();
                                 const status = (req.status || 'pending').toLowerCase();
@@ -870,17 +658,48 @@
                         }
                         
                         html += '</tbody></table></div>';
-            $('#pendingRequestsContent').html(html);
                         
-                        // Attach event handlers
-                        attachRequestHandlers();
+                        const contentDiv = $('#pendingRequestsContent');
+                        if (contentDiv.length) {
+                            contentDiv.html(html);
+                            console.log('Purchase requests table rendered successfully');
+                            
+                            // Attach event handlers
+                            attachRequestHandlers();
+                        } else {
+                            console.error('pendingRequestsContent div not found after data load!');
+                        }
                     } else {
-                        $('#pendingRequestsContent').html('<div class="alert alert-info" style="padding: 20px; border-radius: 8px; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;">No purchase requests found</div>');
+                        console.warn('Response status is not success or requests array missing:', response);
+                        const contentDiv = $('#pendingRequestsContent');
+                        if (contentDiv.length) {
+                            contentDiv.html('<div class="alert alert-warning" style="padding: 20px; border-radius: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">No purchase requests found. Response: ' + JSON.stringify(response) + '</div>');
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error loading requests:', error);
-                    $('#pendingRequestsContent').html('<div class="alert alert-danger" style="padding: 20px; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">Error loading purchase requests. Please try again.</div>');
+                    console.error('XHR Status:', xhr.status);
+                    console.error('XHR Response:', xhr.responseText);
+                    console.error('XHR ReadyState:', xhr.readyState);
+                    const contentDiv = $('#pendingRequestsContent');
+                    if (contentDiv.length) {
+                        let errorMsg = 'Error loading purchase requests: ' + error + ' (Status: ' + xhr.status + ')';
+                        if (xhr.responseText) {
+                            try {
+                                const errorResponse = JSON.parse(xhr.responseText);
+                                if (errorResponse.message) {
+                                    errorMsg += '<br>Message: ' + errorResponse.message;
+                                }
+                            } catch(e) {
+                                errorMsg += '<br>Response: ' + xhr.responseText.substring(0, 200);
+                            }
+                        }
+                        contentDiv.html('<div class="alert alert-danger" style="padding: 20px; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">' + errorMsg + '<br><small>Please check browser console (F12) for more details.</small></div>');
+                    } else {
+                        console.error('Cannot display error - pendingRequestsContent div not found!');
+                        alert('Error: Cannot find content area. Please refresh the page.');
+                    }
         }
     });
 }
@@ -907,9 +726,9 @@
                 
                 if (!selectedSupplier) {
                     alert('Please select a supplier before accepting.');
-                    return;
-                }
-                
+        return;
+    }
+
                 acceptSupplier(requestId, selectedSupplier);
             });
             
@@ -930,7 +749,7 @@
                 dataType: 'json',
                 success: function(response) {
                     if (response.status === 'success' && response.request) {
-                        const req = response.request;
+            const req = response.request;
                         let html = '<div style="padding: 20px;">';
                         html += '<h5 style="margin-bottom: 20px; color: #2d5016; font-weight: 700;">Purchase Request Details</h5>';
                         html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">';
@@ -1000,10 +819,10 @@
                 },
                 error: function() {
                     alert('Error loading request details');
-                }
-            });
         }
-        
+    });
+}
+
         function loadSuppliersForRequest(requestId) {
             $.ajax({
                 url: '<?= base_url('supplier/') ?>?status=active',
@@ -1097,7 +916,7 @@
                 data: { supplier_id: supplierId },
                 dataType: 'json',
                 success: function(response) {
-        if (response.status === 'success') {
+            if (response.status === 'success') {
                         $('#requestModal').modal('hide');
                         // Redirect to purchase request list
                         window.location.href = '<?= base_url('centraladmin/dashboard?tab=purchaseRequests') ?>';
@@ -1115,19 +934,48 @@
 }
 
         function approveRequest(requestId) {
+            // Show delivery details modal first
+            $('#approveRequestId').val(requestId);
+            $('#deliveryDetailsModal').modal('show');
+        }
+        
+        function submitApprovalWithDeliveryDetails() {
+            const requestId = $('#approveRequestId').val();
+            const driverName = $('#deliveryDriverName').val();
+            const vehicleInfo = $('#deliveryVehicleInfo').val();
+            const scheduledDate = $('#deliveryScheduledDate').val();
+            
+            if (!scheduledDate) {
+                alert('Please enter a scheduled delivery date.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = $('#submitApprovalBtn');
+            const originalText = submitBtn.html();
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Approving...');
+            
             $.ajax({
                 url: '<?= base_url('purchase/request/') ?>' + requestId + '/approve',
                 method: 'POST',
+                data: {
+                    driver_name: driverName,
+                    vehicle_info: vehicleInfo,
+                    scheduled_delivery_date: scheduledDate
+                },
                 dataType: 'json',
                 success: function(response) {
-            if (response.status === 'success') {
-                        alert('Purchase request approved successfully! Purchase Order created.');
+                    if (response.status === 'success') {
+                        $('#deliveryDetailsModal').modal('hide');
+                        alert('Purchase request approved successfully! Purchase Order and Delivery created.');
                         loadPendingRequests(); // Reload the list
-            } else {
+                    } else {
+                        submitBtn.prop('disabled', false).html(originalText);
                         alert('Error: ' + (response.message || 'Failed to approve request'));
                     }
                 },
                 error: function(xhr) {
+                    submitBtn.prop('disabled', false).html(originalText);
                     const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error approving request';
                     alert('Error: ' + errorMsg);
                 }
@@ -1155,14 +1003,31 @@
         }
 
         function loadPurchaseOrders() {
-            $('#purchaseOrdersContent').html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading purchase orders...</p></div>');
+            console.log('loadPurchaseOrders called');
+            const contentDiv = $('#purchaseOrdersContent');
+            if (!contentDiv.length) {
+                console.error('purchaseOrdersContent div not found!');
+                return;
+            }
+            
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading purchase orders...</p></div>');
+            
+            const url = '<?= base_url('purchase/order/list') ?>';
+            console.log('Loading purchase orders from URL:', url);
             
             $.ajax({
-                url: '<?= base_url('purchase/order/list') ?>',
+                url: url,
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success' && response.orders) {
+                    console.log('Purchase orders response:', response);
+                    console.log('Response type:', typeof response);
+                    console.log('Response status:', response.status);
+                    console.log('Response orders:', response.orders);
+                    console.log('Response orders type:', typeof response.orders);
+                    console.log('Response orders length:', response.orders ? response.orders.length : 'N/A');
+                    
+                    if (response && response.status === 'success' && Array.isArray(response.orders)) {
                         let html = '<div class="table-responsive"><table class="table" style="margin-bottom: 0;"><thead><tr style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;"><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Order Number</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Supplier</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Branch</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Status</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Total Amount</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Expected Delivery</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Actions</th></tr></thead><tbody>';
                         
                         if (response.orders.length === 0) {
@@ -1217,20 +1082,36 @@
                                 html += '</td>';
                                 html += '</tr>';
                             });
-            }
-            
-            html += '</tbody></table></div>';
-            $('#purchaseOrdersContent').html(html);
+                        }
                         
-                        // Attach event handlers
-                        attachOrderHandlers();
-        } else {
-                        $('#purchaseOrdersContent').html('<div class="alert alert-info" style="padding: 20px; border-radius: 8px; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;">No purchase orders found</div>');
+                        html += '</tbody></table></div>';
+                        
+                        const contentDiv = $('#purchaseOrdersContent');
+                        if (contentDiv.length) {
+                            contentDiv.html(html);
+                            console.log('Purchase orders table rendered successfully');
+                            
+                            // Attach event handlers
+                            attachOrderHandlers();
+                        } else {
+                            console.error('purchaseOrdersContent div not found after data load!');
+                        }
+                    } else {
+                        console.warn('Response status is not success or orders array missing:', response);
+                        const contentDiv = $('#purchaseOrdersContent');
+                        if (contentDiv.length) {
+                            contentDiv.html('<div class="alert alert-warning" style="padding: 20px; border-radius: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">No purchase orders found. Response: ' + JSON.stringify(response) + '</div>');
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error loading orders:', error);
-                    $('#purchaseOrdersContent').html('<div class="alert alert-danger" style="padding: 20px; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">Error loading purchase orders. Please try again.</div>');
+                    console.error('XHR Status:', xhr.status);
+                    console.error('XHR Response:', xhr.responseText);
+                    const contentDiv = $('#purchaseOrdersContent');
+                    if (contentDiv.length) {
+                        contentDiv.html('<div class="alert alert-danger" style="padding: 20px; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">Error loading purchase orders: ' + error + ' (Status: ' + xhr.status + '). Please check console for details.</div>');
+                    }
                 }
             });
         }
@@ -1322,103 +1203,229 @@
         }
 
         function loadDeliveries() {
-            $('#deliveriesContent').html('<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            console.log('loadDeliveries called');
+            const contentDiv = $('#deliveriesContent');
+            if (!contentDiv.length) {
+                console.error('deliveriesContent div not found!');
+                return;
+            }
+            
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading deliveries...</p></div>');
+            
+            const url = '<?= base_url('centraladmin/deliveries/list') ?>';
+            console.log('Loading deliveries from URL:', url);
             
             $.ajax({
-                url: '<?= base_url('centraladmin/deliveries/list') ?>',
+                url: url,
                 method: 'GET',
                 dataType: 'json',
+                timeout: 10000, // 10 second timeout
                 success: function(response) {
-                    if (response.status === 'success' && response.deliveries) {
-                        let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Delivery ID</th><th>Supplier</th><th>Branch</th><th>Status</th><th>Scheduled Date</th><th>Actual Date</th></tr></thead><tbody>';
+                    console.log('Deliveries response:', response);
+                    console.log('Response status:', response.status);
+                    console.log('Deliveries count:', response.deliveries ? response.deliveries.length : 0);
+                    
+                    if (response && response.status === 'success' && Array.isArray(response.deliveries)) {
+                        let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Delivery #</th><th>Purchase Order</th><th>Supplier</th><th>Branch</th><th>Status</th><th>Scheduled Date</th><th>Actual Date</th><th>Actions</th></tr></thead><tbody>';
                         
                         if (response.deliveries.length === 0) {
-                            html += '<tr><td colspan="6" class="text-center text-muted">No deliveries found</td></tr>';
+                            html += '<tr><td colspan="8" style="text-align: center; padding: 60px 20px; color: #999;"><i class="fas fa-truck fa-4x" style="color: #ddd; margin-bottom: 20px; display: block;"></i><h5 style="margin-top: 20px; color: #666;">No deliveries found</h5><p style="color: #999;">No deliveries are available</p></td></tr>';
             } else {
                             response.deliveries.forEach(function(delivery) {
-                                const statusClass = delivery.status === 'delivered' ? 'success' : delivery.status === 'in_transit' ? 'info' : delivery.status === 'scheduled' ? 'warning' : 'secondary';
-                                html += '<tr>';
-                                html += '<td><strong>#' + delivery.id + '</strong></td>';
-                                html += '<td>' + (delivery.supplier_name || 'N/A') + '</td>';
-                                html += '<td>' + (delivery.branch_name || 'N/A') + '</td>';
-                                html += '<td><span class="badge bg-' + statusClass + '">' + (delivery.status || 'pending') + '</span></td>';
-                                html += '<td>' + (delivery.scheduled_date ? new Date(delivery.scheduled_date).toLocaleDateString() : 'N/A') + '</td>';
-                                html += '<td>' + (delivery.actual_delivery_date ? new Date(delivery.actual_delivery_date).toLocaleDateString() : '-') + '</td>';
+                                const status = (delivery.status || 'pending').toLowerCase();
+                                let statusClass = 'status-pending';
+                                let statusText = 'Pending';
+                                if (status === 'delivered') {
+                                    statusClass = 'status-approved';
+                                    statusText = 'Delivered';
+                                } else if (status === 'in_transit') {
+                                    statusClass = 'status-converted';
+                                    statusText = 'In Transit';
+                                } else if (status === 'scheduled') {
+                                    statusClass = 'status-pending';
+                                    statusText = 'Scheduled';
+                                } else if (status === 'cancelled') {
+                                    statusClass = 'status-rejected';
+                                    statusText = 'Cancelled';
+                                }
+                                
+                                html += '<tr style="border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease;">';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><strong style="color: #2d5016;">' + (delivery.delivery_number || 'DLV-' + String(delivery.id).padStart(5, '0')) + '</strong></td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + (delivery.order_number || 'N/A') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + (delivery.supplier_name || 'N/A') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + (delivery.branch_name || 'N/A') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><span class="status-badge ' + statusClass + '" style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; text-transform: capitalize; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">' + statusText + '</span></td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (delivery.scheduled_date ? new Date(delivery.scheduled_date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (delivery.actual_delivery_date ? new Date(delivery.actual_delivery_date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><button class="btn btn-sm btn-info viewDeliveryBtn" data-id="' + delivery.id + '" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem;"><i class="fas fa-eye"></i> View</button></td>';
                                 html += '</tr>';
                             });
             }
             
             html += '</tbody></table></div>';
-                        $('#deliveriesContent').html(html);
+                        const contentDiv = $('#deliveriesContent');
+                        if (contentDiv.length) {
+                            contentDiv.html(html);
+                            console.log('Deliveries table rendered successfully');
+                            
+                            // Attach event handlers for view buttons
+                            attachDeliveryHandlers();
         } else {
-                        $('#deliveriesContent').html('<div class="alert alert-info">No deliveries found</div>');
-                    }
-                },
-                error: function() {
-                    $('#deliveriesContent').html('<div class="alert alert-danger">Error loading deliveries</div>');
-                }
-            });
-        }
-
-        function loadSuppliers() {
-            $('#suppliersContent').html('<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
-            
-            $.ajax({
-                url: '<?= base_url('supplier/performance') ?>',
-                method: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success' && response.suppliers) {
-                        let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Supplier Name</th><th>Contact</th><th>Status</th><th>Total Deliveries</th><th>On-Time Rate</th><th>Delayed</th></tr></thead><tbody>';
-                        
-                        if (response.suppliers.length === 0) {
-                            html += '<tr><td colspan="6" class="text-center text-muted">No suppliers found</td></tr>';
-            } else {
-                            response.suppliers.forEach(function(supplier) {
-                                const statusClass = supplier.status === 'active' ? 'success' : 'secondary';
-                                html += '<tr>';
-                                html += '<td><strong>' + (supplier.name || 'N/A') + '</strong></td>';
-                                html += '<td>' + (supplier.phone || supplier.email || 'N/A') + '</td>';
-                                html += '<td><span class="badge bg-' + statusClass + '">' + (supplier.status || 'inactive') + '</span></td>';
-                                html += '<td>' + (supplier.total_deliveries || 0) + '</td>';
-                                html += '<td><span class="badge bg-' + (supplier.on_time_rate >= 80 ? 'success' : supplier.on_time_rate >= 60 ? 'warning' : 'danger') + '">' + (supplier.on_time_rate || 0) + '%</span></td>';
-                                html += '<td>' + (supplier.delayed_deliveries || 0) + '</td>';
-                                html += '</tr>';
-                            });
+                            console.error('deliveriesContent div not found after data load!');
                         }
-                        
-                        html += '</tbody></table></div>';
-                        $('#suppliersContent').html(html);
-            } else {
-                        $('#suppliersContent').html('<div class="alert alert-info">No suppliers found</div>');
+                    } else {
+                        console.warn('Response status is not success or deliveries array missing:', response);
+                        const contentDiv = $('#deliveriesContent');
+                        if (contentDiv.length) {
+                            let message = 'No deliveries found';
+                            if (response && response.message) {
+                                message = response.message;
+                            }
+                            contentDiv.html('<div class="alert alert-warning" style="padding: 20px; border-radius: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">' + message + '</div>');
+                        }
                     }
                 },
-                error: function() {
-                    $('#suppliersContent').html('<div class="alert alert-danger">Error loading suppliers</div>');
+                error: function(xhr, status, error) {
+                    console.error('=== AJAX ERROR ===');
+                    console.error('Error loading deliveries:', error);
+                    console.error('XHR Status:', xhr.status);
+                    console.error('XHR Status Text:', xhr.statusText);
+                    console.error('XHR Response Text:', xhr.responseText);
+                    console.error('XHR Response JSON:', xhr.responseJSON);
+                    
+                    const contentDiv = $('#deliveriesContent');
+                    if (contentDiv.length) {
+                        let errorMsg = 'Error loading deliveries: ' + error;
+                        if (xhr.status) {
+                            errorMsg += ' (HTTP ' + xhr.status + ')';
+                        }
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg += '<br>Message: ' + xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            errorMsg += '<br>Response: ' + xhr.responseText.substring(0, 200);
+                        }
+                        contentDiv.html('<div class="alert alert-danger" style="padding: 20px; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">' + errorMsg + '<br><small>Please check browser console (F12) for more details.</small></div>');
+                    } else {
+                        console.error('Cannot display error - deliveriesContent div not found!');
+                        alert('Error: Cannot find content area. Error: ' + error);
+                    }
         }
     });
 }
 
-        function loadAccountsPayable() {
-            const statusFilter = $('#apStatusFilter').val() || 'all';
-            
-            $('#accountsPayableContent').html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading accounts payable...</p></div>');
-            
-            let url = '<?= base_url('accounts-payable/list') ?>';
-            if (statusFilter !== 'all') {
-                url += '?payment_status=' + encodeURIComponent(statusFilter);
+        function loadSuppliers() {
+            console.log('loadSuppliers called');
+            const contentDiv = $('#suppliersContent');
+            if (!contentDiv.length) {
+                console.error('suppliersContent div not found!');
+                return;
             }
+            
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading suppliers...</p></div>');
+            
+            const url = '<?= base_url('supplier/performance') ?>';
+            console.log('Loading suppliers from URL:', url);
             
             $.ajax({
                 url: url,
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success' && response.accounts_payable) {
-                        let html = '<div class="table-responsive"><table class="table" style="margin-bottom: 0;"><thead><tr style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;"><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">PO Number</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Supplier</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Branch</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Invoice #</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Amount</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Paid</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Balance</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Due Date</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Status</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Actions</th></tr></thead><tbody>';
+                    console.log('Suppliers response:', response);
+                    console.log('Response type:', typeof response);
+                    console.log('Response status:', response.status);
+                    console.log('Response suppliers:', response.suppliers);
+                    console.log('Response suppliers type:', typeof response.suppliers);
+                    console.log('Response suppliers length:', response.suppliers ? response.suppliers.length : 'N/A');
+                    
+                    if (response && response.status === 'success' && Array.isArray(response.suppliers)) {
+                        let html = '<div class="table-responsive"><table class="table" style="margin-bottom: 0;"><thead><tr style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;"><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Supplier Name</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Contact</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Status</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Total Deliveries</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">On-Time Rate</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Delayed</th></tr></thead><tbody>';
+                        
+                        if (response.suppliers.length === 0) {
+                            html += '<tr><td colspan="6" style="text-align: center; padding: 60px 20px; color: #999;"><i class="fas fa-building fa-4x" style="color: #ddd; margin-bottom: 20px; display: block;"></i><h5 style="margin-top: 20px; color: #666;">No suppliers found</h5><p style="color: #999;">No suppliers are available</p></td></tr>';
+                        } else {
+            response.suppliers.forEach(function(supplier) {
+                                const statusClass = supplier.status === 'active' ? 'status-approved' : 'status-rejected';
+                                const statusText = (supplier.status || 'inactive').charAt(0).toUpperCase() + (supplier.status || 'inactive').slice(1);
+                                html += '<tr style="border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease;">';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><strong style="color: #2d5016;">' + (supplier.name || 'N/A') + '</strong></td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + (supplier.phone || supplier.email || 'N/A') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><span class="status-badge ' + statusClass + '" style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; text-transform: capitalize; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">' + statusText + '</span></td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #333; font-weight: 600;">' + (supplier.total_deliveries || 0) + '</td>';
+                                const rateColor = supplier.on_time_rate >= 80 ? 'status-approved' : supplier.on_time_rate >= 60 ? 'status-pending' : 'status-rejected';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><span class="status-badge ' + rateColor + '" style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">' + (supplier.on_time_rate || 0) + '%</span></td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + (supplier.delayed_deliveries || 0) + '</td>';
+                                html += '</tr>';
+                            });
+                        }
+                        
+                        html += '</tbody></table></div>';
+                        const contentDiv = $('#suppliersContent');
+                        if (contentDiv.length) {
+                            contentDiv.html(html);
+                            console.log('Suppliers table rendered successfully');
+                        } else {
+                            console.error('suppliersContent div not found after data load!');
+                        }
+            } else {
+                        $('#suppliersContent').html('<div class="alert alert-info">No suppliers found</div>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading suppliers:', error);
+                    console.error('XHR Status:', xhr.status);
+                    console.error('XHR Response:', xhr.responseText);
+                    const contentDiv = $('#suppliersContent');
+                    if (contentDiv.length) {
+                        contentDiv.html('<div class="alert alert-danger" style="padding: 20px; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">Error loading suppliers: ' + error + ' (Status: ' + xhr.status + '). Please check console for details.</div>');
+                    }
+        }
+    });
+}
+
+        function loadAccountsPayable() {
+            console.log('loadAccountsPayable called');
+            const contentDiv = $('#accountsPayableContent');
+            if (!contentDiv.length) {
+                console.error('accountsPayableContent div not found!');
+                return;
+            }
+            
+            const statusFilter = $('#apStatusFilter').val() || 'all';
+            const invoiceFilter = $('#apInvoiceFilter').val() || 'all';
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading accounts payable...</p></div>');
+            
+            let url = '<?= base_url('accounts-payable/api/list') ?>';
+            const params = [];
+            if (statusFilter !== 'all') {
+                params.push('payment_status=' + encodeURIComponent(statusFilter));
+            }
+            if (invoiceFilter !== 'all') {
+                params.push('invoice_filter=' + encodeURIComponent(invoiceFilter));
+            }
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            console.log('Loading accounts payable from URL:', url);
+            
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Accounts Payable response:', response);
+                    console.log('Response type:', typeof response);
+                    console.log('Response status:', response.status);
+                    console.log('Response accounts_payable:', response.accounts_payable);
+                    console.log('Response accounts_payable type:', typeof response.accounts_payable);
+                    console.log('Response accounts_payable length:', response.accounts_payable ? response.accounts_payable.length : 'N/A');
+                    
+                    if (response && response.status === 'success' && Array.isArray(response.accounts_payable)) {
+                        let html = '<div class="table-responsive" style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; width: 100%;"><thead><tr style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;"><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">PO Number</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Supplier</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Branch</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Invoice #</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Amount</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Paid</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Balance</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Status</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Payment Date</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Payment Method</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Payment Reference</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Due Date</th><th style="padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Actions</th></tr></thead><tbody>';
                         
                         if (response.accounts_payable.length === 0) {
-                            html += '<tr><td colspan="10" style="text-align: center; padding: 60px 20px; color: #999;"><i class="fas fa-inbox fa-4x" style="color: #ddd; margin-bottom: 20px; display: block;"></i><h5 style="margin-top: 20px; color: #666;">No accounts payable found</h5><p style="color: #999;">No accounts payable records available</p></td></tr>';
+                            html += '<tr><td colspan="13" style="text-align: center; padding: 60px 20px; color: #999;"><i class="fas fa-inbox fa-4x" style="color: #ddd; margin-bottom: 20px; display: block;"></i><h5 style="margin-top: 20px; color: #666;">No accounts payable found</h5><p style="color: #999;">No accounts payable records available</p></td></tr>';
         } else {
                             response.accounts_payable.forEach(function(ap) {
                                 const status = (ap.payment_status || 'unpaid').toLowerCase();
@@ -1440,24 +1447,36 @@
                                 const orderNumber = ap.order_number || 'N/A';
                                 const supplierName = ap.supplier ? ap.supplier.name : 'N/A';
                                 const branchName = ap.branch ? ap.branch.name : 'N/A';
-                                const invoiceNumber = ap.invoice_number || '-';
+                                const invoiceNumber = ap.invoice_number || '';
                                 const amount = parseFloat(ap.amount || 0);
                                 const paidAmount = parseFloat(ap.paid_amount || 0);
                                 const balance = parseFloat(ap.balance || 0);
                                 const dueDate = ap.due_date ? new Date(ap.due_date) : null;
                                 const daysInfo = ap.days_info || '';
+                                const paymentDate = ap.payment_date ? new Date(ap.payment_date) : null;
+                                const paymentMethod = ap.payment_method || '';
+                                const paymentReference = ap.payment_reference || '';
                                 
                                 html += '<tr style="border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease;">';
                                 html += '<td style="padding: 15px; vertical-align: middle;"><strong style="color: #2d5016;">' + orderNumber + '</strong></td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + supplierName + '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #333;">' + branchName + '</td>';
-                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + invoiceNumber + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">';
+                                if (invoiceNumber) {
+                                    html += '<span class="editable-invoice" data-id="' + ap.id + '" data-invoice="' + invoiceNumber + '" style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.2s;" onmouseover="this.style.background=\'#f0f0f0\';" onmouseout="this.style.background=\'transparent\';">' + invoiceNumber + ' <i class="fas fa-edit" style="font-size: 0.7rem; color: #6c757d;"></i></span>';
+                                } else {
+                                    html += '<span class="editable-invoice" data-id="' + ap.id + '" data-invoice="" style="cursor: pointer; padding: 4px 8px; border-radius: 4px; color: #999; font-style: italic; transition: all 0.2s;" onmouseover="this.style.background=\'#f0f0f0\';" onmouseout="this.style.background=\'transparent\';">Click to add <i class="fas fa-plus" style="font-size: 0.7rem; color: #6c757d;"></i></span>';
+                                }
+                                html += '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #333; font-weight: 600;">₱' + amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #28a745; font-weight: 600;">₱' + paidAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: ' + (balance > 0 ? '#dc3545' : '#28a745') + '; font-weight: 600;">₱' + balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
-                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (dueDate ? dueDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A') + '<br><small style="color: ' + (status === 'overdue' ? '#dc3545' : '#6c757d') + ';">' + daysInfo + '</small></td>';
                                 html += '<td style="padding: 15px; vertical-align: middle;"><span class="status-badge ' + statusClass + '" style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; text-transform: capitalize; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">' + statusText + '</span></td>';
-                                html += '<td style="padding: 15px; vertical-align: middle;"><div style="display: flex; gap: 5px;">';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentDate ? paymentDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentMethod || '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentReference || '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (dueDate ? dueDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A') + '<br><small style="color: ' + (status === 'overdue' ? '#dc3545' : '#6c757d') + ';">' + daysInfo + '</small></td>';
+                                html += '<td style="padding: 15px; vertical-align: middle;"><div style="display: flex; gap: 5px; flex-wrap: wrap;">';
                                 html += '<button class="btn btn-sm btn-info viewAPBtn" data-id="' + ap.id + '" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem;"><i class="fas fa-eye"></i> View</button>';
                                 
                                 // Add payment button for unpaid/partial/overdue
@@ -1465,10 +1484,8 @@
                                     html += ' <button class="btn btn-sm btn-success recordPaymentBtn" data-id="' + ap.id + '" data-balance="' + balance + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px;"><i class="fas fa-money-bill-wave"></i> Pay</button>';
                                 }
                                 
-                                // Add invoice update button
-                                if (!ap.invoice_number) {
-                                    html += ' <button class="btn btn-sm btn-warning updateInvoiceBtn" data-id="' + ap.id + '" style="background: #ffc107; color: #000; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px;"><i class="fas fa-file-invoice"></i> Invoice</button>';
-                                }
+                                // Add invoice update button (always show for easy access)
+                                html += ' <button class="btn btn-sm btn-warning updateInvoiceBtn" data-id="' + ap.id + '" data-invoice="' + invoiceNumber + '" style="background: #ffc107; color: #000; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px;"><i class="fas fa-file-invoice"></i> Invoice</button>';
                                 
                                 html += '</div></td>';
                                 html += '</tr>';
@@ -1476,12 +1493,23 @@
                         }
                         
                         html += '</tbody></table></div>';
-                        $('#accountsPayableContent').html(html);
                         
-                        // Attach event handlers
-                        attachAPHandlers();
+                        const contentDiv = $('#accountsPayableContent');
+                        if (contentDiv.length) {
+                            contentDiv.html(html);
+                            console.log('Accounts Payable table rendered successfully');
+                            
+                            // Attach event handlers
+                            attachAPHandlers();
+                        } else {
+                            console.error('accountsPayableContent div not found after data load!');
+                        }
                     } else {
-                        $('#accountsPayableContent').html('<div class="alert alert-info" style="padding: 20px; border-radius: 8px; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;">No accounts payable found</div>');
+                        console.warn('Response status is not success or accounts_payable array missing:', response);
+                        const contentDiv = $('#accountsPayableContent');
+                        if (contentDiv.length) {
+                            contentDiv.html('<div class="alert alert-warning" style="padding: 20px; border-radius: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">No accounts payable found. Response: ' + JSON.stringify(response) + '</div>');
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
@@ -1510,15 +1538,15 @@
         
         function backfillAccountsPayable() {
             if (!confirm('This will create accounts payable entries for all approved purchase orders that don\'t have AP records yet. Continue?')) {
-                return;
-            }
-            
+        return;
+    }
+
             $.ajax({
                 url: '<?= base_url('accounts-payable/backfill') ?>',
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success') {
+        if (response.status === 'success') {
                         alert('Success! Created ' + response.created + ' accounts payable entries.');
                         loadAccountsPayable(); // Reload the list
                     } else {
@@ -1565,6 +1593,81 @@
             });
         }
         
+        function attachDeliveryHandlers() {
+            // View delivery handler
+            $('.viewDeliveryBtn').off('click').on('click', function() {
+                const deliveryId = $(this).data('id');
+                viewDeliveryDetails(deliveryId);
+            });
+        }
+        
+        function viewDeliveryDetails(deliveryId) {
+            $.get('<?= base_url('delivery/') ?>' + deliveryId + '/track', function(response) {
+                if (response.status === 'success' && response.delivery) {
+                    const delivery = response.delivery;
+                    let html = '<div style="padding: 20px;">';
+                    html += '<h5 style="margin-bottom: 20px; color: #2d5016; font-weight: 700;">Delivery Information</h5>';
+                    html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">';
+                    html += '<div><strong>Delivery Number:</strong><br>' + (delivery.delivery_number || 'N/A') + '</div>';
+                    html += '<div><strong>Status:</strong><br><span class="badge ' + (delivery.status === 'delivered' ? 'badge-success' : delivery.status === 'scheduled' ? 'badge-warning' : 'badge-info') + '">' + (delivery.status || 'scheduled') + '</span></div>';
+                    html += '<div><strong>Purchase Order:</strong><br>' + (delivery.purchase_order ? (delivery.purchase_order.order_number || 'N/A') : 'N/A') + '</div>';
+                    html += '<div><strong>Supplier:</strong><br>' + (delivery.supplier ? delivery.supplier.name : 'N/A') + '</div>';
+                    html += '<div><strong>Branch:</strong><br>' + (delivery.branch ? delivery.branch.name : 'N/A') + '</div>';
+                    html += '<div><strong>Scheduled Date:</strong><br>' + (delivery.scheduled_date || 'N/A') + '</div>';
+                    html += '<div><strong>Actual Delivery Date:</strong><br>' + (delivery.actual_delivery_date || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '<div><strong>Driver Name:</strong><br>' + (delivery.driver_name || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '<div><strong>Vehicle Info:</strong><br>' + (delivery.vehicle_info || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '<div><strong>Received By:</strong><br>' + (delivery.received_by ? 'User ID: ' + delivery.received_by : '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '<div><strong>Received At:</strong><br>' + (delivery.received_at || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '</div>';
+                    
+                    if (delivery.items && delivery.items.length > 0) {
+                        html += '<h6 style="margin-top: 20px; margin-bottom: 10px; color: #2d5016; font-weight: 600;">Delivery Items:</h6>';
+                        html += '<table class="table" style="margin-top: 10px;"><thead><tr style="background: #f8f9fa;"><th>Product</th><th>Quantity</th><th>Received Quantity</th></tr></thead><tbody>';
+                        delivery.items.forEach(function(item) {
+                            const productName = item.product ? item.product.name : 'Product ID: ' + item.product_id;
+                            html += '<tr>';
+                            html += '<td>' + productName + '</td>';
+                            html += '<td>' + item.quantity + ' ' + (item.product ? (item.product.unit || '') : '') + '</td>';
+                            html += '<td>' + (item.received_quantity || 0) + ' ' + (item.product ? (item.product.unit || '') : '') + '</td>';
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table>';
+                    }
+                    
+                    if (delivery.notes) {
+                        html += '<div class="mt-3"><strong>Notes:</strong><br>' + delivery.notes + '</div>';
+                    }
+                    
+                    if (delivery.tracking) {
+                        html += '<hr style="margin: 30px 0; border: none; border-top: 2px solid #e5e7eb;">';
+                        html += '<h6 style="margin-bottom: 15px; color: #2d5016; font-weight: 600;"><i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>Tracking Information:</h6>';
+                        html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">';
+                        html += '<div><strong>Current Status:</strong><br>' + delivery.tracking.current_status + '</div>';
+                        if (delivery.tracking.days_until_delivery !== null) {
+                            html += '<div><strong>Days Until Delivery:</strong><br>' + Math.round(delivery.tracking.days_until_delivery) + ' days</div>';
+                        }
+                        if (delivery.tracking.is_overdue) {
+                            html += '<div><strong>Status:</strong><br><span class="badge badge-danger">Overdue</span></div>';
+                        }
+                        if (delivery.tracking.is_delayed) {
+                            html += '<div><strong>Status:</strong><br><span class="badge badge-warning">Delayed</span></div>';
+                        }
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    
+                    $('#deliveryModalBody').html(html);
+                    $('#deliveryModal').modal('show');
+                } else {
+                    alert('Failed to load delivery details: ' + (response.message || 'Unknown error'));
+                }
+            }).fail(function() {
+                alert('Error loading delivery details');
+            });
+        }
+        
         function attachAPHandlers() {
             // View AP handler
             $('.viewAPBtn').off('click').on('click', function() {
@@ -1582,7 +1685,66 @@
             // Update invoice handler
             $('.updateInvoiceBtn').off('click').on('click', function() {
                 const apId = $(this).data('id');
-                updateInvoice(apId);
+                const invoiceNumber = $(this).data('invoice') || '';
+                updateInvoice(apId, invoiceNumber);
+            });
+            
+            // Editable invoice number handler
+            $('.editable-invoice').off('click').on('click', function() {
+                const apId = $(this).data('id');
+                const currentInvoice = $(this).data('invoice') || '';
+                const $this = $(this);
+                
+                // Create input field
+                const input = $('<input>', {
+                    type: 'text',
+                    class: 'form-control',
+                    value: currentInvoice,
+                    style: 'width: 150px; display: inline-block; padding: 4px 8px; border: 2px solid #2d5016; border-radius: 4px;',
+                    onblur: function() {
+                        const newInvoice = $(this).val().trim();
+                        saveInvoiceNumber(apId, newInvoice, $this);
+                    },
+                    onkeypress: function(e) {
+                        if (e.which === 13) { // Enter key
+                            $(this).blur();
+                        }
+                    }
+                });
+                
+                $this.html(input);
+                input.focus();
+                input.select();
+            });
+        }
+        
+        function saveInvoiceNumber(apId, invoiceNumber, $element) {
+            $.ajax({
+                url: '<?= base_url('accounts-payable/') ?>' + apId + '/update-invoice',
+                method: 'POST',
+                data: { invoice_number: invoiceNumber },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (invoiceNumber) {
+                            $element.html(invoiceNumber + ' <i class="fas fa-edit" style="font-size: 0.7rem; color: #6c757d;"></i>');
+                            $element.data('invoice', invoiceNumber);
+                        } else {
+                            $element.html('Click to add <i class="fas fa-plus" style="font-size: 0.7rem; color: #6c757d;"></i>');
+                            $element.data('invoice', '');
+                        }
+                        // Update the button data as well
+                        $('.updateInvoiceBtn[data-id="' + apId + '"]').data('invoice', invoiceNumber);
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to update invoice number'));
+                        loadAccountsPayable(); // Reload to reset
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error updating invoice number';
+                    alert('Error: ' + errorMsg);
+                    loadAccountsPayable(); // Reload to reset
+                }
             });
         }
         
@@ -1664,19 +1826,19 @@
             });
         }
         
-        function updateInvoice(apId) {
-            const invoiceNumber = prompt('Enter invoice number:');
-            if (!invoiceNumber) return;
+        function updateInvoice(apId, currentInvoice) {
+            const invoiceNumber = prompt('Enter invoice number:', currentInvoice || '');
+            if (invoiceNumber === null) return; // User cancelled
             
-            const invoiceDate = prompt('Enter invoice date (YYYY-MM-DD):');
-            if (!invoiceDate) return;
+            const invoiceDate = prompt('Enter invoice date (YYYY-MM-DD):', '');
+            if (invoiceDate === null) return; // User cancelled
             
             $.ajax({
                 url: '<?= base_url('accounts-payable/') ?>' + apId + '/update-invoice',
                 method: 'POST',
                 data: {
-                    invoice_number: invoiceNumber,
-                    invoice_date: invoiceDate
+                    invoice_number: invoiceNumber || '',
+                    invoice_date: invoiceDate || null
                 },
                 dataType: 'json',
                 success: function(response) {
@@ -1695,7 +1857,34 @@
         }
         
         function loadReports() {
-            $('#reportsContent').html('<div class="alert alert-info">Reports feature coming soon</div>');
+            console.log('loadReports called');
+            const contentDiv = $('#reportsContent');
+            if (!contentDiv.length) {
+                console.error('reportsContent div not found!');
+                return;
+            }
+            
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading reports...</p></div>');
+            
+            // For now, show a placeholder with useful information
+            setTimeout(function() {
+                let html = '<div class="content-card" style="padding: 40px; text-align: center;">';
+                html += '<i class="fas fa-chart-bar fa-4x" style="color: #2d5016; margin-bottom: 20px; opacity: 0.3;"></i>';
+                html += '<h4 style="color: #2d5016; margin-bottom: 10px;">Reports Dashboard</h4>';
+                html += '<p style="color: #666; margin-bottom: 30px;">Comprehensive reporting features coming soon</p>';
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">';
+                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Inventory Reports</h5><p style="color: #666; font-size: 0.9rem;">Stock levels, turnover, and trends</p></div>';
+                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Purchase Reports</h5><p style="color: #666; font-size: 0.9rem;">Purchase requests and orders analysis</p></div>';
+                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Supplier Reports</h5><p style="color: #666; font-size: 0.9rem;">Performance and delivery metrics</p></div>';
+                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Financial Reports</h5><p style="color: #666; font-size: 0.9rem;">Accounts payable and expenses</p></div>';
+                html += '</div>';
+                html += '</div>';
+                
+                if (contentDiv.length) {
+                    contentDiv.html(html);
+                    console.log('Reports content rendered successfully');
+                }
+            }, 500);
         }
 
         // Filter change handlers
@@ -1703,17 +1892,26 @@
             loadAccountsPayable();
         });
         
+        $(document).on('change', '#apInvoiceFilter', function() {
+            loadAccountsPayable();
+        });
+        
         // Initialize
-$(document).ready(function() {
-            const activeTab = '<?= $activeTab ?? 'dashboard' ?>';
-            if (activeTab === 'purchaseRequests') showPendingRequests();
-            else if (activeTab === 'purchaseOrders') showPurchaseOrders();
-            else if (activeTab === 'deliveries') showDeliveries();
-            else if (activeTab === 'suppliers') showSuppliers();
-            else if (activeTab === 'accountsPayable') showAccountsPayable();
-            else if (activeTab === 'reports') showReports();
-            else goToDashboard();
-});
+        $(document).ready(function() {
+            console.log('=== DASHBOARD INITIALIZATION START ===');
+            console.log('jQuery loaded:', typeof $ !== 'undefined');
+            
+            // Load data for active tab
+            loadTabData();
+            
+            // Filter change handlers
+            $(document).on('change', '#requestStatusFilter, #requestPriorityFilter', function() {
+                console.log('Filter changed, reloading requests');
+                loadPendingRequests();
+            });
+            
+            console.log('=== DASHBOARD INITIALIZATION COMPLETE ===');
+        });
 </script>
     
     <!-- Request Details Modal -->
@@ -1783,6 +1981,64 @@ $(document).ready(function() {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delivery Details Modal -->
+    <div class="modal fade" id="deliveryModal" tabindex="-1" aria-labelledby="deliveryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title" id="deliveryModalLabel">
+                        <i class="fas fa-truck"></i> Delivery Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="deliveryModalBody">
+                    <!-- Content loaded via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delivery Details Modal for Approval -->
+    <div class="modal fade" id="deliveryDetailsModal" tabindex="-1" aria-labelledby="deliveryDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title" id="deliveryDetailsModalLabel">
+                        <i class="fas fa-truck"></i> Set Delivery Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3" style="color: #666;">Please provide delivery details before approving this purchase request. These details will be used when creating the delivery record.</p>
+                    <form id="deliveryDetailsForm">
+                        <input type="hidden" id="approveRequestId" name="request_id">
+                        <div class="mb-3">
+                            <label for="deliveryScheduledDate" class="form-label">Scheduled Delivery Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="deliveryScheduledDate" name="scheduled_delivery_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deliveryDriverName" class="form-label">Driver Name</label>
+                            <input type="text" class="form-control" id="deliveryDriverName" name="driver_name" placeholder="Enter driver name (optional)">
+                        </div>
+                        <div class="mb-3">
+                            <label for="deliveryVehicleInfo" class="form-label">Vehicle Information</label>
+                            <input type="text" class="form-control" id="deliveryVehicleInfo" name="vehicle_info" placeholder="Enter vehicle info (e.g., Plate #, Model) (optional)">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitApprovalBtn" onclick="submitApprovalWithDeliveryDetails()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none;">
+                        <i class="fas fa-check"></i> Approve & Create PO
+                    </button>
                 </div>
             </div>
         </div>

@@ -73,18 +73,42 @@ class UsersSeeder extends Seeder
                 'role'      => 'franchise_manager',
             ],
             [
-                'branch_id' => $toril ? $toril->id : null,
-                'email'     => 'leo333953@gmail.com',
-                'password'  => password_hash('password123', PASSWORD_DEFAULT),
-                'role'      => 'inventory_staff',
-            ],
-            [
                 'branch_id' => $lanang ? $lanang->id : null,
                 'email'     => 'gpalagpalag@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'logistics_coordinator',
             ],
-            // ✅ New user         
+            // ✅ Inventory Staff for each branch
+            [
+                'branch_id' => $matina ? $matina->id : null,
+                'email'     => 'matina.inventory@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'inventory_staff',
+            ],
+            [
+                'branch_id' => $toril ? $toril->id : null,
+                'email'     => 'toril.inventory@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'inventory_staff',
+            ],
+            [
+                'branch_id' => $buhangin ? $buhangin->id : null,
+                'email'     => 'buhangin.inventory@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'inventory_staff',
+            ],
+            [
+                'branch_id' => $agdao ? $agdao->id : null,
+                'email'     => 'agdao.inventory@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'inventory_staff',
+            ],
+            [
+                'branch_id' => $lanang ? $lanang->id : null,
+                'email'     => 'lanang.inventory@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'inventory_staff',
+            ],
         ];
 
         $tbl = $this->db->table('users');

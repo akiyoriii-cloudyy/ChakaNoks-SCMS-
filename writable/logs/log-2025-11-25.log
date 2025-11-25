@@ -8,3 +8,56 @@ ERROR - 2025-11-25 00:35:24 --> Exception trace: #0 C:\xampp\htdocs\ChakaNoks-SC
 #6 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
 #7 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
 #8 {main}
+CRITICAL - 2025-11-25 13:50:51 --> ErrorException: Undefined property: CodeIgniter\View\View::$request
+[Method: GET, Route: accounts-payable/list]
+in APPPATH\Views\dashboards\accounts_payable_list.php on line 150.
+ 1 APPPATH\Views\dashboards\accounts_payable_list.php(150): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined property: CodeIgniter\\View\\View::$request', 'C:\\xampp\\htdocs\\ChakaNoks-SCMS\\app\\Views\\dashboards\\accounts_payable_list.php', 150)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\app\\Views\\dashboards\\accounts_payable_list.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('dashboards/accounts_payable_list', [], true)
+ 5 APPPATH\Controllers\AccountsPayableController.php(209): view('dashboards/accounts_payable_list', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AccountsPayableController->showAccountsPayableList()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AccountsPayableController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS\\public\\index.php')
+ERROR - 2025-11-25 14:38:24 --> mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `deliver...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `deliver...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `deliver...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `deliver...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\DeliveryController.php(414): CodeIgniter\Model->update(17, Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\DeliveryController->confirmDelivery('17')
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DeliveryController))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+ERROR - 2025-11-25 14:38:24 --> Error confirming delivery: Cannot add or update a child row: a foreign key constraint fails
+ERROR - 2025-11-25 14:38:40 --> mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `deliver...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `deliver...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `deliver...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `deliver...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\app\Controllers\DeliveryController.php(414): CodeIgniter\Model->update(17, Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(933): App\Controllers\DeliveryController->confirmDelivery('17')
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DeliveryController))
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ChakaNoks-SCMS\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\ChakaNoks-SCMS\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+ERROR - 2025-11-25 14:38:40 --> Error confirming delivery: Cannot add or update a child row: a foreign key constraint fails
