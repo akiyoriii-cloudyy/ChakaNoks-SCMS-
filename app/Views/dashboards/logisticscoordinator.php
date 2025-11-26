@@ -1,191 +1,433 @@
-<<<<<<< HEAD
 <?= $this->extend('templates/base_template') ?>
 
 <?= $this->section('head') ?>
 <style>
+    :root {
+        --primary-green: #2d5016;
+        --secondary-green: #3a6520;
+        --accent-green: #4a7a2a;
+        --light-green: #5a8a35;
+        --text-light: #f8fff8;
+        --text-muted: #d4e8c9;
+        --table-header: #3a6520;
+        --card-bg: #ffffff;
+        --hover-green: #e8f5e8;
+        --border-green: #d4e8c9;
+    }
+    
+    body {
+        background-color: #f8fff8;
+        color: #2c3e50;
+    }
+    
     .delivery-card {
-        border: 1px solid #ddd;
+        border: 1px solid var(--border-green);
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 15px;
-        background: white;
+        background: var(--card-bg);
+        box-shadow: 0 2px 4px rgba(45, 80, 22, 0.1);
     }
+    
     .status-badge {
         padding: 5px 10px;
         border-radius: 15px;
         font-size: 0.85rem;
         font-weight: bold;
     }
-    .status-scheduled { background: #17a2b8; color: #fff; }
-    .status-in_transit { background: #ffc107; color: #000; }
-    .status-delivered { background: #28a745; color: #fff; }
+    
+    .status-scheduled { 
+        background: #0d6efd; 
+        color: #fff; 
+    }
+    
+    .status-in_transit { 
+        background: #ffc107; 
+        color: #000; 
+    }
+    
+    .status-delivered { 
+        background: #28a745; 
+        color: #fff; 
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+        min-height: 100vh;
+        background: var(--primary-green);
+        color: var(--text-light);
+        padding: 0;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        border-right: 1px solid var(--accent-green);
+    }
+    
+    .sidebar-header {
+        padding: 20px 15px;
+        border-bottom: 1px solid var(--accent-green);
+        background: var(--primary-green);
+    }
+    
+    .sidebar-nav {
+        padding: 15px 0;
+    }
+    
+    .nav-link-custom {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: var(--text-light);
+        text-decoration: none;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link-custom:hover {
+        background: var(--accent-green);
+        color: white;
+    }
+    
+    .nav-link-custom.active {
+        background: var(--accent-green);
+        color: white;
+        border-left: 4px solid var(--text-light);
+    }
+    
+    .nav-link-custom i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+        background: #f8fff8;
+        min-height: 100vh;
+    }
+    
+    .user-profile-sidebar {
+        padding: 15px;
+        border-top: 1px solid var(--accent-green);
+        background: var(--primary-green);
+        margin-top: auto;
+    }
+    
+    /* Card Styles */
+    .card {
+        border: 1px solid var(--border-green);
+        box-shadow: 0 2px 4px rgba(45, 80, 22, 0.1);
+        background: var(--card-bg);
+        color: #2c3e50;
+    }
+    
+    .card-header {
+        background-color: var(--primary-green);
+        border-bottom: 1px solid var(--border-green);
+        color: var(--text-light);
+    }
+    
+    .card-header h5 {
+        color: var(--text-light);
+        font-weight: 600;
+    }
+    
+    /* Table Styles */
+    .table {
+        color: #2c3e50;
+        border-color: var(--border-green);
+    }
+    
+    .table thead th {
+        background-color: var(--table-header);
+        color: var(--text-light);
+        border-bottom: 1px solid var(--border-green);
+        font-weight: 600;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--hover-green);
+        color: #2c3e50;
+    }
+    
+    .table tbody td {
+        border-color: var(--border-green);
+    }
+    
+    /* Button Styles */
+    .btn-primary {
+        background-color: var(--primary-green);
+        border-color: var(--primary-green);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--secondary-green);
+        border-color: var(--secondary-green);
+    }
+    
+    .btn-info {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+    }
+    
+    .btn-success {
+        background-color: var(--accent-green);
+        border-color: var(--accent-green);
+    }
+    
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+        background: transparent;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    /* Content Card Styles */
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    .card-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d5016;
+        margin: 0;
+    }
+    
+    /* Table row hover effect */
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Ensure navigation is ALWAYS visible */
+    .dashboard-sidebar,
+    .sidebar-nav,
+    .nav-item {
+        visibility: visible !important;
+        display: block !important;
+    }
+    
+    /* Content sections */
+    .content-section {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (min-width: 768px) {
+        .sidebar {
+            width: 250px;
+            position: fixed;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+        }
+    }
 </style>
 <?= $this->endSection() ?>
 
-<?= $this->section('header') ?>
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>Logistics Coordinator Dashboard</h2>
-            <p class="text-muted mb-0">Schedule and track deliveries</p>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <div class="user-profile-card" style="background: linear-gradient(135deg, rgba(45, 80, 22, 0.95) 0%, rgba(74, 124, 42, 0.95) 100%); border-radius: 12px; padding: 12px 16px; margin-right: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 12px;">
-                <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
-                    <i class="fas fa-user-circle" style="font-size: 28px; color: white;"></i>
-                </div>
-                <div class="user-info" style="min-width: 0;">
-                    <div class="user-name" style="font-size: 0.85rem; font-weight: 600; color: white; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc(session()->get('email') ?? 'User') ?></div>
-                    <div class="user-role" style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;"><?= esc(ucwords(str_replace('_', ' ', session()->get('role') ?? 'User'))) ?></div>
-                </div>
-            </div>
-            <a href="<?= base_url('auth/logout') ?>" class="btn btn-sm" style="background: linear-gradient(135deg, rgba(45, 80, 22, 0.9) 0%, rgba(74, 124, 42, 0.9) 100%); border: none; color: white; border-radius: 8px; padding: 8px 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='linear-gradient(135deg, rgba(45, 80, 22, 1) 0%, rgba(74, 124, 42, 1) 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(45, 80, 22, 0.9) 0%, rgba(74, 124, 42, 0.9) 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)';">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
-    </div>
-</div>
-<?= $this->endSection() ?>
-
-<?= $this->section('nav') ?>
-<div class="container-fluid">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link active" href="#">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showScheduleDelivery()">
-                <i class="fas fa-calendar-plus"></i> Schedule Delivery
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showOrderTracking()">
-                <i class="fas fa-search"></i> Track Orders
-            </a>
-        </li>
-    </ul>
-</div>
-<?= $this->endSection() ?>
-
 <?= $this->section('body') ?>
-<div class="container-fluid mt-4">
-    
-    <!-- Pending POs for Scheduling -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5><i class="fas fa-shopping-cart"></i> Pending Purchase Orders (Need Scheduling)</h5>
-        </div>
-        <div class="card-body">
-            <?php if (empty($pendingPOs)): ?>
-                <p class="text-muted">No pending purchase orders</p>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>PO Number</th>
-                                <th>Supplier</th>
-                                <th>Branch</th>
-                                <th>Expected Date</th>
-                                <th>Total Amount</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($pendingPOs as $po): ?>
-                            <tr>
-                                <td><strong><?= esc($po['order_number'] ?? 'N/A') ?></strong></td>
-                                <td><?= esc($po['supplier']['name'] ?? ($po['supplier_id'] ?? 'N/A')) ?></td>
-                                <td><?= esc($po['branch']['name'] ?? ($po['branch_id'] ?? 'N/A')) ?></td>
-                                <td><?= $po['expected_delivery_date'] ? date('M d, Y', strtotime($po['expected_delivery_date'])) : 'Not set' ?></td>
-                                <td>₱<?= number_format($po['total_amount'] ?? 0, 2) ?></td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" onclick="scheduleDelivery(<?= $po['id'] ?>)">
-                                        <i class="fas fa-calendar"></i> Schedule
-                                    </button>
-                                    <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $po['id'] ?>)">
-                                        <i class="fas fa-eye"></i> View
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <!-- Scheduled Deliveries -->
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-6">
-            <div class="card">
+        <!-- Sidebar -->
+        <div class="sidebar d-flex flex-column">
+            <div class="sidebar-header">
+                <h4 class="mb-0">Logistics Coordinator</h4>
+                <small>Delivery Management</small>
+            </div>
+            
+            <div class="sidebar-nav flex-grow-1">
+                <a href="#" class="nav-link-custom active">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link-custom" onclick="showScheduleDelivery()">
+                    <i class="fas fa-calendar-plus"></i> Schedule Delivery
+                </a>
+                <a href="#" class="nav-link-custom" onclick="showOrderTracking()">
+                    <i class="fas fa-search"></i> Track Orders
+                </a>
+                <a href="#" class="nav-link-custom">
+                    <i class="fas fa-truck"></i> Deliveries
+                </a>
+                
+                <a href="#" class="nav-link-custom">
+                    <i class="fas fa-file-contract"></i> Schedules
+                </a>
+            </div>
+            
+            <div class="user-profile-sidebar">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-3">
+                        <i class="fas fa-user-circle fa-2x text-white-50"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name fw-bold text-white"><?= esc(session()->get('email') ?? 'User') ?></div>
+                        <div class="user-role small text-white-50 text-uppercase">
+                            <?= esc(ucwords(str_replace('_', ' ', session()->get('role') ?? 'User')) ) ?>
+                        </div>
+                    </div>
+                </div>
+                <a href="<?= base_url('auth/logout') ?>" class="btn btn-sm btn-outline-danger w-100 mt-2">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content flex-grow-1">
+            <!-- Header removed since we have sidebar navigation -->
+            
+            <!-- Pending POs for Scheduling -->
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h5><i class="fas fa-calendar-check"></i> Scheduled Deliveries</h5>
+                    <h5><i class="fas fa-shopping-cart"></i> Pending Purchase Orders (Need Scheduling)</h5>
                 </div>
                 <div class="card-body">
-                    <?php if (empty($scheduledDeliveries)): ?>
-                        <p class="text-muted">No scheduled deliveries</p>
+                    <?php if (empty($pendingPOs)): ?>
+                        <p class="text-muted">No pending purchase orders</p>
                     <?php else: ?>
-                        <?php foreach ($scheduledDeliveries as $delivery): ?>
-                        <div class="delivery-card">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <strong><?= esc($delivery['delivery_number']) ?></strong>
-                                    <span class="status-badge status-scheduled ms-2">Scheduled</span>
-                                </div>
-                            </div>
-                            <div class="small text-muted">
-                                <div>Date: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
-                                <div>Branch: <?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></div>
-                                <?php if ($delivery['driver_name']): ?>
-                                    <div>Driver: <?= esc($delivery['driver_name']) ?></div>
-                                <?php endif; ?>
-                            </div>
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
-                                    <i class="fas fa-truck"></i> Mark In Transit
-                                </button>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>PO Number</th>
+                                        <th>Supplier</th>
+                                        <th>Branch</th>
+                                        <th>Expected Date</th>
+                                        <th>Total Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($pendingPOs as $po): ?>
+                                    <tr>
+                                        <td><strong><?= esc($po['order_number'] ?? 'N/A') ?></strong></td>
+                                        <td><?= esc($po['supplier']['name'] ?? ($po['supplier_id'] ?? 'N/A')) ?></td>
+                                        <td><?= esc($po['branch']['name'] ?? ($po['branch_id'] ?? 'N/A')) ?></td>
+                                        <td><?= $po['expected_delivery_date'] ? date('M d, Y', strtotime($po['expected_delivery_date'])) : 'Not set' ?></td>
+                                        <td>₱<?= number_format($po['total_amount'] ?? 0, 2) ?></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="scheduleDelivery(<?= $po['id'] ?>)">
+                                                <i class="fas fa-calendar"></i> Schedule
+                                            </button>
+                                            <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $po['id'] ?>)">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </div>
-                        <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-truck"></i> In Transit Deliveries</h5>
-                </div>
-                <div class="card-body">
-                    <?php if (empty($inTransitDeliveries)): ?>
-                        <p class="text-muted">No deliveries in transit</p>
-                    <?php else: ?>
-                        <?php foreach ($inTransitDeliveries as $delivery): ?>
-                        <div class="delivery-card">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <strong><?= esc($delivery['delivery_number']) ?></strong>
-                                    <span class="status-badge status-in_transit ms-2">In Transit</span>
-                                </div>
-                            </div>
-                            <div class="small text-muted">
-                                <div>Scheduled: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
-                                <div>Driver: <?= esc($delivery['driver_name'] ?? 'N/A') ?></div>
-                                <div>Vehicle: <?= esc($delivery['vehicle_info'] ?? 'N/A') ?></div>
-                            </div>
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-success" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'delivered')">
-                                    <i class="fas fa-check"></i> Mark Delivered
-                                </button>
-                            </div>
+            <!-- Scheduled Deliveries -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-calendar-check"></i> Scheduled Deliveries</h5>
                         </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                        <div class="card-body">
+                            <?php if (empty($scheduledDeliveries)): ?>
+                                <p class="text-muted">No scheduled deliveries</p>
+                            <?php else: ?>
+                                <?php foreach ($scheduledDeliveries as $delivery): ?>
+                                <div class="delivery-card">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong><?= esc($delivery['delivery_number']) ?></strong>
+                                            <span class="status-badge status-scheduled ms-2">Scheduled</span>
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <div>Date: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
+                                        <div>Branch: <?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></div>
+                                        <?php if ($delivery['driver_name']): ?>
+                                            <div>Driver: <?= esc($delivery['driver_name']) ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
+                                            <i class="fas fa-truck"></i> Mark In Transit
+                                        </button>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-truck"></i> In Transit Deliveries</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php if (empty($inTransitDeliveries)): ?>
+                                <p class="text-muted">No deliveries in transit</p>
+                            <?php else: ?>
+                                <?php foreach ($inTransitDeliveries as $delivery): ?>
+                                <div class="delivery-card">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong><?= esc($delivery['delivery_number']) ?></strong>
+                                            <span class="status-badge status-in_transit ms-2">In Transit</span>
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <div>Scheduled: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
+                                        <div>Driver: <?= esc($delivery['driver_name'] ?? 'N/A') ?></div>
+                                        <div>Vehicle: <?= esc($delivery['vehicle_info'] ?? 'N/A') ?></div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-success" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'delivered')">
+                                            <i class="fas fa-check"></i> Mark Delivered
+                                        </button>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -353,81 +595,3 @@ function showOrderTracking() {
 }
 </script>
 <?= $this->endSection() ?>
-=======
-<?php
-// logisticscoordinator.php
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logistics Coordinator Dashboard - Chakanok</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<<<<<<< HEAD
-  <link rel="stylesheet" href="<?= base_url('assets/css/logisticscoordinator.css') ?>">
-=======
-  <style>
-    body { background: #f8f9fa; }
-    .sidebar { height: 100vh; background: #146214; color: #fff; padding-top: 20px; }
-    .sidebar a { color: #fff; display: block; padding: 10px 20px; margin: 5px 0; border-radius: 8px; text-decoration: none; }
-    .sidebar a:hover { background: #198754; }
-    .logout { color: red; font-weight: bold; }
-  </style>
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
-</head>
-<body>
-<div class="container-fluid">
-  <div class="row">
-<<<<<<< HEAD
-    <!-- Sidebar -->
-=======
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
-    <div class="col-md-2 sidebar">
-      <h4 class="text-center">CHAKANOKS</h4><hr>
-      <a href="#"><i class="fa-solid fa-truck"></i> Deliveries</a>
-      <a href="#"><i class="fa-solid fa-route"></i> Fleet Tracking</a>
-      <a href="#"><i class="fa-solid fa-file-contract"></i> Schedules</a>
-      <hr>
-      <a href="<?= base_url('/auth/logout') ?>" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-    </div>
-<<<<<<< HEAD
-    
-    <!-- Main Content -->
-=======
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
-    <div class="col-md-10 p-4">
-      <h3>Logistics Coordinator Dashboard</h3>
-      <p>Manage deliveries and fleet schedules.</p>
-      <div class="row">
-<<<<<<< HEAD
-        <div class="col-md-6">
-          <div class="card p-3 shadow">
-            <h5>Ongoing Deliveries</h5>
-            <p>12</p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card p-3 shadow">
-            <h5>Vehicles in Use</h5>
-            <p>7</p>
-          </div>
-        </div>
-=======
-        <div class="col-md-6"><div class="card p-3 shadow"><h5>Ongoing Deliveries</h5><p>12</p></div></div>
-        <div class="col-md-6"><div class="card p-3 shadow"><h5>Vehicles in Use</h5><p>7</p></div></div>
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
-      </div>
-    </div>
-  </div>
-</div>
-</body>
-<<<<<<< HEAD
-=======
-  <a href="<?= base_url('/auth/logout') ?>">Logout</a>
-</body>
-</html>
->>>>>>> 2b5675c60087b8c9e273cc2f256eac7f56137e39
-</html>
->>>>>>> 6e3364b95b5cb4b31807defc91bc8d4193bed064
