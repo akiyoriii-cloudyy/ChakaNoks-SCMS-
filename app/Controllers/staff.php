@@ -7,6 +7,7 @@ use App\Models\StockTransactionModel;
 use App\Models\BranchModel;
 use App\Models\CategoryModel;
 use Config\Database;
+use Exception;
 
 class Staff extends BaseController
 {
@@ -39,6 +40,7 @@ class Staff extends BaseController
 
         $role = strtolower($session->get('role'));
         $branchId = $session->get('branch_id');
+        // Enforce branch scope - each branch only sees their own products
         $enforceBranchScope = $branchId && in_array($role, ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager']);
 
         // Filters
@@ -49,6 +51,7 @@ class Staff extends BaseController
             'branch_id'      => $this->request->getGet('branch_id'),
         ];
 
+        // Enforce branch filtering - users can only see products from their assigned branch
         if ($enforceBranchScope) {
             $filters['branch_id'] = $branchId;
         }
@@ -65,6 +68,47 @@ class Staff extends BaseController
         // Get current section from URL or default to inventory
         $section = $this->request->getGet('section') ?? 'inventory';
 
+        // Load pending deliveries for this branch (server-side)
+        $pendingDeliveries = [];
+        if ($branchId) {
+            try {
+                $activeStatuses = ['scheduled', 'in_transit', 'delayed', 'partial_delivery'];
+                $deliveriesData = $this->db->table('deliveries d')
+                    ->select('d.*, po.order_number, s.name as supplier_name')
+                    ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left')
+                    ->join('suppliers s', 's.id = d.supplier_id', 'left')
+                    ->where('d.branch_id', $branchId)
+                    ->whereIn('d.status', $activeStatuses)
+                    ->orderBy('d.scheduled_date', 'ASC')
+                    ->orderBy('d.created_at', 'DESC')
+                    ->get()
+                    ->getResultArray();
+
+                foreach ($deliveriesData as $delivery) {
+                    $pendingDeliveries[] = [
+                        'id' => $delivery['id'],
+                        'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
+                        'purchase_order' => [
+                            'id' => $delivery['purchase_order_id'],
+                            'order_number' => $delivery['order_number'] ?? 'N/A',
+                        ],
+                        'supplier' => [
+                            'id' => $delivery['supplier_id'],
+                            'name' => $delivery['supplier_name'] ?? 'N/A',
+                        ],
+                        'status' => $delivery['status'] ?? 'scheduled',
+                        'scheduled_date' => $delivery['scheduled_date'],
+                        'actual_delivery_date' => $delivery['actual_delivery_date'],
+                        'driver_name' => $delivery['driver_name'],
+                        'vehicle_info' => $delivery['vehicle_info'],
+                        'notes' => $delivery['notes'],
+                    ];
+                }
+            } catch (Exception $e) {
+                log_message('error', 'Error loading deliveries in dashboard: ' . $e->getMessage());
+            }
+        }
+
         return view('dashboards/staff', [
             'items'    => $items,
             'branches' => $branches,
@@ -80,6 +124,7 @@ class Staff extends BaseController
                 'branch_id' => $branchId,
             ],
             'currentSection' => $section,
+            'pendingDeliveries' => $pendingDeliveries,
         ]);
     }
 
@@ -98,28 +143,54 @@ class Staff extends BaseController
         }
 
         try {
-            // Get ALL products for purchase request dropdown (no branch restriction)
-            // Normalized: Use JOINs to get category and branch information
-            $items = $this->db->table('products')
-                ->select('products.id, products.name, categories.name AS category, products.unit, products.stock_qty, products.min_stock, products.max_stock, products.price, products.branch_id, products.expiry, branches.name AS branch_name, branches.address AS branch_address')
+            // Get ALL products from database
+            $allProducts = $this->db->table('products')
+                ->select('products.id, products.name, categories.name AS category, products.unit, products.stock_qty, products.min_stock, products.max_stock, products.price, products.branch_id, products.expiry, branches.name AS branch_name, branches.address AS branch_address, products.created_at')
                 ->join('categories', 'categories.id = products.category_id', 'left')
                 ->join('branches', 'branches.id = products.branch_id', 'left')
                 ->orderBy('products.name', 'ASC')
+                ->orderBy('products.created_at', 'DESC')
                 ->get()
                 ->getResultArray();
 
-            // Ensure price field exists and is numeric
-            foreach ($items as &$item) {
-                $item['price'] = (float)($item['price'] ?? 0);
-                $item['stock_qty'] = (int)($item['stock_qty'] ?? 0);
+            // Remove duplicates based on product name (case-insensitive)
+            // Keep the most recent product for each unique name
+            $uniqueProducts = [];
+            $seenNames = [];
+            
+            foreach ($allProducts as $product) {
+                $productName = trim(strtolower($product['name'] ?? ''));
+                
+                // Skip if we've already seen this product name
+                if (isset($seenNames[$productName])) {
+                    continue;
+                }
+                
+                // Mark this name as seen and add the product
+                $seenNames[$productName] = true;
+                
+                // Ensure price field exists and is numeric
+                $product['price'] = (float)($product['price'] ?? 0);
+                $product['stock_qty'] = (int)($product['stock_qty'] ?? 0);
+                $product['id'] = (int)($product['id'] ?? 0);
+                
+                // Remove created_at as it's not needed in response
+                unset($product['created_at']);
+                
+                $uniqueProducts[] = $product;
             }
 
-            log_message('debug', 'getItems() returning ' . count($items) . ' products');
+            // Sort by name again after deduplication
+            usort($uniqueProducts, function($a, $b) {
+                return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+            });
+
+            log_message('debug', 'getItems() returning ' . count($uniqueProducts) . ' unique products (removed ' . (count($allProducts) - count($uniqueProducts)) . ' duplicates)');
 
             return $this->response->setJSON([
                 'status' => 'success',
-                'items'  => $items,
-                'count'  => count($items),
+                'items'  => $uniqueProducts,
+                'count'  => count($uniqueProducts),
             ]);
         } catch (\Exception $e) {
             log_message('error', 'getItems() error: ' . $e->getMessage());
@@ -425,6 +496,7 @@ class Staff extends BaseController
 
     /**
      * Get branch products for stock in/out/damaged sections
+     * Returns only products from the user's assigned branch
      */
     public function getBranchProducts()
     {
@@ -440,6 +512,7 @@ class Staff extends BaseController
         }
 
         try {
+            // Get only products from the user's assigned branch
             $products = $this->db->table('products')
                 ->select('products.id, products.name, products.stock_qty, products.unit')
                 ->where('products.branch_id', $branchId)
@@ -576,23 +649,63 @@ class Staff extends BaseController
     {
         $session = session();
 
-        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+        $allowedRoles = [
+            'inventorystaff',
+            'inventory_staff',
+            'branch_manager',
+            'manager',
+            'central_admin',
+            'superadmin',
+        ];
+
+        $role = strtolower((string) $session->get('role'));
+        if (!$session->get('logged_in') || !in_array($role, $allowedRoles, true)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
         }
 
-        $branchId = $session->get('branch_id');
+        $branchId = (int) ($session->get('branch_id') ?? 0);
+        $requestedBranchId = (int) ($this->request->getGet('branch_id') ?? 0);
+
+        if ($requestedBranchId > 0) {
+            $canSwitchBranch = in_array($role, ['branch_manager', 'manager', 'central_admin', 'superadmin'], true);
+            if ($canSwitchBranch) {
+                $branchId = $requestedBranchId;
+            } elseif ($branchId !== $requestedBranchId) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized to view this branch']);
+            }
+        }
+
+        if (!$branchId) {
+            $userId = (int) ($session->get('user_id') ?? $session->get('id') ?? 0);
+            if ($userId) {
+                $user = $this->db->table('users')
+                    ->select('branch_id')
+                    ->where('id', $userId)
+                    ->get()
+                    ->getRowArray();
+
+                if (!empty($user['branch_id'])) {
+                    $branchId = (int) $user['branch_id'];
+                    $session->set('branch_id', $branchId);
+                }
+            }
+        }
+
         if (!$branchId) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Branch assignment missing']);
         }
 
         try {
+            $activeStatuses = ['scheduled', 'in_transit', 'delayed', 'partial_delivery'];
+
             $deliveries = $this->db->table('deliveries d')
                 ->select('d.*, po.order_number, s.name as supplier_name')
                 ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left')
                 ->join('suppliers s', 's.id = d.supplier_id', 'left')
                 ->where('d.branch_id', $branchId)
-                ->whereIn('d.status', ['scheduled', 'in_transit', 'pending'])
+                ->whereIn('d.status', $activeStatuses)
                 ->orderBy('d.scheduled_date', 'ASC')
+                ->orderBy('d.created_at', 'DESC')
                 ->get()
                 ->getResultArray();
 
@@ -603,24 +716,24 @@ class Staff extends BaseController
                     'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
                     'purchase_order' => [
                         'id' => $delivery['purchase_order_id'],
-                        'order_number' => $delivery['order_number'] ?? 'N/A'
+                        'order_number' => $delivery['order_number'] ?? 'N/A',
                     ],
                     'supplier' => [
                         'id' => $delivery['supplier_id'],
-                        'name' => $delivery['supplier_name'] ?? 'N/A'
+                        'name' => $delivery['supplier_name'] ?? 'N/A',
                     ],
                     'status' => $delivery['status'] ?? 'scheduled',
                     'scheduled_date' => $delivery['scheduled_date'],
                     'actual_delivery_date' => $delivery['actual_delivery_date'],
                     'driver_name' => $delivery['driver_name'],
                     'vehicle_info' => $delivery['vehicle_info'],
-                    'notes' => $delivery['notes']
+                    'notes' => $delivery['notes'],
                 ];
             }
 
             return $this->response->setJSON([
                 'status' => 'success',
-                'deliveries' => $formattedDeliveries
+                'deliveries' => $formattedDeliveries,
             ]);
         } catch (Exception $e) {
             log_message('error', 'Error getting deliveries: ' . $e->getMessage());

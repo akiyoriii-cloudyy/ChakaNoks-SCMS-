@@ -178,10 +178,23 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('nav') ?>
+<?php
+// Determine dashboard URL based on user role
+$role = strtolower($me['role'] ?? '');
+$dashboardUrl = 'manager/dashboard'; // default
+
+if (in_array($role, ['central_admin', 'centraladmin', 'superadmin'])) {
+    $dashboardUrl = 'centraladmin/dashboard';
+} elseif (in_array($role, ['branch_manager', 'manager', 'branchmanager'])) {
+    $dashboardUrl = 'manager/dashboard';
+} elseif (in_array($role, ['inventory_staff', 'inventorystaff', 'staff'])) {
+    $dashboardUrl = 'staff/dashboard';
+}
+?>
 <div class="container-fluid" style="padding: 0;">
     <ul class="nav nav-tabs" style="background: white; border-bottom: 2px solid #e0e0e0; border-radius: 0;">
         <li class="nav-item">
-            <a class="nav-link" href="<?= base_url('manager/dashboard') ?>" style="color: #666; transition: all 0.3s ease;">
+            <a class="nav-link" href="<?= base_url($dashboardUrl) ?>" style="color: #666; transition: all 0.3s ease;">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
         </li>
@@ -255,7 +268,7 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2" style="margin-top: 30px;">
-            <a href="<?= base_url('manager/dashboard') ?>" class="btn btn-secondary">
+            <a href="<?= base_url($dashboardUrl) ?>" class="btn btn-secondary">
                 <i class="fas fa-times"></i> Cancel
             </a>
             <button type="submit" class="btn btn-primary">
@@ -486,7 +499,7 @@ document.getElementById('purchaseRequestForm').addEventListener('submit', functi
         console.log('✅ Server response:', data);
         if (data.status === 'success') {
             alert('✅ Purchase request created successfully!');
-            window.location.href = '<?= base_url('manager/dashboard') ?>';
+            window.location.href = '<?= base_url($dashboardUrl) ?>';
         } else {
             console.error('Server error details:', data);
             alert('❌ Error: ' + (data.message || 'Unknown error'));

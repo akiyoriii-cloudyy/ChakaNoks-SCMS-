@@ -62,7 +62,7 @@ class Manager extends BaseController
     private function getInventorySummary(int $branchId)
     {
         try {
-            // Use ProductModel's getInventory method for accurate status calculation
+            // Get only products from the current branch
             $items = $this->model->getInventory(['branch_id' => $branchId]);
             
             $summary = [
@@ -249,7 +249,7 @@ class Manager extends BaseController
         try {
             $alerts = [];
             
-            // Check for items expiring within 7 days (using 'expiry' column)
+            // Check for items expiring within 7 days (using 'expiry' column) - for current branch only
             try {
                 $expiringItems = $this->db->table('products')
                     ->where('branch_id', $branchId)
@@ -265,9 +265,9 @@ class Manager extends BaseController
                 log_message('debug', 'Expiring items check failed: ' . $e->getMessage());
             }
             
-            // Check for low stock items - using proper CodeIgniter 4 syntax
+            // Check for low stock items - using proper CodeIgniter 4 syntax - for current branch only
             try {
-                // Get all products and check in PHP instead of SQL
+                // Get products from current branch and check in PHP instead of SQL
                 $lowStockProducts = $this->db->table('products')
                     ->select('id, stock_qty, min_stock')
                     ->where('branch_id', $branchId)
@@ -293,6 +293,7 @@ class Manager extends BaseController
             try {
                 $tables = $this->db->listTables();
                 if (in_array('purchase_orders', $tables)) {
+                    // Still filter purchase orders by branch as they are branch-specific
                     $pendingOrders = $this->db->table('purchase_orders')
                         ->where('branch_id', $branchId)
                         ->where('status', 'pending')
@@ -703,6 +704,7 @@ class Manager extends BaseController
         }
 
         try {
+            // Search only products from the user's assigned branch
             $products = $this->db->table('products')
                 ->where('branch_id', $branchId)
                 ->where('stock_qty >', 0)
@@ -768,7 +770,7 @@ class Manager extends BaseController
                 $notes = $item['notes'] ?? '';
 
                 if ($productId > 0 && $quantity > 0) {
-                    // Verify product belongs to branch
+                    // Verify product belongs to the user's branch
                     $product = $this->db->table('products')
                         ->where('id', $productId)
                         ->where('branch_id', $branchId)

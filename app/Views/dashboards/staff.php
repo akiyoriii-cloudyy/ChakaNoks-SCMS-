@@ -457,6 +457,7 @@
                     <div class="content-card">
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-truck"></i> Pending Deliveries</h3>
+                            <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($pendingDeliveries ?? []) ?> deliveries</span>
                         </div>
                         <div class="table-responsive" style="padding: 0;">
                             <table class="table" id="deliveriesTable">
@@ -471,9 +472,33 @@
                                     </tr>
                                 </thead>
                                 <tbody id="deliveriesBody">
-                                    <tr>
-                                        <td colspan="6" style="text-align: center; padding: 20px; color: #999;">Loading deliveries...</td>
-                                    </tr>
+                                    <?php if (empty($pendingDeliveries)): ?>
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 20px; color: #999;">No pending deliveries found</td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($pendingDeliveries as $delivery): ?>
+                                            <?php
+                                            $status = strtolower($delivery['status'] ?? 'scheduled');
+                                            $statusBadge = $status === 'scheduled' ? 'badge-warning' : 
+                                                          ($status === 'in_transit' ? 'badge-info' : 
+                                                          ($status === 'delayed' ? 'badge-danger' : 'badge-secondary'));
+                                            $statusText = ucwords(str_replace('_', ' ', $status));
+                                            ?>
+                                            <tr>
+                                                <td><?= esc($delivery['delivery_number']) ?></td>
+                                                <td><?= esc($delivery['purchase_order']['order_number'] ?? 'N/A') ?></td>
+                                                <td><?= esc($delivery['supplier']['name'] ?? 'N/A') ?></td>
+                                                <td><?= $delivery['scheduled_date'] ? date('M d, Y', strtotime($delivery['scheduled_date'])) : 'N/A' ?></td>
+                                                <td><span class="badge <?= $statusBadge ?>"><?= $statusText ?></span></td>
+                                                <td style="text-align: right;">
+                                                    <button class="btn btn-sm btn-primary" onclick="receiveDelivery(<?= $delivery['id'] ?>)">
+                                                        <i class="fas fa-check"></i> Receive
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -1125,9 +1150,8 @@
             }
             
             // Load section-specific data
-            if (currentSection === 'deliveries') {
-                loadDeliveries();
-            } else if (currentSection === 'stock-in' || currentSection === 'stock-out' || currentSection === 'damaged') {
+            // Deliveries are now loaded server-side, no need to call loadDeliveries()
+            if (currentSection === 'stock-in' || currentSection === 'stock-out' || currentSection === 'damaged') {
                 loadProductsForSection(currentSection);
                 
                 // Pre-select product if coming from view item modal
@@ -1151,6 +1175,15 @@
                 branchSelect.style.opacity = '0.7';
             }
             <?php endif; ?>
+
+            const branchFilter = document.getElementById('filterBranch');
+            if (branchFilter) {
+                branchFilter.addEventListener('change', function() {
+                    if (document.getElementById('deliveries-section') && document.getElementById('deliveries-section').style.display !== 'none') {
+                        loadDeliveries();
+                    }
+                });
+            }
         });
         
         // Load products for stock in/out/damaged sections
@@ -1366,93 +1399,131 @@
         
         // Load deliveries
         function loadDeliveries() {
+            const tbody = $('#deliveriesBody');
+            tbody.html('<tr><td colspan="6" style="text-align: center; padding: 20px; color: #999;">Loading deliveries...</td></tr>');
+
+            const branchSelect = document.getElementById('filterBranch');
+            const selectedBranch = branchSelect ? branchSelect.value : null;
+            const requestData = (selectedBranch && selectedBranch !== 'all') ? { branch_id: selectedBranch } : {};
+
             $.ajax({
                 url: '<?= base_url('staff/api/get-deliveries') ?>',
                 method: 'GET',
+                data: requestData,
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success') {
-                        const tbody = $('#deliveriesBody');
-                        tbody.empty();
-                        
-                        if (response.deliveries.length === 0) {
-                            tbody.html('<tr><td colspan="6" style="text-align: center; padding: 20px; color: #999;">No pending deliveries found</td></tr>');
-                            return;
-                        }
-                        
-                        response.deliveries.forEach(function(delivery) {
-                            const statusBadge = delivery.status === 'scheduled' ? 'badge-warning' : 
-                                               delivery.status === 'in_transit' ? 'badge-info' : 'badge-secondary';
-                            const statusText = delivery.status.charAt(0).toUpperCase() + delivery.status.slice(1).replace('_', ' ');
-                            
-                            const row = `
-                                <tr>
-                                    <td>${delivery.delivery_number}</td>
-                                    <td>${delivery.purchase_order?.order_number || 'N/A'}</td>
-                                    <td>${delivery.supplier?.name || 'N/A'}</td>
-                                    <td>${delivery.scheduled_date || 'N/A'}</td>
-                                    <td><span class="badge ${statusBadge}">${statusText}</span></td>
-                                    <td style="text-align: right;">
-                                        <button class="btn btn-sm btn-primary" onclick="receiveDelivery(${delivery.id})">
-                                            <i class="fas fa-check"></i> Receive
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                            tbody.append(row);
-                        });
+                    const tbody = $('#deliveriesBody');
+
+                    if (response.status !== 'success') {
+                        const errorMsg = response.message || 'Unable to load deliveries.';
+                        tbody.html(`<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">${errorMsg}</td></tr>`);
+                        return;
                     }
+
+                    tbody.empty();
+
+                    if (!response.deliveries || response.deliveries.length === 0) {
+                        tbody.html('<tr><td colspan="6" style="text-align: center; padding: 20px; color: #999;">No pending deliveries found</td></tr>');
+                        return;
+                    }
+
+                    response.deliveries.forEach(function(delivery) {
+                        const normalizedStatus = (delivery.status || 'scheduled').toLowerCase();
+                        const statusBadge = normalizedStatus === 'scheduled' ? 'badge-warning' : 
+                                           normalizedStatus === 'in_transit' ? 'badge-info' : 
+                                           normalizedStatus === 'delayed' ? 'badge-danger' : 'badge-secondary';
+                        const statusText = normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1).replace('_', ' ');
+                        
+                        const row = `
+                            <tr>
+                                <td>${delivery.delivery_number}</td>
+                                <td>${delivery.purchase_order?.order_number || 'N/A'}</td>
+                                <td>${delivery.supplier?.name || 'N/A'}</td>
+                                <td>${delivery.scheduled_date || 'N/A'}</td>
+                                <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                                <td style="text-align: right;">
+                                    <button class="btn btn-sm btn-primary" onclick="receiveDelivery(${delivery.id})">
+                                        <i class="fas fa-check"></i> Receive
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
                 },
-                error: function() {
-                    $('#deliveriesBody').html('<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">Error loading deliveries</td></tr>');
+                error: function(xhr) {
+                    const errorMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error loading deliveries';
+                    $('#deliveriesBody').html(`<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">${errorMsg}</td></tr>`);
                 }
             });
         }
         
         // Receive delivery
         function receiveDelivery(deliveryId) {
+            console.log('Loading delivery details for ID:', deliveryId);
+            $('#receiveDeliveryContent').html('<p style="text-align: center; color: #6b7280; margin: 20px 0;"><i class="fas fa-spinner fa-spin"></i> Loading delivery details...</p>');
+            $('#receiveDeliveryModal').modal('show');
+            
             $.ajax({
                 url: '<?= base_url('delivery/') ?>' + deliveryId + '/details',
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success') {
+                    console.log('Delivery details response:', response);
+                    if (response.status === 'success' && response.delivery) {
                         const delivery = response.delivery;
                         let itemsHtml = '<form id="receiveDeliveryForm">';
                         itemsHtml += '<input type="hidden" name="delivery_id" value="' + delivery.id + '">';
-                        itemsHtml += '<h6>Delivery Items:</h6>';
-                        itemsHtml += '<table class="table table-sm">';
-                        itemsHtml += '<thead><tr><th>Product</th><th>Expected</th><th>Received</th><th>Condition</th><th>Notes</th></tr></thead>';
-                        itemsHtml += '<tbody>';
+                        
+                        // Delivery info header
+                        itemsHtml += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">';
+                        itemsHtml += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+                        itemsHtml += '<div><strong>Delivery #:</strong> ' + (delivery.delivery_number || 'N/A') + '</div>';
+                        itemsHtml += '<div><strong>Supplier:</strong> ' + (delivery.supplier?.name || 'N/A') + '</div>';
+                        itemsHtml += '<div><strong>Scheduled:</strong> ' + (delivery.scheduled_date || 'N/A') + '</div>';
+                        itemsHtml += '<div><strong>Status:</strong> ' + (delivery.status || 'N/A') + '</div>';
+                        itemsHtml += '</div></div>';
+                        
+                        itemsHtml += '<h6 style="margin-bottom: 15px; font-weight: 600;">Delivery Items:</h6>';
                         
                         if (delivery.items && delivery.items.length > 0) {
+                            itemsHtml += '<table class="table table-sm table-bordered">';
+                            itemsHtml += '<thead style="background: #e9ecef;"><tr><th>Product</th><th>Expected</th><th>Received</th><th>Condition</th><th>Notes</th></tr></thead>';
+                            itemsHtml += '<tbody>';
+                            
                             delivery.items.forEach(function(item) {
+                                const productName = item.product ? item.product.name : ('Product ID: ' + item.product_id);
                                 itemsHtml += '<tr>';
-                                itemsHtml += '<td>' + (item.product?.name || 'N/A') + '</td>';
-                                itemsHtml += '<td>' + item.expected_quantity + '</td>';
-                                itemsHtml += '<td><input type="number" name="items[' + item.product_id + '][received_quantity]" value="' + item.expected_quantity + '" min="0" max="' + item.expected_quantity + '" class="form-control form-control-sm" required></td>';
+                                itemsHtml += '<td>' + productName + '</td>';
+                                itemsHtml += '<td>' + (item.expected_quantity || 0) + '</td>';
+                                itemsHtml += '<td><input type="number" name="items[' + item.product_id + '][received_quantity]" value="' + (item.expected_quantity || 0) + '" min="0" class="form-control form-control-sm" style="width: 80px;" required></td>';
                                 itemsHtml += '<td><select name="items[' + item.product_id + '][condition_status]" class="form-control form-control-sm"><option value="good">Good</option><option value="damaged">Damaged</option><option value="expired">Expired</option><option value="partial">Partial</option></select></td>';
                                 itemsHtml += '<td><input type="text" name="items[' + item.product_id + '][notes]" class="form-control form-control-sm" placeholder="Notes..."></td>';
                                 itemsHtml += '<input type="hidden" name="items[' + item.product_id + '][product_id]" value="' + item.product_id + '">';
                                 itemsHtml += '</tr>';
                             });
+                            
+                            itemsHtml += '</tbody></table>';
+                        } else {
+                            itemsHtml += '<div class="alert alert-warning">No items found for this delivery.</div>';
                         }
                         
-                        itemsHtml += '</tbody></table>';
-                        itemsHtml += '<div style="margin-top: 20px; text-align: right;">';
-                        itemsHtml += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> ';
-                        itemsHtml += '<button type="button" class="btn btn-primary" onclick="submitReceiveDelivery()">Confirm Receive</button>';
+                        itemsHtml += '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dee2e6; text-align: right;">';
+                        itemsHtml += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="margin-right: 10px;">Cancel</button>';
+                        if (delivery.items && delivery.items.length > 0) {
+                            itemsHtml += '<button type="button" class="btn btn-primary" onclick="submitReceiveDelivery()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none;"><i class="fas fa-check"></i> Confirm Receive</button>';
+                        }
                         itemsHtml += '</div>';
                         itemsHtml += '</form>';
                         
                         $('#receiveDeliveryContent').html(itemsHtml);
-                        $('#receiveDeliveryModal').modal('show');
                     } else {
-                        alert('Error loading delivery details');
+                        $('#receiveDeliveryContent').html('<div class="alert alert-danger">Error loading delivery details: ' + (response.message || 'Unknown error') + '</div>');
                     }
                 },
-                error: function() {
-                    alert('Error loading delivery details');
+                error: function(xhr, status, error) {
+                    console.error('Error loading delivery:', status, error, xhr.responseText);
+                    $('#receiveDeliveryContent').html('<div class="alert alert-danger">Error loading delivery details. Please try again.</div>');
                 }
             });
         }
@@ -1461,9 +1532,14 @@
         function submitReceiveDelivery() {
             const deliveryId = $('#receiveDeliveryForm input[name="delivery_id"]').val();
             
+            if (!deliveryId) {
+                alert('Error: Delivery ID not found');
+                return;
+            }
+            
             // Convert form data to proper format
             const items = [];
-            $('input[name^="items["]').each(function() {
+            $('#receiveDeliveryForm input[name^="items["]').each(function() {
                 const name = $(this).attr('name');
                 const matches = name.match(/items\[(\d+)\]\[(\w+)\]/);
                 if (matches) {
@@ -1475,9 +1551,7 @@
                         items.push(item);
                     }
                     if (field === 'received_quantity') {
-                        item.received_quantity = parseInt($(this).val());
-                    } else if (field === 'condition_status') {
-                        item.condition_status = $(this).val();
+                        item.received_quantity = parseInt($(this).val()) || 0;
                     } else if (field === 'notes') {
                         item.notes = $(this).val();
                     }
@@ -1485,7 +1559,7 @@
             });
             
             // Also get condition_status from selects
-            $('select[name^="items["]').each(function() {
+            $('#receiveDeliveryForm select[name^="items["]').each(function() {
                 const name = $(this).attr('name');
                 const matches = name.match(/items\[(\d+)\]\[(\w+)\]/);
                 if (matches && matches[2] === 'condition_status') {
@@ -1497,30 +1571,58 @@
                 }
             });
             
+            console.log('Submitting receive delivery:', deliveryId, items);
+            
+            if (items.length === 0) {
+                alert('Error: No items to receive');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = $('#receiveDeliveryForm button[onclick="submitReceiveDelivery()"]');
+            const originalText = submitBtn.html();
+            submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Processing...').prop('disabled', true);
+            
             $.ajax({
                 url: '<?= base_url('delivery/') ?>' + deliveryId + '/receive',
                 method: 'POST',
                 data: { items: items },
                 dataType: 'json',
                 success: function(response) {
+                    console.log('Receive response:', response);
                     if (response.status === 'success') {
                         alert('Delivery received successfully! Stock updated.');
                         $('#receiveDeliveryModal').modal('hide');
-                        loadDeliveries();
-                        // Refresh inventory if on inventory section
-                        if (document.getElementById('inventory-section').style.display !== 'none') {
-                            location.reload();
-                        }
+                        // Reload page to refresh deliveries list (server-rendered)
+                        location.reload();
                     } else {
                         alert('Error: ' + (response.message || 'Failed to receive delivery'));
+                        submitBtn.html(originalText).prop('disabled', false);
                     }
                 },
-                error: function(xhr) {
+                error: function(xhr, status, error) {
+                    console.error('Receive error:', status, error, xhr.responseText);
                     const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error receiving delivery';
                     alert('Error: ' + errorMsg);
+                    submitBtn.html(originalText).prop('disabled', false);
                 }
             });
         }
     </script>
+
+    <!-- Receive Delivery Modal -->
+    <div class="modal fade" id="receiveDeliveryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title" style="margin: 0;"><i class="fas fa-truck" style="margin-right: 8px;"></i>Receive Delivery</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="receiveDeliveryContent" style="padding: 20px;">
+                    <p style="text-align: center; color: #6b7280; margin: 0;">Loading delivery details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
