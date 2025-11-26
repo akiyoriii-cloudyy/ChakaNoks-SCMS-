@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 22, 2025 at 03:36 PM
+-- Generation Time: Nov 26, 2025 at 06:58 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,41 @@ SET time_zone = "+00:00";
 --
 -- Database: `chakanoks_scms`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `accounts_payable`
+--
+
+CREATE TABLE `accounts_payable` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `purchase_order_id` int(10) UNSIGNED NOT NULL,
+  `supplier_id` int(10) UNSIGNED NOT NULL,
+  `branch_id` int(10) UNSIGNED NOT NULL,
+  `invoice_number` varchar(100) DEFAULT NULL,
+  `invoice_date` date DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `paid_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `balance` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `payment_status` enum('unpaid','partial','paid','overdue') NOT NULL DEFAULT 'unpaid',
+  `payment_date` date DEFAULT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `payment_reference` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_by` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Accounts payable records for approved purchase orders';
+
+--
+-- Dumping data for table `accounts_payable`
+--
+
+INSERT INTO `accounts_payable` (`id`, `purchase_order_id`, `supplier_id`, `branch_id`, `invoice_number`, `invoice_date`, `due_date`, `amount`, `paid_amount`, `balance`, `payment_status`, `payment_date`, `payment_method`, `payment_reference`, `notes`, `created_by`, `created_at`, `updated_at`) VALUES
+(13, 17, 5, 5, 'INV-20251125-64640', '2025-11-25', '2025-12-25', 24000.00, 24000.00, 0.00, 'paid', '2025-11-25', 'Cash', '475895', 'Auto-created from approved purchase order: PO-20251125-5937', 2, '2025-11-25 14:28:23', '2025-11-25 14:29:02'),
+(14, 18, 13, 6, 'INV-20251125-26188', '2025-11-25', '2025-12-25', 42000.00, 42000.00, 0.00, 'paid', '2025-11-25', 'Cash', '3192832', 'Auto-created from approved purchase order: PO-20251125-1815', 2, '2025-11-25 14:30:46', '2025-11-25 14:31:04');
 
 -- --------------------------------------------------------
 
@@ -64,6 +99,13 @@ CREATE TABLE `categories` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Product categories';
 
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `description`, `created_by`, `status`, `created_at`, `updated_at`) VALUES
+(2, 'Chicken Parts', 'Chicken parts and products', 12, 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57');
+
 -- --------------------------------------------------------
 
 --
@@ -93,10 +135,8 @@ CREATE TABLE `deliveries` (
 --
 
 INSERT INTO `deliveries` (`id`, `delivery_number`, `purchase_order_id`, `supplier_id`, `branch_id`, `status`, `scheduled_date`, `actual_delivery_date`, `driver_name`, `vehicle_info`, `received_by`, `received_at`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 'DEL-20251122-4690', 1, 1, 4, 'scheduled', '2025-11-29', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order', '2025-11-22 22:23:25', '2025-11-22 22:23:25'),
-(2, 'DEL-20251122-8768', 2, 1, 3, 'scheduled', '2025-11-29', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order', '2025-11-22 22:24:35', '2025-11-22 22:24:35'),
-(3, 'DEL-20251122-4707', 3, 1, 4, 'scheduled', '2025-11-29', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order', '2025-11-22 22:25:11', '2025-11-22 22:25:11'),
-(4, 'DEL-20251122-9468', 4, 1, 5, 'scheduled', '2025-11-29', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order', '2025-11-22 22:26:31', '2025-11-22 22:26:31');
+(16, 'DEL-20251125-3663', 17, 5, 5, 'delivered', '2026-01-20', '2025-11-25', 'Markypadilla', 'L300 RE3949', 7, '2025-11-25 15:24:00', 'Auto-created from Purchase Order', '2025-11-25 14:28:00', '2025-11-25 15:24:32'),
+(17, 'DEL-20251125-0721', 18, 13, 6, 'delivered', '2025-11-25', '2025-11-25', 'AbbyRuales', 'L300 AB8930', 8, '2025-11-25 15:18:00', 'Auto-created from Purchase Order', '2025-11-25 14:30:34', '2025-11-25 15:18:31');
 
 -- --------------------------------------------------------
 
@@ -115,16 +155,6 @@ CREATE TABLE `delivery_items` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Items in deliveries';
-
---
--- Dumping data for table `delivery_items`
---
-
-INSERT INTO `delivery_items` (`id`, `delivery_id`, `product_id`, `expected_quantity`, `received_quantity`, `condition_status`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 1, 39, 300, 0, 'good', NULL, '2025-11-22 22:23:25', '2025-11-22 22:23:25'),
-(2, 2, 46, 350, 0, 'good', NULL, '2025-11-22 22:24:35', '2025-11-22 22:24:35'),
-(3, 3, 32, 400, 0, 'good', NULL, '2025-11-22 22:25:11', '2025-11-22 22:25:11'),
-(4, 4, 40, 150, 0, 'good', NULL, '2025-11-22 22:26:31', '2025-11-22 22:26:31');
 
 -- --------------------------------------------------------
 
@@ -165,7 +195,10 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (16, '2025-09-10-100007', 'App\\Database\\Migrations\\CreateCategoriesTable', 'default', 'App', 1763819705, 1),
 (17, '2025-09-10-100008', 'App\\Database\\Migrations\\CreateStockTransactionsTable', 'default', 'App', 1763819705, 1),
 (18, '2025-09-10-100009', 'App\\Database\\Migrations\\AddCategoryIdToProducts', 'default', 'App', 1763819705, 1),
-(19, '2025-11-21-000001', 'App\\Database\\Migrations\\AddBranchIdToProducts', 'default', 'App', 1763819705, 1);
+(19, '2025-11-21-000001', 'App\\Database\\Migrations\\AddBranchIdToProducts', 'default', 'App', 1763819705, 1),
+(20, '2025-11-22-000001', 'App\\Database\\Migrations\\NormalizeProductsTable', 'default', 'App', 1763996526, 2),
+(21, '2025-11-25-000001', 'App\\Database\\Migrations\\AddSelectedSupplierToPurchaseRequests', 'default', 'App', 1764001871, 3),
+(22, '2025-11-25-000002', 'App\\Database\\Migrations\\CreateAccountsPayableTable', 'default', 'App', 1764003252, 4);
 
 -- --------------------------------------------------------
 
@@ -176,11 +209,9 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 CREATE TABLE `products` (
   `id` int(10) UNSIGNED NOT NULL,
   `branch_id` int(10) UNSIGNED DEFAULT NULL,
-  `branch_address` varchar(255) DEFAULT NULL,
   `created_by` int(10) UNSIGNED DEFAULT NULL,
   `category_id` int(10) UNSIGNED DEFAULT NULL,
   `name` varchar(150) NOT NULL,
-  `category` varchar(100) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `stock_qty` int(11) NOT NULL DEFAULT 0,
   `unit` varchar(50) DEFAULT NULL,
@@ -196,37 +227,40 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `branch_id`, `branch_address`, `created_by`, `category_id`, `name`, `category`, `price`, `stock_qty`, `unit`, `min_stock`, `max_stock`, `expiry`, `status`, `created_at`, `updated_at`) VALUES
-(27, 2, 'MATINA Branch, Davao City', 10, NULL, 'Whole Chicken', 'Chicken Parts', 250.00, 500, 'kg', 100, 1000, '2026-03-07', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(28, 3, 'TORIL Branch, Davao City', 10, NULL, 'Chicken Breast', 'Chicken Parts', 280.00, 600, 'kg', 100, 1000, '2026-02-23', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(29, 4, 'BUHANGIN Branch, Davao City', 10, NULL, 'Chicken Thigh', 'Chicken Parts', 220.00, 550, 'kg', 100, 1000, '2026-02-20', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(30, 5, 'AGDAO Branch, Davao City', 10, NULL, 'Chicken Wings', 'Chicken Parts', 180.00, 450, 'kg', 100, 800, '2026-02-15', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(31, 6, 'LANANG Branch, Davao City', 10, NULL, 'Chicken Drumstick', 'Chicken Parts', 200.00, 500, 'kg', 100, 900, '2026-02-20', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(32, 2, 'MATINA Branch, Davao City', 10, NULL, 'Chicken Liver', 'Chicken Parts', 120.00, 300, 'kg', 50, 600, '2026-02-17', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(33, 3, 'TORIL Branch, Davao City', 10, NULL, 'Chicken Gizzard', 'Chicken Parts', 130.00, 280, 'kg', 50, 600, '2026-02-18', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(34, 4, 'BUHANGIN Branch, Davao City', 10, NULL, 'Chicken Feet', 'Chicken Parts', 90.00, 200, 'kg', 50, 500, '2026-02-22', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(35, 5, 'AGDAO Branch, Davao City', 10, NULL, 'Chicken Head', 'Chicken Parts', 80.00, 150, 'kg', 30, 400, '2026-02-19', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(36, 6, 'LANANG Branch, Davao City', 10, NULL, 'Chicken Neck', 'Chicken Parts', 100.00, 180, 'kg', 50, 500, '2026-02-16', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(37, 2, 'MATINA Branch, Davao City', 10, NULL, 'Chicken Back', 'Chicken Parts', 110.00, 220, 'kg', 50, 550, '2026-02-21', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(38, 3, 'TORIL Branch, Davao City', 10, NULL, 'Chicken Heart', 'Chicken Parts', 140.00, 120, 'kg', 30, 400, '2026-02-14', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(39, 4, 'BUHANGIN Branch, Davao City', 10, NULL, 'Chicken Kidney', 'Chicken Parts', 135.00, 100, 'kg', 30, 350, '2026-02-13', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(40, 5, 'AGDAO Branch, Davao City', 10, NULL, 'Chicken Intestine', 'Chicken Parts', 95.00, 80, 'kg', 20, 300, '2026-02-12', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(41, 6, 'LANANG Branch, Davao City', 10, NULL, 'Chicken Blood', 'Chicken Parts', 85.00, 60, 'kg', 20, 250, '2026-02-10', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(42, 2, 'MATINA Branch, Davao City', 10, NULL, 'Chicken Skin', 'Chicken Parts', 75.00, 150, 'kg', 30, 400, '2026-02-24', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(43, 3, 'TORIL Branch, Davao City', 10, NULL, 'Chicken Fat', 'Chicken Parts', 70.00, 100, 'kg', 20, 300, '2026-02-26', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(44, 4, 'BUHANGIN Branch, Davao City', 10, NULL, 'Chicken Bones', 'Chicken Parts', 60.00, 200, 'kg', 50, 500, '2026-02-28', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(45, 5, 'AGDAO Branch, Davao City', 10, NULL, 'Chicken Tail', 'Chicken Parts', 105.00, 120, 'kg', 30, 350, '2026-02-17', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(46, 6, 'LANANG Branch, Davao City', 10, NULL, 'Chicken Leg Quarter', 'Chicken Parts', 210.00, 350, 'kg', 80, 700, '2026-02-19', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(47, 2, 'MATINA Branch, Davao City', 10, NULL, 'Chicken Breast Fillet', 'Chicken Parts', 320.00, 400, 'kg', 100, 800, '2026-02-21', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(48, 3, 'TORIL Branch, Davao City', 10, NULL, 'Chicken Tenderloin', 'Chicken Parts', 290.00, 250, 'kg', 50, 600, '2026-02-18', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(49, 4, 'BUHANGIN Branch, Davao City', 10, NULL, 'Chicken Wing Tip', 'Chicken Parts', 160.00, 180, 'kg', 40, 400, '2026-02-16', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(50, 5, 'AGDAO Branch, Davao City', 10, NULL, 'Chicken Wing Flat', 'Chicken Parts', 170.00, 200, 'kg', 40, 450, '2026-02-15', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(51, 6, 'LANANG Branch, Davao City', 10, NULL, 'Chicken Wing Drumlette', 'Chicken Parts', 175.00, 220, 'kg', 50, 500, '2026-02-14', 'active', '2025-11-22 22:08:37', '2025-11-22 22:08:37'),
-(52, 2, 'Matina Branch — MacArthur Highway, Matina Crossing, Davao City, Philippines', 4, NULL, 'Chicken Breast', 'Chicken Parts', 200.00, 200, 'kg', 200, 200, '2026-02-18', 'active', '2025-11-22 22:09:43', '2025-11-22 22:09:43'),
-(53, 6, 'Lanang Branch — JP Laurel Avenue, Lanang, Davao City, Philippines', 8, NULL, 'Chicken Drumstick', 'Chicken Parts', 200.00, 300, 'kg', 300, 300, '2026-02-09', 'active', '2025-11-22 22:11:06', '2025-11-22 22:11:06'),
-(54, 5, 'Agdao Branch — Lapu-Lapu Street, Agdao, Davao City, Philippines', 7, NULL, 'Chicken Neck', 'Chicken Parts', 90.00, 250, 'kg', 250, 250, '2026-02-17', 'active', '2025-11-22 22:12:24', '2025-11-22 22:12:24'),
-(55, 4, 'Buhangin Branch — Buhangin Road, Buhangin Proper, Davao City, Philippines', 6, NULL, 'Whole Chicken', 'Chicken Parts', 250.00, 300, 'kg', 300, 300, '2026-01-05', 'active', '2025-11-22 22:14:39', '2025-11-22 22:14:39'),
-(56, 3, 'Toril Branch — Agton Street, Toril, Davao City, Philippines', 5, NULL, 'Chicken Thigh', 'Chicken Parts', 220.00, 450, 'kg', 450, 450, '2026-03-20', 'active', '2025-11-22 22:15:49', '2025-11-22 22:15:49');
+INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, `price`, `stock_qty`, `unit`, `min_stock`, `max_stock`, `expiry`, `status`, `created_at`, `updated_at`) VALUES
+(52, 2, 4, 1, 'Chicken Breast', 200.00, 200, 'kg', 200, 200, '2026-02-18', 'active', '2025-11-22 22:09:43', '2025-11-22 22:09:43'),
+(53, 6, 12, 2, 'Chicken Drumstick', 200.00, 500, 'kg', 100, 900, '2026-02-23', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(54, 5, 7, 1, 'Chicken Neck', 90.00, 250, 'kg', 250, 250, '2026-02-17', 'active', '2025-11-22 22:12:24', '2025-11-22 22:12:24'),
+(55, 4, 6, 1, 'Whole Chicken', 250.00, 300, 'kg', 300, 300, '2026-01-05', 'active', '2025-11-22 22:14:39', '2025-11-22 22:14:39'),
+(56, 3, 5, 1, 'Chicken Thigh', 220.00, 495, 'kg', 450, 450, '2026-03-20', 'active', '2025-11-22 22:15:49', '2025-11-25 16:32:32'),
+(57, 2, 4, 1, 'Chicken Drumstick', 200.00, 300, 'kg', 300, 300, '2026-03-24', 'active', '2025-11-24 23:15:06', '2025-11-24 23:15:06'),
+(58, 2, 4, 1, 'Chicken Feet', 90.00, 200, 'kg', 200, 200, '2026-01-26', 'active', '2025-11-25 00:00:02', '2025-11-25 00:00:02'),
+(59, 2, 4, 1, 'Chicken Heart', 175.00, 300, 'kg', 300, 350, '2026-03-20', 'active', '2025-11-25 00:05:35', '2025-11-25 00:05:35'),
+(60, 2, 4, 1, 'Chicken Head', 105.00, 300, 'kg', 300, 300, '2025-12-27', 'active', '2025-11-25 00:40:19', '2025-11-25 00:40:19'),
+(61, 2, 12, 2, 'Whole Chicken', 250.00, 500, 'kg', 100, 1000, '2026-03-10', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(62, 3, 12, 2, 'Chicken Breast', 280.00, 550, 'kg', 100, 1000, '2026-02-26', 'active', '2025-11-25 15:45:57', '2025-11-25 16:35:32'),
+(63, 4, 12, 2, 'Chicken Thigh', 220.00, 550, 'kg', 100, 1000, '2026-02-23', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(64, 5, 12, 2, 'Chicken Wings', 180.00, 450, 'kg', 100, 800, '2026-02-18', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(65, 2, 12, 2, 'Chicken Liver', 120.00, 300, 'kg', 50, 600, '2026-02-20', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(66, 3, 12, 2, 'Chicken Gizzard', 130.00, 280, 'kg', 50, 600, '2026-02-21', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(67, 4, 12, 2, 'Chicken Feet', 90.00, 200, 'kg', 50, 500, '2026-02-25', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(68, 5, 12, 2, 'Chicken Head', 80.00, 150, 'kg', 30, 400, '2026-02-22', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(69, 6, 12, 2, 'Chicken Neck', 100.00, 180, 'kg', 50, 500, '2026-02-19', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(70, 2, 12, 2, 'Chicken Back', 110.00, 220, 'kg', 50, 550, '2026-02-24', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(71, 3, 12, 2, 'Chicken Heart', 140.00, 120, 'kg', 30, 400, '2026-02-17', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(72, 4, 12, 2, 'Chicken Kidney', 135.00, 100, 'kg', 30, 350, '2026-02-16', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(73, 5, 12, 2, 'Chicken Intestine', 95.00, 80, 'kg', 20, 300, '2026-02-15', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(74, 6, 12, 2, 'Chicken Blood', 85.00, 60, 'kg', 20, 250, '2026-02-13', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(75, 2, 12, 2, 'Chicken Skin', 75.00, 150, 'kg', 30, 400, '2026-02-27', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(76, 3, 12, 2, 'Chicken Fat', 70.00, 100, 'kg', 20, 300, '2026-03-01', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(77, 4, 12, 2, 'Chicken Bones', 60.00, 200, 'kg', 50, 500, '2026-03-03', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(78, 5, 12, 2, 'Chicken Tail', 105.00, 120, 'kg', 30, 350, '2026-02-20', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(79, 6, 12, 2, 'Chicken Leg Quarter', 210.00, 350, 'kg', 80, 700, '2026-02-22', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(80, 2, 12, 2, 'Chicken Breast Fillet', 320.00, 400, 'kg', 100, 800, '2026-02-24', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(81, 3, 12, 2, 'Chicken Tenderloin', 290.00, 250, 'kg', 50, 600, '2026-02-21', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(82, 4, 12, 2, 'Chicken Wing Tip', 160.00, 180, 'kg', 40, 400, '2026-02-19', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(83, 5, 12, 2, 'Chicken Wing Flat', 170.00, 200, 'kg', 40, 450, '2026-02-18', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(84, 6, 12, 2, 'Chicken Wing Drumlette', 175.00, 220, 'kg', 50, 500, '2026-02-17', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57');
 
 -- --------------------------------------------------------
 
@@ -257,10 +291,8 @@ CREATE TABLE `purchase_orders` (
 --
 
 INSERT INTO `purchase_orders` (`id`, `order_number`, `purchase_request_id`, `supplier_id`, `branch_id`, `status`, `order_date`, `expected_delivery_date`, `actual_delivery_date`, `total_amount`, `approved_by`, `approved_at`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 'PO-20251122-0947', 1, 1, 4, 'pending', '2025-11-22', '2025-12-02', NULL, 40500.00, NULL, NULL, 'Auto-created from approved purchase request', '2025-11-22 22:23:24', '2025-11-22 22:28:49'),
-(2, 'PO-20251122-8191', 5, 7, 3, 'pending', '2025-11-22', '2025-12-02', NULL, 73500.00, NULL, NULL, 'Auto-created from approved purchase request', '2025-11-22 22:24:34', '2025-11-22 22:28:21'),
-(3, 'PO-20251122-2423', 3, 17, 4, 'pending', '2025-11-22', '2025-11-30', NULL, 48000.00, NULL, NULL, 'Auto-created from approved purchase request', '2025-11-22 22:25:11', '2025-11-22 22:27:46'),
-(4, 'PO-20251122-2076', 4, 3, 5, 'approved', '2025-11-22', '2025-12-01', NULL, 14250.00, 2, '2025-11-22 22:33:15', 'Auto-created from approved purchase request', '2025-11-22 22:26:31', '2025-11-22 22:33:15');
+(17, 'PO-20251125-5937', 19, 5, 5, 'approved', '2025-11-25', '2025-12-02', NULL, 24000.00, 2, '2025-11-25 14:28:23', 'Auto-created from approved purchase request', '2025-11-25 14:28:00', '2025-11-25 14:28:23'),
+(18, 'PO-20251125-1815', 20, 13, 6, 'approved', '2025-11-25', '2025-12-02', NULL, 42000.00, 2, '2025-11-25 14:30:46', 'Auto-created from approved purchase request', '2025-11-25 14:30:34', '2025-11-25 14:30:46');
 
 -- --------------------------------------------------------
 
@@ -280,16 +312,6 @@ CREATE TABLE `purchase_order_items` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Items in purchase orders';
 
---
--- Dumping data for table `purchase_order_items`
---
-
-INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
-(1, 1, 39, 300, 135.00, 40500.00, 0, '2025-11-22 22:23:24', '2025-11-22 22:23:24'),
-(2, 2, 46, 350, 210.00, 73500.00, 0, '2025-11-22 22:24:34', '2025-11-22 22:24:34'),
-(3, 3, 32, 400, 120.00, 48000.00, 0, '2025-11-22 22:25:11', '2025-11-22 22:25:11'),
-(4, 4, 40, 150, 95.00, 14250.00, 0, '2025-11-22 22:26:31', '2025-11-22 22:26:31');
-
 -- --------------------------------------------------------
 
 --
@@ -307,6 +329,7 @@ CREATE TABLE `purchase_requests` (
   `notes` text DEFAULT NULL,
   `approved_by` int(10) UNSIGNED DEFAULT NULL,
   `approved_at` datetime DEFAULT NULL,
+  `selected_supplier_id` int(10) UNSIGNED DEFAULT NULL,
   `rejection_reason` text DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
@@ -316,12 +339,9 @@ CREATE TABLE `purchase_requests` (
 -- Dumping data for table `purchase_requests`
 --
 
-INSERT INTO `purchase_requests` (`id`, `request_number`, `branch_id`, `requested_by`, `status`, `priority`, `total_amount`, `notes`, `approved_by`, `approved_at`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(1, 'PR-20251122-3938', 4, 4, 'converted_to_po', 'urgent', 40500.00, '', 2, '2025-11-22 22:23:24', NULL, '2025-11-22 22:09:03', '2025-11-22 22:23:25'),
-(2, 'PR-20251122-1692', 3, 8, 'rejected', 'urgent', 22500.00, '', NULL, NULL, 'EXPIRED ITEMS', '2025-11-22 22:11:49', '2025-11-22 22:24:06'),
-(3, 'PR-20251122-0706', 4, 7, 'converted_to_po', 'normal', 48000.00, '', 2, '2025-11-22 22:25:11', NULL, '2025-11-22 22:13:44', '2025-11-22 22:25:11'),
-(4, 'PR-20251122-0269', 5, 6, 'converted_to_po', 'low', 14250.00, '', 2, '2025-11-22 22:26:31', NULL, '2025-11-22 22:15:09', '2025-11-22 22:26:31'),
-(5, 'PR-20251122-0236', 3, 5, 'converted_to_po', 'high', 73500.00, '', 2, '2025-11-22 22:24:34', NULL, '2025-11-22 22:16:25', '2025-11-22 22:24:34');
+INSERT INTO `purchase_requests` (`id`, `request_number`, `branch_id`, `requested_by`, `status`, `priority`, `total_amount`, `notes`, `approved_by`, `approved_at`, `selected_supplier_id`, `rejection_reason`, `created_at`, `updated_at`) VALUES
+(19, 'PR-20251125-0970', 5, 7, 'converted_to_po', 'low', 24000.00, '', 2, '2025-11-25 14:28:00', 5, NULL, '2025-11-25 14:01:21', '2025-11-25 14:28:00'),
+(20, 'PR-20251125-2497', 6, 8, 'converted_to_po', 'high', 42000.00, '', 2, '2025-11-25 14:30:34', 13, NULL, '2025-11-25 14:26:48', '2025-11-25 14:30:34');
 
 -- --------------------------------------------------------
 
@@ -340,17 +360,6 @@ CREATE TABLE `purchase_request_items` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Items in purchase requests';
-
---
--- Dumping data for table `purchase_request_items`
---
-
-INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 1, 39, 300, 135.00, 40500.00, '', '2025-11-22 22:09:03', '2025-11-22 22:09:03'),
-(2, 2, 34, 250, 90.00, 22500.00, '', '2025-11-22 22:11:49', '2025-11-22 22:11:49'),
-(3, 3, 32, 400, 120.00, 48000.00, '', '2025-11-22 22:13:44', '2025-11-22 22:13:44'),
-(4, 4, 40, 150, 95.00, 14250.00, '', '2025-11-22 22:15:09', '2025-11-22 22:15:09'),
-(5, 5, 46, 350, 210.00, 73500.00, '', '2025-11-22 22:16:25', '2025-11-22 22:16:25');
 
 -- --------------------------------------------------------
 
@@ -458,21 +467,37 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `branch_id`, `email`, `password`, `role`, `created_at`, `updated_at`, `reset_otp`, `otp_expires`, `reset_expires`) VALUES
-(1, NULL, 'superadmin1@chakanoks.test', '$2y$10$05nYt6PPZIh43s/zQJ8gHuDAXP6pLJPhDjjqu4ZX2s7V.4A911RSu', 'superadmin', NULL, NULL, NULL, NULL, NULL),
-(2, 1, 'mansuetomarky@gmail.com', '$2y$10$gt52/Pm/1bJZK4hfdhvUie8QtmvUWQlm98CYQRJrrhLhYFa5VOFae', 'central_admin', NULL, NULL, NULL, NULL, NULL),
-(3, 2, 'rualesabigail09@gmail.com', '$2y$10$.LZ/LRwVORqiPuChzMNgueDAT3WyGfTWixE3qS/bSLudZVZviSi1u', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(4, 2, 'matina.manager@chakanoks.test', '$2y$10$W1avj3gcceL91MIskjVMZeBYmDAeb289Z7AynoYcAlJK.GUqfpIBS', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(5, 3, 'toril.manager@chakanoks.test', '$2y$10$wEt2TUqlBYKhffTHg9MuMugon2OE9xK0KSP7Knx74YZy82QuN1HKC', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(6, 4, 'buhangin.manager@chakanoks.test', '$2y$10$f9Kaaox50G8jzYr7yAk4eu50tnGx/OQ2/EyphhPKo8Kf.DiFfOYBC', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(7, 5, 'agdao.manager@chakanoks.test', '$2y$10$VscmeGr/qaTaGbAgy/2LoeA6tSHd9dRx73Vdltz5LfNUodKQIIoke', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(8, 6, 'lanang.manager@chakanoks.test', '$2y$10$1.r4K/oec6sqXdfihc8DBuAvR0C7RdEajNFjJ9BvGiS9fdskyK3YC', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(9, 4, 'imonakoplss@gmail.com', '$2y$10$Mf4.7PXPbVluqZl.xxpHg.C1L98jgV2tTJLJBBndRCbX0nB1ED.Uq', 'franchise_manager', NULL, NULL, NULL, NULL, NULL),
-(10, 3, 'leo333953@gmail.com', '$2y$10$GtOtnhL4u.D9e0aD9DoJg.RFj69.Ok2rrwccDX1oZCq7j5aI6BvF2', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
-(11, 6, 'gpalagpalag@gmail.com', '$2y$10$Zh4fYETWnHhZG7rs.yaUsO6wO3aqQpSCqHyiKwD3R.PJsiWf9LR4y', 'logistics_coordinator', NULL, NULL, NULL, NULL, NULL);
+(1, NULL, 'superadmin1@chakanoks.test', '$2y$10$gqWg8q30wEM7PTiior3zT.EdYJty93GtLEQQ/027I3J6ssIArt/fy', 'superadmin', NULL, NULL, NULL, NULL, NULL),
+(2, 1, 'mansuetomarky@gmail.com', '$2y$10$g1UjHDsOe2hLXsvyGXKTxuxkPlgkFt4jHNWIJsc4TYTTZ9oAE4eUi', 'central_admin', NULL, NULL, NULL, NULL, NULL),
+(3, 2, 'rualesabigail09@gmail.com', '$2y$10$0f2TzYrQ2atjT7H80Z/MruzBdRL4Tx3PaC7zHnStuF8Og2gqvIMKy', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
+(4, 2, 'matina.manager@chakanoks.test', '$2y$10$70yi53r0xC5s7oJcqOz4aeQ2hP/sujY2Kzo3PzqKnpcUFaBegrPqe', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
+(5, 3, 'toril.manager@chakanoks.test', '$2y$10$GfUZ92ahWuX/ozlI9xznmucok5.3C7ifnMLVHWDyk4SBnvqxOTgHO', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
+(6, 4, 'buhangin.manager@chakanoks.test', '$2y$10$aaKRlp1KfV3IgIiF09nQBeuYjmQO2qJR9wvEQ4/PeuGKgIRmzkOcy', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
+(7, 5, 'agdao.manager@chakanoks.test', '$2y$10$YbAh.zCMvth4jVDiIU6piO4MPDyH2.d2r1Y7V2Dlx4AUbStCkFn2u', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
+(8, 6, 'lanang.manager@chakanoks.test', '$2y$10$4wzAqdl/5XN6oOjRoL4HT.SShUsRlWWcmD5SXzkvf33aj/5uu0IyS', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
+(9, 4, 'imonakoplss@gmail.com', '$2y$10$VEGImgsPqqqnIrLCKTyFb.sH4KaMrTQW.Dd6GAshdMmJaZ987AJji', 'franchise_manager', NULL, NULL, NULL, NULL, NULL),
+(11, 6, 'gpalagpalag@gmail.com', '$2y$10$0F.WdPUd7jN0VeyKVL1mQeQt2eivBlj9FnsczspjCdewNryQSg2xO', 'logistics_coordinator', NULL, NULL, NULL, NULL, NULL),
+(12, 2, 'matina.inventory@chakanoks.test', '$2y$10$7vomot3tmjnu6wK7G7Zgs.iE.6cG9txDNkrIZSVng2fW2LqHOe1wG', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
+(13, 3, 'toril.inventory@chakanoks.test', '$2y$10$K0roKmNK/84ZcjjfN0yJkOJZ9ENENAKA9oiiBQJ12DFtin4zzWqnq', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
+(14, 4, 'buhangin.inventory@chakanoks.test', '$2y$10$A9fWl5lcyWl9A1K/Wt6zW.VfS7g/4YoUJER/32P7NsvafSRtf.vBy', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
+(15, 5, 'agdao.inventory@chakanoks.test', '$2y$10$iC2BAjS4ukmQ9a.L6DlPqOaVnzXDd5GZy.AI0HDse81xyuqpvEo4y', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
+(16, 6, 'lanang.inventory@chakanoks.test', '$2y$10$NiBxn3qFxyiEWP4kytdsdeSrqiBj/bAAokrv33ixs5FO1rWk2AfMW', 'inventory_staff', NULL, NULL, NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `accounts_payable`
+--
+ALTER TABLE `accounts_payable`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_accounts_payable_created_by` (`created_by`),
+  ADD KEY `purchase_order_id` (`purchase_order_id`),
+  ADD KEY `supplier_id` (`supplier_id`),
+  ADD KEY `branch_id` (`branch_id`),
+  ADD KEY `payment_status` (`payment_status`),
+  ADD KEY `due_date` (`due_date`);
 
 --
 -- Indexes for table `branches`
@@ -597,6 +622,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `accounts_payable`
+--
+ALTER TABLE `accounts_payable`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT for table `branches`
 --
 ALTER TABLE `branches`
@@ -606,55 +637,55 @@ ALTER TABLE `branches`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deliveries`
 --
 ALTER TABLE `deliveries`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `delivery_items`
 --
 ALTER TABLE `delivery_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `purchase_order_items`
 --
 ALTER TABLE `purchase_order_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `purchase_requests`
 --
 ALTER TABLE `purchase_requests`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `purchase_request_items`
 --
 ALTER TABLE `purchase_request_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `reports`
@@ -666,7 +697,7 @@ ALTER TABLE `reports`
 -- AUTO_INCREMENT for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
@@ -678,11 +709,20 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `accounts_payable`
+--
+ALTER TABLE `accounts_payable`
+  ADD CONSTRAINT `fk_accounts_payable_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_accounts_payable_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE SET NULL,
+  ADD CONSTRAINT `fk_accounts_payable_purchase_order` FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_accounts_payable_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `categories`
