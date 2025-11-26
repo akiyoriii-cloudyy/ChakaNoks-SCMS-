@@ -2,37 +2,69 @@
 
 <?= $this->section('head') ?>
 <style>
+    :root {
+        --primary-green: #2d5016;
+        --secondary-green: #3a6520;
+        --accent-green: #4a7a2a;
+        --light-green: #5a8a35;
+        --text-light: #f8fff8;
+        --text-muted: #d4e8c9;
+        --table-header: #3a6520;
+        --card-bg: #ffffff;
+        --hover-green: #e8f5e8;
+        --border-green: #d4e8c9;
+    }
+    
+    body {
+        background-color: #f8fff8;
+        color: #2c3e50;
+    }
+    
     .delivery-card {
-        border: 1px solid #ddd;
+        border: 1px solid var(--border-green);
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 15px;
-        background: white;
+        background: var(--card-bg);
+        box-shadow: 0 2px 4px rgba(45, 80, 22, 0.1);
     }
+    
     .status-badge {
         padding: 5px 10px;
         border-radius: 15px;
         font-size: 0.85rem;
         font-weight: bold;
     }
-    .status-scheduled { background: #17a2b8; color: #fff; }
-    .status-in_transit { background: #ffc107; color: #000; }
-    .status-delivered { background: #28a745; color: #fff; }
+    
+    .status-scheduled { 
+        background: #0d6efd; 
+        color: #fff; 
+    }
+    
+    .status-in_transit { 
+        background: #ffc107; 
+        color: #000; 
+    }
+    
+    .status-delivered { 
+        background: #28a745; 
+        color: #fff; 
+    }
     
     /* Sidebar Styles */
     .sidebar {
         min-height: 100vh;
-        background: #f8f9fa;
-        color: #333;
+        background: var(--primary-green);
+        color: var(--text-light);
         padding: 0;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        border-right: 1px solid #dee2e6;
+        border-right: 1px solid var(--accent-green);
     }
     
     .sidebar-header {
         padding: 20px 15px;
-        border-bottom: 1px solid #dee2e6;
-        background: white;
+        border-bottom: 1px solid var(--accent-green);
+        background: var(--primary-green);
     }
     
     .sidebar-nav {
@@ -43,7 +75,7 @@
         display: flex;
         align-items: center;
         padding: 12px 20px;
-        color: #495057;
+        color: var(--text-light);
         text-decoration: none;
         border: none;
         background: none;
@@ -53,13 +85,14 @@
     }
     
     .nav-link-custom:hover {
-        background: #e9ecef;
-        color: #007bff;
+        background: var(--accent-green);
+        color: white;
     }
     
     .nav-link-custom.active {
-        background: #007bff;
+        background: var(--accent-green);
         color: white;
+        border-left: 4px solid var(--text-light);
     }
     
     .nav-link-custom i {
@@ -71,15 +104,148 @@
     .main-content {
         margin-left: 0;
         padding: 20px;
-        background: #f8f9fa;
+        background: #f8fff8;
         min-height: 100vh;
     }
     
     .user-profile-sidebar {
         padding: 15px;
-        border-top: 1px solid #dee2e6;
-        background: white;
+        border-top: 1px solid var(--accent-green);
+        background: var(--primary-green);
         margin-top: auto;
+    }
+    
+    /* Card Styles */
+    .card {
+        border: 1px solid var(--border-green);
+        box-shadow: 0 2px 4px rgba(45, 80, 22, 0.1);
+        background: var(--card-bg);
+        color: #2c3e50;
+    }
+    
+    .card-header {
+        background-color: var(--primary-green);
+        border-bottom: 1px solid var(--border-green);
+        color: var(--text-light);
+    }
+    
+    .card-header h5 {
+        color: var(--text-light);
+        font-weight: 600;
+    }
+    
+    /* Table Styles */
+    .table {
+        color: #2c3e50;
+        border-color: var(--border-green);
+    }
+    
+    .table thead th {
+        background-color: var(--table-header);
+        color: var(--text-light);
+        border-bottom: 1px solid var(--border-green);
+        font-weight: 600;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--hover-green);
+        color: #2c3e50;
+    }
+    
+    .table tbody td {
+        border-color: var(--border-green);
+    }
+    
+    /* Button Styles */
+    .btn-primary {
+        background-color: var(--primary-green);
+        border-color: var(--primary-green);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--secondary-green);
+        border-color: var(--secondary-green);
+    }
+    
+    .btn-info {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+    }
+    
+    .btn-success {
+        background-color: var(--accent-green);
+        border-color: var(--accent-green);
+    }
+    
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+        background: transparent;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    /* Content Card Styles */
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    .card-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d5016;
+        margin: 0;
+    }
+    
+    /* Table row hover effect */
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Ensure navigation is ALWAYS visible */
+    .dashboard-sidebar,
+    .sidebar-nav,
+    .nav-item {
+        visibility: visible !important;
+        display: block !important;
+    }
+    
+    /* Content sections */
+    .content-section {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     @media (min-width: 768px) {
@@ -102,7 +268,7 @@
         <div class="sidebar d-flex flex-column">
             <div class="sidebar-header">
                 <h4 class="mb-0">Logistics Coordinator</h4>
-                <small class="text-muted">Delivery Management</small>
+                <small>Delivery Management</small>
             </div>
             
             <div class="sidebar-nav flex-grow-1">
@@ -118,9 +284,7 @@
                 <a href="#" class="nav-link-custom">
                     <i class="fas fa-truck"></i> Deliveries
                 </a>
-                <a href="#" class="nav-link-custom">
-                    <i class="fas fa-route"></i> Fleet Tracking
-                </a>
+                
                 <a href="#" class="nav-link-custom">
                     <i class="fas fa-file-contract"></i> Schedules
                 </a>
@@ -129,11 +293,11 @@
             <div class="user-profile-sidebar">
                 <div class="d-flex align-items-center">
                     <div class="user-avatar me-3">
-                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                        <i class="fas fa-user-circle fa-2x text-white-50"></i>
                     </div>
                     <div class="user-info">
-                        <div class="user-name fw-bold"><?= esc(session()->get('email') ?? 'User') ?></div>
-                        <div class="user-role small text-muted text-uppercase">
+                        <div class="user-name fw-bold text-white"><?= esc(session()->get('email') ?? 'User') ?></div>
+                        <div class="user-role small text-white-50 text-uppercase">
                             <?= esc(ucwords(str_replace('_', ' ', session()->get('role') ?? 'User')) ) ?>
                         </div>
                     </div>
