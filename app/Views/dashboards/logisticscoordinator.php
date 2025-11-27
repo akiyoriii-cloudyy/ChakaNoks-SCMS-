@@ -61,6 +61,11 @@
         color: #000;
     }
     
+    .status-partial_delivery {
+        background: #ffc107;
+        color: #000;
+    }
+    
     .status-pending {
         background: #6c757d;
         color: #fff;
@@ -68,6 +73,16 @@
     
     .status-in_transit {
         background: #fd7e14;
+        color: #fff;
+    }
+    
+    .status-sent_to_supplier {
+        background: #6f42c1;
+        color: #fff;
+    }
+    
+    .status-cancelled {
+        background: #dc3545;
         color: #fff;
     }
     
@@ -713,8 +728,16 @@
                                             <td><?= esc($order['supplier']['name'] ?? ($order['supplier_id'] ?? 'N/A')) ?></td>
                                             <td><?= esc($order['branch']['name'] ?? ($order['branch_id'] ?? 'N/A')) ?></td>
                                             <td>
-                                                <span class="status-badge status-<?= esc(strtolower($order['status'] ?? 'pending')) ?>">
-                                                    <?= esc(ucwords(str_replace('_', ' ', $order['status'] ?? 'pending'))) ?>
+                                                <?php 
+                                                $status = strtolower($order['status'] ?? 'pending');
+                                                // Normalize status for display
+                                                if ($status === 'partial_delivery') {
+                                                    $status = 'partial';
+                                                }
+                                                $statusDisplay = ucwords(str_replace('_', ' ', $order['status'] ?? 'pending'));
+                                                ?>
+                                                <span class="status-badge status-<?= esc($status) ?>">
+                                                    <?= esc($statusDisplay) ?>
                                                 </span>
                                             </td>
                                             <td>
