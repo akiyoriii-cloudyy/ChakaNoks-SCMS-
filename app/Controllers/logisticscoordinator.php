@@ -29,11 +29,22 @@ class LogisticsCoordinator extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        // Get pending POs that need delivery scheduling
-        $pendingPOsRaw = $this->purchaseOrderModel->getOrdersByStatus('approved');
+        // Get approved POs that don't have deliveries yet (need scheduling)
+        $approvedPOsRaw = $this->purchaseOrderModel->getOrdersByStatus('approved');
         $pendingPOs = [];
-        foreach ($pendingPOsRaw as $po) {
-            $pendingPOs[] = $this->purchaseOrderModel->getOrderWithDetails($po['id']);
+        
+        // Get all PO IDs that already have deliveries
+        $posWithDeliveries = $this->db->table('deliveries')
+            ->select('purchase_order_id')
+            ->get()
+            ->getResultArray();
+        $poIdsWithDeliveries = array_column($posWithDeliveries, 'purchase_order_id');
+        
+        foreach ($approvedPOsRaw as $po) {
+            // Only include POs that don't have a delivery scheduled yet
+            if (!in_array($po['id'], $poIdsWithDeliveries)) {
+                $pendingPOs[] = $this->purchaseOrderModel->getOrderWithDetails($po['id']);
+            }
         }
         
         // Get scheduled deliveries with full details
@@ -45,7 +56,10 @@ class LogisticsCoordinator extends BaseController
         
         $scheduledDeliveries = [];
         foreach ($scheduledDeliveriesRaw as $delivery) {
-            $scheduledDeliveries[] = $this->deliveryModel->trackDelivery($delivery['id']);
+            $deliveryDetails = $this->deliveryModel->trackDelivery($delivery['id']);
+            if ($deliveryDetails) {
+                $scheduledDeliveries[] = $deliveryDetails;
+            }
         }
 
         // Get in-transit deliveries with full details
@@ -57,7 +71,10 @@ class LogisticsCoordinator extends BaseController
         
         $inTransitDeliveries = [];
         foreach ($inTransitDeliveriesRaw as $delivery) {
-            $inTransitDeliveries[] = $this->deliveryModel->trackDelivery($delivery['id']);
+            $deliveryDetails = $this->deliveryModel->trackDelivery($delivery['id']);
+            if ($deliveryDetails) {
+                $inTransitDeliveries[] = $deliveryDetails;
+            }
         }
 
         return view('dashboards/logisticscoordinator', [
@@ -80,11 +97,22 @@ class LogisticsCoordinator extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        // Get pending POs that need delivery scheduling
-        $pendingPOsRaw = $this->purchaseOrderModel->getOrdersByStatus('approved');
+        // Get approved POs that don't have deliveries yet (need scheduling)
+        $approvedPOsRaw = $this->purchaseOrderModel->getOrdersByStatus('approved');
         $pendingPOs = [];
-        foreach ($pendingPOsRaw as $po) {
-            $pendingPOs[] = $this->purchaseOrderModel->getOrderWithDetails($po['id']);
+        
+        // Get all PO IDs that already have deliveries
+        $posWithDeliveries = $this->db->table('deliveries')
+            ->select('purchase_order_id')
+            ->get()
+            ->getResultArray();
+        $poIdsWithDeliveries = array_column($posWithDeliveries, 'purchase_order_id');
+        
+        foreach ($approvedPOsRaw as $po) {
+            // Only include POs that don't have a delivery scheduled yet
+            if (!in_array($po['id'], $poIdsWithDeliveries)) {
+                $pendingPOs[] = $this->purchaseOrderModel->getOrderWithDetails($po['id']);
+            }
         }
 
         return view('dashboards/logisticscoordinator', [
@@ -110,8 +138,35 @@ class LogisticsCoordinator extends BaseController
         // Get all purchase orders with their tracking info
         $allOrders = $this->purchaseOrderModel->findAll();
         $ordersWithTracking = [];
+        
+        // Get delivery statuses for all POs
+        $deliveries = $this->db->table('deliveries')
+            ->select('purchase_order_id, status as delivery_status')
+            ->get()
+            ->getResultArray();
+        
+        $deliveryStatusMap = [];
+        foreach ($deliveries as $delivery) {
+            $deliveryStatusMap[$delivery['purchase_order_id']] = $delivery['delivery_status'];
+        }
+        
         foreach ($allOrders as $order) {
-            $ordersWithTracking[] = $this->purchaseOrderModel->getOrderWithDetails($order['id']);
+            $orderDetails = $this->purchaseOrderModel->getOrderWithDetails($order['id']);
+            
+            // Update status based on delivery status if delivery exists
+            if (isset($deliveryStatusMap[$order['id']])) {
+                $deliveryStatus = $deliveryStatusMap[$order['id']];
+                // Map delivery status to PO status for display
+                if ($deliveryStatus === 'delivered' && $orderDetails['status'] !== 'delivered') {
+                    $orderDetails['status'] = 'delivered';
+                } elseif ($deliveryStatus === 'partial_delivery' && $orderDetails['status'] !== 'partial') {
+                    $orderDetails['status'] = 'partial';
+                } elseif ($deliveryStatus === 'in_transit' && $orderDetails['status'] !== 'in_transit') {
+                    $orderDetails['status'] = 'in_transit';
+                }
+            }
+            
+            $ordersWithTracking[] = $orderDetails;
         }
 
         return view('dashboards/logisticscoordinator', [
@@ -135,15 +190,19 @@ class LogisticsCoordinator extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        // Get all deliveries with full details
+        // Get all deliveries with full details, ordered by most recent first
         $allDeliveriesRaw = $this->db->table('deliveries')
+            ->orderBy('created_at', 'DESC')
             ->orderBy('scheduled_date', 'DESC')
             ->get()
             ->getResultArray();
         
         $allDeliveries = [];
         foreach ($allDeliveriesRaw as $delivery) {
-            $allDeliveries[] = $this->deliveryModel->trackDelivery($delivery['id']);
+            $deliveryDetails = $this->deliveryModel->trackDelivery($delivery['id']);
+            if ($deliveryDetails) {
+                $allDeliveries[] = $deliveryDetails;
+            }
         }
 
         return view('dashboards/logisticscoordinator', [
@@ -167,16 +226,20 @@ class LogisticsCoordinator extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        // Get scheduled deliveries with full details
+        // Get scheduled deliveries with full details, ordered by scheduled date
         $scheduledDeliveriesRaw = $this->db->table('deliveries')
             ->where('status', 'scheduled')
             ->orderBy('scheduled_date', 'ASC')
+            ->orderBy('created_at', 'ASC')
             ->get()
             ->getResultArray();
         
         $scheduledDeliveries = [];
         foreach ($scheduledDeliveriesRaw as $delivery) {
-            $scheduledDeliveries[] = $this->deliveryModel->trackDelivery($delivery['id']);
+            $deliveryDetails = $this->deliveryModel->trackDelivery($delivery['id']);
+            if ($deliveryDetails) {
+                $scheduledDeliveries[] = $deliveryDetails;
+            }
         }
 
         return view('dashboards/logisticscoordinator', [
