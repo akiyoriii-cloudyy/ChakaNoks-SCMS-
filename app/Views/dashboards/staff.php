@@ -567,41 +567,23 @@
                 <input type="hidden" name="id" value="">
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     <div>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Item Name</label>
-                        <select name="name" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                            <option value="">Select Item</option>
-                            <optgroup label="Chicken Parts">
-                                <option>Whole Chicken</option>
-                                <option>Chicken Breast</option>
-                                <option>Chicken Thigh</option>
-                                <option>Chicken Wings</option>
-                                <option>Chicken Drumstick</option>
-                                <option>Chicken Liver</option>
-                                <option>Chicken Gizzard</option>
-                                <option>Chicken Feet</option>
-                                <option>Chicken Head</option>
-                                <option>Chicken Neck</option>
-                                <option>Chicken Back</option>
-                                <option>Chicken Heart</option>
-                                <option>Chicken Kidney</option>
-                                <option>Chicken Intestine</option>
-                                <option>Chicken Blood</option>
-                                <option>Chicken Skin</option>
-                                <option>Chicken Fat</option>
-                                <option>Chicken Bones</option>
-                                <option>Chicken Tail</option>
-                                <option>Chicken Leg Quarter</option>
-                                <option>Chicken Breast Fillet</option>
-                                <option>Chicken Tenderloin</option>
-                                <option>Chicken Wing Tip</option>
-                                <option>Chicken Wing Flat</option>
-                                <option>Chicken Wing Drumlette</option>
-                            </optgroup>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Category</label>
+                        <select name="category" id="addCategory" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);" onchange="updateItemOptions()">
+                            <option value="">Select Category</option>
+                            <?php foreach ($categories ?? [] as $cat): ?>
+                                <option value="<?= esc($cat['name']) ?>"><?= esc($cat['name']) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Category</label>
-                        <input type="text" name="category" value="Chicken Parts" readonly style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-primary);">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Item Name</label>
+                        <select name="name" id="addItemName" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <option value="">Select Category First</option>
+                        </select>
+                        <input type="text" name="custom_name" id="addCustomName" placeholder="Or enter custom item name..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-top: 8px; display: none;">
+                        <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.875rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" id="useCustomName" onchange="toggleCustomName()"> Enter custom item name
+                        </label>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Branch</label>
@@ -627,11 +609,17 @@
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Stock</label>
                         <div style="display: flex; gap: 10px;">
                             <input type="number" name="stock" required min="1" placeholder="Enter quantity" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                            <select name="unit" required style="width: 120px; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <select name="unit" id="addUnit" required style="width: 120px; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
                                 <option value="pcs">pcs</option>
                                 <option value="kg">kg</option>
                                 <option value="liters">liters</option>
                                 <option value="packs">packs</option>
+                                <option value="boxes">boxes</option>
+                                <option value="bottles">bottles</option>
+                                <option value="cans">cans</option>
+                                <option value="bags">bags</option>
+                                <option value="rolls">rolls</option>
+                                <option value="dozen">dozen</option>
                             </select>
                         </div>
                     </div>
@@ -721,6 +709,9 @@
     <!-- Initial data for JS -->
     <script id="initial-items" type="application/json"><?= json_encode($items) ?></script>
     
+    <!-- Category Items Data -->
+    <script src="<?= base_url('assets/js/categoryItems.js') ?>?v=<?= time() ?>"></script>
+    
     <!-- INVENTORY STAFF JS -->
     <script src="<?= base_url('assets/js/inventorystaff.js') ?>?v=<?= time() ?>"></script>
     
@@ -740,6 +731,74 @@
             document.getElementById('addItemModal').hidden = true;
             document.getElementById('addItemModal').style.display = 'none';
         });
+
+        // Use shared category items from categoryItems.js (CHAKANOKS_CATEGORY_ITEMS)
+        const categoryItems = typeof CHAKANOKS_CATEGORY_ITEMS !== 'undefined' ? CHAKANOKS_CATEGORY_ITEMS : {};
+        const categoryUnits = typeof CHAKANOKS_CATEGORY_UNITS !== 'undefined' ? CHAKANOKS_CATEGORY_UNITS : {};
+
+        // Update item options based on selected category
+        function updateItemOptions() {
+            const categorySelect = document.getElementById('addCategory');
+            const itemSelect = document.getElementById('addItemName');
+            const unitSelect = document.getElementById('addUnit');
+            const selectedCategory = categorySelect.value;
+            
+            // Clear current options
+            itemSelect.innerHTML = '<option value="">Select Item</option>';
+            
+            if (selectedCategory && categoryItems[selectedCategory]) {
+                categoryItems[selectedCategory].forEach(function(item) {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    itemSelect.appendChild(option);
+                });
+                
+                // Add "Other" option for custom items
+                const otherOption = document.createElement('option');
+                otherOption.value = '__other__';
+                otherOption.textContent = '-- Other (Custom Item) --';
+                itemSelect.appendChild(otherOption);
+                
+                // Set default unit based on category (using shared categoryUnits)
+                if (categoryUnits[selectedCategory]) {
+                    unitSelect.value = categoryUnits[selectedCategory];
+                }
+            }
+        }
+        
+        // Handle item selection to show custom input when "Other" is selected
+        document.getElementById('addItemName')?.addEventListener('change', function() {
+            const customInput = document.getElementById('addCustomName');
+            const useCustomCheckbox = document.getElementById('useCustomName');
+            
+            if (this.value === '__other__') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+                useCustomCheckbox.checked = true;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                useCustomCheckbox.checked = false;
+            }
+        });
+        
+        // Toggle custom name input
+        function toggleCustomName() {
+            const customInput = document.getElementById('addCustomName');
+            const itemSelect = document.getElementById('addItemName');
+            const useCustom = document.getElementById('useCustomName').checked;
+            
+            if (useCustom) {
+                customInput.style.display = 'block';
+                customInput.required = true;
+                itemSelect.required = false;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                itemSelect.required = true;
+            }
+        }
         
         document.getElementById('viewClose')?.addEventListener('click', function() {
             document.getElementById('viewItemModal').hidden = true;

@@ -170,8 +170,10 @@ body::before {
 .right-form {
   width: 50%;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  display: block;
-  padding: 60px 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
   position: relative;
   overflow: hidden;
 }
@@ -202,7 +204,7 @@ body::before {
 
 .form-card {
   width: 100%;
-  max-width: 100%;
+  max-width: 500px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -211,6 +213,7 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   z-index: 1;
+  margin: 0 auto;
 }
 
 .welcome-header {
@@ -538,8 +541,16 @@ body::before {
   }
   
   .right-form {
-    padding: 50px 40px;
+    padding: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  }
+  
+  .form-card {
+    max-width: 450px;
+    margin: 0 auto;
   }
   
   .main-title {
@@ -580,8 +591,15 @@ body::before {
   }
   
   .right-form {
-    padding: 30px 20px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  }
+  
+  .form-card {
+    margin: 0 auto;
   }
   
   .main-title {

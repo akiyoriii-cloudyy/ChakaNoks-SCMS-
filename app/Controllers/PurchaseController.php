@@ -697,12 +697,17 @@ class PurchaseController extends BaseController
         }
         $products = $this->productModel->getInventory($productFilters);
 
+        // Get categories for filter
+        $categoryModel = new \App\Models\CategoryModel();
+        $categories = $categoryModel->getActiveCategories();
+
         return view('dashboards/purchase_request_form', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
             ],
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories
         ]);
     }
 

@@ -258,6 +258,27 @@ if (in_array($role, ['central_admin', 'centraladmin', 'superadmin'])) {
                 </button>
             </div>
             <div class="card-body">
+                <!-- Category Filter -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="categoryFilter" class="form-label">
+                            <i class="fas fa-filter"></i> Filter by Category
+                        </label>
+                        <select class="form-select" id="categoryFilter" onchange="filterProductsByCategory()">
+                            <option value="">All Categories</option>
+                            <?php if (!empty($categories)): ?>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= esc($category['name']) ?>"><?= esc($category['name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-8 d-flex align-items-end">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> Select a category to filter products. Products will update automatically.
+                        </small>
+                    </div>
+                </div>
                 <div id="itemsContainer">
                     <!-- Items will be added here dynamically -->
                 </div>
@@ -280,7 +301,9 @@ if (in_array($role, ['central_admin', 'centraladmin', 'superadmin'])) {
 
 <script>
 let itemCount = 0;
-let products = []; // Will be loaded via AJAX
+let products = []; // All products loaded via AJAX
+let filteredProducts = []; // Products filtered by category
+let selectedCategory = ''; // Currently selected category
 
 // Load products on page load
 window.addEventListener('load', function() {
@@ -312,6 +335,7 @@ function loadProducts() {
         
         if (data.status === 'success' && data.items && Array.isArray(data.items) && data.items.length > 0) {
             products = data.items;
+            filteredProducts = products; // Initially show all products
             console.log(`✅ Loaded ${products.length} products`);
             console.log('First product:', JSON.stringify(products[0]));
             addItemRow();
@@ -319,29 +343,103 @@ function loadProducts() {
             console.warn('⚠️ No products returned');
             console.log('Response status:', data.status);
             console.log('Items:', data.items);
+            products = [];
+            filteredProducts = [];
             addItemRow();
         }
     })
     .catch(error => {
         console.error('❌ Error loading products:', error);
+        products = [];
+        filteredProducts = [];
         addItemRow();
+    });
+}
+
+// Filter products by selected category
+function filterProductsByCategory() {
+    const categorySelect = document.getElementById('categoryFilter');
+    selectedCategory = categorySelect.value;
+    
+    console.log('🔍 Filtering products by category:', selectedCategory);
+    
+    if (!selectedCategory || selectedCategory === '') {
+        // Show all products
+        filteredProducts = products;
+    } else {
+        // Filter products by category
+        filteredProducts = products.filter(function(product) {
+            const productCategory = (product.category || '').trim();
+            return productCategory.toLowerCase() === selectedCategory.toLowerCase();
+        });
+    }
+    
+    console.log(`✅ Filtered to ${filteredProducts.length} products`);
+    
+    // Update all existing product dropdowns
+    updateAllProductDropdowns();
+}
+
+// Update all product dropdowns with filtered products
+function updateAllProductDropdowns() {
+    document.querySelectorAll('.product-select').forEach(function(select) {
+        const currentValue = select.value; // Save current selection
+        const currentRow = select.closest('.item-row');
+        
+        // Clear and rebuild options
+        select.innerHTML = '<option value="">Select Product</option>';
+        
+        if (filteredProducts.length > 0) {
+            filteredProducts.forEach(function(p) {
+                const productName = p.name || 'Unknown';
+                const price = p.price || 0;
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.setAttribute('data-price', price);
+                option.textContent = productName;
+                select.appendChild(option);
+            });
+        } else {
+            const option = document.createElement('option');
+            option.disabled = true;
+            option.textContent = selectedCategory ? `No products found in ${selectedCategory}` : 'No products available';
+            select.appendChild(option);
+        }
+        
+        // Restore previous selection if it still exists in filtered list
+        if (currentValue) {
+            const stillAvailable = filteredProducts.some(p => p.id == currentValue);
+            if (stillAvailable) {
+                select.value = currentValue;
+            } else {
+                // Clear selection if product is not in filtered list
+                select.value = '';
+                // Also clear the price input
+                const priceInput = currentRow.querySelector('.price-input');
+                if (priceInput) {
+                    priceInput.value = '0';
+                }
+                calculateTotal();
+            }
+        }
     });
 }
 
 function addItemRow() {
     itemCount++;
-    console.log('Adding item row', itemCount, 'with', products.length, 'products available');
+    console.log('Adding item row', itemCount, 'with', filteredProducts.length, 'filtered products available');
     
-    // Build product options
+    // Build product options from filtered products
     let productOptions = '<option value="">Select Product</option>';
-    if (products.length > 0) {
-        products.forEach(function(p) {
+    if (filteredProducts.length > 0) {
+        filteredProducts.forEach(function(p) {
             const productName = p.name || 'Unknown';
             const price = p.price || 0;
             productOptions += `<option value="${p.id}" data-price="${price}">${productName}</option>`;
         });
     } else {
-        productOptions += '<option disabled>No products available</option>';
+        const noProductsMsg = selectedCategory ? `No products found in ${selectedCategory}` : 'No products available';
+        productOptions += `<option disabled>${noProductsMsg}</option>`;
     }
     
     const row = `

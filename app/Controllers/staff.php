@@ -65,6 +65,10 @@ class Staff extends BaseController
             ->orderBy('name')
             ->findAll();
 
+        // Get categories for Add Item form
+        $categoryModel = new CategoryModel();
+        $categories = $categoryModel->getActiveCategories();
+
         // Get current section from URL or default to inventory
         $section = $this->request->getGet('section') ?? 'inventory';
 
@@ -112,6 +116,7 @@ class Staff extends BaseController
         return view('dashboards/staff', [
             'items'    => $items,
             'branches' => $branches,
+            'categories' => $categories,
             'filters'  => $filters,
             'branchScope' => [
                 'enforced' => (bool)$enforceBranchScope,

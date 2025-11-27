@@ -1,0 +1,15 @@
+ERROR - 2025-11-27 15:23:23 --> mysqli_sql_exception: Duplicate entry 'sales@magnolia.com.ph' for key 'email' in C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `su...', 0)
+#1 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `su...')
+#2 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `su...')
+#3 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `su...', Array, false)
+#4 C:\xampp\htdocs\ChakaNoks-SCMS\app\Database\Seeds\SuppliersSeeder.php(136): CodeIgniter\Database\BaseBuilder->insert(Array)
+#5 C:\xampp\htdocs\ChakaNoks-SCMS\system\Database\Seeder.php(149): App\Database\Seeds\SuppliersSeeder->run()
+#6 C:\xampp\htdocs\ChakaNoks-SCMS\system\Commands\Database\Seed.php(79): CodeIgniter\Database\Seeder->call('App\\Database\\Se...')
+#7 C:\xampp\htdocs\ChakaNoks-SCMS\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Seed->run(Array)
+#8 C:\xampp\htdocs\ChakaNoks-SCMS\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('db:seed', Array)
+#9 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#10 C:\xampp\htdocs\ChakaNoks-SCMS\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#11 C:\xampp\htdocs\ChakaNoks-SCMS\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#12 {main}
