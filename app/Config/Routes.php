@@ -55,6 +55,10 @@ $routes->get('manager/api/search-products', 'Manager::searchProducts');
 $routes->post('manager/api/stock-out', 'Manager::recordStockOut');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
+$routes->get('logisticscoordinator/schedule', 'LogisticsCoordinator::scheduleDelivery');
+$routes->get('logisticscoordinator/track-orders', 'LogisticsCoordinator::trackOrders');
+$routes->get('logisticscoordinator/deliveries', 'LogisticsCoordinator::deliveries');
+$routes->get('logisticscoordinator/schedules', 'LogisticsCoordinator::schedules');
 
 // ---------- STAFF DASHBOARD & ACTIONS ----------
 $routes->get('staff/dashboard', 'Staff::dashboard');

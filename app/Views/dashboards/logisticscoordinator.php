@@ -274,20 +274,23 @@
             </div>
             
             <div class="sidebar-nav flex-grow-1">
-                <a href="#" class="nav-link-custom active">
+                <?php 
+                $currentPage = $currentPage ?? 'dashboard';
+                ?>
+                <a href="<?= base_url('logisticscoordinator/dashboard') ?>" class="nav-link-custom <?= $currentPage === 'dashboard' ? 'active' : '' ?>">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
-                <a href="#" class="nav-link-custom" onclick="showScheduleDelivery()">
+                <a href="<?= base_url('logisticscoordinator/schedule') ?>" class="nav-link-custom <?= $currentPage === 'schedule' ? 'active' : '' ?>">
                     <i class="fas fa-calendar-plus"></i> Schedule Delivery
                 </a>
-                <a href="#" class="nav-link-custom" onclick="showOrderTracking()">
+                <a href="<?= base_url('logisticscoordinator/track-orders') ?>" class="nav-link-custom <?= $currentPage === 'track' ? 'active' : '' ?>">
                     <i class="fas fa-search"></i> Track Orders
                 </a>
-                <a href="#" class="nav-link-custom">
+                <a href="<?= base_url('logisticscoordinator/deliveries') ?>" class="nav-link-custom <?= $currentPage === 'deliveries' ? 'active' : '' ?>">
                     <i class="fas fa-truck"></i> Deliveries
                 </a>
                 
-                <a href="#" class="nav-link-custom">
+                <a href="<?= base_url('logisticscoordinator/schedules') ?>" class="nav-link-custom <?= $currentPage === 'schedules' ? 'active' : '' ?>">
                     <i class="fas fa-file-contract"></i> Schedules
                 </a>
             </div>
@@ -312,129 +315,339 @@
         
         <!-- Main Content -->
         <div class="main-content flex-grow-1">
-            <!-- Header removed since we have sidebar navigation -->
+            <?php $currentPage = $currentPage ?? 'dashboard'; ?>
             
-            <!-- Pending POs for Scheduling -->
-            
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5><i class="fas fa-shopping-cart"></i> Pending Purchase Orders (Need Scheduling)</h5>
+            <?php if ($currentPage === 'dashboard'): ?>
+                <!-- Dashboard View -->
+                <!-- Pending POs for Scheduling -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-shopping-cart"></i> Pending Purchase Orders (Need Scheduling)</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($pendingPOs)): ?>
+                            <p class="text-muted">No pending purchase orders</p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>PO Number</th>
+                                            <th>Supplier</th>
+                                            <th>Branch</th>
+                                            <th>Expected Date</th>
+                                            <th>Total Amount</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($pendingPOs as $po): ?>
+                                        <tr>
+                                            <td><strong><?= esc($po['order_number'] ?? 'N/A') ?></strong></td>
+                                            <td><?= esc($po['supplier']['name'] ?? ($po['supplier_id'] ?? 'N/A')) ?></td>
+                                            <td><?= esc($po['branch']['name'] ?? ($po['branch_id'] ?? 'N/A')) ?></td>
+                                            <td><?= $po['expected_delivery_date'] ? date('M d, Y', strtotime($po['expected_delivery_date'])) : 'Not set' ?></td>
+                                            <td>₱<?= number_format($po['total_amount'] ?? 0, 2) ?></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" onclick="scheduleDelivery(<?= $po['id'] ?>)">
+                                                    <i class="fas fa-calendar"></i> Schedule
+                                                </button>
+                                                <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $po['id'] ?>)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <?php if (empty($pendingPOs)): ?>
-                        <p class="text-muted">No pending purchase orders</p>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>PO Number</th>
-                                        <th>Supplier</th>
-                                        <th>Branch</th>
-                                        <th>Expected Date</th>
-                                        <th>Total Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($pendingPOs as $po): ?>
-                                    <tr>
-                                        <td><strong><?= esc($po['order_number'] ?? 'N/A') ?></strong></td>
-                                        <td><?= esc($po['supplier']['name'] ?? ($po['supplier_id'] ?? 'N/A')) ?></td>
-                                        <td><?= esc($po['branch']['name'] ?? ($po['branch_id'] ?? 'N/A')) ?></td>
-                                        <td><?= $po['expected_delivery_date'] ? date('M d, Y', strtotime($po['expected_delivery_date'])) : 'Not set' ?></td>
-                                        <td>₱<?= number_format($po['total_amount'] ?? 0, 2) ?></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" onclick="scheduleDelivery(<?= $po['id'] ?>)">
-                                                <i class="fas fa-calendar"></i> Schedule
+
+                <!-- Scheduled Deliveries -->
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> Scheduled Deliveries</h5>
+                            </div>
+                            <div class="card-body">
+                                <?php if (empty($scheduledDeliveries)): ?>
+                                    <p class="text-muted">No scheduled deliveries</p>
+                                <?php else: ?>
+                                    <?php foreach ($scheduledDeliveries as $delivery): ?>
+                                    <div class="delivery-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong><?= esc($delivery['delivery_number']) ?></strong>
+                                                <span class="status-badge status-scheduled ms-2">Scheduled</span>
+                                            </div>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <div>Date: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
+                                            <div>Branch: <?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></div>
+                                            <?php if ($delivery['driver_name']): ?>
+                                                <div>Driver: <?= esc($delivery['driver_name']) ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
+                                                <i class="fas fa-truck"></i> Mark In Transit
                                             </button>
-                                            <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $po['id'] ?>)">
-                                                <i class="fas fa-eye"></i> View
-                                            </button>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
                                     <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+                    </div>
 
-            <!-- Scheduled Deliveries -->
-              <br>
-             <br>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-calendar-check"></i> Scheduled Deliveries</h5>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-truck"></i> In Transit Deliveries</h5>
+                            </div>
+                            <div class="card-body">
+                                <?php if (empty($inTransitDeliveries)): ?>
+                                    <p class="text-muted">No deliveries in transit</p>
+                                <?php else: ?>
+                                    <?php foreach ($inTransitDeliveries as $delivery): ?>
+                                    <div class="delivery-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong><?= esc($delivery['delivery_number']) ?></strong>
+                                                <span class="status-badge status-in_transit ms-2">In Transit</span>
+                                            </div>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <div>Scheduled: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
+                                            <div>Driver: <?= esc($delivery['driver_name'] ?? 'N/A') ?></div>
+                                            <div>Vehicle: <?= esc($delivery['vehicle_info'] ?? 'N/A') ?></div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-success" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'delivered')">
+                                                <i class="fas fa-check"></i> Mark Delivered
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <?php if (empty($scheduledDeliveries)): ?>
-                                <p class="text-muted">No scheduled deliveries</p>
-                            <?php else: ?>
+                    </div>
+                </div>
+            
+            <?php elseif ($currentPage === 'schedule'): ?>
+                <!-- Schedule Delivery View -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-plus"></i> Schedule Delivery</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($pendingPOs)): ?>
+                            <p class="text-muted">No pending purchase orders to schedule</p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>PO Number</th>
+                                            <th>Supplier</th>
+                                            <th>Branch</th>
+                                            <th>Expected Date</th>
+                                            <th>Total Amount</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($pendingPOs as $po): ?>
+                                        <tr>
+                                            <td><strong><?= esc($po['order_number'] ?? 'N/A') ?></strong></td>
+                                            <td><?= esc($po['supplier']['name'] ?? ($po['supplier_id'] ?? 'N/A')) ?></td>
+                                            <td><?= esc($po['branch']['name'] ?? ($po['branch_id'] ?? 'N/A')) ?></td>
+                                            <td><?= $po['expected_delivery_date'] ? date('M d, Y', strtotime($po['expected_delivery_date'])) : 'Not set' ?></td>
+                                            <td>₱<?= number_format($po['total_amount'] ?? 0, 2) ?></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" onclick="scheduleDelivery(<?= $po['id'] ?>)">
+                                                    <i class="fas fa-calendar"></i> Schedule
+                                                </button>
+                                                <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $po['id'] ?>)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            
+            <?php elseif ($currentPage === 'track'): ?>
+                <!-- Track Orders View -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-search"></i> Track Orders</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($allOrders ?? [])): ?>
+                            <p class="text-muted">No orders found</p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>PO Number</th>
+                                            <th>Supplier</th>
+                                            <th>Branch</th>
+                                            <th>Status</th>
+                                            <th>Expected Date</th>
+                                            <th>Total Amount</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($allOrders as $order): ?>
+                                        <tr>
+                                            <td><strong><?= esc($order['order_number'] ?? 'N/A') ?></strong></td>
+                                            <td><?= esc($order['supplier']['name'] ?? ($order['supplier_id'] ?? 'N/A')) ?></td>
+                                            <td><?= esc($order['branch']['name'] ?? ($order['branch_id'] ?? 'N/A')) ?></td>
+                                            <td>
+                                                <span class="status-badge status-<?= esc($order['status'] ?? 'pending') ?>">
+                                                    <?= esc(ucwords(str_replace('_', ' ', $order['status'] ?? 'pending'))) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= $order['expected_delivery_date'] ? date('M d, Y', strtotime($order['expected_delivery_date'])) : 'Not set' ?></td>
+                                            <td>₱<?= number_format($order['total_amount'] ?? 0, 2) ?></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $order['id'] ?>)">
+                                                    <i class="fas fa-eye"></i> Track
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            
+            <?php elseif ($currentPage === 'deliveries'): ?>
+                <!-- All Deliveries View -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-truck"></i> All Deliveries</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($allDeliveries ?? [])): ?>
+                            <p class="text-muted">No deliveries found</p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Delivery Number</th>
+                                            <th>PO Number</th>
+                                            <th>Supplier</th>
+                                            <th>Branch</th>
+                                            <th>Status</th>
+                                            <th>Scheduled Date</th>
+                                            <th>Driver</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($allDeliveries as $delivery): ?>
+                                        <tr>
+                                            <td><strong><?= esc($delivery['delivery_number'] ?? 'N/A') ?></strong></td>
+                                            <td><?= esc($delivery['purchase_order']['order_number'] ?? ($delivery['purchase_order_id'] ?? 'N/A')) ?></td>
+                                            <td><?= esc($delivery['supplier']['name'] ?? ($delivery['supplier_id'] ?? 'N/A')) ?></td>
+                                            <td><?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></td>
+                                            <td>
+                                                <span class="status-badge status-<?= esc($delivery['status'] ?? 'pending') ?>">
+                                                    <?= esc(ucwords(str_replace('_', ' ', $delivery['status'] ?? 'pending'))) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= $delivery['scheduled_date'] ? date('M d, Y', strtotime($delivery['scheduled_date'])) : 'Not set' ?></td>
+                                            <td><?= esc($delivery['driver_name'] ?? 'N/A') ?></td>
+                                            <td>
+                                                <?php if ($delivery['status'] === 'scheduled'): ?>
+                                                    <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
+                                                        <i class="fas fa-truck"></i> Mark In Transit
+                                                    </button>
+                                                <?php elseif ($delivery['status'] === 'in_transit'): ?>
+                                                    <button class="btn btn-sm btn-success" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'delivered')">
+                                                        <i class="fas fa-check"></i> Mark Delivered
+                                                    </button>
+                                                <?php endif; ?>
+                                                <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $delivery['purchase_order_id'] ?? 0 ?>)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            
+            <?php elseif ($currentPage === 'schedules'): ?>
+                <!-- Schedules View -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-contract"></i> Scheduled Deliveries</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($scheduledDeliveries)): ?>
+                            <p class="text-muted">No scheduled deliveries</p>
+                        <?php else: ?>
+                            <div class="row">
                                 <?php foreach ($scheduledDeliveries as $delivery): ?>
-                                <div class="delivery-card">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong><?= esc($delivery['delivery_number']) ?></strong>
-                                            <span class="status-badge status-scheduled ms-2">Scheduled</span>
+                                <div class="col-md-6 mb-3">
+                                    <div class="delivery-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong><?= esc($delivery['delivery_number']) ?></strong>
+                                                <span class="status-badge status-scheduled ms-2">Scheduled</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="small text-muted">
-                                        <div>Date: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
-                                        <div>Branch: <?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></div>
-                                        <?php if ($delivery['driver_name']): ?>
-                                            <div>Driver: <?= esc($delivery['driver_name']) ?></div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="mt-2">
-                                        <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
-                                            <i class="fas fa-truck"></i> Mark In Transit
-                                        </button>
+                                        <div class="small text-muted mb-2">
+                                            <div><strong>PO Number:</strong> <?= esc($delivery['purchase_order']['order_number'] ?? ($delivery['purchase_order_id'] ?? 'N/A')) ?></div>
+                                            <div><strong>Date:</strong> <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
+                                            <div><strong>Branch:</strong> <?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></div>
+                                            <?php if ($delivery['driver_name']): ?>
+                                                <div><strong>Driver:</strong> <?= esc($delivery['driver_name']) ?></div>
+                                            <?php endif; ?>
+                                            <?php if ($delivery['vehicle_info']): ?>
+                                                <div><strong>Vehicle:</strong> <?= esc($delivery['vehicle_info']) ?></div>
+                                            <?php endif; ?>
+                                            <?php if ($delivery['notes']): ?>
+                                                <div><strong>Notes:</strong> <?= esc($delivery['notes']) ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
+                                                <i class="fas fa-truck"></i> Mark In Transit
+                                            </button>
+                                            <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $delivery['purchase_order_id'] ?? 0 ?>)">
+                                                <i class="fas fa-eye"></i> View Details
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-truck"></i> In Transit Deliveries</h5>
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($inTransitDeliveries)): ?>
-                                <p class="text-muted">No deliveries in transit</p>
-                            <?php else: ?>
-                                <?php foreach ($inTransitDeliveries as $delivery): ?>
-                                <div class="delivery-card">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong><?= esc($delivery['delivery_number']) ?></strong>
-                                            <span class="status-badge status-in_transit ms-2">In Transit</span>
-                                        </div>
-                                    </div>
-                                    <div class="small text-muted">
-                                        <div>Scheduled: <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
-                                        <div>Driver: <?= esc($delivery['driver_name'] ?? 'N/A') ?></div>
-                                        <div>Vehicle: <?= esc($delivery['vehicle_info'] ?? 'N/A') ?></div>
-                                    </div>
-                                    <div class="mt-2">
-                                        <button class="btn btn-sm btn-success" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'delivered')">
-                                            <i class="fas fa-check"></i> Mark Delivered
-                                        </button>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -587,16 +800,5 @@ function updateDeliveryStatus(deliveryId, status) {
     }
 }
 
-function showScheduleDelivery() {
-    // Scroll to pending POs section
-    $('html, body').animate({
-        scrollTop: $('.card:first').offset().top
-    }, 500);
-}
-
-function showOrderTracking() {
-    // Show tracking modal or scroll to deliveries
-    alert('Use the "View" button on any purchase order to track it');
-}
 </script>
 <?= $this->endSection() ?>
