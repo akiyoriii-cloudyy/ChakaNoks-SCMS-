@@ -631,10 +631,14 @@ class PurchaseController extends BaseController
             $deliveryModel = new \App\Models\DeliveryModel();
             
             // Create delivery record automatically with delivery details
+            $session = session();
+            $userId = $session->get('user_id') ?? $session->get('id');
+            
             $deliveryData = [
                 'purchase_order_id' => $poId,
                 'supplier_id' => $poData['supplier_id'],
                 'branch_id' => $poData['branch_id'],
+                'scheduled_by' => $userId ? (int)$userId : null,
                 'scheduled_date' => $deliveryDetails['scheduled_delivery_date'] ?? $poData['expected_delivery_date'],
                 'driver_name' => $deliveryDetails['driver_name'] ?? null,
                 'vehicle_info' => $deliveryDetails['vehicle_info'] ?? null,

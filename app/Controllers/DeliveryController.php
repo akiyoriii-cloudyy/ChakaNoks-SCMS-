@@ -54,11 +54,15 @@ class DeliveryController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Purchase order not found']);
         }
 
+        // Get user ID from session
+        $userId = $session->get('user_id') ?? $session->get('id');
+
         // Create delivery
         $deliveryData = [
             'purchase_order_id' => (int)$purchaseOrderId,
             'supplier_id' => $po['supplier_id'],
             'branch_id' => $po['branch_id'],
+            'scheduled_by' => $userId ? (int)$userId : null,
             'scheduled_date' => $scheduledDate,
             'driver_name' => $driverName,
             'vehicle_info' => $vehicleInfo,

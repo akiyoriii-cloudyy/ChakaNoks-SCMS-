@@ -14,6 +14,7 @@ class DeliveryModel extends Model
         'purchase_order_id',
         'supplier_id',
         'branch_id',
+        'scheduled_by',
         'status',
         'scheduled_date',
         'actual_delivery_date',
@@ -169,6 +170,34 @@ class DeliveryModel extends Model
         // Get branch info
         $branchModel = new \App\Models\BranchModel();
         $delivery['branch'] = $branchModel->find($delivery['branch_id']);
+
+        // Get user info for scheduled_by
+        if (!empty($delivery['scheduled_by'])) {
+            $userModel = new \App\Models\UserModel();
+            $scheduledByUser = $userModel->find($delivery['scheduled_by']);
+            $delivery['scheduled_by_user'] = $scheduledByUser ? [
+                'id' => $scheduledByUser['id'],
+                'email' => $scheduledByUser['email'] ?? null,
+                'username' => $scheduledByUser['username'] ?? null,
+                'role' => $scheduledByUser['role'] ?? null
+            ] : null;
+        } else {
+            $delivery['scheduled_by_user'] = null;
+        }
+
+        // Get user info for received_by
+        if (!empty($delivery['received_by'])) {
+            $userModel = new \App\Models\UserModel();
+            $receivedByUser = $userModel->find($delivery['received_by']);
+            $delivery['received_by_user'] = $receivedByUser ? [
+                'id' => $receivedByUser['id'],
+                'email' => $receivedByUser['email'] ?? null,
+                'username' => $receivedByUser['username'] ?? null,
+                'role' => $receivedByUser['role'] ?? null
+            ] : null;
+        } else {
+            $delivery['received_by_user'] = null;
+        }
 
         // Calculate tracking info
         $today = date('Y-m-d');
