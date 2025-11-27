@@ -74,7 +74,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'branch_id' => $lanang ? $lanang->id : null,
-                'email'     => 'gpalagpalag@gmail.com',
+                'email'     => '  gpalagpalag@gmail.com  ',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),
                 'role'      => 'logistics_coordinator',
             ],

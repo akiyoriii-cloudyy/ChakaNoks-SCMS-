@@ -1,0 +1,28 @@
+CRITICAL - 2025-11-28 00:17:52 --> TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given
+[Method: GET, Route: logisticscoordinator/dashboard]
+in APPPATH\Views\dashboards\logisticscoordinator.php on line 254.
+ 1 SYSTEMPATH\View\View.php(226): include()
+ 2 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('dashboards/logisticscoordinator', [], true)
+ 4 APPPATH\Controllers\logisticscoordinator.php(63): view('dashboards/logisticscoordinator', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\LogisticsCoordinator->dashboard()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\LogisticsCoordinator))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS-\\public\\index.php')
+CRITICAL - 2025-11-28 00:17:52 --> [Caused by] ErrorException: Undefined variable $allDeliveries
+in APPPATH\Views\dashboards\logisticscoordinator.php on line 254.
+ 1 APPPATH\Views\dashboards\logisticscoordinator.php(254): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $allDeliveries', 'C:\\xampp\\htdocs\\ChakaNoks-SCMS-\\app\\Views\\dashboards\\logisticscoordinator.php', 254)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\ChakaNoks-SCMS-\\app\\Views\\dashboards\\logisticscoordinator.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('dashboards/logisticscoordinator', [], true)
+ 5 APPPATH\Controllers\logisticscoordinator.php(63): view('dashboards/logisticscoordinator', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\LogisticsCoordinator->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\LogisticsCoordinator))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\ChakaNoks-SCMS-\\public\\index.php')

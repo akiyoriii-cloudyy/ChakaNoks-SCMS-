@@ -53,12 +53,12 @@
     
     /* Sidebar Styles */
     .sidebar {
-        min-height: 100vh;
+        min-height: 98vh;
         background: var(--primary-green);
         color: var(--text-light);
-        padding: 0;
+        padding: 50;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        border-right: 1px solid var(--accent-green);
+        border-right: 3px solid var(--accent-green);
     }
     
     .sidebar-header {
@@ -74,7 +74,7 @@
     .nav-link-custom {
         display: flex;
         align-items: center;
-        padding: 12px 20px;
+        padding: 20px 30px;
         color: var(--text-light);
         text-decoration: none;
         border: none;
@@ -265,6 +265,8 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
+         <br>
+         <br>
         <div class="sidebar d-flex flex-column">
             <div class="sidebar-header">
                 <h4 class="mb-0">Logistics Coordinator</h4>
@@ -313,6 +315,7 @@
             <!-- Header removed since we have sidebar navigation -->
             
             <!-- Pending POs for Scheduling -->
+            
             <div class="card mb-4">
                 <div class="card-header">
                     <h5><i class="fas fa-shopping-cart"></i> Pending Purchase Orders (Need Scheduling)</h5>
@@ -359,6 +362,8 @@
             </div>
 
             <!-- Scheduled Deliveries -->
+              <br>
+             <br>
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
