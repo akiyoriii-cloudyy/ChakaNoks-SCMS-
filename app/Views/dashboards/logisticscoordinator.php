@@ -850,6 +850,9 @@
                                             <div><strong>PO Number:</strong> <?= esc($delivery['purchase_order']['order_number'] ?? ($delivery['purchase_order_id'] ?? 'N/A')) ?></div>
                                             <div><strong>Date:</strong> <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?></div>
                                             <div><strong>Branch:</strong> <?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></div>
+                                            <?php if (!empty($delivery['scheduled_by_user'])): ?>
+                                                <div><strong>Scheduled By:</strong> <?= esc($delivery['scheduled_by_user']['email'] ?? $delivery['scheduled_by_user']['username'] ?? 'User ID: ' . $delivery['scheduled_by_user']['id']) ?></div>
+                                            <?php endif; ?>
                                             <?php if ($delivery['driver_name']): ?>
                                                 <div><strong>Driver:</strong> <?= esc($delivery['driver_name']) ?></div>
                                             <?php endif; ?>

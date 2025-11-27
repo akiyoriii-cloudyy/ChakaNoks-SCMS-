@@ -248,7 +248,8 @@
                     html += '<div><strong>Actual Delivery Date:</strong><br>' + (delivery.actual_delivery_date || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
                     html += '<div><strong>Driver Name:</strong><br>' + (delivery.driver_name || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
                     html += '<div><strong>Vehicle Info:</strong><br>' + (delivery.vehicle_info || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
-                    html += '<div><strong>Received By:</strong><br>' + (delivery.received_by ? 'User ID: ' + delivery.received_by : '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '<div><strong>Scheduled By:</strong><br>' + (delivery.scheduled_by_user ? (delivery.scheduled_by_user.email || delivery.scheduled_by_user.username || 'User ID: ' + delivery.scheduled_by_user.id) : '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
+                    html += '<div><strong>Received By:</strong><br>' + (delivery.received_by_user ? (delivery.received_by_user.email || delivery.received_by_user.username || 'User ID: ' + delivery.received_by_user.id) : '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
                     html += '<div><strong>Received At:</strong><br>' + (delivery.received_at || '<span style="color: #999; font-style: italic;">Not set</span>') + '</div>';
                     html += '</div>';
                     
