@@ -54,10 +54,22 @@
             
             <nav class="sidebar-nav">
                 <?php 
+                // Determine dashboard URL based on user role
+                $role = strtolower($me['role'] ?? '');
+                $dashboardUrl = 'manager/dashboard'; // default
+                
+                if (in_array($role, ['central_admin', 'centraladmin', 'superadmin'])) {
+                    $dashboardUrl = 'centraladmin/dashboard';
+                } elseif (in_array($role, ['branch_manager', 'manager', 'branchmanager'])) {
+                    $dashboardUrl = 'manager/dashboard';
+                } elseif (in_array($role, ['inventory_staff', 'inventorystaff', 'staff'])) {
+                    $dashboardUrl = 'staff/dashboard';
+                }
+                
                 $currentUrl = current_url();
-                $isDashboard = strpos($currentUrl, 'centraladmin/dashboard') !== false && strpos($currentUrl, '?tab=') === false;
+                $isDashboard = strpos($currentUrl, $dashboardUrl) !== false && strpos($currentUrl, '?tab=') === false;
                 ?>
-                <a href="<?= base_url('centraladmin/dashboard') ?>" class="nav-item <?= $isDashboard ? 'active' : '' ?>">
+                <a href="<?= base_url($dashboardUrl) ?>" class="nav-item <?= $isDashboard ? 'active' : '' ?>">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>

@@ -53,7 +53,8 @@ class SupplierController extends BaseController
     {
         $session = session();
         
-        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+        // Allow central admin, branch managers, and staff to view suppliers
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin', 'branch_manager', 'manager', 'inventory_staff', 'inventorystaff'])) {
             return redirect()->to('/auth/login');
         }
 

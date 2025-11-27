@@ -697,12 +697,17 @@ class PurchaseController extends BaseController
         }
         $products = $this->productModel->getInventory($productFilters);
 
+        // Get categories for filter
+        $categoryModel = new \App\Models\CategoryModel();
+        $categories = $categoryModel->getActiveCategories();
+
         return view('dashboards/purchase_request_form', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
             ],
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories
         ]);
     }
 
@@ -883,17 +888,27 @@ class PurchaseController extends BaseController
     {
         $session = session();
         
-        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+        // Allow central admin, branch managers, and staff to view purchase orders
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin', 'branch_manager', 'manager', 'inventory_staff', 'inventorystaff'])) {
             return redirect()->to('/auth/login');
         }
 
+        $role = $session->get('role');
+        $branchId = $session->get('branch_id');
+        
         // Fetch purchase orders data server-side
         try {
-            $orders = $this->db->table('purchase_orders')
+            $builder = $this->db->table('purchase_orders')
                 ->select('purchase_orders.*, suppliers.name as supplier_name, branches.name as branch_name')
                 ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id', 'left')
-                ->join('branches', 'branches.id = purchase_orders.branch_id', 'left')
-                ->orderBy('purchase_orders.created_at', 'DESC')
+                ->join('branches', 'branches.id = purchase_orders.branch_id', 'left');
+            
+            // Branch managers and staff only see their branch's purchase orders
+            if (!in_array($role, ['central_admin', 'superadmin']) && $branchId) {
+                $builder->where('purchase_orders.branch_id', $branchId);
+            }
+            
+            $orders = $builder->orderBy('purchase_orders.created_at', 'DESC')
                 ->get()
                 ->getResultArray();
 

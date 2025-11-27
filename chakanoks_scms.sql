@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 26, 2025 at 06:58 AM
+-- Generation Time: Nov 27, 2025 at 10:07 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,8 +53,11 @@ CREATE TABLE `accounts_payable` (
 --
 
 INSERT INTO `accounts_payable` (`id`, `purchase_order_id`, `supplier_id`, `branch_id`, `invoice_number`, `invoice_date`, `due_date`, `amount`, `paid_amount`, `balance`, `payment_status`, `payment_date`, `payment_method`, `payment_reference`, `notes`, `created_by`, `created_at`, `updated_at`) VALUES
-(13, 17, 5, 5, 'INV-20251125-64640', '2025-11-25', '2025-12-25', 24000.00, 24000.00, 0.00, 'paid', '2025-11-25', 'Cash', '475895', 'Auto-created from approved purchase order: PO-20251125-5937', 2, '2025-11-25 14:28:23', '2025-11-25 14:29:02'),
-(14, 18, 13, 6, 'INV-20251125-26188', '2025-11-25', '2025-12-25', 42000.00, 42000.00, 0.00, 'paid', '2025-11-25', 'Cash', '3192832', 'Auto-created from approved purchase order: PO-20251125-1815', 2, '2025-11-25 14:30:46', '2025-11-25 14:31:04');
+(18, 24, 19, 2, 'INV-20251127-52319', '2025-11-27', '2025-12-12', 31500.00, 31500.00, 0.00, 'paid', '2025-11-27', 'Checkque', '3695865', 'Auto-created from approved purchase order: PO-20251127-6130', 2, '2025-11-27 03:03:39', '2025-11-27 03:04:58'),
+(19, 23, 11, 6, 'INV-20251127-80151', '2025-11-27', '2025-12-12', 20000.00, 20000.00, 0.00, 'paid', '2025-11-27', 'Cash', '5848695', 'Auto-created from approved purchase order: PO-20251127-9836', 2, '2025-11-27 03:03:45', '2025-11-27 03:04:39'),
+(20, 25, 1, 5, 'INV-20251127-53580', '2025-11-27', '2025-12-27', 35000.00, 35000.00, 0.00, 'paid', '2025-11-27', 'Cash', '5847596', 'Auto-created from approved purchase order: PO-20251127-7090', 2, '2025-11-27 03:09:35', '2025-11-27 03:10:11'),
+(21, 26, 10, 2, 'INV-20251127-84705', '2025-11-27', '2025-12-27', 45000.00, 45000.00, 0.00, 'paid', '2025-11-27', 'Cash', '1213512', 'Auto-created from approved purchase order: PO-20251127-1796', 2, '2025-11-27 13:28:41', '2025-11-27 13:30:07'),
+(22, 27, 1, 3, 'INV-20251127-20527', '2025-11-27', '2025-12-27', 1650.00, 1650.00, 0.00, 'paid', '2025-11-27', 'Bank Transfer', '2363820', 'Auto-created from approved purchase order: PO-20251127-1506', 2, '2025-11-27 16:06:50', '2025-11-27 16:08:35');
 
 -- --------------------------------------------------------
 
@@ -104,7 +107,26 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`, `description`, `created_by`, `status`, `created_at`, `updated_at`) VALUES
-(2, 'Chicken Parts', 'Chicken parts and products', 12, 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57');
+(2, 'Chicken Parts', 'Chicken parts and products including whole chicken, breast, thigh, wings, drumstick, liver, gizzard, and other parts', 12, 'active', '2025-11-25 15:45:57', '2025-11-27 08:10:55'),
+(3, 'Beverages', 'Soft drinks, juices, water, coffee, tea, and other drinks for customers and staff', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(4, 'Condiments & Sauces', 'Ketchup, mayonnaise, gravy, hot sauce, soy sauce, BBQ sauce, and other dipping sauces', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(5, 'Cooking Oils', 'Vegetable oil, palm oil, coconut oil, shortening, and other cooking fats for frying chicken', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(6, 'Seasonings & Spices', 'Salt, pepper, garlic powder, paprika, chicken seasoning, MSG, and other flavor enhancers', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(7, 'Rice & Grains', 'White rice, brown rice, java rice, garlic rice, and other grain products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(8, 'Vegetables & Produce', 'Fresh vegetables including cabbage, carrots, onions, garlic, potatoes, lettuce, and coleslaw ingredients', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(9, 'Bread & Bakery', 'Burger buns, sandwich bread, pandesal, tortilla wraps, and other bread products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(10, 'Dairy Products', 'Butter, cheese, milk, cream, and other dairy items for cooking and beverages', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(11, 'Frozen Goods', 'Frozen fries, frozen vegetables, ice cream, and other frozen products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(12, 'Packaging & Supplies', 'Takeout boxes, paper bags, plastic containers, utensils, cups, straws, and other packaging materials', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(13, 'Cleaning & Sanitation', 'Dish soap, sanitizers, cleaning supplies, garbage bags, gloves, and sanitation products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(14, 'Eggs', 'Fresh eggs in trays and dozens for cooking, breading, and breakfast items', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(15, 'Flour & Breading', 'All-purpose flour, breading mix, cornstarch, batter mix, and panko for chicken coating', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
+(16, 'Marinades & Brines', 'Chicken marinades, BBQ marinades, buttermilk brine, and flavor enhancers for chicken preparation', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
+(17, 'Side Dishes', 'Pre-made coleslaw, mashed potato mix, gravy, mac and cheese, and other ready-to-serve sides', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
+(18, 'Desserts & Sweets', 'Chocolate syrup, caramel, sundae toppings, brownie mix, and other dessert items', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
+(19, 'Paper Products', 'Napkins, paper towels, tissue paper, parchment paper, and other paper supplies', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
+(20, 'Kitchen Equipment', 'Tongs, spatulas, thermometers, cutting boards, knives, and other kitchen tools', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
+(21, 'Uniforms & Apparel', 'Chef hats, hair nets, aprons, kitchen gloves, face masks, and staff uniforms', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55');
 
 -- --------------------------------------------------------
 
@@ -135,8 +157,9 @@ CREATE TABLE `deliveries` (
 --
 
 INSERT INTO `deliveries` (`id`, `delivery_number`, `purchase_order_id`, `supplier_id`, `branch_id`, `status`, `scheduled_date`, `actual_delivery_date`, `driver_name`, `vehicle_info`, `received_by`, `received_at`, `notes`, `created_at`, `updated_at`) VALUES
-(16, 'DEL-20251125-3663', 17, 5, 5, 'delivered', '2026-01-20', '2025-11-25', 'Markypadilla', 'L300 RE3949', 7, '2025-11-25 15:24:00', 'Auto-created from Purchase Order', '2025-11-25 14:28:00', '2025-11-25 15:24:32'),
-(17, 'DEL-20251125-0721', 18, 13, 6, 'delivered', '2025-11-25', '2025-11-25', 'AbbyRuales', 'L300 AB8930', 8, '2025-11-25 15:18:00', 'Auto-created from Purchase Order', '2025-11-25 14:30:34', '2025-11-25 15:18:31');
+(24, 'DEL-20251127-0686', 25, 1, 5, 'delivered', '2025-11-29', '2025-11-27', 'Markypadilla', 'L300 LO23912', 15, '2025-11-27 03:16:16', 'Auto-created from Purchase Order', '2025-11-27 03:09:25', '2025-11-27 03:16:16'),
+(25, 'DEL-20251127-2366', 26, 1, 2, 'delivered', '2025-11-27', '2025-11-27', 'BossAtan', 'Fishcar LO12392', 12, '2025-11-27 13:31:24', 'Auto-created from Purchase Order', '2025-11-27 13:27:41', '2025-11-27 13:31:24'),
+(26, 'DEL-20251127-7832', 27, 1, 3, 'scheduled', '2025-11-27', NULL, 'Markypadilla', 'L300 AB8930', NULL, NULL, 'Auto-created from Purchase Order', '2025-11-27 16:03:12', '2025-11-27 16:03:12');
 
 -- --------------------------------------------------------
 
@@ -155,6 +178,15 @@ CREATE TABLE `delivery_items` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Items in deliveries';
+
+--
+-- Dumping data for table `delivery_items`
+--
+
+INSERT INTO `delivery_items` (`id`, `delivery_id`, `product_id`, `expected_quantity`, `received_quantity`, `condition_status`, `notes`, `created_at`, `updated_at`) VALUES
+(24, 24, 69, 350, 260, 'damaged', '', '2025-11-27 03:09:25', '2025-11-27 03:16:16'),
+(25, 25, 64, 250, 200, 'damaged', '', '2025-11-27 13:27:41', '2025-11-27 13:31:24'),
+(26, 26, 112, 1, 0, 'good', NULL, '2025-11-27 16:03:12', '2025-11-27 16:03:12');
 
 -- --------------------------------------------------------
 
@@ -230,37 +262,146 @@ CREATE TABLE `products` (
 INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, `price`, `stock_qty`, `unit`, `min_stock`, `max_stock`, `expiry`, `status`, `created_at`, `updated_at`) VALUES
 (52, 2, 4, 1, 'Chicken Breast', 200.00, 200, 'kg', 200, 200, '2026-02-18', 'active', '2025-11-22 22:09:43', '2025-11-22 22:09:43'),
 (53, 6, 12, 2, 'Chicken Drumstick', 200.00, 500, 'kg', 100, 900, '2026-02-23', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(54, 5, 7, 1, 'Chicken Neck', 90.00, 250, 'kg', 250, 250, '2026-02-17', 'active', '2025-11-22 22:12:24', '2025-11-22 22:12:24'),
+(54, 5, 7, 1, 'Chicken Neck', 90.00, 510, 'kg', 250, 250, '2026-02-17', 'active', '2025-11-22 22:12:24', '2025-11-27 03:16:16'),
 (55, 4, 6, 1, 'Whole Chicken', 250.00, 300, 'kg', 300, 300, '2026-01-05', 'active', '2025-11-22 22:14:39', '2025-11-22 22:14:39'),
-(56, 3, 5, 1, 'Chicken Thigh', 220.00, 495, 'kg', 450, 450, '2026-03-20', 'active', '2025-11-22 22:15:49', '2025-11-25 16:32:32'),
-(57, 2, 4, 1, 'Chicken Drumstick', 200.00, 300, 'kg', 300, 300, '2026-03-24', 'active', '2025-11-24 23:15:06', '2025-11-24 23:15:06'),
+(56, 3, 5, 1, 'Chicken Thigh', 220.00, 490, 'kg', 450, 450, '2026-03-20', 'active', '2025-11-22 22:15:49', '2025-11-27 00:37:52'),
+(57, 2, 12, 2, 'Chicken Drumstick', 200.00, 500, 'kg', 100, 900, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (58, 2, 4, 1, 'Chicken Feet', 90.00, 200, 'kg', 200, 200, '2026-01-26', 'active', '2025-11-25 00:00:02', '2025-11-25 00:00:02'),
 (59, 2, 4, 1, 'Chicken Heart', 175.00, 300, 'kg', 300, 350, '2026-03-20', 'active', '2025-11-25 00:05:35', '2025-11-25 00:05:35'),
 (60, 2, 4, 1, 'Chicken Head', 105.00, 300, 'kg', 300, 300, '2025-12-27', 'active', '2025-11-25 00:40:19', '2025-11-25 00:40:19'),
-(61, 2, 12, 2, 'Whole Chicken', 250.00, 500, 'kg', 100, 1000, '2026-03-10', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(61, 2, 12, 2, 'Whole Chicken', 250.00, 400, 'kg', 100, 1000, '2026-03-10', 'active', '2025-11-25 15:45:57', '2025-11-26 15:23:40'),
 (62, 3, 12, 2, 'Chicken Breast', 280.00, 550, 'kg', 100, 1000, '2026-02-26', 'active', '2025-11-25 15:45:57', '2025-11-25 16:35:32'),
 (63, 4, 12, 2, 'Chicken Thigh', 220.00, 550, 'kg', 100, 1000, '2026-02-23', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (64, 5, 12, 2, 'Chicken Wings', 180.00, 450, 'kg', 100, 800, '2026-02-18', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(65, 2, 12, 2, 'Chicken Liver', 120.00, 300, 'kg', 50, 600, '2026-02-20', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(65, 5, 12, 2, 'Chicken Liver', 120.00, 650, 'kg', 50, 600, '2026-02-20', 'active', '2025-11-25 15:45:57', '2025-11-27 02:58:38'),
 (66, 3, 12, 2, 'Chicken Gizzard', 130.00, 280, 'kg', 50, 600, '2026-02-21', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(67, 4, 12, 2, 'Chicken Feet', 90.00, 200, 'kg', 50, 500, '2026-02-25', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(67, 4, 12, 2, 'Chicken Feet', 90.00, 200, 'kg', 50, 500, '2026-02-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (68, 5, 12, 2, 'Chicken Head', 80.00, 150, 'kg', 30, 400, '2026-02-22', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (69, 6, 12, 2, 'Chicken Neck', 100.00, 180, 'kg', 50, 500, '2026-02-19', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(70, 2, 12, 2, 'Chicken Back', 110.00, 220, 'kg', 50, 550, '2026-02-24', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(70, 2, 12, 2, 'Chicken Back', 110.00, 90, 'kg', 50, 550, '2026-02-24', 'active', '2025-11-25 15:45:57', '2025-11-27 13:33:23'),
 (71, 3, 12, 2, 'Chicken Heart', 140.00, 120, 'kg', 30, 400, '2026-02-17', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (72, 4, 12, 2, 'Chicken Kidney', 135.00, 100, 'kg', 30, 350, '2026-02-16', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (73, 5, 12, 2, 'Chicken Intestine', 95.00, 80, 'kg', 20, 300, '2026-02-15', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(74, 6, 12, 2, 'Chicken Blood', 85.00, 60, 'kg', 20, 250, '2026-02-13', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(75, 2, 12, 2, 'Chicken Skin', 75.00, 150, 'kg', 30, 400, '2026-02-27', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(74, 6, 12, 2, 'Chicken Blood', 85.00, 360, 'kg', 20, 250, '2026-02-13', 'active', '2025-11-25 15:45:57', '2025-11-27 02:57:13'),
+(75, 3, 12, 2, 'Chicken Skin', 75.00, 400, 'kg', 30, 400, '2026-02-27', 'active', '2025-11-25 15:45:57', '2025-11-27 02:48:39'),
 (76, 3, 12, 2, 'Chicken Fat', 70.00, 100, 'kg', 20, 300, '2026-03-01', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (77, 4, 12, 2, 'Chicken Bones', 60.00, 200, 'kg', 50, 500, '2026-03-03', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (78, 5, 12, 2, 'Chicken Tail', 105.00, 120, 'kg', 30, 350, '2026-02-20', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(79, 6, 12, 2, 'Chicken Leg Quarter', 210.00, 350, 'kg', 80, 700, '2026-02-22', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(80, 2, 12, 2, 'Chicken Breast Fillet', 320.00, 400, 'kg', 100, 800, '2026-02-24', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(79, 6, 12, 2, 'Chicken Leg Quarter', 210.00, 350, 'kg', 80, 700, '2026-02-24', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(80, 2, 12, 2, 'Chicken Breast Fillet', 320.00, 480, 'kg', 100, 800, '2026-02-24', 'active', '2025-11-25 15:45:57', '2025-11-27 02:55:06'),
 (81, 3, 12, 2, 'Chicken Tenderloin', 290.00, 250, 'kg', 50, 600, '2026-02-21', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (82, 4, 12, 2, 'Chicken Wing Tip', 160.00, 180, 'kg', 40, 400, '2026-02-19', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (83, 5, 12, 2, 'Chicken Wing Flat', 170.00, 200, 'kg', 40, 450, '2026-02-18', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
-(84, 6, 12, 2, 'Chicken Wing Drumlette', 175.00, 220, 'kg', 50, 500, '2026-02-17', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57');
+(84, 6, 12, 2, 'Chicken Wing Drumlette', 175.00, 220, 'kg', 50, 500, '2026-02-17', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
+(85, 3, 13, 2, 'Chicken Kidney', 135.00, 200, 'kg', 200, 200, '2025-12-29', 'active', '2025-11-27 00:35:53', '2025-11-27 00:35:53'),
+(86, 2, NULL, 2, 'Chicken Tail', 105.00, 220, 'kg', 30, 350, '2026-02-20', 'active', '2025-11-27 03:06:44', '2025-11-27 03:06:44'),
+(87, 6, NULL, 2, 'Chicken Head', 80.00, 250, 'kg', 30, 400, '2026-02-22', 'active', '2025-11-27 03:10:43', '2025-11-27 03:10:43'),
+(88, 2, 12, 2, 'Chicken Wings', 180.00, 350, 'kg', 100, 800, '2026-02-18', 'active', '2025-11-27 13:31:24', '2025-11-27 13:32:22'),
+(89, 5, 12, 2, 'Whole Chicken', 250.00, 500, 'kg', 100, 1000, '2026-03-12', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(90, 4, 12, 2, 'Chicken Breast', 280.00, 600, 'kg', 100, 1000, '2026-02-28', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(91, 1, 12, 2, 'Chicken Thigh', 220.00, 550, 'kg', 100, 1000, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(92, 6, 12, 2, 'Chicken Wings', 180.00, 450, 'kg', 100, 800, '2026-02-20', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(93, 3, 12, 2, 'Chicken Liver', 120.00, 300, 'kg', 50, 600, '2026-02-22', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(94, 5, 12, 2, 'Chicken Gizzard', 130.00, 280, 'kg', 50, 600, '2026-02-23', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(95, 1, 12, 2, 'Ground Chicken', 240.00, 150, 'kg', 30, 400, '2026-02-15', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(96, 5, 12, 3, 'Coca-Cola (1.5L)', 65.00, 200, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(97, 4, 12, 3, 'Sprite (1.5L)', 65.00, 180, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(98, 1, 12, 3, 'Royal (1.5L)', 65.00, 150, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(99, 6, 12, 3, 'Bottled Water (500ml)', 15.00, 500, 'bottles', 100, 1000, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(100, 2, 12, 3, 'Iced Tea Powder', 350.00, 50, 'packs', 20, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(101, 3, 12, 3, 'Orange Juice', 85.00, 100, 'bottles', 30, 300, '2026-05-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(102, 5, 12, 3, 'Coffee (3-in-1)', 8.00, 200, 'packs', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(103, 5, 12, 4, 'Ketchup (Gallon)', 450.00, 30, 'bottles', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(104, 4, 12, 4, 'Mayonnaise (Gallon)', 520.00, 25, 'bottles', 10, 80, '2026-05-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(105, 1, 12, 4, 'Hot Sauce', 85.00, 50, 'bottles', 20, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(106, 6, 12, 4, 'Soy Sauce (Gallon)', 280.00, 20, 'bottles', 10, 60, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(107, 2, 12, 4, 'Gravy Mix', 45.00, 100, 'packs', 30, 300, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(108, 3, 12, 4, 'BBQ Sauce', 180.00, 40, 'bottles', 15, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(109, 5, 12, 4, 'Sweet Chili Sauce', 150.00, 35, 'bottles', 15, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(110, 5, 12, 5, 'Vegetable Oil (20L)', 1850.00, 15, 'pcs', 5, 50, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(111, 4, 12, 5, 'Vegetable Oil (5L)', 480.00, 30, 'pcs', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(112, 1, 12, 5, 'Palm Oil (20L)', 1650.00, 10, 'pcs', 5, 40, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(113, 6, 12, 5, 'Shortening', 120.00, 20, 'kg', 10, 80, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(114, 5, 12, 6, 'Salt (1kg)', 25.00, 100, 'packs', 30, 300, '2028-11-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(115, 4, 12, 6, 'Black Pepper (Ground)', 85.00, 50, 'packs', 20, 150, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(116, 1, 12, 6, 'Garlic Powder', 95.00, 40, 'packs', 15, 120, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(117, 6, 12, 6, 'Paprika', 120.00, 30, 'packs', 10, 100, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(118, 2, 12, 6, 'Chicken Seasoning', 75.00, 60, 'packs', 20, 200, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(119, 3, 12, 6, 'MSG', 45.00, 50, 'packs', 20, 150, '2028-11-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(120, 5, 12, 6, 'Cajun Seasoning', 150.00, 25, 'packs', 10, 80, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(121, 5, 12, 7, 'White Rice (25kg)', 1450.00, 50, 'bags', 20, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(122, 4, 12, 7, 'White Rice (10kg)', 580.00, 30, 'bags', 15, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(123, 1, 12, 7, 'Java Rice Mix', 65.00, 40, 'packs', 15, 120, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(124, 6, 12, 7, 'Garlic Rice Mix', 55.00, 45, 'packs', 15, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(125, 5, 12, 8, 'Cabbage', 45.00, 50, 'kg', 20, 150, '2025-12-11', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(126, 4, 12, 8, 'Carrots', 60.00, 30, 'kg', 15, 100, '2025-12-18', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(127, 1, 12, 8, 'Onions (White)', 80.00, 40, 'kg', 15, 120, '2025-12-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(128, 6, 12, 8, 'Garlic (Bulb)', 180.00, 25, 'kg', 10, 80, '2026-01-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(129, 2, 12, 8, 'Potatoes', 55.00, 60, 'kg', 20, 200, '2025-12-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(130, 3, 12, 8, 'Lettuce', 120.00, 20, 'kg', 10, 60, '2025-12-04', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(131, 5, 12, 8, 'Coleslaw Mix', 95.00, 30, 'kg', 15, 100, '2025-12-04', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(132, 5, 12, 9, 'Burger Buns', 15.00, 200, 'pcs', 50, 500, '2025-12-04', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(133, 4, 12, 9, 'Sandwich Bread', 65.00, 50, 'packs', 20, 150, '2025-12-04', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(134, 1, 12, 9, 'Pandesal', 5.00, 300, 'pcs', 100, 600, '2025-11-30', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(135, 6, 12, 9, 'Tortilla Wraps', 12.00, 100, 'pcs', 30, 300, '2025-12-11', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(136, 5, 12, 10, 'Butter (Salted)', 180.00, 30, 'pcs', 10, 100, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(137, 4, 12, 10, 'Cheese (Cheddar Block)', 450.00, 20, 'kg', 10, 60, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(138, 1, 12, 10, 'Cheese (Sliced)', 85.00, 50, 'packs', 20, 150, '2026-01-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(139, 6, 12, 10, 'Milk (Fresh 1L)', 95.00, 40, 'bottles', 20, 120, '2025-12-11', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(140, 2, 12, 10, 'Heavy Cream', 180.00, 25, 'bottles', 10, 80, '2025-12-18', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(141, 5, 12, 11, 'Frozen Fries (Regular)', 250.00, 100, 'packs', 30, 300, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(142, 4, 12, 11, 'Frozen Fries (Curly)', 280.00, 80, 'packs', 25, 250, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(143, 1, 12, 11, 'Frozen Fries (Wedges)', 290.00, 60, 'packs', 20, 200, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(144, 6, 12, 11, 'Frozen Corn', 120.00, 50, 'packs', 20, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(145, 2, 12, 11, 'Ice Cream (Vanilla)', 350.00, 30, 'pcs', 15, 100, '2026-05-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(146, 5, 12, 12, 'Takeout Box (Small)', 8.00, 500, 'pcs', 200, 2000, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(147, 4, 12, 12, 'Takeout Box (Medium)', 12.00, 400, 'pcs', 150, 1500, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(148, 1, 12, 12, 'Takeout Box (Large)', 18.00, 300, 'pcs', 100, 1000, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(149, 6, 12, 12, 'Paper Bag (Small)', 3.00, 600, 'pcs', 200, 2000, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(150, 2, 12, 12, 'Paper Bag (Large)', 5.00, 400, 'pcs', 150, 1500, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(151, 3, 12, 12, 'Plastic Utensils Set', 5.00, 1000, 'pcs', 300, 3000, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(152, 5, 12, 12, 'Drinking Straws', 0.50, 2000, 'pcs', 500, 5000, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(153, 4, 12, 12, 'Cup (12oz)', 4.00, 500, 'pcs', 200, 2000, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(154, 1, 12, 12, 'Aluminum Foil', 250.00, 30, 'rolls', 10, 100, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(155, 5, 12, 13, 'Dish Soap (Gallon)', 350.00, 20, 'bottles', 10, 60, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(156, 4, 12, 13, 'Hand Sanitizer', 150.00, 50, 'bottles', 20, 150, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(157, 1, 12, 13, 'Bleach', 180.00, 15, 'bottles', 5, 50, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(158, 6, 12, 13, 'Degreaser', 280.00, 20, 'bottles', 10, 60, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(159, 2, 12, 13, 'Trash Bags (Large)', 85.00, 100, 'packs', 30, 300, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(160, 3, 12, 13, 'Disposable Gloves', 250.00, 50, 'boxes', 20, 150, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(161, 5, 12, 14, 'Eggs (Tray - 30pcs)', 220.00, 100, 'pcs', 30, 300, '2025-12-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(162, 4, 12, 14, 'Eggs (Dozen)', 95.00, 50, 'pcs', 20, 150, '2025-12-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(163, 5, 12, 15, 'All-Purpose Flour (25kg)', 950.00, 20, 'bags', 10, 60, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(164, 4, 12, 15, 'All-Purpose Flour (1kg)', 55.00, 50, 'packs', 20, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(165, 1, 12, 15, 'Breading Mix', 120.00, 80, 'packs', 30, 250, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(166, 6, 12, 15, 'Cornstarch', 45.00, 40, 'packs', 15, 120, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(167, 2, 12, 15, 'Panko Breadcrumbs', 150.00, 30, 'packs', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(168, 5, 12, 16, 'Chicken Marinade', 180.00, 40, 'bottles', 15, 120, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(169, 4, 12, 16, 'BBQ Marinade', 195.00, 30, 'bottles', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(170, 1, 12, 16, 'Buttermilk Brine', 220.00, 25, 'bottles', 10, 80, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(171, 6, 12, 16, 'Soy Garlic Marinade', 165.00, 35, 'bottles', 15, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(172, 5, 12, 17, 'Coleslaw (Pre-made)', 150.00, 30, 'kg', 15, 100, '2025-12-04', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(173, 4, 12, 17, 'Mashed Potato Mix', 85.00, 50, 'packs', 20, 150, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(174, 1, 12, 17, 'Gravy (Pre-made)', 120.00, 40, 'bottles', 15, 120, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(175, 6, 12, 17, 'Mac and Cheese Mix', 95.00, 30, 'packs', 15, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(176, 5, 12, 18, 'Chocolate Syrup', 180.00, 25, 'bottles', 10, 80, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(177, 4, 12, 18, 'Caramel Syrup', 195.00, 20, 'bottles', 10, 60, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(178, 1, 12, 18, 'Sundae Toppings', 85.00, 30, 'packs', 15, 100, '2026-05-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(179, 6, 12, 18, 'Brownie Mix', 120.00, 25, 'packs', 10, 80, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(180, 5, 12, 19, 'Napkins (Pack)', 45.00, 200, 'packs', 50, 500, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(181, 4, 12, 19, 'Paper Towels (Roll)', 65.00, 100, 'rolls', 30, 300, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(182, 1, 12, 19, 'Tissue Paper (Box)', 85.00, 80, 'boxes', 30, 250, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(183, 6, 12, 19, 'Parchment Paper', 180.00, 30, 'rolls', 10, 100, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(184, 5, 12, 20, 'Tongs', 150.00, 20, 'pcs', 5, 50, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(185, 4, 12, 20, 'Spatula', 120.00, 15, 'pcs', 5, 40, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(186, 1, 12, 20, 'Thermometer', 350.00, 10, 'pcs', 3, 30, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(187, 6, 12, 20, 'Cutting Board', 280.00, 15, 'pcs', 5, 40, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(188, 2, 12, 20, 'Strainer', 180.00, 10, 'pcs', 3, 30, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(189, 5, 12, 21, 'Chef Hat', 85.00, 30, 'pcs', 10, 80, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(190, 4, 12, 21, 'Hair Net', 5.00, 200, 'pcs', 50, 500, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(191, 1, 12, 21, 'Apron', 180.00, 40, 'pcs', 15, 100, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(192, 6, 12, 21, 'Kitchen Gloves', 95.00, 50, 'pcs', 20, 150, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(193, 2, 12, 21, 'Face Mask', 150.00, 100, 'boxes', 30, 300, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09');
 
 -- --------------------------------------------------------
 
@@ -291,8 +432,11 @@ CREATE TABLE `purchase_orders` (
 --
 
 INSERT INTO `purchase_orders` (`id`, `order_number`, `purchase_request_id`, `supplier_id`, `branch_id`, `status`, `order_date`, `expected_delivery_date`, `actual_delivery_date`, `total_amount`, `approved_by`, `approved_at`, `notes`, `created_at`, `updated_at`) VALUES
-(17, 'PO-20251125-5937', 19, 5, 5, 'approved', '2025-11-25', '2025-12-02', NULL, 24000.00, 2, '2025-11-25 14:28:23', 'Auto-created from approved purchase request', '2025-11-25 14:28:00', '2025-11-25 14:28:23'),
-(18, 'PO-20251125-1815', 20, 13, 6, 'approved', '2025-11-25', '2025-12-02', NULL, 42000.00, 2, '2025-11-25 14:30:46', 'Auto-created from approved purchase request', '2025-11-25 14:30:34', '2025-11-25 14:30:46');
+(23, 'PO-20251127-9836', 25, 11, 6, 'delivered', '2025-11-27', '2025-12-04', NULL, 20000.00, 2, '2025-11-27 03:03:45', 'Auto-created from approved purchase request', '2025-11-27 03:01:47', '2025-11-27 03:10:43'),
+(24, 'PO-20251127-6130', 26, 19, 2, 'partial', '2025-11-27', '2025-12-04', NULL, 31500.00, 2, '2025-11-27 03:03:39', 'Auto-created from approved purchase request', '2025-11-27 03:02:11', '2025-11-27 03:06:44'),
+(25, 'PO-20251127-7090', 27, 1, 5, 'partial', '2025-11-27', '2025-12-04', NULL, 35000.00, 2, '2025-11-27 03:09:35', 'Auto-created from approved purchase request', '2025-11-27 03:09:25', '2025-11-27 03:16:16'),
+(26, 'PO-20251127-1796', 28, 10, 2, 'partial', '2025-11-27', '2025-12-04', NULL, 45000.00, 2, '2025-11-27 13:28:41', 'Auto-created from approved purchase request', '2025-11-27 13:27:41', '2025-11-27 13:31:24'),
+(27, 'PO-20251127-1506', 29, 1, 3, 'approved', '2025-11-27', '2025-12-04', NULL, 1650.00, 2, '2025-11-27 16:06:50', 'Auto-created from approved purchase request', '2025-11-27 16:03:12', '2025-11-27 16:06:50');
 
 -- --------------------------------------------------------
 
@@ -311,6 +455,17 @@ CREATE TABLE `purchase_order_items` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Items in purchase orders';
+
+--
+-- Dumping data for table `purchase_order_items`
+--
+
+INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
+(22, 23, 68, 250, 80.00, 20000.00, 250, '2025-11-27 03:01:47', '2025-11-27 03:01:47'),
+(23, 24, 78, 300, 105.00, 31500.00, 220, '2025-11-27 03:02:11', '2025-11-27 03:02:11'),
+(24, 25, 69, 350, 100.00, 35000.00, 260, '2025-11-27 03:09:25', '2025-11-27 03:09:25'),
+(25, 26, 64, 250, 180.00, 45000.00, 200, '2025-11-27 13:27:41', '2025-11-27 13:27:41'),
+(26, 27, 112, 1, 1650.00, 1650.00, 0, '2025-11-27 16:03:12', '2025-11-27 16:03:12');
 
 -- --------------------------------------------------------
 
@@ -340,8 +495,11 @@ CREATE TABLE `purchase_requests` (
 --
 
 INSERT INTO `purchase_requests` (`id`, `request_number`, `branch_id`, `requested_by`, `status`, `priority`, `total_amount`, `notes`, `approved_by`, `approved_at`, `selected_supplier_id`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(19, 'PR-20251125-0970', 5, 7, 'converted_to_po', 'low', 24000.00, '', 2, '2025-11-25 14:28:00', 5, NULL, '2025-11-25 14:01:21', '2025-11-25 14:28:00'),
-(20, 'PR-20251125-2497', 6, 8, 'converted_to_po', 'high', 42000.00, '', 2, '2025-11-25 14:30:34', 13, NULL, '2025-11-25 14:26:48', '2025-11-25 14:30:34');
+(25, 'PR-20251127-3794', 6, 16, 'converted_to_po', 'normal', 20000.00, '', 2, '2025-11-27 03:01:47', 11, NULL, '2025-11-27 01:25:56', '2025-11-27 03:01:47'),
+(26, 'PR-20251127-3041', 2, 4, 'converted_to_po', 'urgent', 31500.00, '', 2, '2025-11-27 03:02:11', 19, NULL, '2025-11-27 03:01:06', '2025-11-27 03:02:11'),
+(27, 'PR-20251127-9837', 5, 7, 'converted_to_po', 'normal', 35000.00, '', 2, '2025-11-27 03:09:25', NULL, NULL, '2025-11-27 03:08:56', '2025-11-27 03:09:25'),
+(28, 'PR-20251127-6346', 2, 4, 'converted_to_po', 'urgent', 45000.00, '', 2, '2025-11-27 13:27:41', 1, NULL, '2025-11-27 13:26:15', '2025-11-27 13:27:41'),
+(29, 'PR-20251127-9452', 3, 7, 'converted_to_po', 'high', 1650.00, '', 2, '2025-11-27 16:03:12', NULL, NULL, '2025-11-27 16:01:49', '2025-11-27 16:03:12');
 
 -- --------------------------------------------------------
 
@@ -360,6 +518,17 @@ CREATE TABLE `purchase_request_items` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Items in purchase requests';
+
+--
+-- Dumping data for table `purchase_request_items`
+--
+
+INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `notes`, `created_at`, `updated_at`) VALUES
+(25, 25, 68, 250, 80.00, 20000.00, '', '2025-11-27 01:25:56', '2025-11-27 01:25:56'),
+(26, 26, 78, 300, 105.00, 31500.00, '', '2025-11-27 03:01:06', '2025-11-27 03:01:06'),
+(27, 27, 69, 350, 100.00, 35000.00, '', '2025-11-27 03:08:56', '2025-11-27 03:08:56'),
+(28, 28, 64, 250, 180.00, 45000.00, '', '2025-11-27 13:26:15', '2025-11-27 13:26:15'),
+(29, 29, 112, 1, 1650.00, 1650.00, '', '2025-11-27 16:01:49', '2025-11-27 16:01:49');
 
 -- --------------------------------------------------------
 
@@ -399,6 +568,24 @@ CREATE TABLE `stock_transactions` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Stock transactions: STOCK-IN → NEW STOCK, STOCK-OUT → EXPIRE? → OLDS';
 
+--
+-- Dumping data for table `stock_transactions`
+--
+
+INSERT INTO `stock_transactions` (`id`, `product_id`, `transaction_type`, `quantity`, `reference_type`, `reference_id`, `stock_before`, `stock_after`, `is_new_stock`, `is_expired`, `is_old_stock`, `expiry_date`, `notes`, `created_by`, `created_at`, `updated_at`) VALUES
+(6, 70, 'stock_in', 20, 'Needs for Other Branch', NULL, 220, 240, 1, 0, 0, '2026-02-24', NULL, 12, '2025-11-26 15:22:20', '2025-11-26 15:22:20'),
+(7, 61, 'stock_out', 100, 'stock_out', NULL, 500, 400, 0, 0, 0, '2026-03-10', 'damaged: Buanggggg', 12, '2025-11-26 15:23:40', '2025-11-26 15:23:40'),
+(8, 56, 'stock_out', 5, 'stock_out', NULL, 495, 490, 0, 0, 0, '2026-03-20', 'sale', 13, '2025-11-27 00:37:52', '2025-11-27 00:37:52'),
+(9, 75, 'stock_in', 250, 'delivery', 19, 150, 400, 1, 0, 0, '2026-02-27', NULL, 5, '2025-11-27 02:48:39', '2025-11-27 02:48:39'),
+(10, 80, 'stock_in', 80, 'delivery', 21, 400, 480, 1, 0, 0, '2026-02-24', NULL, NULL, '2025-11-27 02:55:06', '2025-11-27 02:55:06'),
+(11, 74, 'stock_in', 300, 'delivery', 18, 60, 360, 1, 0, 0, '2026-02-13', NULL, NULL, '2025-11-27 02:57:13', '2025-11-27 02:57:13'),
+(12, 65, 'stock_in', 350, 'delivery', 20, 300, 650, 1, 0, 0, '2026-02-20', NULL, 7, '2025-11-27 02:58:38', '2025-11-27 02:58:38'),
+(13, 86, 'stock_in', 220, 'delivery', 23, 0, 220, 1, 0, 0, '2026-02-20', NULL, NULL, '2025-11-27 03:06:44', '2025-11-27 03:06:44'),
+(14, 87, 'stock_in', 250, 'delivery', 22, 0, 250, 1, 0, 0, '2026-02-22', NULL, NULL, '2025-11-27 03:10:43', '2025-11-27 03:10:43'),
+(15, 54, 'stock_in', 260, 'delivery', 24, 250, 510, 1, 0, 0, '2026-02-19', NULL, 15, '2025-11-27 03:16:16', '2025-11-27 03:16:16'),
+(16, 88, 'stock_in', 200, 'delivery', 25, 0, 200, 1, 0, 0, '2026-02-18', NULL, 12, '2025-11-27 13:31:24', '2025-11-27 13:31:24'),
+(17, 70, 'stock_out', 150, 'stock_out', NULL, 240, 90, 0, 0, 0, '2026-02-24', 'waste: Buanggggg', 12, '2025-11-27 13:33:23', '2025-11-27 13:33:23');
+
 -- --------------------------------------------------------
 
 --
@@ -423,25 +610,71 @@ CREATE TABLE `suppliers` (
 --
 
 INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `email`, `phone`, `address`, `payment_terms`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Magnolia Chicken', 'Sales Department', 'sales@magnolia.com.ph', '(02) 8123-4567', 'Magnolia Avenue, Quezon City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(2, 'Ana\'s Breeders Farms Inc', 'Farm Manager', 'info@anasbreeders.com.ph', '(049) 501-2345', 'Tagaytay, Cavite, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(3, 'Premium Feeds Corporation', 'Sales Officer', 'sales@premiumfeeds.com.ph', '(02) 8456-7890', 'Makati City, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(4, 'San Miguel Foods', 'Corporate Sales', 'corporate@sanmiguelfoods.com.ph', '(02) 8888-0000', 'Mandaluyong City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(5, 'CDO Foodsphere Inc.', 'Sales Department', 'sales@cdofoodsphere.com.ph', '(02) 8123-5678', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(6, 'Excellence Poultry and Livestock Specialist Inc.', 'Operations Manager', 'info@excellencepoultry.com.ph', '(049) 502-3456', 'Cavite, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(7, 'Rare Global Food Trading Corp.', 'Trading Manager', 'trading@rareglobal.com.ph', '(02) 8234-5678', 'Pasig City, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(8, 'E&L Faster Food Imports Inc.', 'Import Manager', 'imports@elfaster.com.ph', '(02) 8345-6789', 'Port Area, Manila, Philippines', 'Net 45', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(9, 'Foster Foods Inc', 'Sales Coordinator', 'sales@fosterfoods.com.ph', '(02) 8456-7890', 'Taguig City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(10, 'Pilmico', 'Corporate Sales', 'corporate@pilmico.com.ph', '(02) 8567-8901', 'Laguna, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(11, 'Consistent Frozen Solutions Corp.', 'Sales Manager', 'sales@consistentfrozen.com.ph', '(02) 8678-9012', 'Cavite, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(12, 'EcoSci Food', 'Business Development', 'bd@ecoscifood.com.ph', '(02) 8789-0123', 'Quezon City, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(13, 'Advance Protein Inc.', 'Sales Officer', 'sales@advanceprotein.com.ph', '(02) 8890-1234', 'Bulacan, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(14, 'Art Inc.', 'Account Manager', 'accounts@artinc.com.ph', '(02) 8901-2345', 'Manila, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(15, 'Clarc Feedmill Inc.', 'Production Manager', 'production@clarcfeedmill.com.ph', '(049) 503-4567', 'Cavite, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(16, 'Kai Anya Foods Intl Corp', 'International Sales', 'sales@kaianya.com.ph', '(02) 8012-3456', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(17, 'Hightower Incorporated', 'Sales Department', 'sales@hightower.com.ph', '(02) 8123-4567', 'Pasig City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(18, 'The Original Savory Escolta - Online', 'Online Manager', 'online@savoryescolta.com.ph', '(02) 8234-5678', 'Escolta, Manila, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57'),
-(19, 'Fresco PH', 'Sales Team', 'sales@fresco.com.ph', '(02) 8345-6789', 'Quezon City, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-22 21:55:57');
+(1, 'Magnolia Chicken', 'Sales Department', 'sales@magnolia.com.ph', '(02) 8123-4567', 'Magnolia Avenue, Quezon City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(2, 'Ana\'s Breeders Farms Inc', 'Farm Manager', 'info@anasbreeders.com.ph', '(049) 501-2345', 'Tagaytay, Cavite, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(3, 'Premium Feeds Corporation', 'Sales Officer', 'sales@premiumfeeds.com.ph', '(02) 8456-7890', 'Makati City, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(4, 'San Miguel Foods', 'Corporate Sales', 'corporate@sanmiguelfoods.com.ph', '(02) 8888-0000', 'Mandaluyong City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(5, 'CDO Foodsphere Inc.', 'Sales Department', 'sales@cdofoodsphere.com.ph', '(02) 8123-5678', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(6, 'Excellence Poultry and Livestock Specialist Inc.', 'Operations Manager', 'info@excellencepoultry.com.ph', '(049) 502-3456', 'Cavite, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(7, 'Rare Global Food Trading Corp.', 'Trading Manager', 'trading@rareglobal.com.ph', '(02) 8234-5678', 'Pasig City, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(8, 'E&L Faster Food Imports Inc.', 'Import Manager', 'imports@elfaster.com.ph', '(02) 8345-6789', 'Port Area, Manila, Philippines', 'Net 45', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(9, 'Foster Foods Inc', 'Sales Coordinator', 'sales@fosterfoods.com.ph', '(02) 8456-7890', 'Taguig City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(10, 'Pilmico', 'Corporate Sales', 'corporate@pilmico.com.ph', '(02) 8567-8901', 'Laguna, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(11, 'Consistent Frozen Solutions Corp.', 'Sales Manager', 'sales@consistentfrozen.com.ph', '(02) 8678-9012', 'Cavite, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(12, 'EcoSci Food', 'Business Development', 'bd@ecoscifood.com.ph', '(02) 8789-0123', 'Quezon City, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(13, 'Advance Protein Inc.', 'Sales Officer', 'sales@advanceprotein.com.ph', '(02) 8890-1234', 'Bulacan, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(14, 'Art Inc.', 'Account Manager', 'accounts@artinc.com.ph', '(02) 8901-2345', 'Manila, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(15, 'Clarc Feedmill Inc.', 'Production Manager', 'production@clarcfeedmill.com.ph', '(049) 503-4567', 'Cavite, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(16, 'Kai Anya Foods Intl Corp', 'International Sales', 'sales@kaianya.com.ph', '(02) 8012-3456', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(17, 'Hightower Incorporated', 'Sales Department', 'sales@hightower.com.ph', '(02) 8123-4567', 'Pasig City, Philippines', 'Net 30', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(18, 'The Original Savory Escolta - Online', 'Online Manager', 'online@savoryescolta.com.ph', '(02) 8234-5678', 'Escolta, Manila, Philippines', 'COD', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(19, 'Fresco PH', 'Sales Team', 'sales@fresco.com.ph', '(02) 8345-6789', 'Quezon City, Philippines', 'Net 15', 'active', '2025-11-22 21:55:57', '2025-11-27 15:23:57'),
+(20, 'Coca-Cola Beverages Philippines Inc.', 'Corporate Sales', 'corporate@coca-cola.com.ph', '(02) 8888-1111', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(21, 'Pepsi-Cola Products Philippines Inc.', 'Sales Manager', 'sales@pepsi.com.ph', '(02) 8888-2222', 'Mandaluyong City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(22, 'Universal Robina Corporation (URC)', 'Beverage Division', 'beverages@urc.com.ph', '(02) 8888-3333', 'Pasig City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(23, 'Nestlé Philippines Inc.', 'Beverage Sales', 'beverages@nestle.com.ph', '(02) 8888-4444', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:23'),
+(24, 'Heinz Philippines Inc.', 'Sales Team', 'sales@heinz.com.ph', '(02) 8888-5555', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(25, 'Datu Puti Food Products', 'Sales Department', 'sales@dataputi.com.ph', '(02) 8888-6666', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(26, 'Bunge Philippines Inc.', 'Oil Division', 'oils@bunge.com.ph', '(02) 8888-7777', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(27, 'Cargill Philippines Inc.', 'Cooking Oil Sales', 'oils@cargill.com.ph', '(02) 8888-8888', 'Taguig City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(28, 'Purefoods-Hormel Company Inc.', 'Oil Products', 'oils@purefoods.com.ph', '(02) 8888-9999', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(29, 'McCormick Philippines Inc.', 'Sales Department', 'sales@mccormick.com.ph', '(02) 8888-1010', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(30, 'Knorr Philippines', 'Seasoning Sales', 'sales@knorr.com.ph', '(02) 8888-2020', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(31, 'Ajinomoto Philippines Corporation', 'Sales Team', 'sales@ajinomoto.com.ph', '(02) 8888-3030', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(32, 'National Food Authority (NFA)', 'Rice Distribution', 'distribution@nfa.gov.ph', '(02) 8888-4040', 'Quezon City, Philippines', 'Net 15', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(33, 'Doña Maria Rice Trading', 'Sales Manager', 'sales@donamaria.com.ph', '(02) 8888-5050', 'Manila, Philippines', 'Net 15', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(34, 'Golden Grains Trading Corp.', 'Trading Manager', 'sales@goldengrains.com.ph', '(02) 8888-6060', 'Pasig City, Philippines', 'Net 15', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(35, 'Farm Fresh Produce Trading', 'Sales Manager', 'sales@farmfresh.com.ph', '(02) 8888-7070', 'Laguna, Philippines', 'COD', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(36, 'Benguet Vegetable Trading', 'Trading Manager', 'sales@benguetveg.com.ph', '(074) 444-1234', 'Benguet, Philippines', 'Net 7', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(37, 'Gardenia Bakeries Philippines Inc.', 'Sales Department', 'sales@gardenia.com.ph', '(02) 8888-8080', 'Laguna, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(38, 'Rebisco Biscuit Corporation', 'Bakery Sales', 'bakery@rebisco.com.ph', '(02) 8888-9090', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(39, 'Local Bakery Suppliers Cooperative', 'Coordinator', 'info@localbakery.com.ph', '(02) 8888-0101', 'Manila, Philippines', 'COD', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(40, 'Nestlé Philippines Inc. (Dairy)', 'Dairy Division', 'dairy@nestle.com.ph', '(02) 8888-1111', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:23', '2025-11-27 15:23:57'),
+(42, 'Magnolia Dairy Products', 'Sales Department', 'dairy@magnolia.com.ph', '(02) 8888-1212', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(43, 'Alaska Milk Corporation', 'Sales Team', 'sales@alaska.com.ph', '(02) 8888-1313', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(44, 'Arctic Foods Distribution', 'Sales Manager', 'sales@arcticfoods.com.ph', '(02) 8888-1414', 'Pasig City, Philippines', 'Net 15', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(45, 'Packaging Solutions Philippines Inc.', 'Sales Department', 'sales@packagingsolutions.com.ph', '(02) 8888-1515', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(46, 'Eco-Pack Manufacturing Corp.', 'Sales Manager', 'sales@ecopack.com.ph', '(02) 8888-1616', 'Laguna, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(47, 'Takeout Packaging Supplies', 'Sales Team', 'sales@takeoutpack.com.ph', '(02) 8888-1717', 'Manila, Philippines', 'Net 15', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(48, 'Procter & Gamble Philippines', 'Commercial Sales', 'commercial@p&g.com.ph', '(02) 8888-1818', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(49, 'Unilever Philippines Inc.', 'Commercial Division', 'commercial@unilever.com.ph', '(02) 8888-1919', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(50, 'Industrial Cleaning Supplies Corp.', 'Sales Manager', 'sales@industrialcleaning.com.ph', '(02) 8888-2020', 'Pasig City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(51, 'Fresh Eggs Distribution Co.', 'Sales Manager', 'sales@fresheggs.com.ph', '(02) 8888-2121', 'Bulacan, Philippines', 'COD', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(52, 'Poultry Egg Suppliers Association', 'Coordinator', 'info@poultryeggs.com.ph', '(02) 8888-2222', 'Laguna, Philippines', 'Net 7', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(53, 'General Milling Corporation', 'Sales Department', 'sales@gmc.com.ph', '(02) 8888-2323', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(54, 'Bread Flour Specialists Inc.', 'Sales Manager', 'sales@breadflour.com.ph', '(02) 8888-2424', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(55, 'Flavor Masters Food Products', 'Sales Team', 'sales@flavormasters.com.ph', '(02) 8888-2525', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(56, 'Marinade Specialists Philippines', 'Sales Manager', 'sales@marinadespecialists.com.ph', '(02) 8888-2626', 'Pasig City, Philippines', 'Net 15', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(57, 'Ready-to-Serve Foods Inc.', 'Sales Department', 'sales@readyfoods.com.ph', '(02) 8888-2727', 'Quezon City, Philippines', 'Net 15', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(58, 'Prepared Foods Distribution', 'Sales Manager', 'sales@preparedfoods.com.ph', '(02) 8888-2828', 'Manila, Philippines', 'Net 15', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(59, 'Sweet Treats Philippines Inc.', 'Sales Team', 'sales@sweettreats.com.ph', '(02) 8888-2929', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(60, 'Ice Cream & Dessert Suppliers', 'Sales Manager', 'sales@icecreamdesserts.com.ph', '(02) 8888-3030', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(61, 'Paper Products Manufacturing Corp.', 'Sales Department', 'sales@paperproducts.com.ph', '(02) 8888-3131', 'Laguna, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(62, 'Tissue & Paper Supplies Inc.', 'Sales Manager', 'sales@tissuepaper.com.ph', '(02) 8888-3232', 'Manila, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(63, 'Commercial Kitchen Equipment Inc.', 'Sales Department', 'sales@kitchenequipment.com.ph', '(02) 8888-3333', 'Makati City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(64, 'Restaurant Supply Solutions', 'Sales Manager', 'sales@restaurantsupply.com.ph', '(02) 8888-3434', 'Pasig City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(65, 'Uniform Solutions Philippines', 'Sales Team', 'sales@uniformsolutions.com.ph', '(02) 8888-3535', 'Quezon City, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57'),
+(66, 'Professional Apparel Manufacturing', 'Sales Manager', 'sales@proapparel.com.ph', '(02) 8888-3636', 'Manila, Philippines', 'Net 30', 'active', '2025-11-27 15:23:57', '2025-11-27 15:23:57');
 
 -- --------------------------------------------------------
 
@@ -625,7 +858,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `accounts_payable`
 --
 ALTER TABLE `accounts_payable`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `branches`
@@ -637,19 +870,19 @@ ALTER TABLE `branches`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `deliveries`
 --
 ALTER TABLE `deliveries`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `delivery_items`
 --
 ALTER TABLE `delivery_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `migrations`
@@ -661,31 +894,31 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=194;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `purchase_order_items`
 --
 ALTER TABLE `purchase_order_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `purchase_requests`
 --
 ALTER TABLE `purchase_requests`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `purchase_request_items`
 --
 ALTER TABLE `purchase_request_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `reports`
@@ -697,13 +930,13 @@ ALTER TABLE `reports`
 -- AUTO_INCREMENT for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `users`

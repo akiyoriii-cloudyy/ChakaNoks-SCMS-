@@ -104,11 +104,12 @@ class DeliveryController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Status is required']);
         }
 
+        $userId = $session->get('user_id') ?? $session->get('id');
         $updated = $this->deliveryModel->updateDeliveryStatus(
             (int)$id,
             $status,
             $actualDeliveryDate,
-            $session->get('id')
+            $userId ? (int)$userId : null
         );
 
         if ($updated) {
@@ -155,6 +156,9 @@ class DeliveryController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
+        // Get delivery branch ID
+        $deliveryBranchId = (int)($delivery['branch_id'] ?? 0);
+
         try {
             foreach ($receivedItems as $item) {
                 $productId = (int)($item['product_id'] ?? 0);
@@ -181,18 +185,59 @@ class DeliveryController extends BaseController
                                 'updated_at' => date('Y-m-d H:i:s')
                             ]);
 
-                        // Get product to check expiry
-                        $product = $this->productModel->find($productId);
-                        $expiryDate = $product['expiry'] ?? null;
+                        // Get original product
+                        $originalProduct = $this->productModel->find($productId);
+                        if (!$originalProduct) {
+                            continue;
+                        }
 
-                        // Record STOCK-IN transaction (NEW STOCK)
-                        // This implements: STOCK-IN → NEW STOCK flow from diagram
+                        $expiryDate = $originalProduct['expiry'] ?? null;
+                        
+                        // Check if product belongs to the delivery's branch
+                        $targetProductId = $productId;
+                        if ((int)$originalProduct['branch_id'] !== $deliveryBranchId) {
+                            // Product is from a different branch - find or create for this branch
+                            $existingProduct = $db->table('products')
+                                ->where('name', $originalProduct['name'])
+                                ->where('branch_id', $deliveryBranchId)
+                                ->get()
+                                ->getRowArray();
+
+                            if ($existingProduct) {
+                                // Use existing product in this branch
+                                $targetProductId = (int)$existingProduct['id'];
+                            } else {
+                                // Create new product for this branch
+                                $newProductData = [
+                                    'name' => $originalProduct['name'],
+                                    'branch_id' => $deliveryBranchId,
+                                    'category_id' => $originalProduct['category_id'],
+                                    'price' => $originalProduct['price'],
+                                    'stock_qty' => 0, // Will be updated by stock-in
+                                    'unit' => $originalProduct['unit'],
+                                    'min_stock' => $originalProduct['min_stock'],
+                                    'max_stock' => $originalProduct['max_stock'],
+                                    'expiry' => $expiryDate,
+                                    'status' => 'active',
+                                    'created_by' => $session->get('user_id') ?? $session->get('id'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                ];
+                                
+                                $db->table('products')->insert($newProductData);
+                                $targetProductId = $db->insertID();
+                                
+                                log_message('info', "Created new product ID {$targetProductId} for branch {$deliveryBranchId} from delivery {$id}");
+                            }
+                        }
+
+                        // Record STOCK-IN transaction for the TARGET product (in delivery's branch)
                         $this->stockTransactionModel->recordStockIn(
-                            $productId,
+                            $targetProductId,
                             $receivedQty,
                             $id, // reference_id (delivery_id)
                             'delivery', // reference_type
-                            $session->get('id'), // created_by
+                            $session->get('user_id') ?? $session->get('id'), // created_by
                             $expiryDate
                         );
 
@@ -216,12 +261,13 @@ class DeliveryController extends BaseController
                 }
             }
 
-            // Update delivery status
+            // Update delivery status with received_by (user who received it)
+            $userId = $session->get('user_id') ?? $session->get('id');
             $this->deliveryModel->updateDeliveryStatus(
                 (int)$id,
                 'delivered',
                 date('Y-m-d'),
-                $session->get('id')
+                (int)$userId
             );
 
             // Update purchase order status if all items received
@@ -522,7 +568,8 @@ class DeliveryController extends BaseController
     {
         $session = session();
         
-        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin', 'logistics_coordinator'])) {
+        // Allow central admin, branch managers, staff, and logistics coordinators to view deliveries
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin', 'logistics_coordinator', 'branch_manager', 'manager', 'inventory_staff', 'inventorystaff'])) {
             return redirect()->to('/auth/login');
         }
 

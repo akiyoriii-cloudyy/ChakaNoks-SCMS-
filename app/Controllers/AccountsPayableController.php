@@ -128,16 +128,25 @@ class AccountsPayableController extends BaseController
     {
         $session = session();
         
-        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+        // Allow central admin, branch managers, and staff to view accounts payable
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin', 'branch_manager', 'manager', 'inventory_staff', 'inventorystaff'])) {
             return redirect()->to('/auth/login');
         }
+        
+        $role = $session->get('role');
+        $branchId = $session->get('branch_id');
 
         // Fetch accounts payable data server-side
         try {
             $builder = $this->db->table('accounts_payable')
-                ->select('accounts_payable.*, suppliers.name as supplier_name, purchase_orders.order_number')
+                ->select('accounts_payable.*, suppliers.name as supplier_name, purchase_orders.order_number, purchase_orders.branch_id')
                 ->join('suppliers', 'suppliers.id = accounts_payable.supplier_id', 'left')
                 ->join('purchase_orders', 'purchase_orders.id = accounts_payable.purchase_order_id', 'left');
+            
+            // Branch managers and staff only see their branch's accounts payable
+            if (!in_array($role, ['central_admin', 'superadmin']) && $branchId) {
+                $builder->where('purchase_orders.branch_id', $branchId);
+            }
             
             // Apply filters
             $paymentStatus = $this->request->getGet('payment_status');
