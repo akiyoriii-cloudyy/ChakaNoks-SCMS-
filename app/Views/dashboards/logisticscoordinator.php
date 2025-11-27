@@ -51,24 +51,165 @@
         color: #fff; 
     }
     
+    .status-approved {
+        background: #17a2b8;
+        color: #fff;
+    }
+    
+    .status-partial {
+        background: #ffc107;
+        color: #000;
+    }
+    
+    .status-pending {
+        background: #6c757d;
+        color: #fff;
+    }
+    
+    .status-in_transit {
+        background: #fd7e14;
+        color: #fff;
+    }
+    
+    /* Professional Table Styles */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    
+    .table thead th {
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    
+    .table tbody td {
+        padding: 12px 15px;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    /* Page Header */
+    .page-header {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border-green);
+    }
+    
+    .page-header h4 {
+        margin: 0;
+        color: var(--primary-green);
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+    
+    .page-header p {
+        margin: 5px 0 0 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    /* Professional Card */
+    .professional-card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .professional-card .card-header {
+        padding: 18px 25px;
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    }
+    
+    .professional-card .card-body {
+        padding: 25px;
+    }
+    
+    /* Status Badge Improvements */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+    
+    /* Professional Button */
+    .btn-track {
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-track:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Amount Formatting */
+    .amount-cell {
+        font-weight: 600;
+        color: var(--primary-green);
+        font-family: 'Courier New', monospace;
+    }
+    
+    /* PO Number Formatting */
+    .po-number {
+        font-weight: 600;
+        color: #2c3e50;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+    
     /* Sidebar Styles */
     .sidebar {
-        min-height: 98vh;
+        min-height: 100vh;
+        height: 100vh;
         background: var(--primary-green);
         color: var(--text-light);
-        padding: 50;
+        padding: 0;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         border-right: 3px solid var(--accent-green);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        z-index: 1000;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
     
     .sidebar-header {
         padding: 20px 15px;
         border-bottom: 1px solid var(--accent-green);
         background: var(--primary-green);
+        flex-shrink: 0;
     }
     
     .sidebar-nav {
         padding: 15px 0;
+        flex: 1;
+        overflow-y: auto;
     }
     
     .nav-link-custom {
@@ -102,10 +243,18 @@
     }
     
     .main-content {
-        margin-left: 0;
+        margin-left: 250px;
         padding: 20px;
         background: #f8fff8;
         min-height: 100vh;
+        width: calc(100% - 250px);
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    .main-content-wrapper {
+        max-width: 100%;
+        overflow-x: hidden;
     }
     
     .user-profile-sidebar {
@@ -113,6 +262,7 @@
         border-top: 1px solid var(--accent-green);
         background: var(--primary-green);
         margin-top: auto;
+        flex-shrink: 0;
     }
     
     /* Card Styles */
@@ -226,8 +376,6 @@
     /* Table row hover effect */
     .table tbody tr:hover {
         background-color: #f8f9fa;
-        transform: scale(1.01);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     /* Ensure navigation is ALWAYS visible */
@@ -248,25 +396,62 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
-    @media (min-width: 768px) {
+    @media (max-width: 767px) {
         .sidebar {
-            width: 250px;
-            position: fixed;
+            width: 100%;
+            position: relative;
+            height: auto;
+            min-height: auto;
         }
         
         .main-content {
-            margin-left: 250px;
+            margin-left: 0;
+            width: 100%;
         }
+    }
+    
+    /* Prevent horizontal overflow */
+    .container-fluid {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+    
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    /* Table responsive container */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+    
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--primary-green);
+        border-radius: 4px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-green);
     }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('body') ?>
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid p-0">
+    <div class="row g-0">
         <!-- Sidebar -->
-         <br>
-         <br>
         <div class="sidebar d-flex flex-column">
             <div class="sidebar-header">
                 <h4 class="mb-0">Logistics Coordinator</h4>
@@ -314,7 +499,8 @@
         </div>
         
         <!-- Main Content -->
-        <div class="main-content flex-grow-1">
+        <div class="main-content">
+            <div class="main-content-wrapper">
             <?php $currentPage = $currentPage ?? 'dashboard'; ?>
             
             <?php if ($currentPage === 'dashboard'): ?>
@@ -489,43 +675,62 @@
             
             <?php elseif ($currentPage === 'track'): ?>
                 <!-- Track Orders View -->
-                <div class="card mb-4">
+                <div class="page-header">
+                    <h4><i class="fas fa-search me-2"></i>Order Tracking</h4>
+                    <p>Monitor and track all purchase orders across the system</p>
+                </div>
+                
+                <div class="card professional-card mb-4">
                     <div class="card-header">
-                        <h5><i class="fas fa-search"></i> Track Orders</h5>
+                        <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Purchase Orders</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <?php if (empty($allOrders ?? [])): ?>
-                            <p class="text-muted">No orders found</p>
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No purchase orders found</p>
+                            </div>
                         <?php else: ?>
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="table table-hover mb-0">
                                     <thead>
                                         <tr>
-                                            <th>PO Number</th>
-                                            <th>Supplier</th>
-                                            <th>Branch</th>
-                                            <th>Status</th>
-                                            <th>Expected Date</th>
-                                            <th>Total Amount</th>
-                                            <th>Actions</th>
+                                            <th style="width: 15%;">PO Number</th>
+                                            <th style="width: 20%;">Supplier</th>
+                                            <th style="width: 15%;">Branch</th>
+                                            <th style="width: 12%;">Status</th>
+                                            <th style="width: 15%;">Expected Date</th>
+                                            <th style="width: 13%;" class="text-end">Total Amount</th>
+                                            <th style="width: 10%;" class="text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($allOrders as $order): ?>
                                         <tr>
-                                            <td><strong><?= esc($order['order_number'] ?? 'N/A') ?></strong></td>
+                                            <td>
+                                                <span class="po-number"><?= esc($order['order_number'] ?? 'N/A') ?></span>
+                                            </td>
                                             <td><?= esc($order['supplier']['name'] ?? ($order['supplier_id'] ?? 'N/A')) ?></td>
                                             <td><?= esc($order['branch']['name'] ?? ($order['branch_id'] ?? 'N/A')) ?></td>
                                             <td>
-                                                <span class="status-badge status-<?= esc($order['status'] ?? 'pending') ?>">
+                                                <span class="status-badge status-<?= esc(strtolower($order['status'] ?? 'pending')) ?>">
                                                     <?= esc(ucwords(str_replace('_', ' ', $order['status'] ?? 'pending'))) ?>
                                                 </span>
                                             </td>
-                                            <td><?= $order['expected_delivery_date'] ? date('M d, Y', strtotime($order['expected_delivery_date'])) : 'Not set' ?></td>
-                                            <td>₱<?= number_format($order['total_amount'] ?? 0, 2) ?></td>
                                             <td>
-                                                <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $order['id'] ?>)">
-                                                    <i class="fas fa-eye"></i> Track
+                                                <?php if ($order['expected_delivery_date']): ?>
+                                                    <i class="fas fa-calendar-alt me-1 text-muted"></i>
+                                                    <?= date('M d, Y', strtotime($order['expected_delivery_date'])) ?>
+                                                <?php else: ?>
+                                                    <span class="text-muted">Not set</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-end amount-cell">
+                                                ₱<?= number_format($order['total_amount'] ?? 0, 2) ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-info btn-track" onclick="trackOrder(<?= $order['id'] ?>)">
+                                                    <i class="fas fa-eye me-1"></i> Track
                                                 </button>
                                             </td>
                                         </tr>
@@ -648,6 +853,7 @@
                     </div>
                 </div>
             <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
