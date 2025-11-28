@@ -250,16 +250,56 @@ class Staff extends BaseController
         $categoryId = null;
         if ($category) {
             $categoryId = $category['id'];
+            
+            // Update created_by if it's NULL
+            if (empty($category['created_by']) || $category['created_by'] === null) {
+                $userId = $session->get('user_id');
+                if (!$userId) {
+                    // Fallback to first inventory staff if session user_id is not available
+                    $invUser = $this->db->table('users')
+                        ->where('role', 'inventory_staff')
+                        ->limit(1)
+                        ->get()
+                        ->getRowArray();
+                    $userId = $invUser ? $invUser['id'] : null;
+                }
+                if ($userId) {
+                    $categoryModel->update($category['id'], ['created_by' => $userId]);
+                }
+            }
         } else {
             // Create category if it doesn't exist
+            $userId = $session->get('user_id');
+            if (!$userId) {
+                // Fallback to first inventory staff if session user_id is not available
+                $invUser = $this->db->table('users')
+                    ->where('role', 'inventory_staff')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+                $userId = $invUser ? $invUser['id'] : null;
+            }
+            
             $categoryModel->insert([
                 'name' => $categoryName,
                 'status' => 'active',
-                'created_by' => $session->get('user_id') ?? null,
+                'created_by' => $userId,
             ]);
             $categoryId = $categoryModel->getInsertID();
         }
 
+        // Ensure created_by is set (fallback to inventory staff if session user_id is not available)
+        $userId = $session->get('user_id');
+        if (!$userId) {
+            // Fallback to first inventory staff if session user_id is not available
+            $invUser = $this->db->table('users')
+                ->where('role', 'inventory_staff')
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+            $userId = $invUser ? $invUser['id'] : null;
+        }
+        
         // Prepare data for insertion (normalized - no branch_address or category)
         $now = date('Y-m-d H:i:s');
         $payload = [
@@ -272,7 +312,7 @@ class Staff extends BaseController
             'max_stock'     => (int)($this->request->getPost('max_stock') ?? 0),
             'branch_id'     => $branchId,
             'expiry'        => $this->request->getPost('expiry') ?: null,
-            'created_by'    => $session->get('user_id') ?? null,
+            'created_by'    => $userId,
             'status'        => 'active',
             'created_at'    => $now,
             'updated_at'    => $now,

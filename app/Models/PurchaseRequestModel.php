@@ -182,16 +182,31 @@ class PurchaseRequestModel extends Model
             ->getResultArray();
         
         log_message('debug', 'Found ' . count($items) . ' items for request ' . $id);
+        
+        if (empty($items)) {
+            log_message('warning', 'Request ' . $id . ' has no items in purchase_request_items table');
+            $request['items'] = [];
+            return $request;
+        }
 
         // Get product details for each item
         $productModel = new \App\Models\ProductModel();
-        foreach ($items as &$item) {
+        $validItems = [];
+        foreach ($items as $item) {
             $product = $productModel->find($item['product_id']);
-            $item['product'] = $product;
-            log_message('debug', 'Loaded product ' . $item['product_id'] . ' for item');
+            if ($product) {
+                $item['product'] = $product;
+                $validItems[] = $item;
+                log_message('debug', 'Loaded product ' . $item['product_id'] . ' (' . ($product['name'] ?? 'unknown') . ') for item');
+            } else {
+                log_message('warning', 'Product ID ' . $item['product_id'] . ' not found for purchase request item ' . $item['id']);
+                // Still include the item even if product is missing (product might have been deleted)
+                $item['product'] = null;
+                $validItems[] = $item;
+            }
         }
 
-        $request['items'] = $items;
+        $request['items'] = $validItems;
 
         // Get branch info
         $branchModel = new \App\Models\BranchModel();

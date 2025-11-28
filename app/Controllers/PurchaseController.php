@@ -120,13 +120,161 @@ class PurchaseController extends BaseController
             $requestId = $this->db->insertID();
             
             // Insert items
+            $itemsInserted = 0;
             foreach ($items as $item) {
-                $productId = (int)($item['product_id'] ?? 0);
                 $quantity = (int)($item['quantity'] ?? 0);
                 $unitPrice = (float)($item['unit_price'] ?? 0);
                 
-                if ($productId > 0 && $quantity > 0) {
-                    $this->db->table('purchase_request_items')->insert([
+                if ($quantity <= 0) {
+                    log_message('debug', 'Skipping item with quantity <= 0');
+                    continue;
+                }
+                
+                // Get product_id from product name and category
+                $productId = null;
+                
+                // If product_id is already provided, use it
+                if (!empty($item['product_id'])) {
+                    $productId = (int)$item['product_id'];
+                } else {
+                    // Look up product by name and category
+                    $itemName = $item['item_name'] ?? '';
+                    $categoryName = $item['category'] ?? '';
+                    
+                    if (empty($itemName)) {
+                        log_message('warning', 'Item missing item_name, skipping');
+                        continue;
+                    }
+                    
+                    // Normalize item name for matching
+                    $normalizedItemName = trim(preg_replace('/\s+/', ' ', $itemName));
+                    $searchName = strtolower($normalizedItemName);
+                    $categoryLower = strtolower(trim($categoryName));
+                    
+                    log_message('debug', 'Looking up product: "' . $itemName . '" (search: "' . $searchName . '") in category: "' . $categoryName . '"');
+                    
+                    // Get all products and search in PHP (more reliable than complex SQL)
+                    $allProducts = $this->db->table('products')
+                        ->select('products.*, categories.name as category_name')
+                        ->join('categories', 'categories.id = products.category_id', 'left')
+                        ->get()
+                        ->getResultArray();
+                    
+                    $product = null;
+                    
+                    // Strategy 1: Exact name match with category
+                    foreach ($allProducts as $p) {
+                        $pName = strtolower(trim($p['name'] ?? ''));
+                        $pCategory = strtolower(trim($p['category_name'] ?? ''));
+                        
+                        if ($pName === $searchName && (!$categoryLower || $pCategory === $categoryLower)) {
+                            $product = $p;
+                            log_message('debug', '✅ Found product ID ' . $p['id'] . ' for item: "' . $itemName . '" (exact match)');
+                            break;
+                        }
+                    }
+                    
+                    // Strategy 2: Case-insensitive name match (without category)
+                    if (!$product) {
+                        foreach ($allProducts as $p) {
+                            $pName = strtolower(trim($p['name'] ?? ''));
+                            if ($pName === $searchName) {
+                                $product = $p;
+                                log_message('debug', '✅ Found product ID ' . $p['id'] . ' for item: "' . $itemName . '" (name match only)');
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Strategy 3: Partial match (product name contains search or vice versa)
+                    if (!$product) {
+                        foreach ($allProducts as $p) {
+                            $pName = strtolower(trim($p['name'] ?? ''));
+                            if (strpos($pName, $searchName) !== false || strpos($searchName, $pName) !== false) {
+                                $product = $p;
+                                log_message('debug', '✅ Found product ID ' . $p['id'] . ' for item: "' . $itemName . '" (partial match: "' . $p['name'] . '")');
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Strategy 4: First word match
+                    if (!$product) {
+                        $words = explode(' ', $searchName);
+                        $firstWord = $words[0] ?? '';
+                        if (strlen($firstWord) > 2) {
+                            foreach ($allProducts as $p) {
+                                $pName = strtolower(trim($p['name'] ?? ''));
+                                if (strpos($pName, $firstWord) === 0) {
+                                    $product = $p;
+                                    log_message('debug', '✅ Found product ID ' . $p['id'] . ' for item: "' . $itemName . '" (first word match: "' . $p['name'] . '")');
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if ($product) {
+                        $productId = (int)$product['id'];
+                    } else {
+                        log_message('warning', '❌ Product not found for item: "' . $itemName . '" in category: "' . $categoryName . '" - will create new');
+                        
+                        // Create a new product entry
+                        $categoryId = null;
+                        if (!empty($categoryName)) {
+                            // Get category ID
+                            $category = $this->db->table('categories')
+                                ->where('name', trim($categoryName))
+                                ->get()
+                                ->getRowArray();
+                            
+                            if (!$category) {
+                                // Try case-insensitive
+                                foreach ($this->db->table('categories')->get()->getResultArray() as $cat) {
+                                    if (strtolower(trim($cat['name'])) === $categoryLower) {
+                                        $category = $cat;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if ($category) {
+                                $categoryId = (int)$category['id'];
+                            }
+                        }
+                        
+                        // If still no category, use first category or create one
+                        if (!$categoryId) {
+                            $firstCategory = $this->db->table('categories')->limit(1)->get()->getRowArray();
+                            $categoryId = $firstCategory ? (int)$firstCategory['id'] : null;
+                        }
+                        
+                        if ($categoryId) {
+                            // Create product
+                            $newProductData = [
+                                'name' => trim($itemName),
+                                'category_id' => $categoryId,
+                                'branch_id' => (int)$branchId,
+                                'price' => $unitPrice,
+                                'stock_qty' => 0,
+                                'unit' => 'pcs',
+                                'status' => 'active',
+                                'created_by' => (int)$userId,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ];
+                            
+                            $this->db->table('products')->insert($newProductData);
+                            $productId = $this->db->insertID();
+                            log_message('info', '✅ Created new product ID ' . $productId . ' for item: "' . $itemName . '"');
+                        } else {
+                            log_message('error', '❌ Could not create product - no category available');
+                        }
+                    }
+                }
+                
+                if ($productId && $productId > 0) {
+                    $insertResult = $this->db->table('purchase_request_items')->insert([
                         'purchase_request_id' => (int)$requestId,
                         'product_id' => (int)$productId,
                         'quantity' => (int)$quantity,
@@ -136,7 +284,53 @@ class PurchaseController extends BaseController
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
+                    
+                    if ($insertResult) {
+                        $itemsInserted++;
+                        log_message('debug', 'Inserted purchase request item: product_id=' . $productId . ', qty=' . $quantity);
+                    } else {
+                        $dbError = $this->db->error();
+                        log_message('error', 'Failed to insert purchase request item. DB error: ' . json_encode($dbError));
+                    }
+                } else {
+                    log_message('warning', 'Skipping item - could not determine product_id for: ' . ($item['item_name'] ?? 'unknown'));
                 }
+            }
+            
+            log_message('info', 'Inserted ' . $itemsInserted . ' items for purchase request ' . $requestId);
+            
+            if ($itemsInserted === 0) {
+                $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+                // Delete the purchase request if no items were inserted
+                $this->db->table('purchase_requests')->where('id', $requestId)->delete();
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => 'No valid items were found. Please ensure products exist in inventory.',
+                    'debug' => [
+                        'items_received' => count($items),
+                        'items_processed' => $itemsInserted
+                    ]
+                ]);
+            }
+            
+            // Verify items were actually saved
+            $savedItemsCount = $this->db->table('purchase_request_items')
+                ->where('purchase_request_id', $requestId)
+                ->countAllResults();
+            
+            log_message('info', 'Verified ' . $savedItemsCount . ' items saved in database for request ' . $requestId);
+            
+            if ($savedItemsCount === 0) {
+                $this->db->query('SET FOREIGN_KEY_CHECKS=1');
+                $this->db->table('purchase_requests')->where('id', $requestId)->delete();
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => 'Failed to save items to database. Please try again.',
+                    'debug' => [
+                        'items_inserted' => $itemsInserted,
+                        'items_in_db' => $savedItemsCount
+                    ]
+                ]);
             }
             
             // Re-enable foreign key checks
@@ -144,11 +338,12 @@ class PurchaseController extends BaseController
             
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Purchase request created successfully',
+                'message' => 'Purchase request created successfully with ' . $savedItemsCount . ' items.',
                 'request_id' => $requestId,
                 'request_number' => $requestNumber,
                 'branch' => $branchName,
-                'items_count' => count($items),
+                'items_received' => count($items),
+                'items_saved' => $savedItemsCount,
                 'total_amount' => $totalAmount
             ]);
         } catch (\Exception $e) {
@@ -291,8 +486,31 @@ class PurchaseController extends BaseController
             // Step 2: Get the approved request with items
             $requestWithItems = $this->purchaseRequestModel->getRequestWithItems((int)$id);
 
-            if (!$requestWithItems || empty($requestWithItems['items'])) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Request has no items']);
+            if (!$requestWithItems) {
+                log_message('error', 'Request ' . $id . ' not found after approval');
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Request not found']);
+            }
+
+            // Check if items exist
+            if (empty($requestWithItems['items']) || !is_array($requestWithItems['items']) || count($requestWithItems['items']) === 0) {
+                log_message('error', 'Request ' . $id . ' has no items. Items count: ' . (is_array($requestWithItems['items']) ? count($requestWithItems['items']) : 'not array'));
+                
+                // Check if items exist in database
+                $itemsCheck = $this->db->table('purchase_request_items')
+                    ->where('purchase_request_id', (int)$id)
+                    ->countAllResults();
+                
+                log_message('error', 'Items in database for request ' . $id . ': ' . $itemsCheck);
+                
+                return $this->response->setJSON([
+                    'status' => 'error', 
+                    'message' => 'Request has no items. Please ensure the purchase request was created with valid products.',
+                    'debug' => [
+                        'request_id' => $id,
+                        'items_in_db' => $itemsCheck,
+                        'items_in_response' => is_array($requestWithItems['items']) ? count($requestWithItems['items']) : 'not array'
+                    ]
+                ]);
             }
 
             // Store items separately
@@ -628,30 +846,109 @@ class PurchaseController extends BaseController
     private function autoCreateDelivery(int $poId, array $poData, array $deliveryDetails = []): void
     {
         try {
-            $deliveryModel = new \App\Models\DeliveryModel();
+            log_message('debug', 'autoCreateDelivery called for PO ' . $poId);
+            log_message('debug', 'poData: ' . json_encode($poData));
+            log_message('debug', 'deliveryDetails: ' . json_encode($deliveryDetails));
             
             // Create delivery record automatically with delivery details
             $session = session();
             $userId = $session->get('user_id') ?? $session->get('id');
             
+            // Ensure scheduled_date has a valid value
+            $scheduledDate = null;
+            if (!empty($deliveryDetails['scheduled_delivery_date'])) {
+                $scheduledDate = $deliveryDetails['scheduled_delivery_date'];
+            } elseif (!empty($poData['expected_delivery_date'])) {
+                $scheduledDate = $poData['expected_delivery_date'];
+            } else {
+                // Default to 3 days from now
+                $scheduledDate = date('Y-m-d', strtotime('+3 days'));
+            }
+            
+            // Ensure supplier_id and branch_id are valid
+            $supplierId = (int)($poData['supplier_id'] ?? 0);
+            $branchId = (int)($poData['branch_id'] ?? 0);
+            
+            if (!$supplierId) {
+                // Get default supplier
+                $defaultSupplier = $this->db->table('suppliers')
+                    ->where('status', 'active')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+                $supplierId = $defaultSupplier ? (int)$defaultSupplier['id'] : 0;
+                log_message('debug', 'Using default supplier ID: ' . $supplierId);
+            }
+            
+            if (!$branchId) {
+                // Get default branch
+                $defaultBranch = $this->db->table('branches')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+                $branchId = $defaultBranch ? (int)$defaultBranch['id'] : 0;
+                log_message('debug', 'Using default branch ID: ' . $branchId);
+            }
+            
+            if (!$supplierId || !$branchId) {
+                log_message('error', 'Cannot create delivery - missing supplier_id or branch_id');
+                return;
+            }
+            
+            // Generate delivery number
+            $deliveryNumber = 'DEL-' . date('Ymd') . '-' . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            
+            // Use direct database insert to bypass model validation issues
             $deliveryData = [
+                'delivery_number' => $deliveryNumber,
                 'purchase_order_id' => $poId,
-                'supplier_id' => $poData['supplier_id'],
-                'branch_id' => $poData['branch_id'],
+                'supplier_id' => $supplierId,
+                'branch_id' => $branchId,
                 'scheduled_by' => $userId ? (int)$userId : null,
-                'scheduled_date' => $deliveryDetails['scheduled_delivery_date'] ?? $poData['expected_delivery_date'],
+                'scheduled_date' => $scheduledDate,
                 'driver_name' => $deliveryDetails['driver_name'] ?? null,
                 'vehicle_info' => $deliveryDetails['vehicle_info'] ?? null,
                 'status' => 'scheduled',
-                'notes' => 'Auto-created from Purchase Order',
+                'notes' => 'Auto-created from Purchase Order #' . $poId,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-
-            $deliveryModel->scheduleDelivery($deliveryData);
-            log_message('info', 'Delivery record created for PO ' . $poId . ' with delivery details');
+            
+            log_message('debug', 'Inserting delivery: ' . json_encode($deliveryData));
+            
+            // Insert directly using database builder
+            $inserted = $this->db->table('deliveries')->insert($deliveryData);
+            
+            if ($inserted) {
+                $deliveryId = $this->db->insertID();
+                log_message('info', '✅ Delivery record created with ID ' . $deliveryId . ' for PO ' . $poId);
+                
+                // Create delivery items from PO items
+                $poItems = $this->db->table('purchase_order_items')
+                    ->where('purchase_order_id', $poId)
+                    ->get()
+                    ->getResultArray();
+                
+                foreach ($poItems as $poItem) {
+                    $this->db->table('delivery_items')->insert([
+                        'delivery_id' => $deliveryId,
+                        'product_id' => $poItem['product_id'],
+                        'expected_quantity' => $poItem['quantity'],
+                        'received_quantity' => 0,
+                        'condition_status' => 'good',
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+                
+                log_message('info', '✅ Created ' . count($poItems) . ' delivery items for delivery ' . $deliveryId);
+            } else {
+                $error = $this->db->error();
+                log_message('error', '❌ Failed to insert delivery: ' . json_encode($error));
+            }
         } catch (\Exception $e) {
-            log_message('error', 'Failed to create delivery record: ' . $e->getMessage());
+            log_message('error', '❌ Exception in autoCreateDelivery: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
         }
     }
 
