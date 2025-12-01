@@ -5,6 +5,10 @@
 
     let ITEMS = [];
     let FILTERED = [];
+    
+    // Pagination settings
+    let currentPage = 1;
+    const ITEMS_PER_PAGE = 10;
 
     // --------- UTILS ---------
     const nowISO = () => new Date().toISOString().slice(0, 10);
@@ -94,10 +98,24 @@
         if (!list || list.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No inventory items found</td></tr>';
             renderCounts([]);
+            renderPagination(0);
             return;
         }
         
-        tbody.innerHTML = list.map(item => {
+        // Calculate pagination
+        const totalItems = list.length;
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        
+        // Ensure current page is valid
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+        
+        // Get items for current page
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        const pageItems = list.slice(startIndex, endIndex);
+        
+        tbody.innerHTML = pageItems.map(item => {
             // Ensure status is properly set
             const status = (item.status || 'Good').trim();
             const statusCls = statusClass(status);
@@ -120,8 +138,103 @@
             `;
         }).join("");
         
-        // Render counts after table is rendered
+        // Render counts after table is rendered (use full list for accurate counts)
         renderCounts(list);
+        
+        // Render pagination controls
+        renderPagination(totalItems);
+    }
+    
+    function renderPagination(totalItems) {
+        const paginationContainer = $("#paginationContainer");
+        if (!paginationContainer) return;
+        
+        if (totalItems === 0) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+        
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+        const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalItems);
+        
+        let paginationHTML = `
+            <div class="pagination-wrapper">
+                <div class="pagination-info">
+                    Showing <strong>${startItem}-${endItem}</strong> of <strong>${totalItems}</strong> items
+                </div>
+                <div class="pagination-controls">
+        `;
+        
+        // Previous button
+        paginationHTML += `
+            <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                    data-page="${currentPage - 1}" 
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i> Prev
+            </button>
+        `;
+        
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        if (startPage > 1) {
+            paginationHTML += `<button class="pagination-btn" data-page="1">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <button class="pagination-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>
+            `;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+            }
+            paginationHTML += `<button class="pagination-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+        
+        // Next button
+        paginationHTML += `
+            <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                    data-page="${currentPage + 1}" 
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+        
+        paginationHTML += `
+                </div>
+            </div>
+        `;
+        
+        paginationContainer.innerHTML = paginationHTML;
+        
+        // Add event listeners for pagination buttons
+        $$('.pagination-btn:not(.disabled)', paginationContainer).forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const page = parseInt(e.currentTarget.dataset.page);
+                if (page && page !== currentPage) {
+                    currentPage = page;
+                    renderTable(FILTERED);
+                    // Scroll to top of table
+                    const table = $("#invTable");
+                    if (table) {
+                        table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
     }
 
     function renderCounts(list) {
@@ -221,6 +334,8 @@
             return blob.includes(q);
         });
 
+        // Reset to page 1 when filters change
+        currentPage = 1;
         renderTable(FILTERED);
     }
 
@@ -305,65 +420,179 @@
     }
 
     // --------- STOCK ACTIONS ---------
-    $('#btnUpdateStock').addEventListener('click', () => $('#updateStockContainer').style.display = 'flex');
-    $('#cancelStockBtn').addEventListener('click', () => $('#updateStockContainer').style.display = 'none');
-    $('#saveStockBtn').addEventListener('click', () => {
-        const newQty = Number($('#updateStockInput').value);
-        const id = viewModal.dataset.currentId;
-        if (isNaN(newQty)) return alert('Invalid stock value');
+    // Get base URL from page or default
+    const getBaseUrl = () => {
+        // Try to get from meta tag or script
+        const baseUrlMeta = document.querySelector('meta[name="base-url"]');
+        if (baseUrlMeta) return baseUrlMeta.content;
+        
+        // Try to extract from current URL
+        const pathParts = window.location.pathname.split('/');
+        // Check if we're in a subdirectory (e.g., /ChakaNoks-SCMS-/)
+        if (pathParts.length > 1 && pathParts[1].includes('SCMS')) {
+            return '/' + pathParts[1] + '/';
+        }
+        // Check for index.php pattern
+        const indexPhpMatch = window.location.href.match(/(.*\/index\.php)/);
+        if (indexPhpMatch) {
+            return indexPhpMatch[1] + '/';
+        }
+        return '/';
+    };
+    
+    const baseUrl = getBaseUrl();
+    
+    $('#btnUpdateStock')?.addEventListener('click', () => {
+        const container = $('#updateStockContainer');
+        if (!container) return;
+        
+        if (container.style.display === 'none' || !container.style.display) {
+            container.style.display = 'flex';
+            // Pre-fill with current stock value
+            const stockText = $('#viewStock')?.textContent || '0';
+            const currentStock = parseInt(stockText.split(' ')[0]) || 0;
+            const input = $('#updateStockInput');
+            if (input) input.value = currentStock;
+        } else {
+            container.style.display = 'none';
+        }
+    });
+    
+    $('#cancelStockBtn')?.addEventListener('click', () => {
+        const container = $('#updateStockContainer');
+        if (container) container.style.display = 'none';
+    });
+    
+    $('#saveStockBtn')?.addEventListener('click', () => {
+        const input = $('#updateStockInput');
+        const newQty = parseInt(input?.value, 10);
+        const id = viewModal?.dataset?.currentId;
+        
+        if (!id) {
+            alert('Product ID not found. Please close and reopen the item.');
+            return;
+        }
+        
+        if (isNaN(newQty) || newQty < 0) {
+            alert('Please enter a valid stock quantity (0 or greater)');
+            return;
+        }
 
-        fetch('/staff/updateStock/' + id, {
-            method:'POST',
-            headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+        // Show loading state
+        const saveBtn = $('#saveStockBtn');
+        const originalText = saveBtn?.textContent;
+        if (saveBtn) {
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+        }
+
+        // Build the URL properly
+        const updateUrl = baseUrl + 'staff/updateStock/' + id;
+        console.log('Updating stock at:', updateUrl, 'with qty:', newQty);
+
+        fetch(updateUrl, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: new URLSearchParams({ stock_qty: newQty })
-        }).then(r => r.json()).then(data => {
-            if (data.status === 'success') location.reload();
-            else alert(data.error || 'Failed to update stock');
+        })
+        .then(r => {
+            if (!r.ok) {
+                throw new Error(`HTTP error! status: ${r.status}`);
+            }
+            return r.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Stock updated successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || data.message || 'Failed to update stock'));
+            }
+        })
+        .catch(e => {
+            console.error('Stock update error:', e);
+            alert('Error updating stock: ' + e.message);
+        })
+        .finally(() => {
+            if (saveBtn) {
+                saveBtn.textContent = originalText || 'Save';
+                saveBtn.disabled = false;
+            }
         });
     });
 
     // --------- ACTION BUTTONS (wired to backend) ---------
-    $('#btnReceiveDelivery').addEventListener('click', () => {
-        const id = viewModal.dataset.currentId;
+    $('#btnReceiveDelivery')?.addEventListener('click', () => {
+        const id = viewModal?.dataset?.currentId;
+        if (!id) return alert('Product ID not found');
+        
         const qty = prompt('Enter quantity received:');
         const n = Number(qty);
         if (!qty || isNaN(n) || n <= 0) return alert('Invalid quantity');
-        fetch('/staff/receiveDelivery/' + id, {
+        
+        fetch(baseUrl + 'staff/receiveDelivery/' + id, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: new URLSearchParams({ quantity: n })
-        }).then(r => r.json()).then(data => {
-            if (data.status === 'success') location.reload();
-            else alert(data.error || 'Failed to receive delivery');
-        }).catch(e => alert(e.message));
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Delivery received! Stock updated.');
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to receive delivery');
+            }
+        })
+        .catch(e => alert('Error: ' + e.message));
     });
 
-    $('#btnReportDamaged').addEventListener('click', () => {
-        const id = viewModal.dataset.currentId;
+    $('#btnReportDamaged')?.addEventListener('click', () => {
+        const id = viewModal?.dataset?.currentId;
+        if (!id) return alert('Product ID not found');
+        
         const qty = prompt('Enter damaged quantity:');
         const n = Number(qty);
         if (!qty || isNaN(n) || n <= 0) return alert('Invalid quantity');
-        fetch('/staff/reportDamage/' + id, {
+        
+        fetch(baseUrl + 'staff/reportDamage/' + id, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: new URLSearchParams({ quantity: n })
-        }).then(r => r.json()).then(data => {
-            if (data.status === 'success') location.reload();
-            else alert(data.error || 'Failed to report damage');
-        }).catch(e => alert(e.message));
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Damage reported! Stock updated.');
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to report damage');
+            }
+        })
+        .catch(e => alert('Error: ' + e.message));
     });
 
-    $('#btnTrackInventory').addEventListener('click', () => {
-        // Apply branch filter for current item's branch
-        const id = viewModal.dataset.currentId;
+    $('#btnTrackInventory')?.addEventListener('click', () => {
+        const id = viewModal?.dataset?.currentId;
         const item = ITEMS.find(x => String(x.id) === String(id));
         if (!item || !item.branch_id) return alert('No branch for this item');
-        window.location.href = '/inventory?branch_id=' + encodeURIComponent(item.branch_id);
+        window.location.href = baseUrl + 'inventory?branch_id=' + encodeURIComponent(item.branch_id);
     });
 
-    $('#btnCheckExpiry').addEventListener('click', () => {
-        const id = viewModal.dataset.currentId;
-        fetch('/inventory/expiry/' + id)
+    $('#btnCheckExpiry')?.addEventListener('click', () => {
+        const id = viewModal?.dataset?.currentId;
+        if (!id) return alert('Product ID not found');
+        
+        fetch(baseUrl + 'inventory/expiry/' + id)
             .then(r => r.json())
             .then(data => {
                 if (data.status !== 'success') return alert(data.error || 'Failed to check expiry');
@@ -371,11 +600,61 @@
                     ? `State: ${data.state}\nExpiry: ${data.expiry}\nDays remaining: ${data.days}`
                     : `State: ${data.state}`;
                 alert(msg);
-            }).catch(e => alert(e.message));
+            })
+            .catch(e => alert('Error: ' + e.message));
+    });
+
+    // Print Report button
+    $('#btnPrintReport')?.addEventListener('click', () => {
+        const id = viewModal?.dataset?.currentId;
+        const item = ITEMS.find(x => String(x.id) === String(id));
+        if (!item) return alert('Item not found');
+        
+        // Create printable content
+        const printContent = `
+            <html>
+            <head>
+                <title>Inventory Report - ${item.name}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1 { color: #2d5016; border-bottom: 2px solid #2d5016; padding-bottom: 10px; }
+                    .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #eee; }
+                    .label { font-weight: bold; width: 150px; color: #666; }
+                    .value { flex: 1; }
+                    .status { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+                    .status.good { background: #d1fae5; color: #065f46; }
+                    .status.low-stock { background: #fef3c7; color: #92400e; }
+                    .status.critical { background: #fee2e2; color: #991b1b; }
+                    .footer { margin-top: 30px; font-size: 12px; color: #999; text-align: center; }
+                </style>
+            </head>
+            <body>
+                <h1>Inventory Item Report</h1>
+                <div class="info-row"><span class="label">Item Name:</span><span class="value">${item.name || 'N/A'}</span></div>
+                <div class="info-row"><span class="label">Category:</span><span class="value">${item.category || 'N/A'}</span></div>
+                <div class="info-row"><span class="label">Branch:</span><span class="value">${item.branch_label || item.branch_name || 'N/A'}</span></div>
+                <div class="info-row"><span class="label">Current Stock:</span><span class="value">${item.stock_qty || 0} ${item.unit || 'pcs'}</span></div>
+                <div class="info-row"><span class="label">Min/Max Stock:</span><span class="value">Min: ${item.min_stock || 0} / Max: ${item.max_stock || 0}</span></div>
+                <div class="info-row"><span class="label">Price:</span><span class="value">₱${parseFloat(item.price || 0).toFixed(2)}</span></div>
+                <div class="info-row"><span class="label">Status:</span><span class="value"><span class="status ${statusClass(item.status)}">${item.status || 'N/A'}</span></span></div>
+                <div class="info-row"><span class="label">Expiry Date:</span><span class="value">${item.expiry || 'N/A'}</span></div>
+                <div class="info-row"><span class="label">Last Updated:</span><span class="value">${item.updated_ago || 'Unknown'}</span></div>
+                <div class="footer">
+                    Generated on ${new Date().toLocaleString()} | CHAKANOKS Supply Chain Management System
+                </div>
+            </body>
+            </html>
+        `;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
     });
 
     // --------- ADD PRODUCT ---------
-    $('#addForm').addEventListener('submit', e => {
+    $('#addForm')?.addEventListener('submit', e => {
         e.preventDefault();
 
         const form = $('#addForm');
@@ -383,9 +662,12 @@
 
         console.log('Form data:', Object.fromEntries(formData));
 
-        fetch('/staff/addProduct', {
+        fetch(baseUrl + 'staff/addProduct', {
             method:'POST',
-            headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+            headers:{ 
+                'Content-Type':'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: new URLSearchParams(formData)
         }).then(r => {
             console.log('Response status:', r.status);

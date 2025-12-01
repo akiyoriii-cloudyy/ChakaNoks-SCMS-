@@ -48,6 +48,17 @@
             transform: scale(1.01);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Pagination Styles */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; margin-top: 1rem; border-top: 1px solid #e0e0e0; flex-wrap: wrap; gap: 1rem; }
+        .pagination-info { color: #6b7280; font-size: 0.9rem; }
+        .pagination-info strong { color: #2d5016; font-weight: 600; }
+        .pagination-controls { display: flex; align-items: center; gap: 0.5rem; }
+        .pagination-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 12px; border: 1px solid #d1d5db; background: white; color: #374151; font-size: 0.875rem; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
+        .pagination-btn:hover:not(.disabled):not(.active) { background: #f3f4f6; border-color: #4a7c2a; color: #2d5016; }
+        .pagination-btn.active { background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border-color: #2d5016; color: white; font-weight: 600; }
+        .pagination-btn.disabled { opacity: 0.5; cursor: not-allowed; background: #f3f4f6; }
+        .pagination-ellipsis { padding: 0 8px; color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -261,6 +272,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="paginationContainer" class="pagination-wrapper"></div>
                 </div>
             </div>
         </main>
@@ -548,6 +560,33 @@
                 alert('Error loading accounts payable details');
             });
         };
+        
+        // Pagination
+        (function initPagination() {
+            const ITEMS_PER_PAGE = 10;
+            let currentPage = 1;
+            const $rows = $('.table tbody tr').not(':has(td[colspan])');
+            const totalItems = $rows.length;
+            
+            if (totalItems > ITEMS_PER_PAGE) { renderPagination(); showPage(1); }
+            
+            function showPage(page) {
+                currentPage = page;
+                $rows.hide().slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).show();
+                renderPagination();
+            }
+            
+            function renderPagination() {
+                const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+                if (totalPages <= 1) { $('#paginationContainer').empty(); return; }
+                let html = '<div class="pagination-info">Showing <strong>' + ((currentPage - 1) * ITEMS_PER_PAGE + 1) + '-' + Math.min(currentPage * ITEMS_PER_PAGE, totalItems) + '</strong> of <strong>' + totalItems + '</strong></div>';
+                html += '<div class="pagination-controls"><button class="pagination-btn ' + (currentPage === 1 ? 'disabled' : '') + '" data-page="' + (currentPage - 1) + '" ' + (currentPage === 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i> Prev</button>';
+                for (let i = 1; i <= totalPages; i++) { if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) { html += '<button class="pagination-btn ' + (i === currentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button>'; } else if (i === currentPage - 3 || i === currentPage + 3) { html += '<span class="pagination-ellipsis">...</span>'; } }
+                html += '<button class="pagination-btn ' + (currentPage === totalPages ? 'disabled' : '') + '" data-page="' + (currentPage + 1) + '" ' + (currentPage === totalPages ? 'disabled' : '') + '>Next <i class="fas fa-chevron-right"></i></button></div>';
+                $('#paginationContainer').html(html);
+                $('.pagination-btn:not(.disabled)').off('click').on('click', function() { showPage(parseInt($(this).data('page'))); $('html, body').animate({ scrollTop: $('.table').offset().top - 100 }, 300); });
+            }
+        })();
     </script>
 </body>
 </html>

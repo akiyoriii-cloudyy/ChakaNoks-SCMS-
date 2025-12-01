@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base-url" content="<?= base_url() ?>">
     <title>Inventory Management — CHAKANOKS SCMS</title>
     
     <!-- Fonts -->
@@ -187,6 +188,92 @@
             box-shadow: 0 0 0 3px rgba(74, 124, 42, 0.1);
             outline: none;
         }
+
+        /* Pagination Styles */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #f8faf7 0%, #f0f4ed 100%);
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .pagination-info strong {
+            color: #2d5016;
+            font-weight: 600;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(.disabled):not(.active) {
+            background: #f3f4f6;
+            border-color: #4a7c2a;
+            color: #2d5016;
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            border-color: #2d5016;
+            color: white;
+            font-weight: 600;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f3f4f6;
+        }
+
+        .pagination-btn i {
+            font-size: 0.75rem;
+        }
+
+        .pagination-ellipsis {
+            padding: 0 8px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        @media (max-width: 640px) {
+            .pagination-wrapper {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .pagination-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -344,6 +431,9 @@
                             <tbody id="invBody"></tbody>
                         </table>
                     </div>
+                    
+                    <!-- Pagination Controls -->
+                    <div id="paginationContainer"></div>
                     
                     <!-- Summary Cards -->
                     <div style="display: flex; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0; flex-wrap: wrap;">
@@ -735,6 +825,8 @@
         // Use shared category items from categoryItems.js (CHAKANOKS_CATEGORY_ITEMS)
         const categoryItems = typeof CHAKANOKS_CATEGORY_ITEMS !== 'undefined' ? CHAKANOKS_CATEGORY_ITEMS : {};
         const categoryUnits = typeof CHAKANOKS_CATEGORY_UNITS !== 'undefined' ? CHAKANOKS_CATEGORY_UNITS : {};
+        const categoryAllowedUnits = typeof CHAKANOKS_CATEGORY_ALLOWED_UNITS !== 'undefined' ? CHAKANOKS_CATEGORY_ALLOWED_UNITS : {};
+        const itemUnits = typeof CHAKANOKS_ITEM_UNITS !== 'undefined' ? CHAKANOKS_ITEM_UNITS : {};
 
         // Update item options based on selected category
         function updateItemOptions() {
@@ -760,26 +852,92 @@
                 otherOption.textContent = '-- Other (Custom Item) --';
                 itemSelect.appendChild(otherOption);
                 
-                // Set default unit based on category (using shared categoryUnits)
-                if (categoryUnits[selectedCategory]) {
-                    unitSelect.value = categoryUnits[selectedCategory];
-                }
+                // Update unit options based on category
+                updateUnitOptionsForCategory(selectedCategory);
             }
         }
         
-        // Handle item selection to show custom input when "Other" is selected
+        // Update unit options based on category (when category changes)
+        function updateUnitOptionsForCategory(category) {
+            const unitSelect = document.getElementById('addUnit');
+            if (!unitSelect) return;
+            
+            const allowedUnits = categoryAllowedUnits[category] || ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen'];
+            const defaultUnit = categoryUnits[category] || 'pcs';
+            
+            // Clear and repopulate
+            unitSelect.innerHTML = '';
+            
+            allowedUnits.forEach(function(unit) {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                unitSelect.appendChild(option);
+            });
+            
+            // Set default unit for category
+            if (allowedUnits.includes(defaultUnit)) {
+                unitSelect.value = defaultUnit;
+            }
+        }
+        
+        // Update unit options based on selected item (more specific)
+        function updateUnitOptionsForItem(itemName, category) {
+            const unitSelect = document.getElementById('addUnit');
+            if (!unitSelect) return;
+            
+            let allowedUnits;
+            
+            // Check if item has specific units defined
+            if (itemUnits[itemName]) {
+                allowedUnits = itemUnits[itemName];
+            } else if (categoryAllowedUnits[category]) {
+                allowedUnits = categoryAllowedUnits[category];
+            } else {
+                allowedUnits = ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen'];
+            }
+            
+            const currentValue = unitSelect.value;
+            
+            // Clear and repopulate
+            unitSelect.innerHTML = '';
+            
+            allowedUnits.forEach(function(unit) {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                unitSelect.appendChild(option);
+            });
+            
+            // Try to keep current selection if valid, otherwise use first option
+            if (allowedUnits.includes(currentValue)) {
+                unitSelect.value = currentValue;
+            } else {
+                unitSelect.value = allowedUnits[0];
+            }
+        }
+        
+        // Handle item selection to show custom input when "Other" is selected and update units
         document.getElementById('addItemName')?.addEventListener('change', function() {
             const customInput = document.getElementById('addCustomName');
             const useCustomCheckbox = document.getElementById('useCustomName');
+            const categorySelect = document.getElementById('addCategory');
+            const selectedCategory = categorySelect ? categorySelect.value : '';
             
             if (this.value === '__other__') {
                 customInput.style.display = 'block';
                 customInput.required = true;
                 useCustomCheckbox.checked = true;
+                // Reset to category default units for custom items
+                updateUnitOptionsForCategory(selectedCategory);
             } else {
                 customInput.style.display = 'none';
                 customInput.required = false;
                 useCustomCheckbox.checked = false;
+                // Update units based on selected item
+                if (this.value) {
+                    updateUnitOptionsForItem(this.value, selectedCategory);
+                }
             }
         });
         
@@ -805,260 +963,8 @@
             document.getElementById('viewItemModal').style.display = 'none';
         });
 
-        // View Item Modal Action Buttons - Override inventorystaff.js handlers
-        let currentViewProductId = null;
-        
-        // Store product ID when viewing item - override the openViewModal function from inventorystaff.js
-        const viewModal = document.getElementById('viewItemModal');
-        if (viewModal) {
-            // Intercept when modal is shown to store product ID
-            const originalOpenViewModal = window.openViewModal;
-            if (originalOpenViewModal) {
-                window.openViewModal = function(itemId) {
-                    currentViewProductId = itemId;
-                    if (viewModal) {
-                        viewModal.setAttribute('data-current-id', itemId);
-                    }
-                    return originalOpenViewModal(itemId);
-                };
-            }
-            
-            // Also watch for changes to data-current-id attribute
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'data-current-id') {
-                        currentViewProductId = viewModal.getAttribute('data-current-id');
-                    }
-                });
-            });
-            observer.observe(viewModal, { attributes: true, attributeFilter: ['data-current-id'] });
-            
-            // Get initial value if already set
-            if (viewModal.getAttribute('data-current-id')) {
-                currentViewProductId = viewModal.getAttribute('data-current-id');
-            }
-        }
-        
-        // Update Stock button
-        document.getElementById('btnUpdateStock')?.addEventListener('click', function() {
-            const container = document.getElementById('updateStockContainer');
-            if (container.style.display === 'none' || !container.style.display) {
-                container.style.display = 'flex';
-                const stockText = document.getElementById('viewStock').textContent;
-                const currentStock = parseInt(stockText.split(' ')[0]) || 0;
-                document.getElementById('updateStockInput').value = currentStock;
-            } else {
-                container.style.display = 'none';
-            }
-        });
-
-        // Save Stock button
-        document.getElementById('saveStockBtn')?.addEventListener('click', function() {
-            const newQty = parseInt(document.getElementById('updateStockInput').value);
-            if (isNaN(newQty) || newQty < 0) {
-                alert('Please enter a valid stock quantity');
-                return;
-            }
-            
-            const productId = currentViewProductId || (viewModal ? viewModal.getAttribute('data-current-id') : null);
-            if (!productId) {
-                alert('Product ID not found');
-                return;
-            }
-
-            $.ajax({
-                url: '<?= base_url('staff/updateStock/') ?>' + productId,
-                method: 'POST',
-                data: { stock_qty: newQty },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Stock updated successfully!');
-                        document.getElementById('viewItemModal').hidden = true;
-                        document.getElementById('viewItemModal').style.display = 'none';
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to update stock'));
-                    }
-                },
-                error: function(xhr) {
-                    const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error updating stock';
-                    alert('Error: ' + errorMsg);
-                }
-            });
-        });
-
-        // Cancel Stock Update button
-        document.getElementById('cancelStockBtn')?.addEventListener('click', function() {
-            document.getElementById('updateStockContainer').style.display = 'none';
-        });
-
-        // Receive Delivery button - override inventorystaff.js handler
-        setTimeout(function() {
-            const btnReceiveDelivery = document.getElementById('btnReceiveDelivery');
-            const viewModal = document.getElementById('viewItemModal');
-            
-            if (btnReceiveDelivery && viewModal) {
-                // Clone button to remove existing listeners
-                const newBtn = btnReceiveDelivery.cloneNode(true);
-                btnReceiveDelivery.parentNode.replaceChild(newBtn, btnReceiveDelivery);
-                
-                newBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    if (!viewModal.getAttribute('data-current-id')) {
-                        alert('Please select a product first');
-                        return;
-                    }
-                    
-                    const productId = viewModal.getAttribute('data-current-id');
-                    const stockText = document.getElementById('viewStock').textContent;
-                    const currentStock = parseInt(stockText.split(' ')[0]) || 0;
-                    
-                    // Prompt for quantity
-                    const qty = prompt('Enter quantity received (Current stock: ' + currentStock + '):');
-                    const n = parseInt(qty);
-                    if (!qty || isNaN(n) || n <= 0) {
-                        return;
-                    }
-                    
-                    $.ajax({
-                        url: '<?= base_url('staff/receiveDelivery/') ?>' + productId,
-                        method: 'POST',
-                        data: { quantity: n },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                alert('Delivery received successfully! Stock updated.');
-                                viewModal.hidden = true;
-                                viewModal.style.display = 'none';
-                                location.reload();
-                            } else {
-                                alert('Error: ' + (response.error || 'Failed to receive delivery'));
-                            }
-                        },
-                        error: function(xhr) {
-                            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error receiving delivery';
-                            alert('Error: ' + errorMsg);
-                        }
-                    });
-                });
-            }
-        }, 1000);
-
-        // Report Damaged button - override inventorystaff.js handler
-        setTimeout(function() {
-            const btnReportDamaged = document.getElementById('btnReportDamaged');
-            const viewModal = document.getElementById('viewItemModal');
-            
-            if (btnReportDamaged && viewModal) {
-                // Clone button to remove existing listeners
-                const newBtn = btnReportDamaged.cloneNode(true);
-                btnReportDamaged.parentNode.replaceChild(newBtn, btnReportDamaged);
-                
-                newBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    if (!viewModal.getAttribute('data-current-id')) {
-                        alert('Please select a product first');
-                        return;
-                    }
-                    
-                    const productId = viewModal.getAttribute('data-current-id');
-                    const stockText = document.getElementById('viewStock').textContent;
-                    const currentStock = parseInt(stockText.split(' ')[0]) || 0;
-                    
-                    // Prompt for quantity
-                    const qty = prompt('Enter damaged/expired quantity (Available: ' + currentStock + '):');
-                    const n = parseInt(qty);
-                    if (!qty || isNaN(n) || n <= 0) {
-                        return;
-                    }
-                    if (n > currentStock) {
-                        alert('Quantity cannot exceed available stock');
-                        return;
-                    }
-                    
-                    // Prompt for reason
-                    const reason = prompt('Enter reason (Damaged/Expired/Other):') || 'Damaged/Expired';
-                    
-                    $.ajax({
-                        url: '<?= base_url('staff/reportDamage/') ?>' + productId,
-                        method: 'POST',
-                        data: {
-                            quantity: n,
-                            reason: reason
-                        },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                alert('Damaged/expired goods reported successfully!');
-                                viewModal.hidden = true;
-                                viewModal.style.display = 'none';
-                                location.reload();
-                            } else {
-                                alert('Error: ' + (response.error || 'Failed to report damaged goods'));
-                            }
-                        },
-                        error: function(xhr) {
-                            const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error reporting damaged goods';
-                            alert('Error: ' + errorMsg);
-                        }
-                    });
-                });
-            }
-        }, 1000);
-
-        // Track Inventory button
-        document.getElementById('btnTrackInventory')?.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            alert('Inventory tracking feature coming soon!');
-        });
-
-        // Check Expiry button
-        document.getElementById('btnCheckExpiry')?.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const productId = currentViewProductId || (viewModal ? viewModal.getAttribute('data-current-id') : null);
-            if (!productId) {
-                alert('Product ID not found');
-                return;
-            }
-            
-            $.ajax({
-                url: '<?= base_url('staff/checkExpiry/') ?>' + productId,
-                method: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        let message = 'Expiry Status: ' + response.state;
-                        if (response.days !== null) {
-                            if (response.days < 0) {
-                                message += '\nExpired ' + Math.abs(response.days) + ' days ago';
-                            } else if (response.days === 0) {
-                                message += '\nExpires today!';
-                            } else {
-                                message += '\nExpires in ' + response.days + ' days';
-                            }
-                        }
-                        if (response.expiry) {
-                            message += '\nExpiry Date: ' + response.expiry;
-                        }
-                        alert(message);
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to check expiry'));
-                    }
-                },
-                error: function(xhr) {
-                    const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error checking expiry';
-                    alert('Error: ' + errorMsg);
-                }
-            });
-        });
+        // Stock action handlers are now in inventorystaff.js
+        // The base URL is passed via meta tag for the JS to use
 
         // Print All Reports
         document.getElementById('btnPrintAll')?.addEventListener('click', function() {
