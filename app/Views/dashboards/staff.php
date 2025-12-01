@@ -605,17 +605,6 @@
                         <div style="padding: 20px;">
                             <form id="damagedForm">
                                 <div class="mb-3">
-                                    <label for="damagedProduct" class="form-label">Select Product</label>
-                                    <select class="form-control" id="damagedProduct" required>
-                                        <option value="">Select a product...</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="damagedQuantity" class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" id="damagedQuantity" min="1" required>
-                                    <small class="form-text text-muted">Available stock: <span id="damagedAvailable">0</span></small>
-                                </div>
-                                <div class="mb-3">
                                     <label for="damagedReason" class="form-label">Reason</label>
                                     <select class="form-control" id="damagedReason" required>
                                         <option value="">Select reason...</option>
@@ -628,6 +617,17 @@
                                 <div class="mb-3" id="damagedOtherReasonDiv" style="display: none;">
                                     <label for="damagedOtherReason" class="form-label">Specify Reason</label>
                                     <input type="text" class="form-control" id="damagedOtherReason" placeholder="Enter reason...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="damagedProduct" class="form-label">Select Product</label>
+                                    <select class="form-control" id="damagedProduct" required>
+                                        <option value="">Select a product...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="damagedQuantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="damagedQuantity" min="1" required>
+                                    <small class="form-text text-muted">Available stock: <span id="damagedAvailable">0</span></small>
                                 </div>
                                 <div class="mb-3">
                                     <label for="damagedNotes" class="form-label">Notes (Optional)</label>
@@ -1169,7 +1169,9 @@
                         response.products.forEach(function(product) {
                             const option = document.createElement('option');
                             option.value = product.id;
-                            option.textContent = product.name + ' (Stock: ' + product.stock_qty + ' ' + (product.unit || '') + ')';
+                            // Remove units from product name (e.g., "(1.5L)", "(500ml)", etc.)
+                            const cleanName = product.name.replace(/\s*\([^)]*\)\s*/g, '').trim();
+                            option.textContent = cleanName + ' (Stock: ' + product.stock_qty + ')';
                             option.setAttribute('data-stock', product.stock_qty);
                             productSelect.appendChild(option);
                         });
