@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2025 at 10:07 AM
+-- Generation Time: Nov 28, 2025 at 08:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,11 +53,9 @@ CREATE TABLE `accounts_payable` (
 --
 
 INSERT INTO `accounts_payable` (`id`, `purchase_order_id`, `supplier_id`, `branch_id`, `invoice_number`, `invoice_date`, `due_date`, `amount`, `paid_amount`, `balance`, `payment_status`, `payment_date`, `payment_method`, `payment_reference`, `notes`, `created_by`, `created_at`, `updated_at`) VALUES
-(18, 24, 19, 2, 'INV-20251127-52319', '2025-11-27', '2025-12-12', 31500.00, 31500.00, 0.00, 'paid', '2025-11-27', 'Checkque', '3695865', 'Auto-created from approved purchase order: PO-20251127-6130', 2, '2025-11-27 03:03:39', '2025-11-27 03:04:58'),
-(19, 23, 11, 6, 'INV-20251127-80151', '2025-11-27', '2025-12-12', 20000.00, 20000.00, 0.00, 'paid', '2025-11-27', 'Cash', '5848695', 'Auto-created from approved purchase order: PO-20251127-9836', 2, '2025-11-27 03:03:45', '2025-11-27 03:04:39'),
-(20, 25, 1, 5, 'INV-20251127-53580', '2025-11-27', '2025-12-27', 35000.00, 35000.00, 0.00, 'paid', '2025-11-27', 'Cash', '5847596', 'Auto-created from approved purchase order: PO-20251127-7090', 2, '2025-11-27 03:09:35', '2025-11-27 03:10:11'),
-(21, 26, 10, 2, 'INV-20251127-84705', '2025-11-27', '2025-12-27', 45000.00, 45000.00, 0.00, 'paid', '2025-11-27', 'Cash', '1213512', 'Auto-created from approved purchase order: PO-20251127-1796', 2, '2025-11-27 13:28:41', '2025-11-27 13:30:07'),
-(22, 27, 1, 3, 'INV-20251127-20527', '2025-11-27', '2025-12-27', 1650.00, 1650.00, 0.00, 'paid', '2025-11-27', 'Bank Transfer', '2363820', 'Auto-created from approved purchase order: PO-20251127-1506', 2, '2025-11-27 16:06:50', '2025-11-27 16:08:35');
+(28, 33, 42, 4, 'INV-20251129-59705', '2025-11-29', '2025-12-29', 18000.00, 18000.00, 0.00, 'paid', '2025-11-29', 'Cash', '8928391', 'Auto-created from approved purchase order: PO-20251129-5677', 2, '2025-11-29 02:57:28', '2025-11-29 02:57:59'),
+(29, 35, 63, 6, 'INV-20251129-13002', '2025-11-29', '2025-12-29', 9000.00, 9000.00, 0.00, 'paid', '2025-11-29', 'Bank Transfer', '7823182', 'Auto-created from approved purchase order: PO-20251129-7054', 2, '2025-11-29 03:05:39', '2025-11-29 03:06:09'),
+(30, 34, 11, 5, 'INV-20251129-94056', '2025-11-29', '2025-12-14', 24000.00, 24000.00, 0.00, 'paid', '2025-11-29', 'Checkque', '8923712', 'Auto-created from approved purchase order: PO-20251129-6834', 2, '2025-11-29 03:05:41', '2025-11-29 03:05:52');
 
 -- --------------------------------------------------------
 
@@ -108,25 +106,25 @@ CREATE TABLE `categories` (
 
 INSERT INTO `categories` (`id`, `name`, `description`, `created_by`, `status`, `created_at`, `updated_at`) VALUES
 (2, 'Chicken Parts', 'Chicken parts and products including whole chicken, breast, thigh, wings, drumstick, liver, gizzard, and other parts', 12, 'active', '2025-11-25 15:45:57', '2025-11-27 08:10:55'),
-(3, 'Beverages', 'Soft drinks, juices, water, coffee, tea, and other drinks for customers and staff', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(4, 'Condiments & Sauces', 'Ketchup, mayonnaise, gravy, hot sauce, soy sauce, BBQ sauce, and other dipping sauces', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(5, 'Cooking Oils', 'Vegetable oil, palm oil, coconut oil, shortening, and other cooking fats for frying chicken', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(6, 'Seasonings & Spices', 'Salt, pepper, garlic powder, paprika, chicken seasoning, MSG, and other flavor enhancers', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(7, 'Rice & Grains', 'White rice, brown rice, java rice, garlic rice, and other grain products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(8, 'Vegetables & Produce', 'Fresh vegetables including cabbage, carrots, onions, garlic, potatoes, lettuce, and coleslaw ingredients', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(9, 'Bread & Bakery', 'Burger buns, sandwich bread, pandesal, tortilla wraps, and other bread products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(10, 'Dairy Products', 'Butter, cheese, milk, cream, and other dairy items for cooking and beverages', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(11, 'Frozen Goods', 'Frozen fries, frozen vegetables, ice cream, and other frozen products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(12, 'Packaging & Supplies', 'Takeout boxes, paper bags, plastic containers, utensils, cups, straws, and other packaging materials', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(13, 'Cleaning & Sanitation', 'Dish soap, sanitizers, cleaning supplies, garbage bags, gloves, and sanitation products', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(14, 'Eggs', 'Fresh eggs in trays and dozens for cooking, breading, and breakfast items', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(15, 'Flour & Breading', 'All-purpose flour, breading mix, cornstarch, batter mix, and panko for chicken coating', NULL, 'active', '2025-11-27 14:54:23', '2025-11-27 08:10:55'),
-(16, 'Marinades & Brines', 'Chicken marinades, BBQ marinades, buttermilk brine, and flavor enhancers for chicken preparation', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
-(17, 'Side Dishes', 'Pre-made coleslaw, mashed potato mix, gravy, mac and cheese, and other ready-to-serve sides', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
-(18, 'Desserts & Sweets', 'Chocolate syrup, caramel, sundae toppings, brownie mix, and other dessert items', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
-(19, 'Paper Products', 'Napkins, paper towels, tissue paper, parchment paper, and other paper supplies', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
-(20, 'Kitchen Equipment', 'Tongs, spatulas, thermometers, cutting boards, knives, and other kitchen tools', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55'),
-(21, 'Uniforms & Apparel', 'Chef hats, hair nets, aprons, kitchen gloves, face masks, and staff uniforms', NULL, 'active', '2025-11-27 08:01:29', '2025-11-27 08:10:55');
+(3, 'Beverages', 'Soft drinks, juices, water, coffee, tea, and other drinks for customers and staff', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(4, 'Condiments & Sauces', 'Ketchup, mayonnaise, gravy, hot sauce, soy sauce, BBQ sauce, and other dipping sauces', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(5, 'Cooking Oils', 'Vegetable oil, palm oil, coconut oil, shortening, and other cooking fats for frying chicken', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(6, 'Seasonings & Spices', 'Salt, pepper, garlic powder, paprika, chicken seasoning, MSG, and other flavor enhancers', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(7, 'Rice & Grains', 'White rice, brown rice, java rice, garlic rice, and other grain products', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(8, 'Vegetables & Produce', 'Fresh vegetables including cabbage, carrots, onions, garlic, potatoes, lettuce, and coleslaw ingredients', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(9, 'Bread & Bakery', 'Burger buns, sandwich bread, pandesal, tortilla wraps, and other bread products', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(10, 'Dairy Products', 'Butter, cheese, milk, cream, and other dairy items for cooking and beverages', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(11, 'Frozen Goods', 'Frozen fries, frozen vegetables, ice cream, and other frozen products', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(12, 'Packaging & Supplies', 'Takeout boxes, paper bags, plastic containers, utensils, cups, straws, and other packaging materials', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(13, 'Cleaning & Sanitation', 'Dish soap, sanitizers, cleaning supplies, garbage bags, gloves, and sanitation products', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(14, 'Eggs', 'Fresh eggs in trays and dozens for cooking, breading, and breakfast items', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(15, 'Flour & Breading', 'All-purpose flour, breading mix, cornstarch, batter mix, and panko for chicken coating', 12, 'active', '2025-11-27 14:54:23', '2025-11-29 02:21:08'),
+(16, 'Marinades & Brines', 'Chicken marinades, BBQ marinades, buttermilk brine, and flavor enhancers for chicken preparation', 12, 'active', '2025-11-27 08:01:29', '2025-11-29 02:21:08'),
+(17, 'Side Dishes', 'Pre-made coleslaw, mashed potato mix, gravy, mac and cheese, and other ready-to-serve sides', 12, 'active', '2025-11-27 08:01:29', '2025-11-29 02:21:08'),
+(18, 'Desserts & Sweets', 'Chocolate syrup, caramel, sundae toppings, brownie mix, and other dessert items', 12, 'active', '2025-11-27 08:01:29', '2025-11-29 02:21:08'),
+(19, 'Paper Products', 'Napkins, paper towels, tissue paper, parchment paper, and other paper supplies', 12, 'active', '2025-11-27 08:01:29', '2025-11-29 02:21:08'),
+(20, 'Kitchen Equipment', 'Tongs, spatulas, thermometers, cutting boards, knives, and other kitchen tools', 12, 'active', '2025-11-27 08:01:29', '2025-11-29 02:21:08'),
+(21, 'Uniforms & Apparel', 'Chef hats, hair nets, aprons, kitchen gloves, face masks, and staff uniforms', 12, 'active', '2025-11-27 08:01:29', '2025-11-29 02:21:08');
 
 -- --------------------------------------------------------
 
@@ -140,6 +138,7 @@ CREATE TABLE `deliveries` (
   `purchase_order_id` int(10) UNSIGNED NOT NULL,
   `supplier_id` int(10) UNSIGNED NOT NULL,
   `branch_id` int(10) UNSIGNED NOT NULL,
+  `scheduled_by` int(10) UNSIGNED DEFAULT NULL,
   `status` enum('scheduled','in_transit','delivered','partial_delivery','cancelled','delayed') NOT NULL DEFAULT 'scheduled',
   `scheduled_date` date NOT NULL,
   `actual_delivery_date` date DEFAULT NULL,
@@ -156,10 +155,10 @@ CREATE TABLE `deliveries` (
 -- Dumping data for table `deliveries`
 --
 
-INSERT INTO `deliveries` (`id`, `delivery_number`, `purchase_order_id`, `supplier_id`, `branch_id`, `status`, `scheduled_date`, `actual_delivery_date`, `driver_name`, `vehicle_info`, `received_by`, `received_at`, `notes`, `created_at`, `updated_at`) VALUES
-(24, 'DEL-20251127-0686', 25, 1, 5, 'delivered', '2025-11-29', '2025-11-27', 'Markypadilla', 'L300 LO23912', 15, '2025-11-27 03:16:16', 'Auto-created from Purchase Order', '2025-11-27 03:09:25', '2025-11-27 03:16:16'),
-(25, 'DEL-20251127-2366', 26, 1, 2, 'delivered', '2025-11-27', '2025-11-27', 'BossAtan', 'Fishcar LO12392', 12, '2025-11-27 13:31:24', 'Auto-created from Purchase Order', '2025-11-27 13:27:41', '2025-11-27 13:31:24'),
-(26, 'DEL-20251127-7832', 27, 1, 3, 'scheduled', '2025-11-27', NULL, 'Markypadilla', 'L300 AB8930', NULL, NULL, 'Auto-created from Purchase Order', '2025-11-27 16:03:12', '2025-11-27 16:03:12');
+INSERT INTO `deliveries` (`id`, `delivery_number`, `purchase_order_id`, `supplier_id`, `branch_id`, `scheduled_by`, `status`, `scheduled_date`, `actual_delivery_date`, `driver_name`, `vehicle_info`, `received_by`, `received_at`, `notes`, `created_at`, `updated_at`) VALUES
+(30, 'DEL-20251129-3229', 33, 42, 4, 2, 'scheduled', '2025-12-06', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
+(31, 'DEL-20251129-4785', 34, 11, 5, NULL, 'scheduled', '2025-12-06', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
+(32, 'DEL-20251129-7561', 35, 63, 6, 2, 'in_transit', '2025-11-30', NULL, 'BossKakak', 'L300 AB3123', NULL, NULL, 'Auto-created from Purchase Order #35', '2025-11-29 03:04:18', '2025-11-29 03:06:49');
 
 -- --------------------------------------------------------
 
@@ -184,9 +183,9 @@ CREATE TABLE `delivery_items` (
 --
 
 INSERT INTO `delivery_items` (`id`, `delivery_id`, `product_id`, `expected_quantity`, `received_quantity`, `condition_status`, `notes`, `created_at`, `updated_at`) VALUES
-(24, 24, 69, 350, 260, 'damaged', '', '2025-11-27 03:09:25', '2025-11-27 03:16:16'),
-(25, 25, 64, 250, 200, 'damaged', '', '2025-11-27 13:27:41', '2025-11-27 13:31:24'),
-(26, 26, 112, 1, 0, 'good', NULL, '2025-11-27 16:03:12', '2025-11-27 16:03:12');
+(30, 30, 298, 150, 0, 'good', NULL, '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
+(31, 31, 113, 200, 0, 'good', NULL, '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
+(32, 32, 222, 50, 0, 'good', NULL, '2025-11-29 03:04:18', '2025-11-29 03:04:18');
 
 -- --------------------------------------------------------
 
@@ -230,7 +229,8 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (19, '2025-11-21-000001', 'App\\Database\\Migrations\\AddBranchIdToProducts', 'default', 'App', 1763819705, 1),
 (20, '2025-11-22-000001', 'App\\Database\\Migrations\\NormalizeProductsTable', 'default', 'App', 1763996526, 2),
 (21, '2025-11-25-000001', 'App\\Database\\Migrations\\AddSelectedSupplierToPurchaseRequests', 'default', 'App', 1764001871, 3),
-(22, '2025-11-25-000002', 'App\\Database\\Migrations\\CreateAccountsPayableTable', 'default', 'App', 1764003252, 4);
+(22, '2025-11-25-000002', 'App\\Database\\Migrations\\CreateAccountsPayableTable', 'default', 'App', 1764003252, 4),
+(23, '2025-11-29-000001', 'App\\Database\\Migrations\\AddScheduledByToDeliveries', 'default', 'App', 1764356547, 5);
 
 -- --------------------------------------------------------
 
@@ -294,8 +294,8 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (83, 5, 12, 2, 'Chicken Wing Flat', 170.00, 200, 'kg', 40, 450, '2026-02-18', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (84, 6, 12, 2, 'Chicken Wing Drumlette', 175.00, 220, 'kg', 50, 500, '2026-02-17', 'active', '2025-11-25 15:45:57', '2025-11-25 15:45:57'),
 (85, 3, 13, 2, 'Chicken Kidney', 135.00, 200, 'kg', 200, 200, '2025-12-29', 'active', '2025-11-27 00:35:53', '2025-11-27 00:35:53'),
-(86, 2, NULL, 2, 'Chicken Tail', 105.00, 220, 'kg', 30, 350, '2026-02-20', 'active', '2025-11-27 03:06:44', '2025-11-27 03:06:44'),
-(87, 6, NULL, 2, 'Chicken Head', 80.00, 250, 'kg', 30, 400, '2026-02-22', 'active', '2025-11-27 03:10:43', '2025-11-27 03:10:43'),
+(86, 2, 12, 2, 'Chicken Tail', 105.00, 220, 'kg', 30, 350, '2026-02-20', 'active', '2025-11-27 03:06:44', '2025-11-29 02:46:56'),
+(87, 6, 12, 2, 'Chicken Head', 80.00, 250, 'kg', 30, 400, '2026-02-22', 'active', '2025-11-27 03:10:43', '2025-11-29 02:46:56'),
 (88, 2, 12, 2, 'Chicken Wings', 180.00, 350, 'kg', 100, 800, '2026-02-18', 'active', '2025-11-27 13:31:24', '2025-11-27 13:32:22'),
 (89, 5, 12, 2, 'Whole Chicken', 250.00, 500, 'kg', 100, 1000, '2026-03-12', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (90, 4, 12, 2, 'Chicken Breast', 280.00, 600, 'kg', 100, 1000, '2026-02-28', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
@@ -304,7 +304,7 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (93, 3, 12, 2, 'Chicken Liver', 120.00, 300, 'kg', 50, 600, '2026-02-22', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (94, 5, 12, 2, 'Chicken Gizzard', 130.00, 280, 'kg', 50, 600, '2026-02-23', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (95, 1, 12, 2, 'Ground Chicken', 240.00, 150, 'kg', 30, 400, '2026-02-15', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
-(96, 5, 12, 3, 'Coca-Cola (1.5L)', 65.00, 200, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(96, 2, 12, 3, 'Coca-Cola (1.5L)', 65.00, 225, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-29 02:50:48'),
 (97, 4, 12, 3, 'Sprite (1.5L)', 65.00, 180, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (98, 1, 12, 3, 'Royal (1.5L)', 65.00, 150, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (99, 6, 12, 3, 'Bottled Water (500ml)', 15.00, 500, 'bottles', 100, 1000, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
@@ -376,7 +376,7 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (165, 1, 12, 15, 'Breading Mix', 120.00, 80, 'packs', 30, 250, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (166, 6, 12, 15, 'Cornstarch', 45.00, 40, 'packs', 15, 120, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (167, 2, 12, 15, 'Panko Breadcrumbs', 150.00, 30, 'packs', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
-(168, 5, 12, 16, 'Chicken Marinade', 180.00, 40, 'bottles', 15, 120, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(168, 6, 12, 16, 'Chicken Marinade', 180.00, 140, 'bottles', 15, 120, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-29 02:51:06'),
 (169, 4, 12, 16, 'BBQ Marinade', 195.00, 30, 'bottles', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (170, 1, 12, 16, 'Buttermilk Brine', 220.00, 25, 'bottles', 10, 80, '2026-02-25', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (171, 6, 12, 16, 'Soy Garlic Marinade', 165.00, 35, 'bottles', 15, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
@@ -401,7 +401,166 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (190, 4, 12, 21, 'Hair Net', 5.00, 200, 'pcs', 50, 500, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (191, 1, 12, 21, 'Apron', 180.00, 40, 'pcs', 15, 100, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (192, 6, 12, 21, 'Kitchen Gloves', 95.00, 50, 'pcs', 20, 150, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
-(193, 2, 12, 21, 'Face Mask', 150.00, 100, 'boxes', 30, 300, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09');
+(193, 2, 12, 21, 'Face Mask', 150.00, 100, 'boxes', 30, 300, NULL, 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(194, 5, 12, 2, 'Chicken Cutlet', 260.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(195, 5, 12, 3, 'Coca-Cola (330ml can)', 25.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(196, 5, 12, 3, 'Sprite (330ml can)', 25.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(197, 5, 12, 3, 'Royal (330ml can)', 25.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(198, 5, 12, 3, 'Pepsi (1.5L)', 65.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(199, 5, 12, 3, 'Mountain Dew (1.5L)', 65.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(200, 5, 12, 3, 'Bottled Water (1L)', 25.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(201, 5, 12, 3, 'Mineral Water (6L)', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(202, 5, 12, 3, 'Pineapple Juice', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(203, 5, 12, 3, 'Mango Juice', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(204, 5, 12, 3, 'Hot Chocolate Mix', 120.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(205, 5, 12, 3, 'Lemonade Mix', 95.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(206, 5, 12, 3, 'Fruit Punch', 90.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(207, 5, 12, 3, 'Energy Drink', 45.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(208, 5, 12, 3, 'Yakult', 12.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(209, 5, 12, 3, 'Fresh Milk (1L)', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(210, 5, 12, 3, 'Chocolate Milk', 100.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(211, 5, 12, 4, 'Ketchup (Sachet)', 2.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(212, 5, 12, 4, 'Mayonnaise (Sachet)', 3.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(213, 5, 12, 4, 'Soy Sauce (Sachet)', 1.50, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(214, 5, 12, 4, 'Vinegar (Gallon)', 150.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(215, 5, 12, 4, 'Brown Gravy', 50.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(216, 5, 12, 4, 'White Gravy', 50.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(217, 5, 12, 4, 'Honey Mustard', 200.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(218, 5, 12, 4, 'Ranch Dressing', 220.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(219, 5, 12, 4, 'Thousand Island', 210.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(220, 5, 12, 4, 'Caesar Dressing', 230.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(221, 5, 12, 4, 'Garlic Sauce', 160.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(222, 5, 12, 4, 'Cheese Sauce', 180.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(223, 5, 12, 4, 'Tartar Sauce', 170.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(224, 5, 12, 4, 'Buffalo Sauce', 175.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(225, 5, 12, 4, 'Teriyaki Sauce', 180.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(226, 5, 12, 5, 'Palm Oil (5L)', 420.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(227, 5, 12, 5, 'Canola Oil (5L)', 500.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(228, 5, 12, 5, 'Corn Oil (5L)', 480.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(229, 5, 12, 5, 'Coconut Oil (5L)', 550.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(230, 5, 12, 5, 'Olive Oil (1L)', 350.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(231, 5, 12, 5, 'Butter (Unsalted)', 185.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(232, 5, 12, 5, 'Margarine', 95.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(233, 5, 12, 6, 'Iodized Salt', 28.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(234, 5, 12, 6, 'Rock Salt', 30.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(235, 5, 12, 6, 'White Pepper', 90.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(236, 5, 12, 6, 'Onion Powder', 90.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(237, 5, 12, 6, 'Cayenne Pepper', 110.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(238, 5, 12, 6, 'Chili Powder', 100.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(239, 5, 12, 6, 'All-Purpose Seasoning', 80.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(240, 5, 12, 6, 'Oregano', 130.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(241, 5, 12, 6, 'Basil', 125.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(242, 5, 12, 6, 'Thyme', 135.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(243, 5, 12, 6, 'Rosemary', 140.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(244, 5, 12, 6, 'Bay Leaves', 115.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(245, 5, 12, 6, 'Cumin', 120.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(246, 5, 12, 6, 'Curry Powder', 110.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(247, 5, 12, 6, 'Five Spice', 145.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(248, 5, 12, 6, 'Lemon Pepper', 105.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(249, 5, 12, 6, 'Italian Seasoning', 125.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(250, 5, 12, 7, 'White Rice (5kg)', 300.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(251, 5, 12, 7, 'Brown Rice (5kg)', 350.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(252, 5, 12, 7, 'Fried Rice Mix', 60.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(253, 5, 12, 7, 'Jasmine Rice (25kg)', 1500.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(254, 5, 12, 7, 'Sticky Rice', 320.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(255, 5, 12, 7, 'Corn Grits', 280.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(256, 5, 12, 8, 'Onions (Red)', 85.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(257, 5, 12, 8, 'Tomatoes', 70.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(258, 5, 12, 8, 'Cucumber', 50.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(259, 5, 12, 8, 'Bell Pepper (Green)', 90.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(260, 5, 12, 8, 'Bell Pepper (Red)', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(261, 5, 12, 8, 'Celery', 85.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(262, 5, 12, 8, 'Spring Onions', 75.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(263, 5, 12, 8, 'Ginger', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(264, 5, 12, 8, 'Lemon', 65.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(265, 5, 12, 8, 'Calamansi', 70.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(266, 5, 12, 8, 'Chili (Siling Labuyo)', 150.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(267, 5, 12, 8, 'Pickles', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(268, 5, 12, 8, 'Corn (Canned)', 45.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(269, 5, 12, 9, 'Hotdog Buns', 14.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(270, 5, 12, 9, 'Dinner Rolls', 12.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(271, 5, 12, 9, 'Pita Bread', 18.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(272, 5, 12, 9, 'Garlic Bread', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(273, 5, 12, 9, 'Breadcrumbs', 85.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(274, 5, 12, 9, 'Croutons', 75.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(275, 5, 12, 10, 'Cheese (Parmesan)', 550.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(276, 5, 12, 10, 'Cream Cheese', 220.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(277, 5, 12, 10, 'Milk (Evaporated)', 45.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(278, 5, 12, 10, 'Milk (Condensed)', 55.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(279, 5, 12, 10, 'Sour Cream', 160.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(280, 5, 12, 10, 'Whipped Cream', 140.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(281, 5, 12, 10, 'Yogurt', 75.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(282, 5, 12, 11, 'Frozen Peas', 125.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(283, 5, 12, 11, 'Frozen Mixed Vegetables', 130.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(284, 5, 12, 11, 'Ice Cream (Chocolate)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(285, 5, 12, 11, 'Ice Cream (Strawberry)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(286, 5, 12, 11, 'Frozen Mozzarella Sticks', 320.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(287, 5, 12, 12, 'Plastic Container (Round)', 15.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(288, 5, 12, 12, 'Plastic Container (Rectangle)', 18.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(289, 5, 12, 12, 'Styrofoam Box', 10.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(290, 5, 12, 12, 'Plastic Fork', 0.50, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(291, 5, 12, 12, 'Plastic Spoon', 0.50, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(292, 5, 12, 12, 'Plastic Knife', 0.50, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(293, 5, 12, 12, 'Cup (8oz)', 3.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(294, 5, 12, 12, 'Cup (16oz)', 5.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(295, 5, 12, 12, 'Cup Lid', 1.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(296, 5, 12, 12, 'Sauce Cup (Small)', 2.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(297, 5, 12, 12, 'Cling Wrap', 180.00, 0, 'rolls', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(298, 5, 12, 12, 'Wax Paper', 120.00, 0, 'rolls', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(299, 5, 12, 13, 'Dish Soap (500ml)', 120.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(300, 5, 12, 13, 'Hand Soap', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(301, 5, 12, 13, 'Floor Cleaner', 200.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(302, 5, 12, 13, 'Glass Cleaner', 150.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(303, 5, 12, 13, 'Disinfectant Spray', 220.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(304, 5, 12, 13, 'Sponge', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(305, 5, 12, 13, 'Steel Wool', 35.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(306, 5, 12, 13, 'Scrub Brush', 45.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(307, 5, 12, 13, 'Mop Head', 120.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(308, 5, 12, 13, 'Trash Bags (Small)', 45.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(309, 5, 12, 13, 'Rubber Gloves', 150.00, 0, 'pairs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(310, 5, 12, 14, 'Eggs (Half Dozen)', 50.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(311, 5, 12, 14, 'Quail Eggs', 180.00, 0, 'tray', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(312, 5, 12, 14, 'Salted Eggs', 120.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(313, 5, 12, 14, 'Century Eggs', 150.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(314, 5, 12, 15, 'Batter Mix', 110.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(315, 5, 12, 15, 'Tempura Flour', 130.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(316, 5, 12, 15, 'Seasoned Flour', 100.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(317, 5, 12, 15, 'Cake Flour', 60.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(318, 5, 12, 15, 'Bread Flour', 65.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(319, 5, 12, 16, 'Teriyaki Marinade', 185.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(320, 5, 12, 16, 'Honey Garlic Marinade', 200.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(321, 5, 12, 16, 'Lemon Herb Marinade', 190.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(322, 5, 12, 16, 'Spicy Marinade', 175.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(323, 5, 12, 16, 'Salt Brine Mix', 85.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(324, 5, 12, 16, 'Pickle Juice', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(325, 5, 12, 17, 'Corn on the Cob', 35.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(326, 5, 12, 17, 'Baked Beans', 55.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(327, 5, 12, 17, 'Potato Salad', 140.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(328, 5, 12, 17, 'Garden Salad Mix', 110.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(329, 5, 12, 18, 'Strawberry Syrup', 185.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(330, 5, 12, 18, 'Sprinkles', 65.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(331, 5, 12, 18, 'Cake Mix', 110.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(332, 5, 12, 18, 'Cookies', 75.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(333, 5, 12, 18, 'Ice Cream Cones', 45.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(334, 5, 12, 18, 'Fruit Cocktail', 55.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(335, 5, 12, 18, 'Leche Flan Mix', 95.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(336, 5, 12, 19, 'Toilet Paper', 75.00, 0, 'rolls', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(337, 5, 12, 19, 'Paper Plates', 35.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(338, 5, 12, 19, 'Paper Cups', 25.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(339, 5, 12, 19, 'Wax Paper Sheets', 120.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(340, 5, 12, 20, 'Ladle', 100.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(341, 5, 12, 20, 'Measuring Cups', 180.00, 0, 'set', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(342, 5, 12, 20, 'Measuring Spoons', 95.00, 0, 'set', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(343, 5, 12, 20, 'Timer', 250.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(344, 5, 12, 20, 'Chef Knife', 450.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(345, 5, 12, 20, 'Peeler', 85.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(346, 5, 12, 20, 'Can Opener', 120.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(347, 5, 12, 20, 'Whisk', 95.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(348, 5, 12, 20, 'Mixing Bowl', 150.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(349, 5, 12, 20, 'Colander', 200.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(350, 5, 12, 21, 'Safety Shoes', 850.00, 0, 'pairs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(351, 5, 12, 21, 'Polo Shirt (Staff)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(352, 5, 12, 21, 'Name Tag', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30');
 
 -- --------------------------------------------------------
 
@@ -432,11 +591,9 @@ CREATE TABLE `purchase_orders` (
 --
 
 INSERT INTO `purchase_orders` (`id`, `order_number`, `purchase_request_id`, `supplier_id`, `branch_id`, `status`, `order_date`, `expected_delivery_date`, `actual_delivery_date`, `total_amount`, `approved_by`, `approved_at`, `notes`, `created_at`, `updated_at`) VALUES
-(23, 'PO-20251127-9836', 25, 11, 6, 'delivered', '2025-11-27', '2025-12-04', NULL, 20000.00, 2, '2025-11-27 03:03:45', 'Auto-created from approved purchase request', '2025-11-27 03:01:47', '2025-11-27 03:10:43'),
-(24, 'PO-20251127-6130', 26, 19, 2, 'partial', '2025-11-27', '2025-12-04', NULL, 31500.00, 2, '2025-11-27 03:03:39', 'Auto-created from approved purchase request', '2025-11-27 03:02:11', '2025-11-27 03:06:44'),
-(25, 'PO-20251127-7090', 27, 1, 5, 'partial', '2025-11-27', '2025-12-04', NULL, 35000.00, 2, '2025-11-27 03:09:35', 'Auto-created from approved purchase request', '2025-11-27 03:09:25', '2025-11-27 03:16:16'),
-(26, 'PO-20251127-1796', 28, 10, 2, 'partial', '2025-11-27', '2025-12-04', NULL, 45000.00, 2, '2025-11-27 13:28:41', 'Auto-created from approved purchase request', '2025-11-27 13:27:41', '2025-11-27 13:31:24'),
-(27, 'PO-20251127-1506', 29, 1, 3, 'approved', '2025-11-27', '2025-12-04', NULL, 1650.00, 2, '2025-11-27 16:06:50', 'Auto-created from approved purchase request', '2025-11-27 16:03:12', '2025-11-27 16:06:50');
+(33, 'PO-20251129-5677', 38, 42, 4, 'approved', '2025-11-29', '2025-12-06', NULL, 18000.00, 2, '2025-11-29 02:57:28', 'Auto-created from approved purchase request', '2025-11-29 02:57:16', '2025-11-29 02:57:28'),
+(34, 'PO-20251129-6834', 39, 11, 5, 'approved', '2025-11-29', '2025-12-06', NULL, 24000.00, 2, '2025-11-29 03:05:41', 'Auto-created from approved purchase request', '2025-11-29 02:59:07', '2025-11-29 03:05:41'),
+(35, 'PO-20251129-7054', 40, 63, 6, 'approved', '2025-11-29', '2025-12-06', NULL, 9000.00, 2, '2025-11-29 03:05:39', 'Auto-created from approved purchase request', '2025-11-29 03:04:18', '2025-11-29 03:05:39');
 
 -- --------------------------------------------------------
 
@@ -461,11 +618,9 @@ CREATE TABLE `purchase_order_items` (
 --
 
 INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
-(22, 23, 68, 250, 80.00, 20000.00, 250, '2025-11-27 03:01:47', '2025-11-27 03:01:47'),
-(23, 24, 78, 300, 105.00, 31500.00, 220, '2025-11-27 03:02:11', '2025-11-27 03:02:11'),
-(24, 25, 69, 350, 100.00, 35000.00, 260, '2025-11-27 03:09:25', '2025-11-27 03:09:25'),
-(25, 26, 64, 250, 180.00, 45000.00, 200, '2025-11-27 13:27:41', '2025-11-27 13:27:41'),
-(26, 27, 112, 1, 1650.00, 1650.00, 0, '2025-11-27 16:03:12', '2025-11-27 16:03:12');
+(32, 33, 298, 150, 120.00, 18000.00, 0, '2025-11-29 02:57:16', '2025-11-29 02:57:16'),
+(33, 34, 113, 200, 120.00, 24000.00, 0, '2025-11-29 02:59:07', '2025-11-29 02:59:07'),
+(34, 35, 222, 50, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18');
 
 -- --------------------------------------------------------
 
@@ -495,11 +650,9 @@ CREATE TABLE `purchase_requests` (
 --
 
 INSERT INTO `purchase_requests` (`id`, `request_number`, `branch_id`, `requested_by`, `status`, `priority`, `total_amount`, `notes`, `approved_by`, `approved_at`, `selected_supplier_id`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(25, 'PR-20251127-3794', 6, 16, 'converted_to_po', 'normal', 20000.00, '', 2, '2025-11-27 03:01:47', 11, NULL, '2025-11-27 01:25:56', '2025-11-27 03:01:47'),
-(26, 'PR-20251127-3041', 2, 4, 'converted_to_po', 'urgent', 31500.00, '', 2, '2025-11-27 03:02:11', 19, NULL, '2025-11-27 03:01:06', '2025-11-27 03:02:11'),
-(27, 'PR-20251127-9837', 5, 7, 'converted_to_po', 'normal', 35000.00, '', 2, '2025-11-27 03:09:25', NULL, NULL, '2025-11-27 03:08:56', '2025-11-27 03:09:25'),
-(28, 'PR-20251127-6346', 2, 4, 'converted_to_po', 'urgent', 45000.00, '', 2, '2025-11-27 13:27:41', 1, NULL, '2025-11-27 13:26:15', '2025-11-27 13:27:41'),
-(29, 'PR-20251127-9452', 3, 7, 'converted_to_po', 'high', 1650.00, '', 2, '2025-11-27 16:03:12', NULL, NULL, '2025-11-27 16:01:49', '2025-11-27 16:03:12');
+(38, 'PR-20251129-5115', 4, 4, 'converted_to_po', 'urgent', 18000.00, '', 2, '2025-11-29 02:57:16', 42, NULL, '2025-11-29 02:55:52', '2025-11-29 02:57:16'),
+(39, 'PR-20251129-4567', 5, 7, 'converted_to_po', 'low', 24000.00, '', 2, '2025-11-29 02:59:07', 11, NULL, '2025-11-29 02:56:18', '2025-11-29 02:59:07'),
+(40, 'PR-20251129-1540', 6, 8, 'converted_to_po', 'normal', 9000.00, '', 2, '2025-11-29 03:04:18', 63, NULL, '2025-11-29 02:56:41', '2025-11-29 03:04:18');
 
 -- --------------------------------------------------------
 
@@ -524,11 +677,9 @@ CREATE TABLE `purchase_request_items` (
 --
 
 INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `notes`, `created_at`, `updated_at`) VALUES
-(25, 25, 68, 250, 80.00, 20000.00, '', '2025-11-27 01:25:56', '2025-11-27 01:25:56'),
-(26, 26, 78, 300, 105.00, 31500.00, '', '2025-11-27 03:01:06', '2025-11-27 03:01:06'),
-(27, 27, 69, 350, 100.00, 35000.00, '', '2025-11-27 03:08:56', '2025-11-27 03:08:56'),
-(28, 28, 64, 250, 180.00, 45000.00, '', '2025-11-27 13:26:15', '2025-11-27 13:26:15'),
-(29, 29, 112, 1, 1650.00, 1650.00, '', '2025-11-27 16:01:49', '2025-11-27 16:01:49');
+(35, 38, 298, 150, 120.00, 18000.00, '', '2025-11-29 02:55:52', '2025-11-29 02:55:52'),
+(36, 39, 113, 200, 120.00, 24000.00, '', '2025-11-29 02:56:18', '2025-11-29 02:56:18'),
+(37, 40, 222, 50, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41');
 
 -- --------------------------------------------------------
 
@@ -584,7 +735,9 @@ INSERT INTO `stock_transactions` (`id`, `product_id`, `transaction_type`, `quant
 (14, 87, 'stock_in', 250, 'delivery', 22, 0, 250, 1, 0, 0, '2026-02-22', NULL, NULL, '2025-11-27 03:10:43', '2025-11-27 03:10:43'),
 (15, 54, 'stock_in', 260, 'delivery', 24, 250, 510, 1, 0, 0, '2026-02-19', NULL, 15, '2025-11-27 03:16:16', '2025-11-27 03:16:16'),
 (16, 88, 'stock_in', 200, 'delivery', 25, 0, 200, 1, 0, 0, '2026-02-18', NULL, 12, '2025-11-27 13:31:24', '2025-11-27 13:31:24'),
-(17, 70, 'stock_out', 150, 'stock_out', NULL, 240, 90, 0, 0, 0, '2026-02-24', 'waste: Buanggggg', 12, '2025-11-27 13:33:23', '2025-11-27 13:33:23');
+(17, 70, 'stock_out', 150, 'stock_out', NULL, 240, 90, 0, 0, 0, '2026-02-24', 'waste: Buanggggg', 12, '2025-11-27 13:33:23', '2025-11-27 13:33:23'),
+(18, 96, 'stock_in', 25, 'delivery', 27, 200, 225, 1, 0, 0, '2026-11-27', NULL, 4, '2025-11-29 02:50:48', '2025-11-29 02:50:48'),
+(19, 168, 'stock_in', 100, 'delivery', 29, 40, 140, 1, 0, 0, '2026-11-27', NULL, 8, '2025-11-29 02:51:06', '2025-11-29 02:51:06');
 
 -- --------------------------------------------------------
 
@@ -756,7 +909,8 @@ ALTER TABLE `deliveries`
   ADD KEY `purchase_order_id` (`purchase_order_id`),
   ADD KEY `supplier_id` (`supplier_id`),
   ADD KEY `branch_id` (`branch_id`),
-  ADD KEY `status` (`status`);
+  ADD KEY `status` (`status`),
+  ADD KEY `fk_deliveries_scheduled_by` (`scheduled_by`);
 
 --
 -- Indexes for table `delivery_items`
@@ -858,7 +1012,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `accounts_payable`
 --
 ALTER TABLE `accounts_payable`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `branches`
@@ -876,49 +1030,49 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `deliveries`
 --
 ALTER TABLE `deliveries`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `delivery_items`
 --
 ALTER TABLE `delivery_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=194;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=353;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `purchase_order_items`
 --
 ALTER TABLE `purchase_order_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `purchase_requests`
 --
 ALTER TABLE `purchase_requests`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `purchase_request_items`
 --
 ALTER TABLE `purchase_request_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `reports`
@@ -930,7 +1084,7 @@ ALTER TABLE `reports`
 -- AUTO_INCREMENT for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
@@ -970,6 +1124,7 @@ ALTER TABLE `deliveries`
   ADD CONSTRAINT `fk_deliveries_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_deliveries_purchase_order` FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_deliveries_received_by` FOREIGN KEY (`received_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE SET NULL,
+  ADD CONSTRAINT `fk_deliveries_scheduled_by` FOREIGN KEY (`scheduled_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_deliveries_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --

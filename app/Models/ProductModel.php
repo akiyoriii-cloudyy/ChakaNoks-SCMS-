@@ -188,13 +188,27 @@ class ProductModel extends Model
     }
 
     /**
-     * Update stock quantity
+     * Update stock quantity and recalculate status
      */
     public function updateStock(int $id, int $qty): bool
     {
-        return $this->update($id, [
+        // Get the current product to calculate new status
+        $product = $this->find($id);
+        if (!$product) {
+            return false;
+        }
+        
+        // Build update data
+        $updateData = [
             'stock_qty' => $qty,
             'updated_at' => date('Y-m-d H:i:s')
-        ]);
+        ];
+        
+        // Calculate the new status based on updated stock
+        $tempProduct = array_merge($product, ['stock_qty' => $qty]);
+        $newStatus = $this->calculateStatus($tempProduct);
+        $updateData['status'] = $newStatus;
+        
+        return $this->update($id, $updateData);
     }
 }
