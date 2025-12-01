@@ -58,6 +58,17 @@ $routes->get('manager/settings', 'Manager::settings');
 $routes->get('manager/api/search-products', 'Manager::searchProducts');
 $routes->post('manager/api/stock-out', 'Manager::recordStockOut');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
+
+// ---------- FRANCHISE MANAGER APIs ----------
+$routes->post('franchisemanager/application/create', 'FranchiseManager::createApplication');
+$routes->post('franchisemanager/application/(:num)/status', 'FranchiseManager::updateApplicationStatus/$1');
+$routes->get('franchisemanager/api/applications', 'FranchiseManager::getApplicationsList');
+$routes->post('franchisemanager/allocation/create', 'FranchiseManager::createAllocation');
+$routes->post('franchisemanager/allocation/(:num)/status', 'FranchiseManager::updateAllocationStatus/$1');
+$routes->get('franchisemanager/api/allocations', 'FranchiseManager::getAllocationsList');
+$routes->post('franchisemanager/royalty/create', 'FranchiseManager::createRoyalty');
+$routes->post('franchisemanager/royalty/(:num)/payment', 'FranchiseManager::recordPayment/$1');
+$routes->get('franchisemanager/api/royalties', 'FranchiseManager::getRoyaltiesList');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
 $routes->get('logisticscoordinator/schedule', 'LogisticsCoordinator::scheduleDelivery');
 $routes->get('logisticscoordinator/track-orders', 'LogisticsCoordinator::trackOrders');

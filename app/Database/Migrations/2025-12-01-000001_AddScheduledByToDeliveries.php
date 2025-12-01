@@ -8,28 +8,18 @@ class AddScheduledByToDeliveries extends Migration
 {
     public function up()
     {
-        // Add scheduled_by column
-        $this->forge->addColumn('deliveries', [
-            'scheduled_by' => [
-                'type' => 'INT',
-                'unsigned' => true,
-                'null' => true,
-                'after' => 'branch_id'
-            ]
-        ]);
-
-        // Add index for scheduled_by
-        $this->forge->addKey('scheduled_by');
-
-        // Add foreign key constraint
-        $this->forge->addForeignKey(
-            'scheduled_by',
-            'users',
-            'id',
-            'SET NULL',
-            'CASCADE',
-            'fk_deliveries_scheduled_by'
-        );
+        // Check if column already exists
+        if (!$this->db->fieldExists('scheduled_by', 'deliveries')) {
+            // Add scheduled_by column
+            $this->forge->addColumn('deliveries', [
+                'scheduled_by' => [
+                    'type' => 'INT',
+                    'unsigned' => true,
+                    'null' => true,
+                    'after' => 'branch_id'
+                ]
+            ]);
+        }
     }
 
     public function down()

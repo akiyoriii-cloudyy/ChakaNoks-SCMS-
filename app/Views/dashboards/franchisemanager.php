@@ -1,3 +1,16 @@
+<?php
+// Ensure all variables are defined with defaults
+$products = $products ?? [];
+$branches = $branches ?? [];
+$applications = $applications ?? [];
+$allocations = $allocations ?? [];
+$royalties = $royalties ?? [];
+$applicationStats = $applicationStats ?? ['total' => 0, 'pending' => 0, 'under_review' => 0, 'approved' => 0, 'rejected' => 0];
+$allocationStats = $allocationStats ?? ['total' => 0, 'pending' => 0, 'approved' => 0, 'shipped' => 0, 'delivered' => 0, 'total_value' => 0];
+$royaltyStats = $royaltyStats ?? ['total_due' => 0, 'total_paid' => 0, 'total_balance' => 0, 'pending_count' => 0, 'overdue_count' => 0, 'paid_count' => 0];
+$me = $me ?? ['email' => 'User', 'role' => 'franchise_manager'];
+$currentSection = $currentSection ?? 'overview';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,8 +31,345 @@
     
     <!-- Professional Dashboard CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/css/dashboard-pro.css') ?>">
+    
+    <style>
+        /* Professional gradient background matching other dashboards */
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .dashboard-main {
+            background: transparent;
+        }
+
+        /* Enhanced page header matching other dashboards */
+        .dashboard-header {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(45, 80, 22, 0.2);
+        }
+
+        .dashboard-header .page-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-header .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .dashboard-header .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-header .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced content card matching other dashboards */
+        .content-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            background: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-card:hover {
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .content-card .card-header {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+            padding: 20px 30px;
+            border: none;
+        }
+
+        .content-card .card-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Enhanced table styling matching other dashboards */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: #f9faf8;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            color: #333;
+        }
+
+        /* Enhanced summary cards */
+        .summary-card {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-card .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card .summary-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Form controls matching other dashboards */
+        .form-select, .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #4a7c2a;
+            box-shadow: 0 0 0 3px rgba(74, 124, 42, 0.1);
+            outline: none;
+        }
+
+        /* Badge Styles */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-under_review { background: #dbeafe; color: #1e40af; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .badge-on_hold { background: #e5e7eb; color: #374151; }
+        .badge-shipped { background: #e0e7ff; color: #3730a3; }
+        .badge-delivered { background: #d1fae5; color: #065f46; }
+        .badge-paid { background: #d1fae5; color: #065f46; }
+        .badge-partial { background: #fef3c7; color: #92400e; }
+        .badge-overdue { background: #fee2e2; color: #991b1b; }
+
+        /* Section Display */
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 4px;
+        }
+
+        .action-btn.approve { background: #d1fae5; color: #065f46; }
+        .action-btn.approve:hover { background: #a7f3d0; }
+        .action-btn.reject { background: #fee2e2; color: #991b1b; }
+        .action-btn.reject:hover { background: #fecaca; }
+        .action-btn.view { background: #dbeafe; color: #1e40af; }
+        .action-btn.view:hover { background: #bfdbfe; }
+        .action-btn.payment { background: #d1fae5; color: #065f46; }
+        .action-btn.payment:hover { background: #a7f3d0; }
+
+        /* Primary Button */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        /* Amount Display */
+        .amount {
+            font-family: 'Poppins', monospace;
+            font-weight: 600;
+        }
+
+        .amount.positive { color: #059669; }
+        .amount.negative { color: #dc2626; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <?php 
+    $baseUrl = base_url('franchisemanager/dashboard');
+    ?>
+    
     <div class="dashboard-wrapper">
         <!-- Sidebar -->
         <aside class="dashboard-sidebar">
@@ -36,33 +386,25 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active">
+                <a href="<?= $baseUrl ?>?section=overview" class="nav-item <?= $currentSection === 'overview' ? 'active' : '' ?>">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
+                    <span>Overview</span>
                 </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-store"></i>
-                    <span>Store Overview</span>
+                <a href="<?= $baseUrl ?>?section=applications" class="nav-item <?= $currentSection === 'applications' ? 'active' : '' ?>">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Franchise Applications</span>
                 </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-truck"></i>
-                    <span>Deliveries</span>
+                <a href="<?= $baseUrl ?>?section=allocations" class="nav-item <?= $currentSection === 'allocations' ? 'active' : '' ?>">
+                    <i class="fas fa-boxes"></i>
+                    <span>Supply Allocations</span>
                 </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-file-invoice"></i>
-                    <span>Sales Reports</span>
+                <a href="<?= $baseUrl ?>?section=royalties" class="nav-item <?= $currentSection === 'royalties' ? 'active' : '' ?>">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Royalty & Payments</span>
                 </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-sitemap"></i>
-                    <span>My Branches</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Revenue</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-users"></i>
-                    <span>Staff</span>
+                <a href="<?= $baseUrl ?>?section=partners" class="nav-item <?= $currentSection === 'partners' ? 'active' : '' ?>">
+                    <i class="fas fa-handshake"></i>
+                    <span>Franchise Partners</span>
                 </a>
             </nav>
             
@@ -73,8 +415,8 @@
                             <i class="fas fa-user-circle" style="font-size: 32px; color: white;"></i>
                         </div>
                         <div class="user-info" style="flex: 1; min-width: 0;">
-                            <div class="user-name" style="font-size: 0.9rem; font-weight: 600; color: white; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc(session()->get('email') ?? 'User') ?></div>
-                            <div class="user-role" style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Franchise Manager</div>
+                            <div class="user-name" style="font-size: 0.9rem; font-weight: 600; color: white; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc($me['email'] ?? 'User') ?></div>
+                            <div class="user-role" style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">FRANCHISE MANAGER</div>
                         </div>
                     </div>
                 </div>
@@ -91,11 +433,11 @@
                 <div class="header-left">
                     <div class="page-title-section">
                         <h2 class="page-title">Franchise Manager Dashboard</h2>
-                        <p class="page-subtitle">Manage franchise operations and local sales</p>
+                        <p class="page-subtitle">Manage franchise applications, supply allocations, and royalty payments</p>
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="btn btn-secondary" onclick="location.reload()">
+                    <button class="btn" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                         <span>Refresh</span>
                     </button>
@@ -103,145 +445,357 @@
             </header>
 
             <div class="dashboard-content">
-                <!-- Key Metrics -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon primary">
-                                <i class="fas fa-boxes"></i>
-                            </div>
+                <!-- Overview Section -->
+                <div id="overview-section" class="dashboard-section <?= $currentSection === 'overview' ? 'active' : '' ?>">
+                    <!-- Summary Cards -->
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+                        <div class="summary-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                            <div class="summary-value" style="color: #1e40af;"><?= number_format($applicationStats['pending'] ?? 0) ?></div>
+                            <div class="summary-label">Pending Applications</div>
                         </div>
-                        <h3 class="stat-value"><?= number_format($data['inventory']['total_items'] ?? 0) ?></h3>
-                        <p class="stat-label">Total Items</p>
-                        <div style="margin-top: 8px; font-size: 0.875rem; color: #64748b;">
-                            Stock Value: ₱<?= number_format($data['inventory']['total_stock_value'] ?? 0, 2) ?>
+                        <div class="summary-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                            <div class="summary-value" style="color: #92400e;"><?= number_format($allocationStats['pending'] ?? 0) ?></div>
+                            <div class="summary-label">Pending Allocations</div>
                         </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
+                        <div class="summary-card" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+                            <div class="summary-value" style="color: #065f46;">₱<?= number_format($royaltyStats['total_paid'] ?? 0, 0) ?></div>
+                            <div class="summary-label">Total Collected</div>
                         </div>
-                        <h3 class="stat-value"><?= number_format($data['inventory']['low_stock_count'] ?? 0) ?></h3>
-                        <p class="stat-label">Low Stock Items</p>
-                        <div style="margin-top: 8px;">
-                            <span class="badge badge-danger">Critical: <?= $data['inventory']['critical_items_count'] ?? 0 ?></span>
+                        <div class="summary-card" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
+                            <div class="summary-value" style="color: #991b1b;"><?= number_format($royaltyStats['overdue_count'] ?? 0) ?></div>
+                            <div class="summary-label">Overdue Payments</div>
                         </div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon info">
-                                <i class="fas fa-sitemap"></i>
-                            </div>
+                    <!-- Quick Actions -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h3>
                         </div>
-                        <h3 class="stat-value"><?= number_format($data['inventory']['branches_count'] ?? 0) ?></h3>
-                        <p class="stat-label">Total Branches</p>
-                        <div style="margin-top: 8px; font-size: 0.875rem; color: #64748b;">
-                            Active locations
+                        <div style="padding: 20px; display: flex; gap: 16px; flex-wrap: wrap;">
+                            <button class="btn-primary-custom" onclick="openModal('applicationModal')">
+                                <i class="fas fa-plus"></i> New Application
+                            </button>
+                            <button class="btn-primary-custom" onclick="openModal('allocationModal')" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <i class="fas fa-truck"></i> Create Allocation
+                            </button>
+                            <button class="btn-primary-custom" onclick="openModal('royaltyModal')" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                                <i class="fas fa-receipt"></i> Record Royalty
+                            </button>
                         </div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon success">
-                                <i class="fas fa-check-circle"></i>
+                    <!-- Recent Activity -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+                        <div class="content-card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title"><i class="fas fa-file-alt"></i> Recent Applications</h3>
+                                <a href="<?= $baseUrl ?>?section=applications" style="color: rgba(255,255,255,0.9); font-weight: 500; text-decoration: none; font-size: 0.9rem;">View All →</a>
+                            </div>
+                            <div style="padding: 20px;">
+                                <?php if (!empty($applications)): ?>
+                                    <?php foreach (array_slice($applications, 0, 3) as $app): ?>
+                                        <div style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1e293b;"><?= esc($app['applicant_name']) ?></div>
+                                                    <div style="font-size: 0.85rem; color: #64748b;"><?= esc($app['city']) ?></div>
+                                                </div>
+                                                <span class="badge badge-<?= $app['status'] ?>"><?= ucfirst(str_replace('_', ' ', $app['status'])) ?></span>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="empty-state" style="padding: 30px;">
+                                        <i class="fas fa-file-alt"></i>
+                                        <p>No applications yet</p>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
-                        <h3 class="stat-value"><?= number_format($data['inventory']['total_stock_value'] ?? 0, 0) ?></h3>
-                        <p class="stat-label">Total Stock Value</p>
-                        <div style="margin-top: 8px; font-size: 0.875rem; color: #64748b;">
-                            Across all branches
+
+                        <div class="content-card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title"><i class="fas fa-money-bill-wave"></i> Recent Payments</h3>
+                                <a href="<?= $baseUrl ?>?section=royalties" style="color: rgba(255,255,255,0.9); font-weight: 500; text-decoration: none; font-size: 0.9rem;">View All →</a>
+                            </div>
+                            <div style="padding: 20px;">
+                                <?php if (!empty($royalties)): ?>
+                                    <?php foreach (array_slice($royalties, 0, 3) as $payment): ?>
+                                        <div style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1e293b;"><?= esc($payment['branch_name'] ?? 'Unknown Branch') ?></div>
+                                                    <div style="font-size: 0.85rem; color: #64748b;"><?= date('F Y', mktime(0, 0, 0, $payment['period_month'], 1, $payment['period_year'])) ?></div>
+                                                </div>
+                                                <div style="text-align: right;">
+                                                    <div class="amount positive">₱<?= number_format($payment['amount_paid'], 2) ?></div>
+                                                    <span class="badge badge-<?= $payment['status'] ?>"><?= ucfirst($payment['status']) ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="empty-state" style="padding: 30px;">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        <p>No payment records yet</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Additional Content Cards -->
-                <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
-                    <!-- Branch Overview -->
-                    <div class="content-card" style="grid-column: 1 / -1;">
-                        <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
-                            <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-sitemap" style="font-size: 1.5rem;"></i>
-                                Branch Overview
-                                <span style="margin-left: auto; font-size: 0.875rem; font-weight: 500; opacity: 0.9;">5 Active Branches</span>
-                            </h3>
+                <!-- Applications Section -->
+                <div id="applications-section" class="dashboard-section <?= $currentSection === 'applications' ? 'active' : '' ?>">
+                    <div class="content-card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Franchise Applications</h3>
+                            <button class="btn-primary-custom" onclick="openModal('applicationModal')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                                <i class="fas fa-plus"></i> New Application
+                            </button>
                         </div>
-                        <?php if (!empty($data['branches'])): ?>
-                            <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 10px;">
-                                <?php foreach ($data['branches'] as $index => $branch): ?>
-                                    <div class="branch-card" style="background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid rgba(45, 80, 22, 0.1); transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(45, 80, 22, 0.15)'; this.style.borderColor='rgba(45, 80, 22, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.08)'; this.style.borderColor='rgba(45, 80, 22, 0.1)';">
-                                        <div style="position: absolute; top: 0; right: 0; width: 60px; height: 60px; background: linear-gradient(135deg, rgba(45, 80, 22, 0.1) 0%, rgba(74, 124, 42, 0.1) 100%); border-radius: 0 0 0 50px;"></div>
-                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                                            <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(45, 80, 22, 0.3);">
-                                                <i class="fas fa-store" style="color: white; font-size: 1.25rem;"></i>
-                                            </div>
-                                            <div style="flex: 1; min-width: 0;">
-                                                <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc($branch['branch_name']) ?></h4>
-                                                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b; font-weight: 500;"><?= esc($branch['branch_code']) ?></p>
-                                            </div>
-                                        </div>
-                                        <?php if (!empty($branch['branch_address'])): ?>
-                                            <p style="margin: 0 0 12px 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                                                <i class="fas fa-map-marker-alt" style="color: #2d5016; margin-right: 6px;"></i>
-                                                <?= esc($branch['branch_address']) ?>
-                                            </p>
-                                        <?php endif; ?>
-                                        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(45, 80, 22, 0.1);">
-                                            <div>
-                                                <p style="margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Total Products</p>
-                                                <h3 style="margin: 4px 0 0 0; font-size: 1.5rem; font-weight: 700; color: #2d5016;"><?= number_format($branch['total_products']) ?></h3>
-                                            </div>
-                                            <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, rgba(45, 80, 22, 0.1) 0%, rgba(74, 124, 42, 0.1) 100%); display: flex; align-items: center; justify-content: center;">
-                                                <i class="fas fa-boxes" style="color: #2d5016; font-size: 1.1rem;"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
+                        
+                        <?php if (!empty($applications)): ?>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Applicant</th>
+                                            <th>Contact</th>
+                                            <th>Location</th>
+                                            <th>Investment</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($applications as $app): ?>
+                                            <tr>
+                                                <td>
+                                                    <div style="font-weight: 600;"><?= esc($app['applicant_name']) ?></div>
+                                                </td>
+                                                <td>
+                                                    <div><?= esc($app['email']) ?></div>
+                                                    <div style="font-size: 0.85rem; color: #64748b;"><?= esc($app['phone']) ?></div>
+                                                </td>
+                                                <td>
+                                                    <div><?= esc($app['proposed_location']) ?></div>
+                                                    <div style="font-size: 0.85rem; color: #64748b;"><?= esc($app['city']) ?></div>
+                                                </td>
+                                                <td class="amount">₱<?= number_format($app['investment_capital'], 2) ?></td>
+                                                <td><span class="badge badge-<?= $app['status'] ?>"><?= ucfirst(str_replace('_', ' ', $app['status'])) ?></span></td>
+                                                <td><?= date('M d, Y', strtotime($app['created_at'])) ?></td>
+                                                <td>
+                                                    <?php if ($app['status'] === 'pending'): ?>
+                                                        <button class="action-btn view" onclick="reviewApplication(<?= $app['id'] ?>, 'under_review')">Review</button>
+                                                        <button class="action-btn approve" onclick="reviewApplication(<?= $app['id'] ?>, 'approved')">Approve</button>
+                                                        <button class="action-btn reject" onclick="reviewApplication(<?= $app['id'] ?>, 'rejected')">Reject</button>
+                                                    <?php elseif ($app['status'] === 'under_review'): ?>
+                                                        <button class="action-btn approve" onclick="reviewApplication(<?= $app['id'] ?>, 'approved')">Approve</button>
+                                                        <button class="action-btn reject" onclick="reviewApplication(<?= $app['id'] ?>, 'rejected')">Reject</button>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         <?php else: ?>
-                            <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                                <i class="fas fa-store" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
-                                <p style="margin: 0; font-size: 1rem; font-weight: 500;">No branch data available</p>
+                            <div class="empty-state">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>No Applications</h3>
+                                <p>Click "New Application" to add a franchise application.</p>
                             </div>
                         <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Inventory Summary -->
+                <!-- Allocations Section -->
+                <div id="allocations-section" class="dashboard-section <?= $currentSection === 'allocations' ? 'active' : '' ?>">
+                    <div class="content-card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="card-title"><i class="fas fa-boxes"></i> Supply Allocations</h3>
+                            <button class="btn-primary-custom" onclick="openModal('allocationModal')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                                <i class="fas fa-plus"></i> Create Allocation
+                            </button>
+                        </div>
+                        
+                        <?php if (!empty($allocations)): ?>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Branch</th>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Delivery Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($allocations as $alloc): ?>
+                                            <tr>
+                                                <td>
+                                                    <div style="font-weight: 600;"><?= esc($alloc['branch_name'] ?? 'N/A') ?></div>
+                                                    <div style="font-size: 0.85rem; color: #64748b;"><?= esc($alloc['branch_code'] ?? '') ?></div>
+                                                </td>
+                                                <td><?= esc($alloc['product_name'] ?? 'N/A') ?></td>
+                                                <td><?= number_format($alloc['allocated_qty']) ?></td>
+                                                <td class="amount">₱<?= number_format($alloc['unit_price'], 2) ?></td>
+                                                <td class="amount positive">₱<?= number_format($alloc['total_amount'], 2) ?></td>
+                                                <td><span class="badge badge-<?= $alloc['status'] ?>"><?= ucfirst($alloc['status']) ?></span></td>
+                                                <td><?= $alloc['delivery_date'] ? date('M d, Y', strtotime($alloc['delivery_date'])) : '-' ?></td>
+                                                <td>
+                                                    <?php if ($alloc['status'] === 'pending'): ?>
+                                                        <button class="action-btn approve" onclick="updateAllocation(<?= $alloc['id'] ?>, 'approved')">Approve</button>
+                                                    <?php elseif ($alloc['status'] === 'approved'): ?>
+                                                        <button class="action-btn view" onclick="updateAllocation(<?= $alloc['id'] ?>, 'shipped')">Ship</button>
+                                                    <?php elseif ($alloc['status'] === 'shipped'): ?>
+                                                        <button class="action-btn approve" onclick="updateAllocation(<?= $alloc['id'] ?>, 'delivered')">Delivered</button>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="empty-state">
+                                <i class="fas fa-boxes"></i>
+                                <h3>No Allocations</h3>
+                                <p>Click "Create Allocation" to allocate supplies to franchise partners.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Royalties Section -->
+                <div id="royalties-section" class="dashboard-section <?= $currentSection === 'royalties' ? 'active' : '' ?>">
+                    <div class="content-card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="card-title"><i class="fas fa-money-bill-wave"></i> Royalty & Payment Tracking</h3>
+                            <button class="btn-primary-custom" onclick="openModal('royaltyModal')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                                <i class="fas fa-plus"></i> Record Royalty
+                            </button>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div style="padding: 20px; display: flex; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0;">
+                            <div class="summary-card" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); min-width: 180px;">
+                                <div class="summary-value" style="color: #065f46;">₱<?= number_format($royaltyStats['total_paid'] ?? 0, 2) ?></div>
+                                <div class="summary-label">Total Collected</div>
+                            </div>
+                            <div class="summary-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); min-width: 180px;">
+                                <div class="summary-value" style="color: #92400e;">₱<?= number_format($royaltyStats['total_balance'] ?? 0, 2) ?></div>
+                                <div class="summary-label">Pending</div>
+                            </div>
+                            <div class="summary-card" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); min-width: 180px;">
+                                <div class="summary-value" style="color: #991b1b;"><?= number_format($royaltyStats['overdue_count'] ?? 0) ?></div>
+                                <div class="summary-label">Overdue Records</div>
+                            </div>
+                        </div>
+                        
+                        <?php if (!empty($royalties)): ?>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Branch</th>
+                                            <th>Period</th>
+                                            <th>Gross Sales</th>
+                                            <th>Royalty (5%)</th>
+                                            <th>Total Due</th>
+                                            <th>Paid</th>
+                                            <th>Balance</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($royalties as $royalty): ?>
+                                            <tr>
+                                                <td>
+                                                    <div style="font-weight: 600;"><?= esc($royalty['branch_name'] ?? 'N/A') ?></div>
+                                                </td>
+                                                <td><?= date('F Y', mktime(0, 0, 0, $royalty['period_month'], 1, $royalty['period_year'])) ?></td>
+                                                <td class="amount">₱<?= number_format($royalty['gross_sales'], 2) ?></td>
+                                                <td class="amount">₱<?= number_format($royalty['royalty_amount'], 2) ?></td>
+                                                <td class="amount">₱<?= number_format($royalty['total_due'], 2) ?></td>
+                                                <td class="amount positive">₱<?= number_format($royalty['amount_paid'], 2) ?></td>
+                                                <td class="amount <?= $royalty['balance'] > 0 ? 'negative' : '' ?>">₱<?= number_format($royalty['balance'], 2) ?></td>
+                                                <td><span class="badge badge-<?= $royalty['status'] ?>"><?= ucfirst($royalty['status']) ?></span></td>
+                                                <td>
+                                                    <?php if ($royalty['status'] !== 'paid'): ?>
+                                                        <button class="action-btn payment" onclick="openPaymentModal(<?= $royalty['id'] ?>, <?= $royalty['balance'] ?>)">
+                                                            <i class="fas fa-money-bill"></i> Pay
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="empty-state">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <h3>No Royalty Records</h3>
+                                <p>Click "Record Royalty" to create royalty payment records for franchise partners.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Partners Section -->
+                <div id="partners-section" class="dashboard-section <?= $currentSection === 'partners' ? 'active' : '' ?>">
                     <div class="content-card">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-chart-bar" style="color: var(--info); margin-right: 8px;"></i>
-                                Inventory Summary
-                            </h3>
+                            <h3 class="card-title"><i class="fas fa-handshake"></i> Franchise Partners</h3>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                            <div>
-                                <p class="stat-label">Total Items</p>
-                                <h4 style="font-size: 1.75rem; font-weight: 700; color: var(--primary-green); margin: 0.5rem 0;">
-                                    <?= number_format($data['inventory']['total_items'] ?? 0) ?>
-                                </h4>
-                            </div>
-                            <div>
-                                <p class="stat-label">Low Stock</p>
-                                <h4 style="font-size: 1.75rem; font-weight: 700; color: var(--warning); margin: 0.5rem 0;">
-                                    <?= number_format($data['inventory']['low_stock_count'] ?? 0) ?>
-                                </h4>
-                            </div>
-                            <div>
-                                <p class="stat-label">Critical Items</p>
-                                <h4 style="font-size: 1.75rem; font-weight: 700; color: var(--danger); margin: 0.5rem 0;">
-                                    <?= number_format($data['inventory']['critical_items_count'] ?? 0) ?>
-                                </h4>
-                            </div>
-                            <div>
-                                <p class="stat-label">Total Value</p>
-                                <h4 style="font-size: 1.75rem; font-weight: 700; color: var(--success); margin: 0.5rem 0;">
-                                    ₱<?= number_format($data['inventory']['total_stock_value'] ?? 0, 2) ?>
-                                </h4>
-                            </div>
+                        <div style="padding: 20px;">
+                            <?php if (!empty($branches)): ?>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                                    <?php foreach ($branches as $branch): ?>
+                                        <?php 
+                                        $branchName = strtolower($branch['name'] ?? '');
+                                        if (strpos($branchName, 'central') !== false) continue;
+                                        ?>
+                                        <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                                                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-store" style="color: white; font-size: 1.5rem;"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 style="margin: 0; font-weight: 700; color: #1e293b;"><?= esc($branch['name']) ?></h4>
+                                                    <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;"><?= esc($branch['code'] ?? '') ?></p>
+                                                </div>
+                                            </div>
+                                            <?php if (!empty($branch['address'])): ?>
+                                                <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #64748b;">
+                                                    <i class="fas fa-map-marker-alt" style="margin-right: 8px; color: #2d5016;"></i>
+                                                    <?= esc($branch['address']) ?>
+                                                </p>
+                                            <?php endif; ?>
+                                            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                                                <button class="btn-primary-custom" style="flex: 1; justify-content: center; padding: 10px 12px; font-size: 0.85rem;" onclick="openAllocationForBranch(<?= $branch['id'] ?>)">
+                                                    <i class="fas fa-truck"></i> Allocate Supply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="empty-state">
+                                    <i class="fas fa-handshake"></i>
+                                    <h3>No Partners Yet</h3>
+                                    <p>Approved franchise applications will appear here as partners.</p>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -249,8 +803,389 @@
         </main>
     </div>
 
+    <!-- Application Modal -->
+    <div id="applicationModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-file-alt" style="color: #2d5016; margin-right: 10px;"></i> New Franchise Application</h3>
+                <button class="modal-close" onclick="closeModal('applicationModal')">&times;</button>
+            </div>
+            <form id="applicationForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Applicant Name *</label>
+                        <input type="text" class="form-control" name="applicant_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Phone *</label>
+                        <input type="text" class="form-control" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Investment Capital (₱)</label>
+                        <input type="number" class="form-control" name="investment_capital" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Proposed Location *</label>
+                        <input type="text" class="form-control" name="proposed_location" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City *</label>
+                        <input type="text" class="form-control" name="city" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Business Experience</label>
+                    <textarea class="form-control" name="business_experience" rows="3" placeholder="Previous business experience..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary-custom" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-paper-plane"></i> Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Allocation Modal -->
+    <div id="allocationModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-boxes" style="color: #f59e0b; margin-right: 10px;"></i> Create Supply Allocation</h3>
+                <button class="modal-close" onclick="closeModal('allocationModal')">&times;</button>
+            </div>
+            <form id="allocationForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Franchise Branch *</label>
+                        <select class="form-control" name="branch_id" id="allocationBranch" required>
+                            <option value="">Select branch...</option>
+                            <?php foreach ($branches as $branch): ?>
+                                <?php if (strpos(strtolower($branch['name'] ?? ''), 'central') === false): ?>
+                                    <option value="<?= $branch['id'] ?>"><?= esc($branch['name']) ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Product *</label>
+                        <select class="form-control" name="product_id" required>
+                            <option value="">Select product...</option>
+                            <?php if (!empty($products)): ?>
+                                <?php foreach ($products as $product): ?>
+                                    <option value="<?= $product['id'] ?>" data-price="<?= $product['price'] ?? 0 ?>"><?= esc($product['name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Quantity *</label>
+                        <input type="number" class="form-control" name="allocated_qty" id="allocQty" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Unit Price (₱) *</label>
+                        <input type="number" class="form-control" name="unit_price" id="allocPrice" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Allocation Date</label>
+                        <input type="date" class="form-control" name="allocation_date" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expected Delivery Date</label>
+                        <input type="date" class="form-control" name="delivery_date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" name="notes" rows="2" placeholder="Additional notes..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary-custom" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-truck"></i> Create Allocation
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Royalty Modal -->
+    <div id="royaltyModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-receipt" style="color: #3b82f6; margin-right: 10px;"></i> Record Royalty</h3>
+                <button class="modal-close" onclick="closeModal('royaltyModal')">&times;</button>
+            </div>
+            <form id="royaltyForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Franchise Branch *</label>
+                        <select class="form-control" name="branch_id" required>
+                            <option value="">Select branch...</option>
+                            <?php foreach ($branches as $branch): ?>
+                                <?php if (strpos(strtolower($branch['name'] ?? ''), 'central') === false): ?>
+                                    <option value="<?= $branch['id'] ?>"><?= esc($branch['name']) ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Period Month *</label>
+                        <select class="form-control" name="period_month" required>
+                            <?php for ($m = 1; $m <= 12; $m++): ?>
+                                <option value="<?= $m ?>" <?= $m == date('n') ? 'selected' : '' ?>><?= date('F', mktime(0, 0, 0, $m, 1)) ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Period Year *</label>
+                        <input type="number" class="form-control" name="period_year" value="<?= date('Y') ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gross Sales (₱) *</label>
+                        <input type="number" class="form-control" name="gross_sales" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Royalty Rate (%)</label>
+                        <input type="number" class="form-control" name="royalty_rate" value="5" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Marketing Fee (₱)</label>
+                        <input type="number" class="form-control" name="marketing_fee" value="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date *</label>
+                    <input type="date" class="form-control" name="due_date" required>
+                </div>
+                <button type="submit" class="btn-primary-custom" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                    <i class="fas fa-save"></i> Save Royalty Record
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-money-bill" style="color: #059669; margin-right: 10px;"></i> Record Payment</h3>
+                <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+            </div>
+            <form id="paymentForm">
+                <input type="hidden" name="royalty_id" id="paymentRoyaltyId">
+                <div class="form-group">
+                    <label class="form-label">Amount to Pay (₱) *</label>
+                    <input type="number" class="form-control" name="amount_paid" id="paymentAmount" step="0.01" required>
+                    <small style="color: #64748b;">Balance: ₱<span id="paymentBalance">0.00</span></small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Reference</label>
+                    <input type="text" class="form-control" name="payment_reference" placeholder="e.g., Check #, Transfer Ref...">
+                </div>
+                <button type="submit" class="btn-primary-custom" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                    <i class="fas fa-check"></i> Record Payment
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+        
+        // Application form submit
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/application/create') ?>',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Application submitted successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to submit application'));
+                    }
+                },
+                error: function() {
+                    alert('Error submitting application');
+                }
+            });
+        });
+        
+        // Review application
+        function reviewApplication(id, status) {
+            if (!confirm('Are you sure you want to ' + status.replace('_', ' ') + ' this application?')) return;
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/application/') ?>' + id + '/status',
+                method: 'POST',
+                data: { status: status },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Application ' + status.replace('_', ' ') + ' successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to update'));
+                    }
+                }
+            });
+        }
+        
+        // Allocation form submit
+        document.getElementById('allocationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/allocation/create') ?>',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Allocation created successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to create allocation'));
+                    }
+                },
+                error: function() {
+                    alert('Error creating allocation');
+                }
+            });
+        });
+        
+        // Update allocation status
+        function updateAllocation(id, status) {
+            $.ajax({
+                url: '<?= base_url('franchisemanager/allocation/') ?>' + id + '/status',
+                method: 'POST',
+                data: { status: status },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Status updated successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to update'));
+                    }
+                }
+            });
+        }
+        
+        // Open allocation modal for specific branch
+        function openAllocationForBranch(branchId) {
+            document.getElementById('allocationBranch').value = branchId;
+            openModal('allocationModal');
+        }
+        
+        // Royalty form submit
+        document.getElementById('royaltyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/royalty/create') ?>',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Royalty record created successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to create record'));
+                    }
+                },
+                error: function() {
+                    alert('Error creating royalty record');
+                }
+            });
+        });
+        
+        // Open payment modal
+        function openPaymentModal(royaltyId, balance) {
+            document.getElementById('paymentRoyaltyId').value = royaltyId;
+            document.getElementById('paymentBalance').textContent = parseFloat(balance).toFixed(2);
+            document.getElementById('paymentAmount').value = balance;
+            document.getElementById('paymentAmount').max = balance;
+            openModal('paymentModal');
+        }
+        
+        // Payment form submit
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const royaltyId = document.getElementById('paymentRoyaltyId').value;
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/royalty/') ?>' + royaltyId + '/payment',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Payment recorded successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to record payment'));
+                    }
+                },
+                error: function() {
+                    alert('Error recording payment');
+                }
+            });
+        });
+        
+        // Auto-fill price when product selected
+        $('select[name="product_id"]').on('change', function() {
+            const price = $(this).find(':selected').data('price') || 0;
+            $('#allocPrice').val(price);
+        });
+    </script>
 </body>
 </html>
