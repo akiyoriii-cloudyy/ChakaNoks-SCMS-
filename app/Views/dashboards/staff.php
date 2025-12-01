@@ -301,10 +301,6 @@
                     <i class="fas fa-boxes"></i>
                     <span>Inventory</span>
                 </a>
-                <a href="<?= $baseUrl ?>?section=stock-in" class="nav-item <?= $currentSection === 'stock-in' ? 'active' : '' ?>">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>Stock In</span>
-                </a>
                 <a href="<?= $baseUrl ?>?section=stock-out" class="nav-item <?= $currentSection === 'stock-out' ? 'active' : '' ?>">
                     <i class="fas fa-arrow-down"></i>
                     <span>Stock Out</span>
@@ -312,10 +308,6 @@
                 <a href="<?= $baseUrl ?>?section=deliveries" class="nav-item <?= $currentSection === 'deliveries' ? 'active' : '' ?>">
                     <i class="fas fa-truck"></i>
                     <span>Deliveries</span>
-                </a>
-                <a href="<?= $baseUrl ?>?section=damaged" class="nav-item <?= $currentSection === 'damaged' ? 'active' : '' ?>">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Damaged/Expired</span>
                 </a>
                 <a href="<?= base_url('purchase/request/new') ?>" class="nav-item">
                     <i class="fas fa-shopping-cart"></i>
@@ -458,41 +450,6 @@
                 </div>
                 <!-- End Inventory Section -->
 
-                <!-- Stock In Section -->
-                <div id="stock-in-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'stock-in' ? 'block' : 'none' ?>;">
-                    <div class="content-card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-arrow-up"></i> Stock In</h3>
-                        </div>
-                        <div style="padding: 20px;">
-                            <form id="stockInForm">
-                                <div class="mb-3">
-                                    <label for="stockInProduct" class="form-label">Select Product</label>
-                                    <select class="form-control" id="stockInProduct" required>
-                                        <option value="">Select a product...</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="stockInQuantity" class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" id="stockInQuantity" min="1" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="stockInReference" class="form-label">Reference (Optional)</label>
-                                    <input type="text" class="form-control" id="stockInReference" placeholder="e.g., Delivery #, Adjustment, etc.">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="stockInNotes" class="form-label">Notes (Optional)</label>
-                                    <textarea class="form-control" id="stockInNotes" rows="3" placeholder="Additional notes..."></textarea>
-                                </div>
-                                <button type="button" class="btn btn-primary" onclick="submitStockIn()" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none;">
-                                    <i class="fas fa-check"></i> Record Stock In
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <!-- End Stock In Section -->
-
                 <!-- Stock Out Section -->
                 <div id="stock-out-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'stock-out' ? 'block' : 'none' ?>;">
                     <div class="content-card">
@@ -501,17 +458,6 @@
                         </div>
                         <div style="padding: 20px;">
                             <form id="stockOutForm">
-                                <div class="mb-3">
-                                    <label for="stockOutProduct" class="form-label">Select Product</label>
-                                    <select class="form-control" id="stockOutProduct" required>
-                                        <option value="">Select a product...</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="stockOutQuantity" class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" id="stockOutQuantity" min="1" required>
-                                    <small class="form-text text-muted">Available stock: <span id="stockOutAvailable">0</span></small>
-                                </div>
                                 <div class="mb-3">
                                     <label for="stockOutReason" class="form-label">Reason</label>
                                     <select class="form-control" id="stockOutReason" required>
@@ -528,6 +474,17 @@
                                 <div class="mb-3" id="stockOutOtherReasonDiv" style="display: none;">
                                     <label for="stockOutOtherReason" class="form-label">Specify Reason</label>
                                     <input type="text" class="form-control" id="stockOutOtherReason" placeholder="Enter reason...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockOutProduct" class="form-label">Select Product</label>
+                                    <select class="form-control" id="stockOutProduct" required>
+                                        <option value="">Select a product...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stockOutQuantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="stockOutQuantity" min="1" required>
+                                    <small class="form-text text-muted">Available stock: <span id="stockOutAvailable">0</span></small>
                                 </div>
                                 <div class="mb-3">
                                     <label for="stockOutNotes" class="form-label">Notes (Optional)</label>
@@ -595,52 +552,6 @@
                     </div>
                 </div>
                 <!-- End Deliveries Section -->
-
-                <!-- Damaged/Expired Section -->
-                <div id="damaged-section" class="dashboard-section" style="display: <?= ($currentSection ?? 'inventory') === 'damaged' ? 'block' : 'none' ?>;">
-                    <div class="content-card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> Report Damaged/Expired Goods</h3>
-                        </div>
-                        <div style="padding: 20px;">
-                            <form id="damagedForm">
-                                <div class="mb-3">
-                                    <label for="damagedReason" class="form-label">Reason</label>
-                                    <select class="form-control" id="damagedReason" required>
-                                        <option value="">Select reason...</option>
-                                        <option value="Damaged">Damaged</option>
-                                        <option value="Expired">Expired</option>
-                                        <option value="Damaged/Expired">Damaged/Expired</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3" id="damagedOtherReasonDiv" style="display: none;">
-                                    <label for="damagedOtherReason" class="form-label">Specify Reason</label>
-                                    <input type="text" class="form-control" id="damagedOtherReason" placeholder="Enter reason...">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="damagedProduct" class="form-label">Select Product</label>
-                                    <select class="form-control" id="damagedProduct" required>
-                                        <option value="">Select a product...</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="damagedQuantity" class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" id="damagedQuantity" min="1" required>
-                                    <small class="form-text text-muted">Available stock: <span id="damagedAvailable">0</span></small>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="damagedNotes" class="form-label">Notes (Optional)</label>
-                                    <textarea class="form-control" id="damagedNotes" rows="3" placeholder="Additional notes..."></textarea>
-                                </div>
-                                <button type="button" class="btn btn-warning" onclick="submitDamaged()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; color: white;">
-                                    <i class="fas fa-exclamation-triangle"></i> Report Damaged/Expired
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <!-- End Damaged/Expired Section -->
             </div>
         </main>
     </div>
@@ -784,7 +695,6 @@
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                 <button class="btn btn-primary" id="btnUpdateStock">Update Stock</button>
                 <button class="btn btn-success" id="btnReceiveDelivery">Receive Delivery</button>
-                <button class="btn btn-warning" id="btnReportDamaged">Report Damaged</button>
                 <button class="btn btn-info" id="btnTrackInventory">Track Inventory</button>
                 <button class="btn btn-secondary" id="btnCheckExpiry">Check Expiry</button>
                 <button class="btn btn-secondary" id="btnPrintReport">Print Report</button>
@@ -1094,7 +1004,7 @@
             const currentSection = urlParams.get('section') || '<?= $currentSection ?? 'inventory' ?>';
             
             // Ensure sections are properly shown/hidden
-            const sections = ['inventory', 'stock-in', 'stock-out', 'deliveries', 'damaged'];
+            const sections = ['inventory', 'stock-out', 'deliveries'];
             sections.forEach(function(section) {
                 const sectionEl = document.getElementById(section + '-section');
                 if (sectionEl) {
@@ -1116,19 +1026,8 @@
             
             // Load section-specific data
             // Deliveries are now loaded server-side, no need to call loadDeliveries()
-            if (currentSection === 'stock-in' || currentSection === 'stock-out' || currentSection === 'damaged') {
+            if (currentSection === 'stock-out') {
                 loadProductsForSection(currentSection);
-                
-                // Pre-select product if coming from view item modal
-                if (currentSection === 'damaged') {
-                    const damagedProductId = sessionStorage.getItem('damagedProductId');
-                    if (damagedProductId) {
-                        setTimeout(function() {
-                            $('#damagedProduct').val(damagedProductId).trigger('change');
-                            sessionStorage.removeItem('damagedProductId');
-                        }, 500);
-                    }
-                }
             }
             
             // Ensure branch filter is disabled for inventory staff
@@ -1151,11 +1050,9 @@
             }
         });
         
-        // Load products for stock in/out/damaged sections
+        // Load products for stock out section
         function loadProductsForSection(section) {
-            const productSelect = document.getElementById(section === 'stock-in' ? 'stockInProduct' : 
-                                                          section === 'stock-out' ? 'stockOutProduct' : 
-                                                          'damagedProduct');
+            const productSelect = document.getElementById('stockOutProduct');
             
             if (!productSelect) return;
             
@@ -1184,13 +1081,11 @@
         }
         
         // Stock quantity change handlers
-        $(document).on('change', '#stockOutProduct, #damagedProduct', function() {
+        $(document).on('change', '#stockOutProduct', function() {
             const selectedOption = $(this).find('option:selected');
             const availableStock = selectedOption.attr('data-stock') || 0;
-            const availableSpan = $(this).attr('id') === 'stockOutProduct' ? $('#stockOutAvailable') : $('#damagedAvailable');
-            availableSpan.text(availableStock);
-            const qtyInput = $(this).attr('id') === 'stockOutProduct' ? $('#stockOutQuantity') : $('#damagedQuantity');
-            qtyInput.attr('max', availableStock);
+            $('#stockOutAvailable').text(availableStock);
+            $('#stockOutQuantity').attr('max', availableStock);
         });
         
         // Reason change handlers
@@ -1203,58 +1098,6 @@
                 $('#stockOutOtherReason').prop('required', false);
             }
         });
-        
-        $(document).on('change', '#damagedReason', function() {
-            if ($(this).val() === 'Other') {
-                $('#damagedOtherReasonDiv').show();
-                $('#damagedOtherReason').prop('required', true);
-            } else {
-                $('#damagedOtherReasonDiv').hide();
-                $('#damagedOtherReason').prop('required', false);
-            }
-        });
-        
-        // Submit Stock In
-        function submitStockIn() {
-            const productId = $('#stockInProduct').val();
-            const quantity = parseInt($('#stockInQuantity').val());
-            const reference = $('#stockInReference').val();
-            const notes = $('#stockInNotes').val();
-            
-            if (!productId || !quantity || quantity <= 0) {
-                alert('Please select a product and enter a valid quantity');
-                return;
-            }
-            
-            $.ajax({
-                url: '<?= base_url('staff/api/stock-in') ?>',
-                method: 'POST',
-                data: {
-                    product_id: productId,
-                    quantity: quantity,
-                    reference: reference,
-                    notes: notes
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Stock in recorded successfully!');
-                        $('#stockInForm')[0].reset();
-                        loadProductsForSection('stock-in');
-                        // Refresh inventory if on inventory section
-                        if (document.getElementById('inventory-section').style.display !== 'none') {
-                            location.reload();
-                        }
-                    } else {
-                        alert('Error: ' + (response.message || 'Failed to record stock in'));
-                    }
-                },
-                error: function(xhr) {
-                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error recording stock in';
-                    alert('Error: ' + errorMsg);
-                }
-            });
-        }
         
         // Submit Stock Out
         function submitStockOut() {
@@ -1306,59 +1149,6 @@
                 },
                 error: function(xhr) {
                     const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error recording stock out';
-                    alert('Error: ' + errorMsg);
-                }
-            });
-        }
-        
-        // Submit Damaged/Expired
-        function submitDamaged() {
-            const productId = $('#damagedProduct').val();
-            const quantity = parseInt($('#damagedQuantity').val());
-            const reason = $('#damagedReason').val();
-            const otherReason = $('#damagedOtherReason').val();
-            const notes = $('#damagedNotes').val();
-            
-            if (!productId || !quantity || quantity <= 0) {
-                alert('Please select a product and enter a valid quantity');
-                return;
-            }
-            
-            if (!reason) {
-                alert('Please select a reason');
-                return;
-            }
-            
-            const finalReason = reason === 'Other' ? otherReason : reason;
-            if (reason === 'Other' && !finalReason) {
-                alert('Please specify the reason');
-                return;
-            }
-            
-            $.ajax({
-                url: '<?= base_url('staff/reportDamage/') ?>' + productId,
-                method: 'POST',
-                data: {
-                    quantity: quantity,
-                    reason: finalReason + (notes ? ': ' + notes : '')
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Damaged/expired goods reported successfully!');
-                        $('#damagedForm')[0].reset();
-                        $('#damagedOtherReasonDiv').hide();
-                        loadProductsForSection('damaged');
-                        // Refresh inventory if on inventory section
-                        if (document.getElementById('inventory-section').style.display !== 'none') {
-                            location.reload();
-                        }
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to report damaged goods'));
-                    }
-                },
-                error: function(xhr) {
-                    const errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error reporting damaged goods';
                     alert('Error: ' + errorMsg);
                 }
             });
