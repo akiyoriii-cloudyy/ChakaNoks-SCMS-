@@ -4,6 +4,10 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 
+// ---------- LEGAL PAGES ----------
+$routes->get('legal/terms', 'Legal::termsOfService');
+$routes->get('legal/privacy', 'Legal::privacyPolicy');
+
 // ---------- AUTH ----------
 $routes->get('/', 'Auth::login');
 $routes->get('auth/login', 'Auth::login');

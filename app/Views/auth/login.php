@@ -99,8 +99,8 @@
 
             <div class="terms">
               <p>By signing in, you agree to our 
-                <a href="#">Terms of Service</a> and 
-                <a href="#">Privacy Policy</a>
+                <a href="<?= base_url('legal/terms') ?>">Terms of Service</a> and 
+                <a href="<?= base_url('legal/privacy') ?>">Privacy Policy</a>
               </p>
             </div>
           </form>
