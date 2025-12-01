@@ -2,16 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
-<<<<<<< HEAD
--- Generation Time: Nov 28, 2025 at 08:09 PM
-=======
-<<<<<<< HEAD
--- Generation Time: Dec 01, 2025 at 02:27 PM
-=======
--- Generation Time: Nov 28, 2025 at 08:09 PM
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
+-- Host: localhost:3306
+-- Generation Time: Dec 01, 2025 at 04:56 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -63,16 +55,8 @@ CREATE TABLE `accounts_payable` (
 INSERT INTO `accounts_payable` (`id`, `purchase_order_id`, `supplier_id`, `branch_id`, `invoice_number`, `invoice_date`, `due_date`, `amount`, `paid_amount`, `balance`, `payment_status`, `payment_date`, `payment_method`, `payment_reference`, `notes`, `created_by`, `created_at`, `updated_at`) VALUES
 (28, 33, 42, 4, 'INV-20251129-59705', '2025-11-29', '2025-12-29', 18000.00, 18000.00, 0.00, 'paid', '2025-11-29', 'Cash', '8928391', 'Auto-created from approved purchase order: PO-20251129-5677', 2, '2025-11-29 02:57:28', '2025-11-29 02:57:59'),
 (29, 35, 63, 6, 'INV-20251129-13002', '2025-11-29', '2025-12-29', 9000.00, 9000.00, 0.00, 'paid', '2025-11-29', 'Bank Transfer', '7823182', 'Auto-created from approved purchase order: PO-20251129-7054', 2, '2025-11-29 03:05:39', '2025-11-29 03:06:09'),
-<<<<<<< HEAD
-(30, 34, 11, 5, 'INV-20251129-94056', '2025-11-29', '2025-12-14', 24000.00, 24000.00, 0.00, 'paid', '2025-11-29', 'Checkque', '8923712', 'Auto-created from approved purchase order: PO-20251129-6834', 2, '2025-11-29 03:05:41', '2025-11-29 03:05:52');
-=======
-<<<<<<< HEAD
 (30, 34, 11, 5, 'INV-20251129-94056', '2025-11-29', '2025-12-14', 24000.00, 24000.00, 0.00, 'paid', '2025-11-29', 'Checkque', '8923712', 'Auto-created from approved purchase order: PO-20251129-6834', 2, '2025-11-29 03:05:41', '2025-11-29 03:05:52'),
 (31, 36, 1, 2, 'INV-20251201-33201', '2025-12-01', '2025-12-31', 17500.00, 17500.00, 0.00, 'paid', '2025-12-01', 'Cash', '239481', 'Auto-created from approved purchase order: PO-20251201-5995', 2, '2025-12-01 13:40:35', '2025-12-01 13:41:23');
-=======
-(30, 34, 11, 5, 'INV-20251129-94056', '2025-11-29', '2025-12-14', 24000.00, 24000.00, 0.00, 'paid', '2025-11-29', 'Checkque', '8923712', 'Auto-created from approved purchase order: PO-20251129-6834', 2, '2025-11-29 03:05:41', '2025-11-29 03:05:52');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -175,16 +159,8 @@ CREATE TABLE `deliveries` (
 INSERT INTO `deliveries` (`id`, `delivery_number`, `purchase_order_id`, `supplier_id`, `branch_id`, `scheduled_by`, `status`, `scheduled_date`, `actual_delivery_date`, `driver_name`, `vehicle_info`, `received_by`, `received_at`, `notes`, `created_at`, `updated_at`) VALUES
 (30, 'DEL-20251129-3229', 33, 42, 4, 2, 'scheduled', '2025-12-06', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
 (31, 'DEL-20251129-4785', 34, 11, 5, NULL, 'scheduled', '2025-12-06', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
-<<<<<<< HEAD
-(32, 'DEL-20251129-7561', 35, 63, 6, 2, 'in_transit', '2025-11-30', NULL, 'BossKakak', 'L300 AB3123', NULL, NULL, 'Auto-created from Purchase Order #35', '2025-11-29 03:04:18', '2025-11-29 03:06:49');
-=======
-<<<<<<< HEAD
 (32, 'DEL-20251129-7561', 35, 63, 6, 2, 'in_transit', '2025-11-30', NULL, 'BossKakak', 'L300 AB3123', NULL, NULL, 'Auto-created from Purchase Order #35', '2025-11-29 03:04:18', '2025-11-29 03:06:49'),
 (33, 'DEL-20251201-8294', 36, 1, 2, 2, 'delivered', '2025-12-01', '2025-12-01', 'Marky Hatdog', 'L300 AB8930', 4, '2025-12-01 13:41:00', 'Auto-created from Purchase Order #36', '2025-12-01 13:40:27', '2025-12-01 13:41:58');
-=======
-(32, 'DEL-20251129-7561', 35, 63, 6, 2, 'in_transit', '2025-11-30', NULL, 'BossKakak', 'L300 AB3123', NULL, NULL, 'Auto-created from Purchase Order #35', '2025-11-29 03:04:18', '2025-11-29 03:06:49');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -211,16 +187,31 @@ CREATE TABLE `delivery_items` (
 INSERT INTO `delivery_items` (`id`, `delivery_id`, `product_id`, `expected_quantity`, `received_quantity`, `condition_status`, `notes`, `created_at`, `updated_at`) VALUES
 (30, 30, 298, 150, 0, 'good', NULL, '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
 (31, 31, 113, 200, 0, 'good', NULL, '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
-<<<<<<< HEAD
-(32, 32, 222, 50, 0, 'good', NULL, '2025-11-29 03:04:18', '2025-11-29 03:04:18');
-=======
-<<<<<<< HEAD
 (32, 32, 222, 50, 0, 'good', NULL, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
 (33, 33, 285, 50, 50, 'good', NULL, '2025-12-01 13:40:27', '2025-12-01 13:41:58');
-=======
-(32, 32, 222, 50, 0, 'good', NULL, '2025-11-29 03:04:18', '2025-11-29 03:04:18');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `franchise_applications`
+--
+
+CREATE TABLE `franchise_applications` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `applicant_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  `proposed_location` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `investment_capital` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `business_experience` text DEFAULT NULL,
+  `status` enum('pending','under_review','approved','rejected','on_hold') NOT NULL DEFAULT 'pending',
+  `notes` text DEFAULT NULL,
+  `reviewed_by` int(11) UNSIGNED DEFAULT NULL,
+  `reviewed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -265,7 +256,9 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (20, '2025-11-22-000001', 'App\\Database\\Migrations\\NormalizeProductsTable', 'default', 'App', 1763996526, 2),
 (21, '2025-11-25-000001', 'App\\Database\\Migrations\\AddSelectedSupplierToPurchaseRequests', 'default', 'App', 1764001871, 3),
 (22, '2025-11-25-000002', 'App\\Database\\Migrations\\CreateAccountsPayableTable', 'default', 'App', 1764003252, 4),
-(23, '2025-11-29-000001', 'App\\Database\\Migrations\\AddScheduledByToDeliveries', 'default', 'App', 1764356547, 5);
+(23, '2025-11-29-000001', 'App\\Database\\Migrations\\AddScheduledByToDeliveries', 'default', 'App', 1764356547, 5),
+(24, '2025-12-01-000001', 'App\\Database\\Migrations\\AddScheduledByToDeliveries', 'default', 'App', 1764603156, 6),
+(25, '2025-12-01-000002', 'App\\Database\\Migrations\\CreateFranchiseTables', 'default', 'App', 1764603156, 6);
 
 -- --------------------------------------------------------
 
@@ -447,31 +440,13 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (201, 5, 12, 3, 'Mineral Water (6L)', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (202, 5, 12, 3, 'Pineapple Juice', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (203, 5, 12, 3, 'Mango Juice', 85.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-(204, 5, 12, 3, 'Hot Chocolate Mix', 120.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-<<<<<<< HEAD
 (204, 5, 12, 18, 'Hot Chocolate Mix', 120.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-(204, 5, 12, 3, 'Hot Chocolate Mix', 120.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (205, 5, 12, 3, 'Lemonade Mix', 95.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (206, 5, 12, 3, 'Fruit Punch', 90.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (207, 5, 12, 3, 'Energy Drink', 45.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (208, 5, 12, 3, 'Yakult', 12.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-(209, 5, 12, 3, 'Fresh Milk (1L)', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(210, 5, 12, 3, 'Chocolate Milk', 100.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-<<<<<<< HEAD
 (209, 5, 12, 10, 'Fresh Milk (1L)', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (210, 5, 12, 10, 'Chocolate Milk', 100.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-(209, 5, 12, 3, 'Fresh Milk (1L)', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(210, 5, 12, 3, 'Chocolate Milk', 100.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (211, 5, 12, 4, 'Ketchup (Sachet)', 2.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (212, 5, 12, 4, 'Mayonnaise (Sachet)', 3.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (213, 5, 12, 4, 'Soy Sauce (Sachet)', 1.50, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -482,40 +457,17 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (218, 5, 12, 4, 'Ranch Dressing', 220.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (219, 5, 12, 4, 'Thousand Island', 210.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (220, 5, 12, 4, 'Caesar Dressing', 230.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-(221, 5, 12, 4, 'Garlic Sauce', 160.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(222, 5, 12, 4, 'Cheese Sauce', 180.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-<<<<<<< HEAD
 (221, 5, 12, 8, 'Garlic Sauce', 160.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (222, 5, 12, 10, 'Cheese Sauce', 180.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-(221, 5, 12, 4, 'Garlic Sauce', 160.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(222, 5, 12, 4, 'Cheese Sauce', 180.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (223, 5, 12, 4, 'Tartar Sauce', 170.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (224, 5, 12, 4, 'Buffalo Sauce', 175.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (225, 5, 12, 4, 'Teriyaki Sauce', 180.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (226, 5, 12, 5, 'Palm Oil (5L)', 420.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (227, 5, 12, 5, 'Canola Oil (5L)', 500.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 (228, 5, 12, 8, 'Corn Oil (5L)', 480.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (229, 5, 12, 5, 'Coconut Oil (5L)', 550.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (230, 5, 12, 5, 'Olive Oil (1L)', 350.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (231, 5, 12, 6, 'Butter (Unsalted)', 185.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
-(228, 5, 12, 5, 'Corn Oil (5L)', 480.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(229, 5, 12, 5, 'Coconut Oil (5L)', 550.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(230, 5, 12, 5, 'Olive Oil (1L)', 350.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(231, 5, 12, 5, 'Butter (Unsalted)', 185.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (232, 5, 12, 5, 'Margarine', 95.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (233, 5, 12, 6, 'Iodized Salt', 28.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (234, 5, 12, 6, 'Rock Salt', 30.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -534,9 +486,6 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (247, 5, 12, 6, 'Five Spice', 145.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (248, 5, 12, 6, 'Lemon Pepper', 105.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (249, 5, 12, 6, 'Italian Seasoning', 125.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 (250, 5, 12, 11, 'White Rice (5kg)', 300.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (251, 5, 12, 11, 'Brown Rice (5kg)', 350.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (252, 5, 12, 11, 'Fried Rice Mix', 60.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -552,27 +501,6 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (262, 5, 12, 8, 'Spring Onions', 75.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (263, 5, 12, 8, 'Ginger', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (264, 5, 12, 3, 'Lemon', 65.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
-(250, 5, 12, 7, 'White Rice (5kg)', 300.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(251, 5, 12, 7, 'Brown Rice (5kg)', 350.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(252, 5, 12, 7, 'Fried Rice Mix', 60.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(253, 5, 12, 7, 'Jasmine Rice (25kg)', 1500.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(254, 5, 12, 7, 'Sticky Rice', 320.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(255, 5, 12, 7, 'Corn Grits', 280.00, 0, 'bags', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(256, 5, 12, 8, 'Onions (Red)', 85.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(257, 5, 12, 8, 'Tomatoes', 70.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(258, 5, 12, 8, 'Cucumber', 50.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(259, 5, 12, 8, 'Bell Pepper (Green)', 90.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(260, 5, 12, 8, 'Bell Pepper (Red)', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(261, 5, 12, 8, 'Celery', 85.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(262, 5, 12, 8, 'Spring Onions', 75.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(263, 5, 12, 8, 'Ginger', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(264, 5, 12, 8, 'Lemon', 65.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (265, 5, 12, 8, 'Calamansi', 70.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (266, 5, 12, 8, 'Chili (Siling Labuyo)', 150.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (267, 5, 12, 8, 'Pickles', 95.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -580,15 +508,7 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (269, 5, 12, 9, 'Hotdog Buns', 14.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (270, 5, 12, 9, 'Dinner Rolls', 12.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (271, 5, 12, 9, 'Pita Bread', 18.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-(272, 5, 12, 9, 'Garlic Bread', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-<<<<<<< HEAD
 (272, 5, 12, 8, 'Garlic Bread', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-(272, 5, 12, 9, 'Garlic Bread', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (273, 5, 12, 9, 'Breadcrumbs', 85.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (274, 5, 12, 9, 'Croutons', 75.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (275, 5, 12, 10, 'Cheese (Parmesan)', 550.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -600,21 +520,9 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (281, 5, 12, 10, 'Yogurt', 75.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (282, 5, 12, 11, 'Frozen Peas', 125.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (283, 5, 12, 11, 'Frozen Mixed Vegetables', 130.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-(284, 5, 12, 11, 'Ice Cream (Chocolate)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(285, 5, 12, 11, 'Ice Cream (Strawberry)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(286, 5, 12, 11, 'Frozen Mozzarella Sticks', 320.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-<<<<<<< HEAD
 (284, 5, 12, 10, 'Ice Cream (Chocolate)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (285, 2, 12, 10, 'Ice Cream (Strawberry)', 350.00, 50, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-12-01 13:41:58'),
 (286, 5, 12, 10, 'Frozen Mozzarella Sticks', 320.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-(284, 5, 12, 11, 'Ice Cream (Chocolate)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(285, 5, 12, 11, 'Ice Cream (Strawberry)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(286, 5, 12, 11, 'Frozen Mozzarella Sticks', 320.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (287, 5, 12, 12, 'Plastic Container (Round)', 15.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (288, 5, 12, 12, 'Plastic Container (Rectangle)', 18.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (289, 5, 12, 12, 'Styrofoam Box', 10.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -638,50 +546,22 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (307, 5, 12, 13, 'Mop Head', 120.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (308, 5, 12, 13, 'Trash Bags (Small)', 45.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (309, 5, 12, 13, 'Rubber Gloves', 150.00, 0, 'pairs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 (310, 5, 12, 10, 'Eggs (Half Dozen)', 50.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (311, 5, 12, 10, 'Quail Eggs', 180.00, 0, 'tray', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (312, 5, 12, 6, 'Salted Eggs', 120.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (313, 5, 12, 10, 'Century Eggs', 150.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
-(310, 5, 12, 14, 'Eggs (Half Dozen)', 50.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(311, 5, 12, 14, 'Quail Eggs', 180.00, 0, 'tray', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(312, 5, 12, 14, 'Salted Eggs', 120.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(313, 5, 12, 14, 'Century Eggs', 150.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (314, 5, 12, 15, 'Batter Mix', 110.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (315, 5, 12, 15, 'Tempura Flour', 130.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (316, 5, 12, 15, 'Seasoned Flour', 100.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (317, 5, 12, 15, 'Cake Flour', 60.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (318, 5, 12, 15, 'Bread Flour', 65.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (319, 5, 12, 16, 'Teriyaki Marinade', 185.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 (320, 5, 12, 8, 'Honey Garlic Marinade', 200.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (321, 5, 12, 16, 'Lemon Herb Marinade', 190.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (322, 5, 12, 16, 'Spicy Marinade', 175.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (323, 5, 12, 6, 'Salt Brine Mix', 85.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (324, 5, 12, 3, 'Pickle Juice', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (325, 5, 12, 8, 'Corn on the Cob', 35.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
-(320, 5, 12, 16, 'Honey Garlic Marinade', 200.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(321, 5, 12, 16, 'Lemon Herb Marinade', 190.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(322, 5, 12, 16, 'Spicy Marinade', 175.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(323, 5, 12, 16, 'Salt Brine Mix', 85.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(324, 5, 12, 16, 'Pickle Juice', 95.00, 0, 'bottles', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(325, 5, 12, 17, 'Corn on the Cob', 35.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-=======
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (326, 5, 12, 17, 'Baked Beans', 55.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (327, 5, 12, 17, 'Potato Salad', 140.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (328, 5, 12, 17, 'Garden Salad Mix', 110.00, 0, 'kg', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -689,15 +569,7 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (330, 5, 12, 18, 'Sprinkles', 65.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (331, 5, 12, 18, 'Cake Mix', 110.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (332, 5, 12, 18, 'Cookies', 75.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-<<<<<<< HEAD
-(333, 5, 12, 18, 'Ice Cream Cones', 45.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-<<<<<<< HEAD
 (333, 5, 12, 10, 'Ice Cream Cones', 45.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-=======
-(333, 5, 12, 18, 'Ice Cream Cones', 45.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 (334, 5, 12, 18, 'Fruit Cocktail', 55.00, 0, 'cans', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (335, 5, 12, 18, 'Leche Flan Mix', 95.00, 0, 'packs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (336, 5, 12, 19, 'Toilet Paper', 75.00, 0, 'rolls', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
@@ -749,16 +621,8 @@ CREATE TABLE `purchase_orders` (
 INSERT INTO `purchase_orders` (`id`, `order_number`, `purchase_request_id`, `supplier_id`, `branch_id`, `status`, `order_date`, `expected_delivery_date`, `actual_delivery_date`, `total_amount`, `approved_by`, `approved_at`, `notes`, `created_at`, `updated_at`) VALUES
 (33, 'PO-20251129-5677', 38, 42, 4, 'approved', '2025-11-29', '2025-12-06', NULL, 18000.00, 2, '2025-11-29 02:57:28', 'Auto-created from approved purchase request', '2025-11-29 02:57:16', '2025-11-29 02:57:28'),
 (34, 'PO-20251129-6834', 39, 11, 5, 'approved', '2025-11-29', '2025-12-06', NULL, 24000.00, 2, '2025-11-29 03:05:41', 'Auto-created from approved purchase request', '2025-11-29 02:59:07', '2025-11-29 03:05:41'),
-<<<<<<< HEAD
-(35, 'PO-20251129-7054', 40, 63, 6, 'approved', '2025-11-29', '2025-12-06', NULL, 9000.00, 2, '2025-11-29 03:05:39', 'Auto-created from approved purchase request', '2025-11-29 03:04:18', '2025-11-29 03:05:39');
-=======
-<<<<<<< HEAD
 (35, 'PO-20251129-7054', 40, 63, 6, 'approved', '2025-11-29', '2025-12-06', NULL, 9000.00, 2, '2025-11-29 03:05:39', 'Auto-created from approved purchase request', '2025-11-29 03:04:18', '2025-11-29 03:05:39'),
 (36, 'PO-20251201-5995', 41, 1, 2, 'approved', '2025-12-01', '2025-12-08', NULL, 17500.00, 2, '2025-12-01 13:40:35', 'Auto-created from approved purchase request', '2025-12-01 13:40:27', '2025-12-01 13:40:35');
-=======
-(35, 'PO-20251129-7054', 40, 63, 6, 'approved', '2025-11-29', '2025-12-06', NULL, 9000.00, 2, '2025-11-29 03:05:39', 'Auto-created from approved purchase request', '2025-11-29 03:04:18', '2025-11-29 03:05:39');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -785,16 +649,8 @@ CREATE TABLE `purchase_order_items` (
 INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
 (32, 33, 298, 150, 120.00, 18000.00, 0, '2025-11-29 02:57:16', '2025-11-29 02:57:16'),
 (33, 34, 113, 200, 120.00, 24000.00, 0, '2025-11-29 02:59:07', '2025-11-29 02:59:07'),
-<<<<<<< HEAD
-(34, 35, 222, 50, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18');
-=======
-<<<<<<< HEAD
 (34, 35, 222, 50, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
 (35, 36, 285, 50, 350.00, 17500.00, 0, '2025-12-01 13:40:27', '2025-12-01 13:40:27');
-=======
-(34, 35, 222, 50, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -826,16 +682,8 @@ CREATE TABLE `purchase_requests` (
 INSERT INTO `purchase_requests` (`id`, `request_number`, `branch_id`, `requested_by`, `status`, `priority`, `total_amount`, `notes`, `approved_by`, `approved_at`, `selected_supplier_id`, `rejection_reason`, `created_at`, `updated_at`) VALUES
 (38, 'PR-20251129-5115', 4, 4, 'converted_to_po', 'urgent', 18000.00, '', 2, '2025-11-29 02:57:16', 42, NULL, '2025-11-29 02:55:52', '2025-11-29 02:57:16'),
 (39, 'PR-20251129-4567', 5, 7, 'converted_to_po', 'low', 24000.00, '', 2, '2025-11-29 02:59:07', 11, NULL, '2025-11-29 02:56:18', '2025-11-29 02:59:07'),
-<<<<<<< HEAD
-(40, 'PR-20251129-1540', 6, 8, 'converted_to_po', 'normal', 9000.00, '', 2, '2025-11-29 03:04:18', 63, NULL, '2025-11-29 02:56:41', '2025-11-29 03:04:18');
-=======
-<<<<<<< HEAD
 (40, 'PR-20251129-1540', 6, 8, 'converted_to_po', 'normal', 9000.00, '', 2, '2025-11-29 03:04:18', 63, NULL, '2025-11-29 02:56:41', '2025-11-29 03:04:18'),
 (41, 'PR-20251201-8406', 2, 12, 'converted_to_po', 'high', 17500.00, '', 2, '2025-12-01 13:40:27', NULL, NULL, '2025-12-01 13:39:02', '2025-12-01 13:40:27');
-=======
-(40, 'PR-20251129-1540', 6, 8, 'converted_to_po', 'normal', 9000.00, '', 2, '2025-11-29 03:04:18', 63, NULL, '2025-11-29 02:56:41', '2025-11-29 03:04:18');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -862,16 +710,8 @@ CREATE TABLE `purchase_request_items` (
 INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `notes`, `created_at`, `updated_at`) VALUES
 (35, 38, 298, 150, 120.00, 18000.00, '', '2025-11-29 02:55:52', '2025-11-29 02:55:52'),
 (36, 39, 113, 200, 120.00, 24000.00, '', '2025-11-29 02:56:18', '2025-11-29 02:56:18'),
-<<<<<<< HEAD
-(37, 40, 222, 50, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41');
-=======
-<<<<<<< HEAD
 (37, 40, 222, 50, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41'),
 (38, 41, 285, 50, 350.00, 17500.00, '', '2025-12-01 13:39:02', '2025-12-01 13:39:02');
-=======
-(37, 40, 222, 50, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -885,6 +725,33 @@ CREATE TABLE `reports` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Inventory Reports for products';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `royalty_payments`
+--
+
+CREATE TABLE `royalty_payments` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `branch_id` int(11) UNSIGNED NOT NULL,
+  `period_month` int(2) NOT NULL,
+  `period_year` int(4) NOT NULL,
+  `gross_sales` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `royalty_rate` decimal(5,2) NOT NULL DEFAULT 5.00,
+  `royalty_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `marketing_fee` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `total_due` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `amount_paid` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `balance` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `status` enum('pending','partial','paid','overdue') NOT NULL DEFAULT 'pending',
+  `due_date` date DEFAULT NULL,
+  `paid_date` date DEFAULT NULL,
+  `payment_reference` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -929,18 +796,10 @@ INSERT INTO `stock_transactions` (`id`, `product_id`, `transaction_type`, `quant
 (16, 88, 'stock_in', 200, 'delivery', 25, 0, 200, 1, 0, 0, '2026-02-18', NULL, 12, '2025-11-27 13:31:24', '2025-11-27 13:31:24'),
 (17, 70, 'stock_out', 150, 'stock_out', NULL, 240, 90, 0, 0, 0, '2026-02-24', 'waste: Buanggggg', 12, '2025-11-27 13:33:23', '2025-11-27 13:33:23'),
 (18, 96, 'stock_in', 25, 'delivery', 27, 200, 225, 1, 0, 0, '2026-11-27', NULL, 4, '2025-11-29 02:50:48', '2025-11-29 02:50:48'),
-<<<<<<< HEAD
-(19, 168, 'stock_in', 100, 'delivery', 29, 40, 140, 1, 0, 0, '2026-11-27', NULL, 8, '2025-11-29 02:51:06', '2025-11-29 02:51:06');
-=======
-<<<<<<< HEAD
 (19, 168, 'stock_in', 100, 'delivery', 29, 40, 140, 1, 0, 0, '2026-11-27', NULL, 8, '2025-11-29 02:51:06', '2025-11-29 02:51:06'),
 (20, 58, 'stock_out', 100, 'stock_out', NULL, 200, 100, 0, 0, 0, '2026-01-26', 'waste', 4, '2025-11-29 11:53:33', '2025-11-29 11:53:33'),
 (21, 58, 'stock_out', 100, 'stock_out', NULL, 100, 0, 0, 0, 0, '2026-01-26', 'waste', 4, '2025-11-29 11:53:33', '2025-11-29 11:53:33'),
 (22, 285, 'stock_in', 50, 'delivery', 33, 0, 50, 1, 0, 0, NULL, NULL, 4, '2025-12-01 13:41:58', '2025-12-01 13:41:58');
-=======
-(19, 168, 'stock_in', 100, 'delivery', 29, 40, 140, 1, 0, 0, '2026-11-27', NULL, 8, '2025-11-29 02:51:06', '2025-11-29 02:51:06');
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 -- --------------------------------------------------------
 
@@ -1035,6 +894,28 @@ INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `email`, `phone`, `addr
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `supply_allocations`
+--
+
+CREATE TABLE `supply_allocations` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `branch_id` int(11) UNSIGNED NOT NULL,
+  `product_id` int(11) UNSIGNED NOT NULL,
+  `allocated_qty` int(11) NOT NULL DEFAULT 0,
+  `unit_price` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `status` enum('pending','approved','shipped','delivered','cancelled') NOT NULL DEFAULT 'pending',
+  `allocation_date` date DEFAULT NULL,
+  `delivery_date` date DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_by` int(11) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -1124,6 +1005,13 @@ ALTER TABLE `delivery_items`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- Indexes for table `franchise_applications`
+--
+ALTER TABLE `franchise_applications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `status` (`status`);
+
+--
 -- Indexes for table `migrations`
 --
 ALTER TABLE `migrations`
@@ -1183,6 +1071,15 @@ ALTER TABLE `reports`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `royalty_payments`
+--
+ALTER TABLE `royalty_payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `branch_id` (`branch_id`),
+  ADD KEY `status` (`status`),
+  ADD KEY `period_year_period_month` (`period_year`,`period_month`);
+
+--
 -- Indexes for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
@@ -1200,6 +1097,14 @@ ALTER TABLE `suppliers`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indexes for table `supply_allocations`
+--
+ALTER TABLE `supply_allocations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `branch_id` (`branch_id`),
+  ADD KEY `status` (`status`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -1215,15 +1120,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `accounts_payable`
 --
 ALTER TABLE `accounts_payable`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `branches`
@@ -1241,105 +1138,55 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `deliveries`
 --
 ALTER TABLE `deliveries`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `delivery_items`
 --
 ALTER TABLE `delivery_items`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
+
+--
+-- AUTO_INCREMENT for table `franchise_applications`
+--
+ALTER TABLE `franchise_applications`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=353;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=355;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=353;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `purchase_order_items`
 --
 ALTER TABLE `purchase_order_items`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `purchase_requests`
 --
 ALTER TABLE `purchase_requests`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `purchase_request_items`
 --
 ALTER TABLE `purchase_request_items`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `reports`
@@ -1348,24 +1195,28 @@ ALTER TABLE `reports`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `royalty_payments`
+--
+ALTER TABLE `royalty_payments`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
-<<<<<<< HEAD
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
-=======
-<<<<<<< HEAD
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-=======
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
->>>>>>> a496b0278e37441ddb3a838f8a09720c22faf329
->>>>>>> eb21e80931eb00ceb522439e7b48c504590e2d0c
 
 --
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+
+--
+-- AUTO_INCREMENT for table `supply_allocations`
+--
+ALTER TABLE `supply_allocations`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
