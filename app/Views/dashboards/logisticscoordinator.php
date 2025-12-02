@@ -392,6 +392,149 @@
                         </div>
                     </div>
 
+                    <!-- Quick Actions & Recent Activity Row -->
+                    <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <!-- Quick Actions -->
+                        <div class="content-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                                <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-bolt" style="font-size: 1.5rem;"></i>
+                                    Quick Actions
+                                </h3>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                <button class="btn btn-primary w-100" onclick="showSection('schedule', event);" style="padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <i class="fas fa-calendar-plus" style="font-size: 1.5rem;"></i>
+                                    <span>Schedule Delivery</span>
+                                </button>
+                                <button class="btn btn-info w-100" onclick="showSection('track', event);" style="padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <i class="fas fa-search" style="font-size: 1.5rem;"></i>
+                                    <span>Track Order</span>
+                                </button>
+                                <button class="btn btn-success w-100" onclick="exportDeliveries()" style="padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <i class="fas fa-file-export" style="font-size: 1.5rem;"></i>
+                                    <span>Export Data</span>
+                                </button>
+                                <button class="btn btn-warning w-100" onclick="printReport()" style="padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <i class="fas fa-print" style="font-size: 1.5rem;"></i>
+                                    <span>Print Report</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="content-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                                <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-history" style="font-size: 1.5rem;"></i>
+                                    Recent Activity
+                                </h3>
+                            </div>
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                <?php 
+                                $recentActivities = [];
+                                if (!empty($scheduledDeliveries)) {
+                                    foreach (array_slice($scheduledDeliveries, 0, 3) as $delivery) {
+                                        $recentActivities[] = [
+                                            'type' => 'scheduled',
+                                            'message' => 'Delivery ' . esc($delivery['delivery_number']) . ' scheduled',
+                                            'time' => !empty($delivery['created_at']) ? $delivery['created_at'] : 'Recently',
+                                            'icon' => 'fa-calendar-check',
+                                            'color' => 'info'
+                                        ];
+                                    }
+                                }
+                                if (!empty($inTransitDeliveries)) {
+                                    foreach (array_slice($inTransitDeliveries, 0, 2) as $delivery) {
+                                        $recentActivities[] = [
+                                            'type' => 'in_transit',
+                                            'message' => 'Delivery ' . esc($delivery['delivery_number']) . ' in transit',
+                                            'time' => !empty($delivery['updated_at']) ? $delivery['updated_at'] : 'Recently',
+                                            'icon' => 'fa-truck',
+                                            'color' => 'warning'
+                                        ];
+                                    }
+                                }
+                                if (empty($recentActivities)):
+                                ?>
+                                    <div style="text-align: center; padding: 30px 20px; color: #64748b;">
+                                        <i class="fas fa-inbox" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+                                        <p style="margin: 0; font-size: 0.9rem;">No recent activity</p>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($recentActivities as $activity): ?>
+                                    <div style="display: flex; align-items: start; gap: 12px; padding: 12px; border-bottom: 1px solid #e5e7eb; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa';" onmouseout="this.style.background='transparent';">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: <?= $activity['color'] === 'info' ? '#0dcaf0' : '#ffc107' ?>20; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                            <i class="fas <?= $activity['icon'] ?>" style="color: <?= $activity['color'] === 'info' ? '#0dcaf0' : '#ffc107' ?>;"></i>
+                                        </div>
+                                        <div style="flex: 1; min-width: 0;">
+                                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500; color: #1e293b;"><?= $activity['message'] ?></p>
+                                            <small style="color: #64748b; font-size: 0.75rem;">
+                                                <i class="fas fa-clock"></i> <?= $activity['time'] ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Calendar Widget -->
+                        <div class="content-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                                <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-calendar-alt" style="font-size: 1.5rem;"></i>
+                                    Upcoming Deliveries
+                                </h3>
+                            </div>
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                <?php 
+                                $upcomingDeliveries = [];
+                                if (!empty($scheduledDeliveries)) {
+                                    foreach ($scheduledDeliveries as $delivery) {
+                                        if (!empty($delivery['scheduled_date'])) {
+                                            $upcomingDeliveries[] = $delivery;
+                                        }
+                                    }
+                                }
+                                usort($upcomingDeliveries, function($a, $b) {
+                                    return strtotime($a['scheduled_date'] ?? '') - strtotime($b['scheduled_date'] ?? '');
+                                });
+                                $upcomingDeliveries = array_slice($upcomingDeliveries, 0, 5);
+                                
+                                if (empty($upcomingDeliveries)):
+                                ?>
+                                    <div style="text-align: center; padding: 30px 20px; color: #64748b;">
+                                        <i class="fas fa-calendar-times" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+                                        <p style="margin: 0; font-size: 0.9rem;">No upcoming deliveries</p>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($upcomingDeliveries as $delivery): ?>
+                                    <div style="display: flex; align-items: start; gap: 12px; padding: 12px; border-bottom: 1px solid #e5e7eb;">
+                                        <div style="width: 50px; text-align: center; flex-shrink: 0;">
+                                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary-green);">
+                                                <?= date('d', strtotime($delivery['scheduled_date'])) ?>
+                                            </div>
+                                            <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase;">
+                                                <?= date('M', strtotime($delivery['scheduled_date'])) ?>
+                                            </div>
+                                        </div>
+                                        <div style="flex: 1; min-width: 0;">
+                                            <p style="margin: 0; font-size: 0.9rem; font-weight: 600; color: #1e293b;">
+                                                <?= esc($delivery['delivery_number']) ?>
+                                            </p>
+                                            <small style="color: #64748b; font-size: 0.75rem;">
+                                                <i class="fas fa-building"></i> <?= esc($delivery['branch']['name'] ?? 'N/A') ?>
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-info" style="font-size: 0.7rem;">Scheduled</span>
+                                    </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Content Cards -->
                     <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
                         <!-- Pending Purchase Orders -->
@@ -3161,6 +3304,140 @@ function ucwords(str) {
 function str_replace(search, replace, subject) {
     return subject ? subject.split(search).join(replace) : '';
 }
+    // Export Deliveries Function
+    function exportDeliveries() {
+        const format = prompt('Export format:\n1. CSV\n2. Excel\n3. PDF\n\nEnter format (1-3):', '1');
+        if (!format) return;
+        
+        let message = 'Exporting deliveries data...\n\n';
+        switch(format) {
+            case '1':
+                message += 'CSV export functionality would be implemented here.';
+                break;
+            case '2':
+                message += 'Excel export functionality would be implemented here.';
+                break;
+            case '3':
+                message += 'PDF export functionality would be implemented here.';
+                break;
+            default:
+                alert('Invalid format selected.');
+                return;
+        }
+        
+        alert(message + '\n\nThis feature requires backend implementation.');
+    }
+
+    // Print Report Function
+    function printReport() {
+        const reportType = prompt('Select report type:\n1. Delivery Summary\n2. Pending Orders\n3. Scheduled Deliveries\n4. Full Report\n\nEnter type (1-4):', '1');
+        if (!reportType) return;
+        
+        const reportTypes = {
+            '1': 'Delivery Summary',
+            '2': 'Pending Orders',
+            '3': 'Scheduled Deliveries',
+            '4': 'Full Report'
+        };
+        
+        alert('Printing ' + (reportTypes[reportType] || 'Report') + '...\n\nThis will open the print dialog.');
+        
+        // Create print window
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>${reportTypes[reportType] || 'Report'}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #2d5016; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #2d5016; color: white; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${reportTypes[reportType] || 'Report'}</h1>
+                    <p>Generated on: ${new Date().toLocaleString()}</p>
+                    <p>This is a sample report. Full implementation would include actual data.</p>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    // Search Functionality
+    function searchDeliveries() {
+        const searchTerm = prompt('Enter search term (Order Number, Supplier, Branch, etc.):', '');
+        if (!searchTerm) return;
+        
+        // This would filter the displayed deliveries
+        $('.delivery-card, .content-card table tbody tr').each(function() {
+            const text = $(this).text().toLowerCase();
+            if (text.includes(searchTerm.toLowerCase())) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        
+        alert('Search completed. Showing results for: ' + searchTerm);
+    }
+
+    // Filter by Status
+    function filterByStatus(status) {
+        $('.delivery-card, .content-card table tbody tr').show();
+        if (status !== 'all') {
+            $('.delivery-card, .content-card table tbody tr').each(function() {
+                const hasStatus = $(this).find('.status-badge, .badge').text().toLowerCase().includes(status.toLowerCase());
+                if (!hasStatus) {
+                    $(this).hide();
+                }
+            });
+        }
+    }
+
+    // Auto-refresh functionality
+    let autoRefreshInterval;
+    function toggleAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+            alert('Auto-refresh disabled.');
+        } else {
+            autoRefreshInterval = setInterval(function() {
+                // Refresh dashboard data
+                location.reload();
+            }, 300000); // 5 minutes
+            alert('Auto-refresh enabled. Page will refresh every 5 minutes.');
+        }
+    }
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+        const notification = $('<div class="notification" style="position: fixed; top: 20px; right: 20px; background: ' + 
+            (type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#0dcaf0') + 
+            '; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; max-width: 300px;">' +
+            '<i class="fas fa-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle') + '"></i> ' +
+            message + '</div>');
+        
+        $('body').append(notification);
+        
+        setTimeout(function() {
+            notification.fadeOut(300, function() {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+
+    // Initialize notifications on page load
+    $(document).ready(function() {
+        // Show welcome notification
+        setTimeout(function() {
+            showNotification('Welcome to Logistics Coordinator Dashboard', 'success');
+        }, 1000);
+    });
 </script>
 </body>
 </html>
