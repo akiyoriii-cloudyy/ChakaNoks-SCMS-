@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Dec 03, 2025 at 03:21 AM
+-- Host: 127.0.0.1
+-- Generation Time: Dec 03, 2025 at 04:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -266,7 +266,7 @@ INSERT INTO `franchise_applications` (`id`, `applicant_name`, `email`, `phone`, 
 (6, 'Michael James Lopez', 'mj.lopez@email.com', '+63 921 789 0123', 'SM City Iloilo', 'Iloilo City', 4200000.00, 'Recent business graduate. Limited practical experience.', 'rejected', 'Insufficient experience and below minimum investment threshold for SM mall location.', 9, '2025-11-30 09:53:46', '2025-11-23 09:53:46', '2025-11-30 09:53:46'),
 (7, 'Santiago Luis Ramos', 'santiago.ramos@cdo-enterprises.com', '+63 922 890 1234', 'Centrio Mall, Claro M. Recto Avenue', 'Cagayan de Oro City', 7000000.00, 'Successful businessman in Northern Mindanao. Owns hardware stores and construction supply business.', 'approved', 'Strong business acumen. Excellent financial standing. Approved for Centrio Mall location.', 9, '2025-11-20 09:53:46', '2025-11-16 09:53:46', '2025-11-20 09:53:46'),
 (8, 'Catherine Rose Mendoza', 'catherine.mendoza@baguio-business.com', '+63 923 901 2345', 'Session Road, Baguio City', 'Baguio City', 6500000.00, '8 years operating a café and gift shop on Session Road. Strong tourist market knowledge.', 'approved', 'Prime tourist location. Experienced local operator. Approved for Session Road location.', 9, '2025-11-25 09:53:46', '2025-11-21 09:53:46', '2025-11-25 09:53:46'),
-(9, 'David Emmanuel Torres', 'david.torres@email.com', '+63 924 012 3456', 'SM City Baguio', 'Baguio City', 5800000.00, '4 years in retail sales. Currently store manager at another retail chain.', 'under_review', 'Good retail experience but needs to clarify financing sources.', 9, '2025-12-03 09:56:23', '2025-11-27 09:53:46', '2025-12-03 09:56:23');
+(9, 'David Emmanuel Torres', 'david.torres@email.com', '+63 924 012 3456', 'SM City Baguio', 'Baguio City', 5800000.00, '4 years in retail sales. Currently store manager at another retail chain.', 'approved', 'Good retail experience but needs to clarify financing sources.', 9, '2025-12-03 16:54:31', '2025-11-27 09:53:46', '2025-12-03 16:54:31');
 
 -- --------------------------------------------------------
 
@@ -475,7 +475,7 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (93, 3, 12, 2, 'Chicken Liver', 120.00, 300, 'kg', 50, 600, '2026-02-22', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (94, 5, 12, 2, 'Chicken Gizzard', 130.00, 280, 'kg', 50, 600, '2026-02-23', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (95, 1, 12, 2, 'Ground Chicken', 240.00, 150, 'kg', 30, 400, '2026-02-15', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
-(96, 2, 12, 3, 'Coca-Cola (1.5L)', 65.00, 225, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-29 02:50:48'),
+(96, 2, 12, 3, 'Coca-Cola (1.5L)', 65.00, 200, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-12-03 16:52:13'),
 (97, 4, 12, 3, 'Sprite (1.5L)', 65.00, 180, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (98, 1, 12, 3, 'Royal (1.5L)', 65.00, 150, 'bottles', 50, 500, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (99, 6, 12, 3, 'Bottled Water (500ml)', 15.00, 500, 'bottles', 100, 1000, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
@@ -1102,11 +1102,11 @@ CREATE TABLE `purchase_order_items` (
 -- Dumping data for table `purchase_order_items`
 --
 
-INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
-(32, 33, 298, 150, 120.00, 18000.00, 0, '2025-11-29 02:57:16', '2025-11-29 02:57:16'),
-(33, 34, 113, 200, 120.00, 24000.00, 0, '2025-11-29 02:59:07', '2025-11-29 02:59:07'),
-(34, 35, 222, 50, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
-(35, 36, 285, 50, 350.00, 17500.00, 0, '2025-12-01 13:40:27', '2025-12-01 13:40:27');
+INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
+(32, 33, 298, 150, NULL, 120.00, 18000.00, 0, '2025-11-29 02:57:16', '2025-11-29 02:57:16'),
+(33, 34, 113, 200, NULL, 120.00, 24000.00, 0, '2025-11-29 02:59:07', '2025-11-29 02:59:07'),
+(34, 35, 222, 50, NULL, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
+(35, 36, 285, 50, NULL, 350.00, 17500.00, 0, '2025-12-01 13:40:27', '2025-12-01 13:40:27');
 
 -- --------------------------------------------------------
 
@@ -1164,11 +1164,11 @@ CREATE TABLE `purchase_request_items` (
 -- Dumping data for table `purchase_request_items`
 --
 
-INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`, `quantity`, `unit_price`, `subtotal`, `notes`, `created_at`, `updated_at`) VALUES
-(35, 38, 298, 150, 120.00, 18000.00, '', '2025-11-29 02:55:52', '2025-11-29 02:55:52'),
-(36, 39, 113, 200, 120.00, 24000.00, '', '2025-11-29 02:56:18', '2025-11-29 02:56:18'),
-(37, 40, 222, 50, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41'),
-(38, 41, 285, 50, 350.00, 17500.00, '', '2025-12-01 13:39:02', '2025-12-01 13:39:02');
+INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`, `quantity`, `unit`, `unit_price`, `subtotal`, `notes`, `created_at`, `updated_at`) VALUES
+(35, 38, 298, 150, NULL, 120.00, 18000.00, '', '2025-11-29 02:55:52', '2025-11-29 02:55:52'),
+(36, 39, 113, 200, NULL, 120.00, 24000.00, '', '2025-11-29 02:56:18', '2025-11-29 02:56:18'),
+(37, 40, 222, 50, NULL, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41'),
+(38, 41, 285, 50, NULL, 350.00, 17500.00, '', '2025-12-01 13:39:02', '2025-12-01 13:39:02');
 
 -- --------------------------------------------------------
 
@@ -1241,7 +1241,7 @@ INSERT INTO `royalty_payments` (`id`, `branch_id`, `period_month`, `period_year`
 (2, 7, 11, 2025, 2586753.00, 5.00, 129337.65, 23466.00, 152803.65, 110018.63, 42785.02, 'partial', '2025-12-01', '2025-11-30', 'REF-287E8C30', 'Monthly royalty for SM City Cebu Branch - November 2025', '2025-11-01 09:53:46', '2025-11-01 09:53:46'),
 (3, 8, 11, 2025, 2597459.00, 5.00, 129872.95, 26160.00, 156032.95, 102981.75, 53051.20, 'partial', '2025-12-01', '2025-12-02', 'REF-5D990E28', 'Monthly royalty for SM Megamall Branch - November 2025', '2025-11-03 09:53:46', '2025-11-03 09:53:46'),
 (4, 8, 10, 2025, 891520.00, 5.00, 44576.00, 29635.00, 74211.00, 74211.00, 0.00, 'paid', '2025-11-01', '2025-12-02', 'REF-26E5CA22', 'Monthly royalty for SM Megamall Branch - October 2025', '2025-11-06 09:53:46', '2025-11-06 09:53:46'),
-(5, 8, 9, 2025, 2806435.00, 5.00, 140321.75, 10079.00, 150400.75, 0.00, 150400.75, 'overdue', '2025-10-01', NULL, NULL, 'Monthly royalty for SM Megamall Branch - September 2025', '2025-11-09 09:53:46', '2025-11-09 09:53:46'),
+(5, 8, 9, 2025, 2806435.00, 5.00, 140321.75, 10079.00, 150400.75, 150400.75, 0.00, 'paid', '2025-10-01', '2025-12-03', 'Bank Transfer', 'Monthly royalty for SM Megamall Branch - September 2025', '2025-11-09 09:53:46', '2025-12-03 16:54:55'),
 (6, 9, 10, 2025, 2768437.00, 5.00, 138421.85, 11226.00, 149647.85, 149647.85, 0.00, 'paid', '2025-11-01', '2025-11-24', 'REF-62C318EC', 'Monthly royalty for Robinsons Place Iloilo Branch - October 2025', '2025-11-08 09:53:46', '2025-11-08 09:53:46'),
 (7, 9, 9, 2025, 2532036.00, 5.00, 126601.80, 28717.00, 155318.80, 0.00, 155318.80, 'overdue', '2025-10-01', NULL, NULL, 'Monthly royalty for Robinsons Place Iloilo Branch - September 2025', '2025-11-11 09:53:46', '2025-11-11 09:53:46'),
 (8, 9, 8, 2025, 2652976.00, 5.00, 132648.80, 15318.00, 147966.80, 0.00, 147966.80, 'pending', '2025-09-01', NULL, NULL, 'Monthly royalty for Robinsons Place Iloilo Branch - August 2025', '2025-11-14 09:53:46', '2025-11-14 09:53:46'),
@@ -1462,6 +1462,13 @@ CREATE TABLE `stock_transactions` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Stock transactions supporting both simple and normalized batch-level tracking';
+
+--
+-- Dumping data for table `stock_transactions`
+--
+
+INSERT INTO `stock_transactions` (`id`, `transaction_number`, `batch_id`, `product_id`, `branch_id`, `transaction_type`, `quantity`, `unit_cost`, `reference_type`, `reference_id`, `stock_before`, `stock_after`, `batch_qty_before`, `batch_qty_after`, `branch_total_before`, `branch_total_after`, `is_new_stock`, `is_expired`, `is_old_stock`, `expiry_date`, `reason`, `notes`, `created_by`, `approved_by`, `transaction_date`, `created_at`, `updated_at`) VALUES
+(1, 'OUT-20251203-165213-854', NULL, 96, 2, 'stock_out', 25, 65.00, 'stock_out', NULL, 225, 200, NULL, NULL, NULL, NULL, 0, 0, 0, '2026-11-27', 'damaged', 'damaged', 12, NULL, '2025-12-03 16:52:13', '2025-12-03 16:52:13', '2025-12-03 16:52:13');
 
 -- --------------------------------------------------------
 
@@ -2064,7 +2071,7 @@ ALTER TABLE `stock_batches`
 -- AUTO_INCREMENT for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
