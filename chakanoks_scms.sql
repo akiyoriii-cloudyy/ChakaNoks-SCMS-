@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 02:22 AM
+-- Host: localhost:3306
+-- Generation Time: Dec 03, 2025 at 03:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -118,7 +118,12 @@ INSERT INTO `branches` (`id`, `code`, `name`, `address`, `franchise_owner_id`, `
 (3, 'TORIL', 'Toril Branch', 'Agton Street, Toril, Davao City, Philippines', NULL, 'company_owned', '2025-11-22 21:55:32', '2025-11-22 21:55:32'),
 (4, 'BUHANGIN', 'Buhangin Branch', 'Buhangin Road, Buhangin Proper, Davao City, Philippines', NULL, 'company_owned', '2025-11-22 21:55:32', '2025-11-22 21:55:32'),
 (5, 'AGDAO', 'Agdao Branch', 'Lapu-Lapu Street, Agdao, Davao City, Philippines', NULL, 'company_owned', '2025-11-22 21:55:32', '2025-11-22 21:55:32'),
-(6, 'LANANG', 'Lanang Branch', 'JP Laurel Avenue, Lanang, Davao City, Philippines', NULL, 'company_owned', '2025-11-22 21:55:32', '2025-11-22 21:55:32');
+(6, 'LANANG', 'Lanang Branch', 'JP Laurel Avenue, Lanang, Davao City, Philippines', NULL, 'company_owned', '2025-11-22 21:55:32', '2025-11-22 21:55:32'),
+(7, 'CEBU01', 'SM City Cebu Branch', 'Juan Luna Avenue, North Reclamation Area, Cebu City, 6000', 1, 'franchised', '2025-11-03 09:53:13', '2025-12-03 10:11:18'),
+(8, 'MANILA01', 'SM Megamall Branch', 'EDSA corner Doña Julia Vargas Avenue, Ortigas Center, Mandaluyong City, Metro Manila', 2, 'franchised', '2025-11-08 09:53:13', '2025-12-03 10:11:18'),
+(9, 'ILOILO01', 'Robinsons Place Iloilo Branch', 'Quezon Street corner Ledesma Street, Iloilo City Proper, Iloilo City, 5000', 3, 'franchised', '2025-11-13 09:53:13', '2025-12-03 10:11:18'),
+(10, 'CDO01', 'Centrio Mall Branch', 'Claro M. Recto Avenue, Carmen, Cagayan de Oro City, 9000', 4, 'franchised', '2025-11-18 09:53:13', '2025-12-03 10:11:18'),
+(11, 'BAGUIO01', 'Session Road Branch', 'Session Road, Baguio City, Benguet, 2600', 5, 'franchised', '2025-11-23 09:53:13', '2025-12-03 10:11:18');
 
 -- --------------------------------------------------------
 
@@ -248,6 +253,21 @@ CREATE TABLE `franchise_applications` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `franchise_applications`
+--
+
+INSERT INTO `franchise_applications` (`id`, `applicant_name`, `email`, `phone`, `proposed_location`, `city`, `investment_capital`, `business_experience`, `status`, `notes`, `reviewed_by`, `reviewed_at`, `created_at`, `updated_at`) VALUES
+(1, 'Maria Clara Santos', 'maria.santos@cebu-business.com', '+63 917 234 5678', 'SM City Cebu, North Reclamation Area', 'Cebu City', 8500000.00, 'MBA graduate with 5 years experience in retail management. Currently operates 2 successful convenience stores in Cebu.', 'approved', 'Excellent qualifications. Strong local market knowledge. Approved for SM City Cebu location.', 9, '2025-11-05 09:53:46', '2025-11-01 09:53:46', '2025-11-05 09:53:46'),
+(2, 'Juan Carlos Reyes', 'jc.reyes@email.com', '+63 918 345 6789', 'Ayala Center Cebu', 'Cebu City', 6000000.00, 'First-time franchisee but has business degree and family retail background.', 'under_review', 'Under evaluation. Scheduled for site visit next week.', 9, '2025-11-28 09:53:46', '2025-11-21 09:53:46', '2025-11-28 09:53:46'),
+(3, 'Roberto Antonio Tan', 'roberto.tan@manila-ventures.com', '+63 915 456 7890', 'SM Megamall, Ortigas Center', 'Mandaluyong City', 12000000.00, 'Owns 3 successful restaurants in Metro Manila. 10+ years in food and retail industry. Strong financial backing.', 'approved', 'Premium location approved. High-capacity franchisee with proven track record.', 9, '2025-11-10 09:53:46', '2025-11-06 09:53:46', '2025-11-10 09:53:46'),
+(4, 'Patricia Anne Cruz', 'patricia.cruz@email.com', '+63 920 567 8901', 'Bonifacio Global City', 'Taguig City', 10000000.00, 'Corporate executive with MBA. Looking to start own business. No prior retail experience.', 'under_review', 'Strong financial capacity but lacks retail experience. Considering acceptance with training program.', 9, '2025-12-03 10:16:57', '2025-11-25 09:53:46', '2025-12-03 10:16:57'),
+(5, 'Ana Marie Garcia', 'ana.garcia@iloilo-retail.com', '+63 919 678 9012', 'Robinsons Place Iloilo', 'Iloilo City', 5500000.00, 'Family owns established retail business in Iloilo. 7 years in business management.', 'approved', 'Local market expert. Family business background. Approved for Robinsons Place location.', 9, '2025-11-15 09:53:46', '2025-11-11 09:53:46', '2025-11-15 09:53:46'),
+(6, 'Michael James Lopez', 'mj.lopez@email.com', '+63 921 789 0123', 'SM City Iloilo', 'Iloilo City', 4200000.00, 'Recent business graduate. Limited practical experience.', 'rejected', 'Insufficient experience and below minimum investment threshold for SM mall location.', 9, '2025-11-30 09:53:46', '2025-11-23 09:53:46', '2025-11-30 09:53:46'),
+(7, 'Santiago Luis Ramos', 'santiago.ramos@cdo-enterprises.com', '+63 922 890 1234', 'Centrio Mall, Claro M. Recto Avenue', 'Cagayan de Oro City', 7000000.00, 'Successful businessman in Northern Mindanao. Owns hardware stores and construction supply business.', 'approved', 'Strong business acumen. Excellent financial standing. Approved for Centrio Mall location.', 9, '2025-11-20 09:53:46', '2025-11-16 09:53:46', '2025-11-20 09:53:46'),
+(8, 'Catherine Rose Mendoza', 'catherine.mendoza@baguio-business.com', '+63 923 901 2345', 'Session Road, Baguio City', 'Baguio City', 6500000.00, '8 years operating a café and gift shop on Session Road. Strong tourist market knowledge.', 'approved', 'Prime tourist location. Experienced local operator. Approved for Session Road location.', 9, '2025-11-25 09:53:46', '2025-11-21 09:53:46', '2025-11-25 09:53:46'),
+(9, 'David Emmanuel Torres', 'david.torres@email.com', '+63 924 012 3456', 'SM City Baguio', 'Baguio City', 5800000.00, '4 years in retail sales. Currently store manager at another retail chain.', 'under_review', 'Good retail experience but needs to clarify financing sources.', 9, '2025-12-03 09:56:23', '2025-11-27 09:53:46', '2025-12-03 09:56:23');
+
 -- --------------------------------------------------------
 
 --
@@ -268,6 +288,17 @@ CREATE TABLE `franchise_owners` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Franchise owners (normalized from branches)';
+
+--
+-- Dumping data for table `franchise_owners`
+--
+
+INSERT INTO `franchise_owners` (`id`, `owner_name`, `email`, `phone`, `address`, `tax_id`, `business_license`, `status`, `joined_date`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 'Maria Clara Santos', 'maria.santos@cebu-business.com', '+63 917 234 5678', 'Unit 3B, Pacific Plaza Towers, Archbishop Reyes Avenue, Lahug, Cebu City, 6000', '123-456-789-000', 'CEBU-BL-2025-001234', 'active', '2025-11-03', 'MBA graduate with 5 years retail management experience. Operates 2 successful convenience stores in Cebu. Approved for SM City Cebu franchise.', '2025-11-03 10:11:18', '2025-11-03 10:11:18'),
+(2, 'Roberto Antonio Tan', 'roberto.tan@manila-ventures.com', '+63 915 456 7890', '25th Floor, Discovery Center, ADB Avenue, Ortigas Center, Pasig City, Metro Manila', '234-567-890-000', 'MANILA-BL-2025-005678', 'active', '2025-11-08', 'Owns 3 successful restaurants in Metro Manila. 10+ years in food and retail industry. Strong financial backing. Premium franchisee for SM Megamall location.', '2025-11-08 10:11:18', '2025-11-08 10:11:18'),
+(3, 'Ana Marie Garcia', 'ana.garcia@iloilo-retail.com', '+63 919 678 9012', 'Garcia Building, Quezon Street, Iloilo City Proper, Iloilo, 5000', '345-678-901-000', 'ILOILO-BL-2025-002345', 'active', '2025-11-13', 'Family owns established retail business in Iloilo. 7 years in business management. Local market expert with deep community connections.', '2025-11-13 10:11:18', '2025-11-13 10:11:18'),
+(4, 'Santiago Luis Ramos', 'santiago.ramos@cdo-enterprises.com', '+63 922 890 1234', 'Ramos Commercial Complex, Corrales Avenue, Cagayan de Oro City, 9000', '456-789-012-000', 'CDO-BL-2025-003456', 'active', '2025-11-18', 'Successful businessman in Northern Mindanao. Owns hardware stores and construction supply business. Excellent financial standing and business acumen.', '2025-11-18 10:11:18', '2025-11-18 10:11:18'),
+(5, 'Catherine Rose Mendoza', 'catherine.mendoza@baguio-business.com', '+63 923 901 2345', 'Mendoza Building, Upper Session Road, Baguio City, Benguet, 2600', '567-890-123-000', 'BAGUIO-BL-2025-004567', 'active', '2025-11-23', '8 years operating a café and gift shop on Session Road. Strong tourist market knowledge and established local presence.', '2025-11-23 10:11:18', '2025-11-23 10:11:18');
 
 -- --------------------------------------------------------
 
@@ -326,7 +357,8 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (34, '2025-12-03-000009', 'App\\Database\\Migrations\\CreateSupplierPerformanceTable', 'default', 'App', 1764721838, 7),
 (35, '2025-12-03-000010', 'App\\Database\\Migrations\\CreateAuditTrailTable', 'default', 'App', 1764722058, 8),
 (36, '2025-12-03-000011', 'App\\Database\\Migrations\\MigrateDataToNormalizedStructure', 'default', 'App', 1764722059, 8),
-(37, '2025-12-03-000012', 'App\\Database\\Migrations\\NormalizeAccountsPayableTable', 'default', 'App', 1764724564, 9);
+(37, '2025-12-03-000012', 'App\\Database\\Migrations\\NormalizeAccountsPayableTable', 'default', 'App', 1764724564, 9),
+(38, '2025-12-03-100000', 'App\\Database\\Migrations\\AddForeignKeysToFranchiseTables', 'default', 'App', 1764726252, 10);
 
 -- --------------------------------------------------------
 
@@ -1198,6 +1230,26 @@ CREATE TABLE `royalty_payments` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `royalty_payments`
+--
+
+INSERT INTO `royalty_payments` (`id`, `branch_id`, `period_month`, `period_year`, `gross_sales`, `royalty_rate`, `royalty_amount`, `marketing_fee`, `total_due`, `amount_paid`, `balance`, `status`, `due_date`, `paid_date`, `payment_reference`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 7, 12, 2025, 2545525.00, 5.00, 127276.25, 23299.00, 150575.25, 0.00, 150575.25, 'pending', '2026-01-01', NULL, NULL, 'Monthly royalty for SM City Cebu Branch - December 2025', '2025-10-29 09:53:46', '2025-10-29 09:53:46'),
+(2, 7, 11, 2025, 2586753.00, 5.00, 129337.65, 23466.00, 152803.65, 110018.63, 42785.02, 'partial', '2025-12-01', '2025-11-30', 'REF-287E8C30', 'Monthly royalty for SM City Cebu Branch - November 2025', '2025-11-01 09:53:46', '2025-11-01 09:53:46'),
+(3, 8, 11, 2025, 2597459.00, 5.00, 129872.95, 26160.00, 156032.95, 102981.75, 53051.20, 'partial', '2025-12-01', '2025-12-02', 'REF-5D990E28', 'Monthly royalty for SM Megamall Branch - November 2025', '2025-11-03 09:53:46', '2025-11-03 09:53:46'),
+(4, 8, 10, 2025, 891520.00, 5.00, 44576.00, 29635.00, 74211.00, 74211.00, 0.00, 'paid', '2025-11-01', '2025-12-02', 'REF-26E5CA22', 'Monthly royalty for SM Megamall Branch - October 2025', '2025-11-06 09:53:46', '2025-11-06 09:53:46'),
+(5, 8, 9, 2025, 2806435.00, 5.00, 140321.75, 10079.00, 150400.75, 0.00, 150400.75, 'overdue', '2025-10-01', NULL, NULL, 'Monthly royalty for SM Megamall Branch - September 2025', '2025-11-09 09:53:46', '2025-11-09 09:53:46'),
+(6, 9, 10, 2025, 2768437.00, 5.00, 138421.85, 11226.00, 149647.85, 149647.85, 0.00, 'paid', '2025-11-01', '2025-11-24', 'REF-62C318EC', 'Monthly royalty for Robinsons Place Iloilo Branch - October 2025', '2025-11-08 09:53:46', '2025-11-08 09:53:46'),
+(7, 9, 9, 2025, 2532036.00, 5.00, 126601.80, 28717.00, 155318.80, 0.00, 155318.80, 'overdue', '2025-10-01', NULL, NULL, 'Monthly royalty for Robinsons Place Iloilo Branch - September 2025', '2025-11-11 09:53:46', '2025-11-11 09:53:46'),
+(8, 9, 8, 2025, 2652976.00, 5.00, 132648.80, 15318.00, 147966.80, 0.00, 147966.80, 'pending', '2025-09-01', NULL, NULL, 'Monthly royalty for Robinsons Place Iloilo Branch - August 2025', '2025-11-14 09:53:46', '2025-11-14 09:53:46'),
+(9, 10, 9, 2025, 2399970.00, 5.00, 119998.50, 26650.00, 146648.50, 0.00, 146648.50, 'overdue', '2025-10-01', NULL, NULL, 'Monthly royalty for Centrio Mall Branch - September 2025', '2025-11-13 09:53:46', '2025-11-13 09:53:46'),
+(10, 10, 8, 2025, 2496642.00, 5.00, 124832.10, 12639.00, 137471.10, 0.00, 137471.10, 'pending', '2025-09-01', NULL, NULL, 'Monthly royalty for Centrio Mall Branch - August 2025', '2025-11-16 09:53:46', '2025-11-16 09:53:46'),
+(11, 10, 7, 2025, 1611318.00, 5.00, 80565.90, 23956.00, 104521.90, 66894.02, 37627.88, 'partial', '2025-08-01', '2025-11-29', 'REF-07B17ECA', 'Monthly royalty for Centrio Mall Branch - July 2025', '2025-11-19 09:53:46', '2025-11-19 09:53:46'),
+(12, 11, 8, 2025, 2622847.00, 5.00, 131142.35, 12967.00, 144109.35, 0.00, 144109.35, 'pending', '2025-09-01', NULL, NULL, 'Monthly royalty for Session Road Branch - August 2025', '2025-11-18 09:53:46', '2025-11-18 09:53:46'),
+(13, 11, 7, 2025, 2622483.00, 5.00, 131124.15, 18108.00, 149232.15, 114908.76, 34323.39, 'partial', '2025-08-01', '2025-11-28', 'REF-B7262886', 'Monthly royalty for Session Road Branch - July 2025', '2025-11-21 09:53:46', '2025-11-21 09:53:46'),
+(14, 11, 6, 2025, 2944762.00, 5.00, 147238.10, 24525.00, 171763.10, 171763.10, 0.00, 'paid', '2025-07-01', '2025-11-30', 'REF-D8E73419', 'Monthly royalty for Session Road Branch - June 2025', '2025-11-24 09:53:46', '2025-11-24 09:53:46');
+
 -- --------------------------------------------------------
 
 --
@@ -1543,6 +1595,23 @@ CREATE TABLE `supply_allocations` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `supply_allocations`
+--
+
+INSERT INTO `supply_allocations` (`id`, `branch_id`, `product_id`, `allocated_qty`, `unit_price`, `total_amount`, `status`, `allocation_date`, `delivery_date`, `notes`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 7, 55, 466, 250.00, 116500.00, 'pending', '2025-11-08', '2025-12-10', 'Initial supply allocation for SM City Cebu Branch - 1 of 2', 9, '2025-11-08 09:53:46', '2025-11-08 09:53:46'),
+(2, 7, 61, 488, 250.00, 122000.00, 'approved', '2025-11-09', '2025-12-13', 'Initial supply allocation for SM City Cebu Branch - 2 of 2', 9, '2025-11-09 09:53:46', '2025-11-09 09:53:46'),
+(3, 8, 53, 402, 200.00, 80400.00, 'approved', '2025-11-11', '2025-12-10', 'Initial supply allocation for SM Megamall Branch - 1 of 2', 9, '2025-11-11 09:53:46', '2025-11-11 09:53:46'),
+(4, 8, 68, 330, 80.00, 26400.00, 'shipped', '2025-11-12', '2025-12-13', 'Initial supply allocation for SM Megamall Branch - 2 of 2', 9, '2025-11-12 09:53:46', '2025-11-12 09:53:46'),
+(5, 9, 67, 397, 90.00, 35730.00, 'shipped', '2025-11-14', '2025-12-10', 'Initial supply allocation for Robinsons Place Iloilo Branch - 1 of 2', 9, '2025-11-14 09:53:46', '2025-11-14 09:53:46'),
+(6, 9, 52, 492, 200.00, 98400.00, 'delivered', '2025-11-15', '2025-12-13', 'Initial supply allocation for Robinsons Place Iloilo Branch - 2 of 2', 9, '2025-11-15 09:53:46', '2025-11-15 09:53:46'),
+(7, 10, 55, 430, 250.00, 107500.00, 'delivered', '2025-11-17', '2025-12-10', 'Initial supply allocation for Centrio Mall Branch - 1 of 3', 9, '2025-11-17 09:53:46', '2025-11-17 09:53:46'),
+(8, 10, 59, 261, 175.00, 45675.00, 'pending', '2025-11-18', '2025-12-13', 'Initial supply allocation for Centrio Mall Branch - 2 of 3', 9, '2025-11-18 09:53:46', '2025-11-18 09:53:46'),
+(9, 10, 52, 358, 200.00, 71600.00, 'approved', '2025-11-19', '2025-12-16', 'Initial supply allocation for Centrio Mall Branch - 3 of 3', 9, '2025-11-19 09:53:46', '2025-11-19 09:53:46'),
+(10, 11, 53, 141, 200.00, 28200.00, 'pending', '2025-11-20', '2025-12-10', 'Initial supply allocation for Session Road Branch - 1 of 2', 9, '2025-11-20 09:53:46', '2025-11-20 09:53:46'),
+(11, 11, 64, 149, 180.00, 26820.00, 'approved', '2025-11-21', '2025-12-13', 'Initial supply allocation for Session Road Branch - 2 of 2', 9, '2025-11-21 09:53:46', '2025-11-21 09:53:46');
+
 -- --------------------------------------------------------
 
 --
@@ -1657,7 +1726,9 @@ ALTER TABLE `delivery_items`
 --
 ALTER TABLE `franchise_applications`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `status` (`status`);
+  ADD KEY `status` (`status`),
+  ADD KEY `idx_franchise_applications_email` (`email`),
+  ADD KEY `idx_franchise_applications_reviewed_by` (`reviewed_by`);
 
 --
 -- Indexes for table `franchise_owners`
@@ -1772,7 +1843,9 @@ ALTER TABLE `royalty_payments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `branch_id` (`branch_id`),
   ADD KEY `status` (`status`),
-  ADD KEY `period_year_period_month` (`period_year`,`period_month`);
+  ADD KEY `period_year_period_month` (`period_year`,`period_month`),
+  ADD KEY `idx_royalty_payments_due_date` (`due_date`),
+  ADD KEY `idx_royalty_payments_paid_date` (`paid_date`);
 
 --
 -- Indexes for table `stock_batches`
@@ -1826,7 +1899,10 @@ ALTER TABLE `supplier_performance_metrics`
 ALTER TABLE `supply_allocations`
   ADD PRIMARY KEY (`id`),
   ADD KEY `branch_id` (`branch_id`),
-  ADD KEY `status` (`status`);
+  ADD KEY `status` (`status`),
+  ADD KEY `idx_supply_allocations_product` (`product_id`),
+  ADD KEY `idx_supply_allocations_date` (`allocation_date`),
+  ADD KEY `idx_supply_allocations_created_by` (`created_by`);
 
 --
 -- Indexes for table `users`
@@ -1862,7 +1938,7 @@ ALTER TABLE `auth_logs`
 -- AUTO_INCREMENT for table `branches`
 --
 ALTER TABLE `branches`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1886,19 +1962,19 @@ ALTER TABLE `delivery_items`
 -- AUTO_INCREMENT for table `franchise_applications`
 --
 ALTER TABLE `franchise_applications`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `franchise_owners`
 --
 ALTER TABLE `franchise_owners`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
@@ -1964,7 +2040,7 @@ ALTER TABLE `reports`
 -- AUTO_INCREMENT for table `royalty_payments`
 --
 ALTER TABLE `royalty_payments`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `stock_batches`
@@ -1994,7 +2070,7 @@ ALTER TABLE `supplier_performance_metrics`
 -- AUTO_INCREMENT for table `supply_allocations`
 --
 ALTER TABLE `supply_allocations`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -2047,6 +2123,12 @@ ALTER TABLE `deliveries`
 ALTER TABLE `delivery_items`
   ADD CONSTRAINT `fk_delivery_items_delivery` FOREIGN KEY (`delivery_id`) REFERENCES `deliveries` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_delivery_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `franchise_applications`
+--
+ALTER TABLE `franchise_applications`
+  ADD CONSTRAINT `fk_franchise_applications_reviewed_by` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `password_reset_tokens`
@@ -2116,6 +2198,12 @@ ALTER TABLE `purchase_request_quotations`
   ADD CONSTRAINT `fk_quotations_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Constraints for table `royalty_payments`
+--
+ALTER TABLE `royalty_payments`
+  ADD CONSTRAINT `fk_royalty_payments_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `stock_batches`
 --
 ALTER TABLE `stock_batches`
@@ -2141,6 +2229,14 @@ ALTER TABLE `stock_transactions`
 --
 ALTER TABLE `supplier_performance_metrics`
   ADD CONSTRAINT `fk_supplier_performance_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `supply_allocations`
+--
+ALTER TABLE `supply_allocations`
+  ADD CONSTRAINT `fk_supply_allocations_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_supply_allocations_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_supply_allocations_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `users`
