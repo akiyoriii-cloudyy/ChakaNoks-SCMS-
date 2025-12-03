@@ -2,16 +2,19 @@
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\PasswordResetTokenModel;
 use CodeIgniter\I18n\Time;
 
 class Forgot extends BaseController
 {
     protected $userModel;
+    protected $tokenModel;
     protected $session;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->tokenModel = new PasswordResetTokenModel();
         $this->session   = session();
     }
 
@@ -66,12 +69,14 @@ class Forgot extends BaseController
         $otpCode      = (string) random_int(100000, 999999);
         $otpExpires   = Time::now()->addMinutes(10);
 
-        $this->userModel->update($user['id'], [
-            'reset_token'   => $token,
-            'token_expires' => $tokenExpires->toDateTimeString(),
-            'reset_otp'     => $otpCode,
-            'otp_expires'   => $otpExpires->toDateTimeString(),
-        ]);
+        // Store in password_reset_tokens table (normalized structure)
+        $this->tokenModel->createToken(
+            $user['id'],
+            $token,
+            $otpCode,
+            $otpExpires->toDateTimeString(),
+            $tokenExpires->toDateTimeString()
+        );
 
         $resetLink = base_url("auth/reset-password?token=" . $token);
         $userName  = $user['username'] ?? $user['name'] ?? 'User';
@@ -93,27 +98,17 @@ class Forgot extends BaseController
             <p>— Chakanoks SCMS Team</p>
         ";
 
-        // ✅ Fresh email config (from .env)
-        $emailConfig = [
-            'protocol'    => 'smtp',
-            'SMTPHost'    => env('email.SMTPHost', 'smtp.gmail.com'),
-            'SMTPUser'    => env('email.SMTPUser'),
-            'SMTPPass'    => env('email.SMTPPass'),
-            'SMTPPort'    => (int) env('email.SMTPPort', 587),
-            'SMTPCrypto'  => env('email.SMTPCrypto', 'tls'),
-            'mailType'    => 'html',
-            'charset'     => 'utf-8',
-            'newline'     => "\r\n",
-            'crlf'        => "\r\n",
-            'wordWrap'    => true,
-            'SMTPTimeout' => (int) env('email.SMTPTimeout', 30),
-        ];
-
-        // ✅ Always new service (no shared instance)
+        // ✅ Use Email config (includes your Gmail App Password)
+        $emailConfig = config('Email');
+        
+        // Ensure SMTPPort is integer (critical for fsockopen)
+        $emailConfig->SMTPPort = (int) $emailConfig->SMTPPort;
+        $emailConfig->SMTPTimeout = (int) ($emailConfig->SMTPTimeout ?? 30);
+        
         $email = \Config\Services::email($emailConfig, false);
 
-        $fromEmail = env('email.fromEmail', $emailConfig['SMTPUser']);
-        $fromName  = env('email.fromName', 'CHAKANOKS SCMS');
+        $fromEmail = $emailConfig->fromEmail;
+        $fromName  = $emailConfig->fromName;
 
         try {
             $email->setFrom($fromEmail, $fromName);
@@ -175,27 +170,20 @@ class Forgot extends BaseController
             $user = (array) $user;
         }
 
-        // Validate OTP
-        if (empty($user['reset_otp']) || empty($user['otp_expires'])) {
-            return redirect()->back()->with('error', 'No OTP request found. Please request a new reset.');
+        // Validate OTP using new password_reset_tokens table
+        $tokenData = $this->tokenModel->verifyOTP($user['id'], $otp);
+        
+        if (!$tokenData) {
+            return redirect()->back()->with('error', 'Invalid or expired OTP code. Please request a new reset.');
         }
 
-        if ($user['reset_otp'] !== $otp) {
-            return redirect()->back()->with('error', 'Invalid OTP code.');
-        }
-
-        if (Time::now()->isAfter($user['otp_expires'])) {
-            return redirect()->back()->with('error', 'OTP has expired. Please request a new one.');
-        }
-
-        // Update password and clear reset fields
+        // Update password
         $this->userModel->update($user['id'], [
-            'password'      => password_hash($password, PASSWORD_DEFAULT),
-            'reset_token'   => null,
-            'token_expires' => null,
-            'reset_otp'     => null,
-            'otp_expires'   => null,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
         ]);
+
+        // Mark token as used
+        $this->tokenModel->markAsUsed($tokenData['id']);
 
         return redirect()->to('auth/login')->with('success', '✅ Password updated. You can now log in.');
     }

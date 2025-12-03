@@ -2,16 +2,19 @@
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\PasswordResetTokenModel;
 use CodeIgniter\I18n\Time;
 
 class ResetPassword extends BaseController
 {
     protected $userModel;
+    protected $tokenModel;
     protected $session;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->tokenModel = new PasswordResetTokenModel();
         $this->session   = session();
     }
 
@@ -26,18 +29,11 @@ class ResetPassword extends BaseController
             return redirect()->to('auth/forgot')->with('error', 'Invalid reset token.');
         }
 
-        $user = $this->userModel->where('reset_token', $token)->first();
+        // Verify token using new password_reset_tokens table
+        $tokenData = $this->tokenModel->verifyToken($token);
 
-        if (!$user) {
-            return redirect()->to('auth/forgot')->with('error', 'Invalid reset link.');
-        }
-
-        if (is_object($user)) {
-            $user = (array) $user;
-        }
-
-        if (Time::now()->isAfter($user['token_expires'])) {
-            return redirect()->to('auth/forgot')->with('error', 'Reset link expired.');
+        if (!$tokenData) {
+            return redirect()->to('auth/forgot')->with('error', 'Invalid or expired reset link.');
         }
 
         return view('auth/reset_password', ['token' => $token]);
@@ -65,28 +61,20 @@ class ResetPassword extends BaseController
             return redirect()->back()->with('error', 'Password must be at least 8 characters long.');
         }
 
-        $user = $this->userModel->where('reset_token', $token)->first();
+        // Verify token using new password_reset_tokens table
+        $tokenData = $this->tokenModel->verifyToken($token);
 
-        if (!$user) {
-            return redirect()->to('auth/forgot')->with('error', 'Invalid reset link.');
+        if (!$tokenData) {
+            return redirect()->to('auth/forgot')->with('error', 'Invalid or expired reset link.');
         }
 
-        if (is_object($user)) {
-            $user = (array) $user;
-        }
-
-        if (Time::now()->isAfter($user['token_expires'])) {
-            return redirect()->to('auth/forgot')->with('error', 'Reset link expired.');
-        }
-
-        // ✅ Update password & clear reset/OTP fields
-        $this->userModel->update($user['id'], [
-            'password'      => password_hash($password, PASSWORD_DEFAULT),
-            'reset_token'   => null,
-            'token_expires' => null,
-            'otp_code'      => null,
-            'otp_expires'   => null,
+        // Update password
+        $this->userModel->update($tokenData['user_id'], [
+            'password' => password_hash($password, PASSWORD_DEFAULT),
         ]);
+
+        // Mark token as used
+        $this->tokenModel->markAsUsed($tokenData['id']);
 
         return redirect()->to('auth/login')->with('success', '✅ Password updated. You can now log in.');
     }

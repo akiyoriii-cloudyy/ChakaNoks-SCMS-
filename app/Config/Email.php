@@ -6,14 +6,18 @@ class Email extends BaseConfig
 {
     public $protocol   = 'smtp';
     public $SMTPHost   = 'smtp.gmail.com';
-    public $SMTPUser   = 'chakanoks.system@gmail.com';
-    public $SMTPPass   = 'vvivsynirqzlwgai';
-    public $SMTPPort   = 465;
-    public $SMTPCrypto = 'ssl';
+    public $SMTPUser   = 'mansuetomarky@gmail.com';
+    public $SMTPPass   = 'jzbrbmtrwdfoieyc'; // Gmail App Password (spaces removed)
+    public $SMTPPort   = 587;
+    public $SMTPCrypto = 'tls';
     public $mailType   = 'html';
     public $charset    = 'utf-8';
     public $newline    = "\r\n";
     public $wordWrap   = true;
+    public $SMTPTimeout = 30;
+
+    public $fromEmail  = 'mansuetomarky@gmail.com';
+    public $fromName   = 'CHAKANOKS SCMS';
 
     public function __construct()
     {
@@ -29,5 +33,7 @@ class Email extends BaseConfig
         $this->mailType   = getenv('email.mailType') ?: $this->mailType;
         $this->charset    = getenv('email.charset') ?: $this->charset;
         $this->newline    = getenv('email.newline') ?: $this->newline;
+        $this->fromEmail  = getenv('email.fromEmail') ?: $this->fromEmail;
+        $this->fromName   = getenv('email.fromName') ?: $this->fromName;
     }
 }

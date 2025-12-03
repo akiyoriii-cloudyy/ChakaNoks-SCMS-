@@ -9,42 +9,39 @@ class EmailTest extends BaseController
 {
     public function sendTest()
     {
-        // 📌 Load values from .env
-        $fromEmail = env('email.fromEmail');
-        $fromName  = env('email.fromName');
-        $to        = env('email.SMTPUser'); // send test to yourself
+        // Use Email config with updated App Password
+        $emailConfig = config('Email');
+        
+        // Ensure SMTPPort is integer (critical for fsockopen)
+        $smtpPort = (int) $emailConfig->SMTPPort;
+        $smtpTimeout = (int) ($emailConfig->SMTPTimeout ?? 30);
+        
+        $fromEmail = $emailConfig->fromEmail;
+        $fromName  = $emailConfig->fromName;
+        $to        = $emailConfig->SMTPUser; // send test to yourself
 
-        // Try TLS:587 first, then fallback to SSL:465 if socket cannot connect
+        // Try configured settings first
         $attempts = [
             [
-                'label'       => 'TLS:587',
-                'protocol'    => 'smtp',
-                'SMTPHost'    => env('email.SMTPHost', 'smtp.gmail.com'),
-                'SMTPUser'    => env('email.SMTPUser'),
-                'SMTPPass'    => env('email.SMTPPass'),
-                'SMTPPort'    => 587,
-                'SMTPCrypto'  => 'tls',
-            ],
-            [
-                'label'       => 'SSL:465',
-                'protocol'    => 'smtp',
-                'SMTPHost'    => env('email.SMTPHost', 'smtp.gmail.com'),
-                'SMTPUser'    => env('email.SMTPUser'),
-                'SMTPPass'    => env('email.SMTPPass'),
-                'SMTPPort'    => 465,
-                'SMTPCrypto'  => 'ssl',
+                'label'       => 'Configured (' . $emailConfig->SMTPCrypto . ':' . $smtpPort . ')',
+                'protocol'    => $emailConfig->protocol,
+                'SMTPHost'    => $emailConfig->SMTPHost,
+                'SMTPUser'    => $emailConfig->SMTPUser,
+                'SMTPPass'    => $emailConfig->SMTPPass,
+                'SMTPPort'    => $smtpPort,
+                'SMTPCrypto'  => $emailConfig->SMTPCrypto,
+                'SMTPTimeout' => $smtpTimeout,
             ],
         ];
 
         $logs = [];
         foreach ($attempts as $cfg) {
-            $config = array_merge($cfg, [
-                'mailType'    => env('email.mailType', 'html'),
-                'charset'     => env('email.charset', 'utf-8'),
-                'newline'     => env('email.newline', "\r\n"),
-                'crlf'        => env('email.crlf', "\r\n"),
-                'SMTPTimeout' => (int) env('email.SMTPTimeout', 30),
-            ]);
+            $config = $cfg; // Already includes SMTPPort and SMTPTimeout as integers
+            $config['mailType'] = $emailConfig->mailType;
+            $config['charset'] = $emailConfig->charset;
+            $config['newline'] = $emailConfig->newline;
+            $config['crlf'] = "\r\n";
+            $config['wordWrap'] = $emailConfig->wordWrap;
 
             $email = new Email();
             $email->initialize($config);
