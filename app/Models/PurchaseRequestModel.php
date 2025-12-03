@@ -60,6 +60,32 @@ class PurchaseRequestModel extends Model
     }
 
     /**
+     * Override insert to auto-generate request_number
+     */
+    public function insert($data = null, bool $returnID = true)
+    {
+        if (is_array($data) && empty($data['request_number'])) {
+            $data['request_number'] = $this->generateRequestNumber();
+            
+            // Ensure unique request number
+            $count = 0;
+            while ($this->where('request_number', $data['request_number'])->first() && $count < 10) {
+                $data['request_number'] = $this->generateRequestNumber();
+                $count++;
+            }
+        }
+        
+        // Set defaults
+        if (is_array($data)) {
+            $data['status'] = $data['status'] ?? 'pending';
+            $data['priority'] = $data['priority'] ?? 'normal';
+            $data['total_amount'] = $data['total_amount'] ?? 0.00;
+        }
+        
+        return parent::insert($data, $returnID);
+    }
+
+    /**
      * Create a new purchase request
      */
     public function createRequest(array $data): ?int
@@ -213,10 +239,19 @@ class PurchaseRequestModel extends Model
         $request['branch'] = $branchModel->find($request['branch_id']);
         log_message('debug', 'Loaded branch ' . $request['branch_id']);
 
-        // Get requester info
+        // Get requester info (Prepared by)
         $userModel = new \App\Models\UserModel();
         $request['requester'] = $userModel->find($request['requested_by']);
+        $request['requested_by_user'] = $request['requester']; // Alias for consistency
         log_message('debug', 'Loaded requester ' . $request['requested_by']);
+
+        // Get approver info (Approved by)
+        if (!empty($request['approved_by'])) {
+            $request['approved_by_user'] = $userModel->find($request['approved_by']);
+            log_message('debug', 'Loaded approver ' . $request['approved_by']);
+        } else {
+            $request['approved_by_user'] = null;
+        }
 
         log_message('info', 'Request ' . $id . ' loaded successfully with ' . count($items) . ' items');
         return $request;

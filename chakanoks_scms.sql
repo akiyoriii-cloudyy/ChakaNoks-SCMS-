@@ -1090,6 +1090,7 @@ CREATE TABLE `purchase_order_items` (
   `purchase_order_id` int(10) UNSIGNED NOT NULL,
   `product_id` int(10) UNSIGNED NOT NULL,
   `quantity` int(10) UNSIGNED NOT NULL,
+  `unit` varchar(50) DEFAULT NULL COMMENT 'Unit of measurement (pcs, kg, liters, etc.)',
   `unit_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `subtotal` decimal(10,2) NOT NULL DEFAULT 0.00,
   `received_quantity` int(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -1151,6 +1152,7 @@ CREATE TABLE `purchase_request_items` (
   `purchase_request_id` int(10) UNSIGNED NOT NULL,
   `product_id` int(10) UNSIGNED NOT NULL,
   `quantity` int(10) UNSIGNED NOT NULL,
+  `unit` varchar(50) DEFAULT NULL COMMENT 'Unit of measurement (pcs, kg, liters, etc.)',
   `unit_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `subtotal` decimal(10,2) NOT NULL DEFAULT 0.00,
   `notes` text DEFAULT NULL,
@@ -1433,19 +1435,25 @@ INSERT INTO `stock_batches` (`id`, `batch_number`, `product_id`, `branch_id`, `s
 
 CREATE TABLE `stock_transactions` (
   `id` int(10) UNSIGNED NOT NULL,
-  `transaction_number` varchar(50) NOT NULL,
-  `batch_id` int(10) UNSIGNED NOT NULL,
+  `transaction_number` varchar(50) DEFAULT NULL COMMENT 'Unique transaction number (optional for simple transactions)',
+  `batch_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Batch ID (optional for simple transactions)',
   `product_id` int(10) UNSIGNED NOT NULL,
-  `branch_id` int(10) UNSIGNED NOT NULL,
+  `branch_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Branch ID (optional for simple transactions)',
   `transaction_type` enum('stock_in','stock_out','transfer','adjustment','return','waste','expired') NOT NULL,
   `quantity` int(11) NOT NULL COMMENT 'Positive for stock_in, negative for stock_out',
   `unit_cost` decimal(10,2) DEFAULT NULL,
   `reference_type` varchar(50) DEFAULT NULL COMMENT 'delivery, sale, transfer, adjustment, waste, expired',
   `reference_id` int(10) UNSIGNED DEFAULT NULL,
-  `batch_qty_before` int(10) UNSIGNED NOT NULL,
-  `batch_qty_after` int(10) UNSIGNED NOT NULL,
+  `stock_before` int(10) UNSIGNED DEFAULT NULL COMMENT 'Product stock quantity before transaction',
+  `stock_after` int(10) UNSIGNED DEFAULT NULL COMMENT 'Product stock quantity after transaction',
+  `batch_qty_before` int(10) UNSIGNED DEFAULT NULL COMMENT 'Batch quantity before (for normalized tracking)',
+  `batch_qty_after` int(10) UNSIGNED DEFAULT NULL COMMENT 'Batch quantity after (for normalized tracking)',
   `branch_total_before` int(10) UNSIGNED DEFAULT NULL,
   `branch_total_after` int(10) UNSIGNED DEFAULT NULL,
+  `is_new_stock` tinyint(1) DEFAULT 0 COMMENT 'Whether this is new stock (for stock_in)',
+  `is_expired` tinyint(1) DEFAULT 0 COMMENT 'Whether the stock is expired',
+  `is_old_stock` tinyint(1) DEFAULT 0 COMMENT 'Whether the stock is old/expiring soon',
+  `expiry_date` date DEFAULT NULL COMMENT 'Expiry date of the stock',
   `reason` varchar(255) DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `created_by` int(10) UNSIGNED DEFAULT NULL,
@@ -1453,7 +1461,7 @@ CREATE TABLE `stock_transactions` (
   `transaction_date` datetime NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Normalized stock transactions with batch-level tracking';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Stock transactions supporting both simple and normalized batch-level tracking';
 
 -- --------------------------------------------------------
 
@@ -1875,7 +1883,11 @@ ALTER TABLE `stock_transactions`
   ADD KEY `product_id_branch_id` (`product_id`,`branch_id`),
   ADD KEY `transaction_type` (`transaction_type`),
   ADD KEY `transaction_date` (`transaction_date`),
-  ADD KEY `reference_type_reference_id` (`reference_type`,`reference_id`);
+  ADD KEY `reference_type_reference_id` (`reference_type`,`reference_id`),
+  ADD KEY `idx_is_new_stock` (`is_new_stock`),
+  ADD KEY `idx_is_expired` (`is_expired`),
+  ADD KEY `idx_is_old_stock` (`is_old_stock`),
+  ADD KEY `idx_expiry_date` (`expiry_date`);
 
 --
 -- Indexes for table `suppliers`

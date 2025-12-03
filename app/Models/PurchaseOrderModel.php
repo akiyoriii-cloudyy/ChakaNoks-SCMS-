@@ -47,24 +47,35 @@ class PurchaseOrderModel extends Model
     }
 
     /**
+     * Override insert to auto-generate order_number
+     */
+    public function insert($data = null, bool $returnID = true)
+    {
+        if (is_array($data) && empty($data['order_number'])) {
+            $data['order_number'] = $this->generateOrderNumber();
+            
+            // Ensure unique order number
+            while ($this->where('order_number', $data['order_number'])->first()) {
+                $data['order_number'] = $this->generateOrderNumber();
+            }
+        }
+        
+        // Set defaults
+        if (is_array($data)) {
+            $data['status'] = $data['status'] ?? 'pending';
+            $data['order_date'] = $data['order_date'] ?? date('Y-m-d');
+            $data['total_amount'] = $data['total_amount'] ?? 0.00;
+        }
+        
+        return parent::insert($data, $returnID);
+    }
+
+    /**
      * Create a new purchase order
      */
     public function createOrder(array $data): ?int
     {
-        // Generate order number if not provided
-        if (empty($data['order_number'])) {
-            $data['order_number'] = $this->generateOrderNumber();
-        }
-
-        // Ensure unique order number
-        while ($this->where('order_number', $data['order_number'])->first()) {
-            $data['order_number'] = $this->generateOrderNumber();
-        }
-
-        $data['status'] = $data['status'] ?? 'pending';
-        $data['order_date'] = $data['order_date'] ?? date('Y-m-d');
-        $data['total_amount'] = $data['total_amount'] ?? 0.00;
-
+        // insert() method now handles order_number generation automatically
         $insertId = $this->insert($data);
         return $insertId ? $this->getInsertID() : null;
     }
@@ -135,6 +146,14 @@ class PurchaseOrderModel extends Model
         // Get branch info
         $branchModel = new \App\Models\BranchModel();
         $order['branch'] = $branchModel->find($order['branch_id']);
+
+        // Get approved by user info
+        if (!empty($order['approved_by'])) {
+            $userModel = new \App\Models\UserModel();
+            $order['approved_by_user'] = $userModel->find($order['approved_by']);
+        } else {
+            $order['approved_by_user'] = null;
+        }
 
         // Get delivery info if exists
         $delivery = $db->table('deliveries')

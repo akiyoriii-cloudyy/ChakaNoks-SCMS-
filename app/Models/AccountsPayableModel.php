@@ -71,6 +71,40 @@ class AccountsPayableModel extends Model
     }
 
     /**
+     * Override insert to auto-generate invoice_number
+     */
+    public function insert($data = null, bool $returnID = true)
+    {
+        if (is_array($data) && empty($data['invoice_number'])) {
+            $data['invoice_number'] = $this->generateInvoiceNumber();
+        }
+        
+        // Set defaults
+        if (is_array($data)) {
+            $data['payment_status'] = $data['payment_status'] ?? 'unpaid';
+            $data['paid_amount'] = $data['paid_amount'] ?? 0.00;
+            $data['balance'] = $data['balance'] ?? ($data['amount'] ?? 0);
+            $data['invoice_date'] = $data['invoice_date'] ?? date('Y-m-d');
+            
+            // Calculate due date if not provided and we have payment terms from supplier
+            if (empty($data['due_date']) && !empty($data['supplier_id'])) {
+                $supplierModel = new \App\Models\SupplierModel();
+                $supplier = $supplierModel->find($data['supplier_id']);
+                if ($supplier && !empty($supplier['payment_terms'])) {
+                    $data['due_date'] = $this->calculateDueDate($supplier['payment_terms'], $data['invoice_date']);
+                }
+            }
+            
+            // Default due_date if still not set (30 days from invoice)
+            if (empty($data['due_date'])) {
+                $data['due_date'] = date('Y-m-d', strtotime('+30 days', strtotime($data['invoice_date'])));
+            }
+        }
+        
+        return parent::insert($data, $returnID);
+    }
+
+    /**
      * Get accounts payable with related data
      */
     public function getAccountsPayableWithDetails(array $filters = []): array

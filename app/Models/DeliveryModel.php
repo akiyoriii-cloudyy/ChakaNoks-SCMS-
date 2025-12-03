@@ -49,23 +49,34 @@ class DeliveryModel extends Model
     }
 
     /**
+     * Override insert to auto-generate delivery_number
+     */
+    public function insert($data = null, bool $returnID = true)
+    {
+        if (is_array($data) && empty($data['delivery_number'])) {
+            $data['delivery_number'] = $this->generateDeliveryNumber();
+            
+            // Ensure unique delivery number
+            while ($this->where('delivery_number', $data['delivery_number'])->first()) {
+                $data['delivery_number'] = $this->generateDeliveryNumber();
+            }
+        }
+        
+        // Set defaults
+        if (is_array($data)) {
+            $data['status'] = $data['status'] ?? 'scheduled';
+            $data['scheduled_date'] = $data['scheduled_date'] ?? date('Y-m-d');
+        }
+        
+        return parent::insert($data, $returnID);
+    }
+
+    /**
      * Schedule a delivery
      */
     public function scheduleDelivery(array $data): ?int
     {
-        // Generate delivery number if not provided
-        if (empty($data['delivery_number'])) {
-            $data['delivery_number'] = $this->generateDeliveryNumber();
-        }
-
-        // Ensure unique delivery number
-        while ($this->where('delivery_number', $data['delivery_number'])->first()) {
-            $data['delivery_number'] = $this->generateDeliveryNumber();
-        }
-
-        $data['status'] = $data['status'] ?? 'scheduled';
-        $data['scheduled_date'] = $data['scheduled_date'] ?? date('Y-m-d');
-
+        // insert() method now handles delivery_number generation automatically
         $insertId = $this->insert($data);
         
         if ($insertId) {

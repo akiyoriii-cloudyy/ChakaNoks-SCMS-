@@ -130,6 +130,64 @@ class FranchiseManager extends BaseController
         }
     }
 
+    public function viewApplication($id)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $application = $this->applicationModel->find($id);
+            
+            if (!$application) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Application not found']);
+            }
+
+            // Format dates for display
+            if (!empty($application['created_at'])) {
+                $application['created_at'] = date('M d, Y g:i A', strtotime($application['created_at']));
+            }
+            if (!empty($application['updated_at'])) {
+                $application['updated_at'] = date('M d, Y g:i A', strtotime($application['updated_at']));
+            }
+
+            return $this->response->setJSON(['status' => 'success', 'data' => $application]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function updateApplication($id)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        try {
+            // Note: investment_capital is excluded from updates as it's the franchise owner's proposed budget
+            $data = [
+                'applicant_name' => $this->request->getPost('applicant_name'),
+                'email' => $this->request->getPost('email'),
+                'phone' => $this->request->getPost('phone'),
+                'proposed_location' => $this->request->getPost('proposed_location'),
+                'city' => $this->request->getPost('city'),
+                'business_experience' => $this->request->getPost('business_experience') ?? '',
+            ];
+
+            if ($this->applicationModel->update($id, $data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Application updated successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to update application']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
     public function updateApplicationStatus($id)
     {
         $session = session();

@@ -11,16 +11,26 @@ class StockTransactionModel extends Model
 
     protected $allowedFields = [
         'product_id',
+        'branch_id',
         'transaction_type',
         'quantity',
+        'unit_cost',
         'reference_type',
         'reference_id',
         'stock_before',
         'stock_after',
+        'batch_id',
+        'batch_qty_before',
+        'batch_qty_after',
+        'branch_total_before',
+        'branch_total_after',
+        'transaction_number',
+        'transaction_date',
         'is_new_stock',
         'is_expired',
         'is_old_stock',
         'expiry_date',
+        'reason',
         'notes',
         'created_by'
     ];
@@ -29,6 +39,27 @@ class StockTransactionModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $returnType    = 'array';
+
+    /**
+     * Generate unique transaction number
+     */
+    public function generateTransactionNumber(string $type = 'TRANS'): string
+    {
+        $date = date('Ymd');
+        $time = date('His');
+        $random = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+        
+        $transactionNumber = "{$type}-{$date}-{$time}-{$random}";
+        
+        // Ensure uniqueness
+        $count = 1;
+        while ($this->where('transaction_number', $transactionNumber)->first()) {
+            $transactionNumber = "{$type}-{$date}-{$time}-" . str_pad($random + $count, 3, '0', STR_PAD_LEFT);
+            $count++;
+        }
+        
+        return $transactionNumber;
+    }
 
     /**
      * Record STOCK-IN transaction (NEW STOCK)
@@ -44,6 +75,8 @@ class StockTransactionModel extends Model
 
         $stockBefore = (int)($product['stock_qty'] ?? 0);
         $stockAfter = $stockBefore + $quantity;
+        $branchId = $product['branch_id'] ?? null;
+        $unitCost = $product['price'] ?? $product['cost'] ?? null;
 
         // Check if this is NEW STOCK (recent delivery, not expired)
         $isNewStock = true;
@@ -54,17 +87,24 @@ class StockTransactionModel extends Model
             $isNewStock = $daysUntilExpiry > 7;
         }
 
+        // Generate transaction number
+        $transactionNumber = $this->generateTransactionNumber('IN');
+
         $data = [
+            'transaction_number' => $transactionNumber,
             'product_id' => $productId,
+            'branch_id' => $branchId,
             'transaction_type' => 'stock_in',
             'quantity' => $quantity,
+            'unit_cost' => $unitCost,
             'reference_type' => $referenceType,
             'reference_id' => $referenceId,
             'stock_before' => $stockBefore,
             'stock_after' => $stockAfter,
-            'is_new_stock' => $isNewStock,
-            'is_expired' => false,
-            'is_old_stock' => false,
+            'transaction_date' => date('Y-m-d H:i:s'),
+            'is_new_stock' => $isNewStock ? 1 : 0,  // Convert boolean to integer
+            'is_expired' => 0,                        // Always 0 for stock_in
+            'is_old_stock' => 0,                      // Always 0 for stock_in
             'expiry_date' => $expiryDate,
             'created_by' => $createdBy,
         ];
@@ -93,6 +133,8 @@ class StockTransactionModel extends Model
 
         $stockBefore = (int)($product['stock_qty'] ?? 0);
         $stockAfter = max(0, $stockBefore - $quantity);
+        $branchId = $product['branch_id'] ?? null;
+        $unitCost = $product['price'] ?? $product['cost'] ?? null;
 
         // Check EXPIRE? - is the stock expired?
         $isExpired = false;
@@ -120,18 +162,26 @@ class StockTransactionModel extends Model
             }
         }
 
+        // Generate transaction number
+        $transactionNumber = $this->generateTransactionNumber('OUT');
+
         $data = [
+            'transaction_number' => $transactionNumber,
             'product_id' => $productId,
+            'branch_id' => $branchId,
             'transaction_type' => 'stock_out',
             'quantity' => $quantity,
+            'unit_cost' => $unitCost,
             'reference_type' => $referenceType,
             'reference_id' => $referenceId,
             'stock_before' => $stockBefore,
             'stock_after' => $stockAfter,
-            'is_new_stock' => false,
-            'is_expired' => $isExpired,
-            'is_old_stock' => $isOldStock,
+            'transaction_date' => date('Y-m-d H:i:s'),
+            'is_new_stock' => 0,                      // Always 0 for stock_out
+            'is_expired' => $isExpired ? 1 : 0,       // Convert boolean to integer
+            'is_old_stock' => $isOldStock ? 1 : 0,    // Convert boolean to integer
             'expiry_date' => $expiryDate,
+            'reason' => $reason,
             'notes' => $reason,
             'created_by' => $createdBy,
         ];

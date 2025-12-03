@@ -588,13 +588,18 @@ $currentSection = $currentSection ?? 'overview';
                                                 <td><span class="badge badge-<?= $app['status'] ?>"><?= ucfirst(str_replace('_', ' ', $app['status'])) ?></span></td>
                                                 <td><?= date('M d, Y', strtotime($app['created_at'])) ?></td>
                                                 <td>
-                                                    <?php if ($app['status'] === 'pending'): ?>
-                                                        <button class="action-btn view" onclick="reviewApplication(<?= $app['id'] ?>, 'under_review')">Review</button>
-                                                        <button class="action-btn approve" onclick="reviewApplication(<?= $app['id'] ?>, 'approved')">Approve</button>
-                                                        <button class="action-btn reject" onclick="reviewApplication(<?= $app['id'] ?>, 'rejected')">Reject</button>
-                                                    <?php elseif ($app['status'] === 'under_review'): ?>
-                                                        <button class="action-btn approve" onclick="reviewApplication(<?= $app['id'] ?>, 'approved')">Approve</button>
-                                                        <button class="action-btn reject" onclick="reviewApplication(<?= $app['id'] ?>, 'rejected')">Reject</button>
+                                                    <button class="action-btn view" onclick="viewApplication(<?= $app['id'] ?>)" title="View details and edit">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <?php if ($app['status'] !== 'approved'): ?>
+                                                        <button class="action-btn approve" onclick="reviewApplication(<?= $app['id'] ?>, 'approved')" title="Approve application">
+                                                            <i class="fas fa-check"></i> Approve
+                                                        </button>
+                                                    <?php endif; ?>
+                                                    <?php if ($app['status'] !== 'rejected'): ?>
+                                                        <button class="action-btn reject" onclick="reviewApplication(<?= $app['id'] ?>, 'rejected')" title="Reject application">
+                                                            <i class="fas fa-times"></i> Reject
+                                                        </button>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -1009,6 +1014,68 @@ $currentSection = $currentSection ?? 'overview';
         </div>
     </div>
 
+    <!-- View/Edit Application Modal -->
+    <div id="viewApplicationModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-file-alt" style="color: #2d5016; margin-right: 10px;"></i> Application Details</h3>
+                <button class="modal-close" onclick="closeModal('viewApplicationModal')">&times;</button>
+            </div>
+            <div id="applicationDetailsContent">
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #2d5016;"></i>
+                    <p style="margin-top: 16px; color: #64748b;">Loading application details...</p>
+                </div>
+            </div>
+            <form id="editApplicationForm" style="display: none;">
+                <input type="hidden" name="application_id" id="editAppId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Applicant Name *</label>
+                        <input type="text" class="form-control" name="applicant_name" id="editAppName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" name="email" id="editAppEmail" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Phone *</label>
+                        <input type="text" class="form-control" name="phone" id="editAppPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Investment Capital (₱)</label>
+                        <input type="number" class="form-control" name="investment_capital" id="editAppInvestment" step="0.01" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
+                        <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display: block;">This field cannot be edited (proposed by franchise owner)</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Proposed Location *</label>
+                        <input type="text" class="form-control" name="proposed_location" id="editAppLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City *</label>
+                        <input type="text" class="form-control" name="city" id="editAppCity" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Business Experience</label>
+                    <textarea class="form-control" name="business_experience" id="editAppExperience" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn-primary-custom" style="flex: 1; justify-content: center;">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button type="button" class="btn-primary-custom" onclick="toggleEditMode(false)" style="flex: 1; justify-content: center; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1054,6 +1121,175 @@ $currentSection = $currentSection ?? 'overview';
                 },
                 error: function() {
                     alert('Error submitting application');
+                }
+            });
+        });
+        
+        // View application details
+        function viewApplication(id) {
+            openModal('viewApplicationModal');
+            document.getElementById('applicationDetailsContent').style.display = 'block';
+            document.getElementById('editApplicationForm').style.display = 'none';
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/application/') ?>' + id + '/view',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.data) {
+                        displayApplicationDetails(response.data);
+                    } else {
+                        document.getElementById('applicationDetailsContent').innerHTML = 
+                            '<div style="text-align: center; padding: 40px; color: #dc2626;">' +
+                            '<i class="fas fa-exclamation-circle" style="font-size: 2rem;"></i>' +
+                            '<p style="margin-top: 16px;">Failed to load application details.</p></div>';
+                    }
+                },
+                error: function() {
+                    document.getElementById('applicationDetailsContent').innerHTML = 
+                        '<div style="text-align: center; padding: 40px; color: #dc2626;">' +
+                        '<i class="fas fa-exclamation-circle" style="font-size: 2rem;"></i>' +
+                        '<p style="margin-top: 16px;">Error loading application details.</p></div>';
+                }
+            });
+        }
+        
+        // Display application details
+        function displayApplicationDetails(app) {
+            const statusColors = {
+                'pending': '#fef3c7',
+                'under_review': '#dbeafe',
+                'approved': '#d1fae5',
+                'rejected': '#fee2e2',
+                'on_hold': '#e5e7eb'
+            };
+            const statusTextColors = {
+                'pending': '#92400e',
+                'under_review': '#1e40af',
+                'approved': '#065f46',
+                'rejected': '#991b1b',
+                'on_hold': '#374151'
+            };
+            
+            const statusBg = statusColors[app.status] || '#e5e7eb';
+            const statusColor = statusTextColors[app.status] || '#374151';
+            const statusText = app.status.replace('_', ' ').toUpperCase();
+            
+            document.getElementById('applicationDetailsContent').innerHTML = `
+                <div style="padding: 0 8px;">
+                    <div style="background: ${statusBg}; color: ${statusColor}; padding: 12px 20px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 0.9rem; margin-bottom: 24px; letter-spacing: 0.5px;">
+                        STATUS: ${statusText}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Applicant Name</label>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 500;">${app.applicant_name || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Email</label>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 500;">${app.email || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Phone</label>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 500;">${app.phone || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Investment Capital</label>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 600;">₱${parseFloat(app.investment_capital || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Proposed Location</label>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 500;">${app.proposed_location || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">City</label>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 500;">${app.city || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Business Experience</label>
+                        <div style="font-size: 0.95rem; color: #475569; line-height: 1.6; background: #f8fafc; padding: 12px; border-radius: 6px;">${app.business_experience || 'No experience provided'}</div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px;">
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Application Date</label>
+                            <div style="font-size: 0.95rem; color: #1e293b;">${app.created_at || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Last Updated</label>
+                            <div style="font-size: 0.95rem; color: #1e293b;">${app.updated_at || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+                        <button class="btn-primary-custom" onclick="toggleEditMode(true, ${app.id})" style="flex: 1; justify-content: center;">
+                            <i class="fas fa-edit"></i> Edit Application
+                        </button>
+                        <button class="btn-primary-custom" onclick="closeModal('viewApplicationModal')" style="flex: 1; justify-content: center; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Store app data for editing
+            window.currentAppData = app;
+        }
+        
+        // Toggle edit mode
+        function toggleEditMode(enable, appId = null) {
+            if (enable && window.currentAppData) {
+                document.getElementById('applicationDetailsContent').style.display = 'none';
+                document.getElementById('editApplicationForm').style.display = 'block';
+                
+                // Populate form with current data
+                const app = window.currentAppData;
+                document.getElementById('editAppId').value = app.id;
+                document.getElementById('editAppName').value = app.applicant_name || '';
+                document.getElementById('editAppEmail').value = app.email || '';
+                document.getElementById('editAppPhone').value = app.phone || '';
+                document.getElementById('editAppInvestment').value = app.investment_capital || '';
+                document.getElementById('editAppLocation').value = app.proposed_location || '';
+                document.getElementById('editAppCity').value = app.city || '';
+                document.getElementById('editAppExperience').value = app.business_experience || '';
+            } else {
+                document.getElementById('applicationDetailsContent').style.display = 'block';
+                document.getElementById('editApplicationForm').style.display = 'none';
+            }
+        }
+        
+        // Edit application form submit
+        document.getElementById('editApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const appId = document.getElementById('editAppId').value;
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/application/') ?>' + appId + '/update',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Application updated successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to update application'));
+                    }
+                },
+                error: function() {
+                    alert('Error updating application');
                 }
             });
         });

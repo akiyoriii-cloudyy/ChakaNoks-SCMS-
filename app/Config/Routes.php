@@ -61,6 +61,8 @@ $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 
 // ---------- FRANCHISE MANAGER APIs ----------
 $routes->post('franchisemanager/application/create', 'FranchiseManager::createApplication');
+$routes->get('franchisemanager/application/(:num)/view', 'FranchiseManager::viewApplication/$1');
+$routes->post('franchisemanager/application/(:num)/update', 'FranchiseManager::updateApplication/$1');
 $routes->post('franchisemanager/application/(:num)/status', 'FranchiseManager::updateApplicationStatus/$1');
 $routes->get('franchisemanager/api/applications', 'FranchiseManager::getApplicationsList');
 $routes->post('franchisemanager/allocation/create', 'FranchiseManager::createAllocation');

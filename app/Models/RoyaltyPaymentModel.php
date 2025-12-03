@@ -28,6 +28,36 @@ class RoyaltyPaymentModel extends Model
     protected $useTimestamps = true;
     protected $returnType = 'array';
 
+    /**
+     * Override insert to auto-calculate fields
+     */
+    public function insert($data = null, bool $returnID = true)
+    {
+        if (is_array($data)) {
+            // Auto-calculate royalty amount if not provided
+            if (empty($data['royalty_amount']) && !empty($data['gross_sales'])) {
+                $rate = $data['royalty_rate'] ?? 5.0;
+                $data['royalty_amount'] = ($data['gross_sales'] * $rate) / 100;
+            }
+            
+            // Auto-calculate total_due
+            if (empty($data['total_due'])) {
+                $royalty = $data['royalty_amount'] ?? 0;
+                $marketing = $data['marketing_fee'] ?? 0;
+                $data['total_due'] = $royalty + $marketing;
+            }
+            
+            // Set defaults
+            $data['amount_paid'] = $data['amount_paid'] ?? 0.00;
+            $data['balance'] = $data['balance'] ?? $data['total_due'];
+            $data['status'] = $data['status'] ?? 'pending';
+            $data['royalty_rate'] = $data['royalty_rate'] ?? 5.0;
+            $data['marketing_fee'] = $data['marketing_fee'] ?? 0.00;
+        }
+        
+        return parent::insert($data, $returnID);
+    }
+
     public function getPaymentsWithBranch()
     {
         return $this->db->table('royalty_payments rp')

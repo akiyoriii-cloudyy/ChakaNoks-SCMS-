@@ -709,6 +709,7 @@ function updateItemOptionsForRow(rowId) {
     const customNameInput = row.querySelector('.custom-name-input');
     const useCustomCheckbox = row.querySelector('.use-custom-checkbox');
     const priceInput = row.querySelector('.price-input');
+    const unitSelect = row.querySelector('.unit-select');
     
     if (!categorySelect || !itemSelect) return;
     
@@ -716,6 +717,11 @@ function updateItemOptionsForRow(rowId) {
     
     // Clear item options
     itemSelect.innerHTML = '<option value="">Select Product</option>';
+    
+    // Update unit options based on category
+    if (unitSelect && selectedCategory) {
+        updateUnitOptionsForCategory(unitSelect, selectedCategory);
+    }
     
     // Reset custom name input and price
     if (customNameInput) {
@@ -814,6 +820,218 @@ function updateItemOptionsForRow(rowId) {
     }
 }
 
+// Get relevant unit options for a product/category
+function getRelevantUnitOptions(productName, category) {
+    const nameLower = productName.toLowerCase();
+    let allowedUnits = [];
+    let defaultUnit = 'pcs';
+    
+    // First, try to find exact match in inventory products
+    for (let product of inventoryProducts) {
+        if (product.name === productName && product.unit) {
+            // Return the product's unit as primary, plus common alternatives
+            const productUnit = product.unit;
+            allowedUnits = getUnitAlternatives(productUnit, category);
+            return { units: allowedUnits, default: productUnit };
+        }
+    }
+    
+    // Beverages - bottles, cans, liters
+    if (category === 'Beverages' || nameLower.includes('cola') || nameLower.includes('pepsi') || 
+        nameLower.includes('juice') || nameLower.includes('water') || nameLower.includes('soda')) {
+        allowedUnits = ['bottles', 'cans', 'liters', 'pcs'];
+        defaultUnit = nameLower.includes('can') ? 'cans' : 'bottles';
+    }
+    
+    // Condiments/Sauces - bottles, liters, packs
+    else if (category === 'Condiments' || nameLower.includes('sauce') || nameLower.includes('vinegar') || 
+        nameLower.includes('ketchup') || nameLower.includes('soy sauce')) {
+        allowedUnits = ['bottles', 'liters', 'packs', 'pcs'];
+        defaultUnit = 'bottles';
+    }
+    
+    // Cooking Oil - liters, bottles
+    else if (category === 'Cooking Oil' || nameLower.includes('oil') || nameLower.includes('cooking')) {
+        allowedUnits = ['liters', 'bottles', 'pcs'];
+        defaultUnit = 'liters';
+    }
+    
+    // Seasonings/Spices - packs, kg, pcs
+    else if (category === 'Seasonings' || category === 'Spices' || nameLower.includes('salt') || 
+        nameLower.includes('pepper') || nameLower.includes('garlic') || nameLower.includes('msg')) {
+        allowedUnits = ['packs', 'kg', 'pcs', 'bags'];
+        defaultUnit = 'packs';
+    }
+    
+    // Rice - kg, sacks, bags
+    else if (category === 'Rice' || nameLower.includes('rice')) {
+        allowedUnits = ['kg', 'sacks', 'bags', 'pcs'];
+        defaultUnit = nameLower.includes('sack') ? 'sacks' : 'kg';
+    }
+    
+    // Vegetables/Fruits - kg, pcs, bags
+    else if (category === 'Vegetables' || category === 'Fruits' || nameLower.includes('vegetable') || nameLower.includes('fruit')) {
+        allowedUnits = ['kg', 'pcs', 'bags', 'boxes'];
+        defaultUnit = 'kg';
+    }
+    
+    // Bread/Bakery - pcs, loaves, dozen, packs
+    else if (category === 'Bread' || category === 'Bakery' || nameLower.includes('bread') || nameLower.includes('pandesal')) {
+        allowedUnits = ['pcs', 'loaves', 'dozen', 'packs'];
+        defaultUnit = nameLower.includes('loaf') ? 'loaves' : 'pcs';
+    }
+    
+    // Dairy - liters, pcs, packs, kg
+    else if (category === 'Dairy' || nameLower.includes('milk') || nameLower.includes('cheese') || nameLower.includes('butter')) {
+        allowedUnits = ['liters', 'pcs', 'packs', 'kg'];
+        defaultUnit = nameLower.includes('liter') || nameLower.includes('liquid') ? 'liters' : 'pcs';
+    }
+    
+    // Frozen Foods - kg, packs, boxes, pcs
+    else if (category === 'Frozen Foods' || nameLower.includes('frozen') || nameLower.includes('chicken')) {
+        allowedUnits = ['kg', 'packs', 'boxes', 'pcs'];
+        defaultUnit = nameLower.includes('pack') || nameLower.includes('box') ? 'packs' : 'kg';
+    }
+    
+    // Packaging - pcs, rolls, packs, boxes
+    else if (category === 'Packaging' || nameLower.includes('bag') || nameLower.includes('container') || nameLower.includes('cup')) {
+        allowedUnits = ['pcs', 'rolls', 'packs', 'boxes'];
+        defaultUnit = nameLower.includes('roll') ? 'rolls' : 'pcs';
+    }
+    
+    // Cleaning Supplies - liters, bottles, pcs, packs
+    else if (category === 'Cleaning Supplies' || nameLower.includes('cleaning') || nameLower.includes('detergent')) {
+        allowedUnits = ['liters', 'bottles', 'pcs', 'packs'];
+        defaultUnit = nameLower.includes('liquid') || nameLower.includes('bleach') ? 'liters' : 'pcs';
+    }
+    
+    // Default - all common units
+    else {
+        allowedUnits = ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen', 'sacks', 'loaves'];
+        defaultUnit = 'pcs';
+    }
+    
+    return { units: allowedUnits, default: defaultUnit };
+}
+
+// Get alternative units for a given primary unit
+function getUnitAlternatives(primaryUnit, category) {
+    const alternatives = {
+        'bottles': ['bottles', 'cans', 'liters', 'pcs'],
+        'cans': ['cans', 'bottles', 'pcs'],
+        'liters': ['liters', 'bottles', 'pcs'],
+        'kg': ['kg', 'pcs', 'bags', 'sacks'],
+        'packs': ['packs', 'boxes', 'pcs', 'dozen'],
+        'boxes': ['boxes', 'packs', 'pcs'],
+        'pcs': ['pcs', 'dozen', 'packs'],
+        'bags': ['bags', 'pcs', 'kg'],
+        'rolls': ['rolls', 'pcs'],
+        'dozen': ['dozen', 'pcs', 'packs'],
+        'sacks': ['sacks', 'kg', 'bags'],
+        'loaves': ['loaves', 'pcs', 'dozen']
+    };
+    
+    return alternatives[primaryUnit] || ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles'];
+}
+
+// Update unit dropdown options based on category only
+function updateUnitOptionsForCategory(unitSelect, category) {
+    if (!unitSelect) return;
+    
+    console.log(`📦 Updating unit options for category: "${category}"`);
+    
+    let allowedUnits = [];
+    let defaultUnit = 'pcs';
+    
+    // Get category-appropriate units
+    if (category === 'Beverages') {
+        allowedUnits = ['bottles', 'cans', 'liters', 'pcs'];
+        defaultUnit = 'bottles';
+    } else if (category === 'Condiments') {
+        allowedUnits = ['bottles', 'liters', 'packs', 'pcs'];
+        defaultUnit = 'bottles';
+    } else if (category === 'Cooking Oil') {
+        allowedUnits = ['liters', 'bottles', 'pcs'];
+        defaultUnit = 'liters';
+    } else if (category === 'Seasonings' || category === 'Spices') {
+        allowedUnits = ['packs', 'kg', 'pcs', 'bags'];
+        defaultUnit = 'packs';
+    } else if (category === 'Rice') {
+        allowedUnits = ['kg', 'sacks', 'bags', 'pcs'];
+        defaultUnit = 'kg';
+    } else if (category === 'Vegetables' || category === 'Fruits') {
+        allowedUnits = ['kg', 'pcs', 'bags', 'boxes'];
+        defaultUnit = 'kg';
+    } else if (category === 'Bread' || category === 'Bakery') {
+        allowedUnits = ['pcs', 'loaves', 'dozen', 'packs'];
+        defaultUnit = 'pcs';
+    } else if (category === 'Dairy') {
+        allowedUnits = ['liters', 'pcs', 'packs', 'kg'];
+        defaultUnit = 'pcs';
+    } else if (category === 'Frozen Foods') {
+        allowedUnits = ['kg', 'packs', 'boxes', 'pcs'];
+        defaultUnit = 'kg';
+    } else if (category === 'Packaging') {
+        allowedUnits = ['pcs', 'rolls', 'packs', 'boxes'];
+        defaultUnit = 'pcs';
+    } else if (category === 'Cleaning Supplies') {
+        allowedUnits = ['liters', 'bottles', 'pcs', 'packs'];
+        defaultUnit = 'pcs';
+    } else {
+        // Default all units
+        allowedUnits = ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen', 'sacks', 'loaves'];
+        defaultUnit = 'pcs';
+    }
+    
+    const currentValue = unitSelect.value;
+    
+    // Clear and repopulate
+    unitSelect.innerHTML = '';
+    allowedUnits.forEach(function(unit) {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = unit;
+        unitSelect.appendChild(option);
+    });
+    
+    // Set value
+    if (allowedUnits.includes(currentValue)) {
+        unitSelect.value = currentValue;
+    } else {
+        unitSelect.value = defaultUnit;
+    }
+}
+
+// Update unit dropdown options for a specific product
+function updateUnitOptionsForProduct(unitSelect, productName, category) {
+    if (!unitSelect) return;
+    
+    console.log(`📦 Updating unit options for: "${productName}" in category: "${category}"`);
+    
+    const { units, default: defaultUnit } = getRelevantUnitOptions(productName, category);
+    const currentValue = unitSelect.value;
+    
+    // Clear existing options
+    unitSelect.innerHTML = '';
+    
+    // Add relevant unit options
+    units.forEach(function(unit) {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = unit;
+        unitSelect.appendChild(option);
+    });
+    
+    // Set the value - prefer keeping current if valid, otherwise use default
+    if (units.includes(currentValue)) {
+        unitSelect.value = currentValue;
+        console.log(`✅ Kept current unit: ${currentValue}`);
+    } else {
+        unitSelect.value = defaultUnit;
+        console.log(`✅ Set default unit: ${defaultUnit}`);
+    }
+}
+
 // Update all product prices in all existing rows
 function updateAllProductPrices() {
     console.log('🔄 Updating prices for all existing product selections...');
@@ -893,11 +1111,28 @@ function addItemRow() {
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Quantity</label>
-                    <input type="number" class="form-control quantity-input" name="items[${itemCount}][quantity]" min="1" value="1" required>
+                    <input type="number" class="form-control quantity-input" name="items[${itemCount}][quantity]" min="1" value="1" required oninput="calculateTotal()">
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Unit</label>
+                    <select class="form-select unit-select" name="items[${itemCount}][unit]" required style="font-weight: 600;">
+                        <option value="pcs">pcs</option>
+                        <option value="kg">kg</option>
+                        <option value="liters">liters</option>
+                        <option value="packs">packs</option>
+                        <option value="boxes">boxes</option>
+                        <option value="bottles">bottles</option>
+                        <option value="cans">cans</option>
+                        <option value="bags">bags</option>
+                        <option value="rolls">rolls</option>
+                        <option value="dozen">dozen</option>
+                        <option value="sacks">sacks</option>
+                        <option value="loaves">loaves</option>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Unit Price</label>
-                    <input type="number" class="form-control price-input" name="items[${itemCount}][unit_price]" step="0.01" min="0" value="0" required>
+                    <input type="number" class="form-control price-input" name="items[${itemCount}][unit_price]" step="0.01" min="0" value="0" required oninput="calculateTotal()">
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Notes</label>
@@ -938,6 +1173,7 @@ function handleItemNameChange(rowId) {
     const customInput = row.querySelector('.custom-name-input');
     const useCustomCheckbox = row.querySelector('.use-custom-checkbox');
     const priceInput = row.querySelector('.price-input');
+    const unitSelect = row.querySelector('.unit-select');
     
     if (!itemSelect) return;
     
@@ -945,6 +1181,11 @@ function handleItemNameChange(rowId) {
     const selectedCategory = categorySelect ? categorySelect.value : '';
     
     console.log(`🔄 Product changed: "${selectedValue}" in category "${selectedCategory}"`);
+    
+    // Update unit dropdown options based on selected product/category
+    if (unitSelect && selectedValue && selectedValue !== '__other__') {
+        updateUnitOptionsForProduct(unitSelect, selectedValue, selectedCategory);
+    }
     
     // If "Other" is selected, show custom input
     if (selectedValue === '__other__') {
@@ -1071,9 +1312,15 @@ function handleCustomNameChange(rowId) {
     const categorySelect = row.querySelector('.category-select');
     const customInput = row.querySelector('.custom-name-input');
     const priceInput = row.querySelector('.price-input');
+    const unitSelect = row.querySelector('.unit-select');
     
     const customName = customInput ? customInput.value.trim() : '';
     const selectedCategory = categorySelect ? categorySelect.value : '';
+    
+    // Update unit options based on custom product name
+    if (unitSelect && customName && selectedCategory) {
+        updateUnitOptionsForProduct(unitSelect, customName, selectedCategory);
+    }
     
     // Debounce: only search after user stops typing for 500ms
     if (customInput && customInput.searchTimeout) {
@@ -1185,6 +1432,8 @@ document.getElementById('purchaseRequestForm').addEventListener('submit', functi
         const itemSelect = row.querySelector('.item-name-select');
         const customInput = row.querySelector('.custom-name-input');
         const quantity = row.querySelector('.quantity-input').value;
+        const unitSelect = row.querySelector('.unit-select');
+        const unit = unitSelect ? unitSelect.value : 'pcs';
         const unitPrice = row.querySelector('.price-input').value;
         const notesInput = row.querySelector('input[name*="[notes]"]');
         const notes = notesInput ? notesInput.value : '';
@@ -1199,7 +1448,7 @@ document.getElementById('purchaseRequestForm').addEventListener('submit', functi
             itemName = customInput.value.trim();
         }
         
-        console.log(`Processing row: category=${category}, itemName=${itemName}, qty=${quantity}, price=${unitPrice}`);
+        console.log(`Processing row: category=${category}, itemName=${itemName}, qty=${quantity}, unit=${unit}, price=${unitPrice}`);
         
         // Validate that we have category, item name, and quantity > 0
         if (category && itemName && quantity && parseFloat(quantity) > 0) {
@@ -1207,6 +1456,7 @@ document.getElementById('purchaseRequestForm').addEventListener('submit', functi
                 category: category,
                 item_name: itemName,
                 quantity: parseInt(quantity),
+                unit: unit,
                 unit_price: parseFloat(unitPrice) || 0,
                 notes: notes || ''
             });

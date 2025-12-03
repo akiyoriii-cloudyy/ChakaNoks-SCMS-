@@ -23,6 +23,25 @@ class SupplyAllocationModel extends Model
     protected $useTimestamps = true;
     protected $returnType = 'array';
 
+    /**
+     * Override insert to set defaults and calculate total_amount
+     */
+    public function insert($data = null, bool $returnID = true)
+    {
+        if (is_array($data)) {
+            // Set defaults
+            $data['status'] = $data['status'] ?? 'pending';
+            $data['allocation_date'] = $data['allocation_date'] ?? date('Y-m-d');
+            
+            // Calculate total_amount if not provided
+            if (empty($data['total_amount']) && !empty($data['allocated_qty']) && !empty($data['unit_price'])) {
+                $data['total_amount'] = $data['allocated_qty'] * $data['unit_price'];
+            }
+        }
+        
+        return parent::insert($data, $returnID);
+    }
+
     public function getAllocationsWithDetails()
     {
         return $this->db->table('supply_allocations sa')

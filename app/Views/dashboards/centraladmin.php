@@ -1142,10 +1142,25 @@
                         const order = response.order;
                         let html = '<div style="padding: 20px;">';
                         html += '<h5 style="margin-bottom: 20px; color: #2d5016; font-weight: 700;">Purchase Order Details</h5>';
+                        
+                        // Branch and Supplier Section
+                        html += '<div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #2d5016; padding: 15px; margin-bottom: 20px; border-radius: 8px;">';
+                        html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">';
+                        html += '<div><strong style="color: #2d5016;"><i class="fas fa-building"></i> Branch:</strong><br><span style="font-size: 1.05rem; color: #333;">' + (order.branch ? order.branch.name : 'N/A') + '</span></div>';
+                        html += '<div><strong style="color: #2d5016;"><i class="fas fa-truck"></i> Supplier:</strong><br><span style="font-size: 1.05rem; color: #333;">' + (order.supplier ? order.supplier.name : 'N/A') + '</span></div>';
+                        html += '</div></div>';
+                        
+                        // Approved By Section (if approved)
+                        if (order.approved_by && order.approved_by_user) {
+                            html += '<div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 4px solid #28a745; padding: 15px; margin-bottom: 20px; border-radius: 8px;">';
+                            html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">';
+                            html += '<div><strong style="color: #155724;"><i class="fas fa-check-circle"></i> Approved By (Central Admin):</strong><br><span style="font-size: 1.05rem; color: #155724;">' + (order.approved_by_user.email || order.approved_by_user.username || 'User ID: ' + order.approved_by) + '</span></div>';
+                            html += '<div><strong style="color: #155724;"><i class="fas fa-clock"></i> Approved Date:</strong><br><span style="font-size: 1.05rem; color: #155724;">' + (order.approved_at ? new Date(order.approved_at).toLocaleString() : 'N/A') + '</span></div>';
+                            html += '</div></div>';
+                        }
+                        
                         html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">';
                         html += '<div><strong>Order Number:</strong><br>' + (order.order_number || 'N/A') + '</div>';
-                        html += '<div><strong>Supplier:</strong><br>' + (order.supplier ? order.supplier.name : 'N/A') + '</div>';
-                        html += '<div><strong>Branch:</strong><br>' + (order.branch ? order.branch.name : 'N/A') + '</div>';
                         html += '<div><strong>Status:</strong><br><span class="status-badge status-' + order.status + '">' + order.status.replace('_', ' ') + '</span></div>';
                         html += '<div><strong>Total Amount:</strong><br>₱' + parseFloat(order.total_amount || 0).toFixed(2) + '</div>';
                         html += '<div><strong>Order Date:</strong><br>' + new Date(order.order_date).toLocaleDateString() + '</div>';
@@ -1158,12 +1173,13 @@
                             html += '<table class="table" style="margin-top: 10px;"><thead><tr style="background: #f8f9fa;"><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Subtotal</th><th>Received</th></tr></thead><tbody>';
                             order.items.forEach(function(item) {
                                 const productName = item.product ? item.product.name : 'Product ID: ' + item.product_id;
+                                const unit = item.unit || (item.product ? item.product.unit : 'pcs') || 'pcs';
                                 html += '<tr>';
                                 html += '<td>' + productName + '</td>';
-                                html += '<td>' + item.quantity + ' ' + (item.product ? (item.product.unit || '') : '') + '</td>';
+                                html += '<td>' + item.quantity + ' <span style="font-weight: 600; color: #2d5016;">' + unit + '</span></td>';
                                 html += '<td>₱' + parseFloat(item.unit_price || 0).toFixed(2) + '</td>';
                                 html += '<td>₱' + parseFloat(item.subtotal || 0).toFixed(2) + '</td>';
-                                html += '<td>' + (item.received_quantity || 0) + '</td>';
+                                html += '<td>' + (item.received_quantity || 0) + ' <span style="font-weight: 600; color: #2d5016;">' + unit + '</span></td>';
                                 html += '</tr>';
                             });
                             html += '</tbody></table>';
