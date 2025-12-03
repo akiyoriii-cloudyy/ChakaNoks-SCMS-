@@ -425,7 +425,9 @@
                     </div>
                     
                     <!-- Pagination Controls -->
-                    <div id="paginationContainer"></div>
+                    <?php if (isset($pager) && $pager->pageCount > 1): ?>
+                        <?= render_pagination($pager, 'page') ?>
+                    <?php endif; ?>
                     
                     <!-- Summary Cards -->
                     <div style="display: flex; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0; flex-wrap: wrap;">

@@ -56,8 +56,25 @@ class Staff extends BaseController
             $filters['branch_id'] = $branchId;
         }
 
-        // Get inventory items
+        // Pagination
+        $perPage = 10; // Maximum 10 records per page
+        $currentPage = max(1, (int)$this->request->getGet('page') ?? 1);
+
+        // Get inventory items with pagination
         $items = $this->model->getInventory($filters);
+        $totalItems = count($items);
+        
+        // Manual pagination since getInventory returns array
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedItems = array_slice($items, $offset, $perPage);
+        
+        // Create pager data manually
+        $pager = (object)[
+            'currentPage' => $currentPage,
+            'perPage' => $perPage,
+            'total' => $totalItems,
+            'pageCount' => ceil($totalItems / $perPage),
+        ];
 
         // Get branches from branches table
         $branches = $this->branchModel
@@ -114,7 +131,8 @@ class Staff extends BaseController
         }
 
         return view('dashboards/staff', [
-            'items'    => $items,
+            'items'    => $paginatedItems,
+            'pager'    => $pager,
             'branches' => $branches,
             'categories' => $categories,
             'filters'  => $filters,

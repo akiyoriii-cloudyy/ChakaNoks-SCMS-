@@ -3,6 +3,9 @@ namespace App\Controllers;
 
 use App\Models\ProductModel;
 use App\Models\BranchModel;
+use App\Models\FranchiseApplicationModel;
+use App\Models\SupplyAllocationModel;
+use App\Models\RoyaltyPaymentModel;
 use Config\Database;
 use Exception;
 
@@ -11,12 +14,18 @@ class FranchiseManager extends BaseController
     protected $db;
     protected $productModel;
     protected $branchModel;
+    protected $applicationModel;
+    protected $allocationModel;
+    protected $royaltyModel;
 
     public function __construct()
     {
         $this->db = Database::connect();
         $this->productModel = new ProductModel();
         $this->branchModel = new BranchModel();
+        $this->applicationModel = new FranchiseApplicationModel();
+        $this->allocationModel = new SupplyAllocationModel();
+        $this->royaltyModel = new RoyaltyPaymentModel();
     }
 
     public function dashboard()
@@ -28,87 +37,299 @@ class FranchiseManager extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        // Get all branches for franchise manager
-        $branches = $this->branchModel->getAllBranches();
+        // Get current section from query parameter
+        $currentSection = $this->request->getGet('section') ?? 'overview';
         
-        // Get dashboard data
-        $dashboardData = $this->getDashboardData();
+        // Get pagination parameters
+        $perPage = 10; // Maximum 10 records per page
+        $applicationsPage = max(1, (int)$this->request->getGet('applications_page') ?? 1);
+        $allocationsPage = max(1, (int)$this->request->getGet('allocations_page') ?? 1);
+        $royaltiesPage = max(1, (int)$this->request->getGet('royalties_page') ?? 1);
+
+        // Get all necessary data with pagination
+        $branches = $this->branchModel->getAllBranches();
+        $products = $this->productModel->getInventory();
+        
+        // Paginated data
+        $applications = $this->applicationModel
+            ->orderBy('created_at', 'DESC')
+            ->paginate($perPage, 'default', $applicationsPage);
+        $applicationsPager = $this->applicationModel->pager;
+        
+        $allocations = $this->allocationModel
+            ->select('supply_allocations.*, branches.name as branch_name, branches.code as branch_code, products.name as product_name')
+            ->join('branches', 'branches.id = supply_allocations.branch_id', 'left')
+            ->join('products', 'products.id = supply_allocations.product_id', 'left')
+            ->orderBy('supply_allocations.created_at', 'DESC')
+            ->paginate($perPage, 'default', $allocationsPage);
+        $allocationsPager = $this->allocationModel->pager;
+        
+        $royalties = $this->royaltyModel
+            ->select('royalty_payments.*, branches.name as branch_name, branches.code as branch_code')
+            ->join('branches', 'branches.id = royalty_payments.branch_id', 'left')
+            ->orderBy('royalty_payments.period_year', 'DESC')
+            ->orderBy('royalty_payments.period_month', 'DESC')
+            ->paginate($perPage, 'default', $royaltiesPage);
+        $royaltiesPager = $this->royaltyModel->pager;
+
+        // Get statistics (non-paginated)
+        $applicationStats = $this->applicationModel->getApplicationStats();
+        $allocationStats = $this->allocationModel->getAllocationStats();
+        $royaltyStats = $this->royaltyModel->getPaymentStats();
 
         return view('dashboards/franchisemanager', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
             ],
-            'data' => $dashboardData,
-            'branches' => $branches
+            'currentSection' => $currentSection,
+            'branches' => $branches,
+            'products' => $products,
+            'applications' => $applications,
+            'allocations' => $allocations,
+            'royalties' => $royalties,
+            'applicationsPager' => $applicationsPager,
+            'allocationsPager' => $allocationsPager,
+            'royaltiesPager' => $royaltiesPager,
+            'applicationStats' => $applicationStats,
+            'allocationStats' => $allocationStats,
+            'royaltyStats' => $royaltyStats,
         ]);
     }
 
-    private function getDashboardData(): array
+    // ==================== FRANCHISE APPLICATION METHODS ====================
+    
+    public function createApplication()
     {
-        // Get all products across all branches (normalized - using JOINs)
-        $allProducts = $this->productModel->getInventory();
+        $session = session();
         
-        $summary = [
-            'total_items' => count($allProducts),
-            'total_stock_value' => 0,
-            'low_stock_count' => 0,
-            'critical_items_count' => 0,
-            'branches_count' => count($this->branchModel->getAllBranches()),
-        ];
-
-        foreach ($allProducts as $product) {
-            $status = $product['status'] ?? 'Good';
-            $stockQty = (int)($product['stock_qty'] ?? 0);
-            $unitPrice = (float)($product['price'] ?? 0);
-            
-            $summary['total_stock_value'] += $stockQty * ($unitPrice > 0 ? $unitPrice : 150);
-
-            if (in_array($status, ['Low Stock', 'Expiring Soon'])) {
-                $summary['low_stock_count']++;
-            }
-            
-            if (in_array($status, ['Critical', 'Out of Stock'])) {
-                $summary['critical_items_count']++;
-            }
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
         }
 
-        return [
-            'inventory' => $summary,
-            'branches' => $this->getBranchSummary(),
-        ];
+        try {
+            $data = [
+                'applicant_name' => $this->request->getPost('applicant_name'),
+                'email' => $this->request->getPost('email'),
+                'phone' => $this->request->getPost('phone'),
+                'proposed_location' => $this->request->getPost('proposed_location'),
+                'city' => $this->request->getPost('city'),
+                'investment_capital' => $this->request->getPost('investment_capital') ?? 0,
+                'business_experience' => $this->request->getPost('business_experience') ?? '',
+                'status' => 'pending',
+                'reviewed_by' => $session->get('user_id'),
+            ];
+
+            if ($this->applicationModel->insert($data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Application created successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create application']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     }
 
-    private function getBranchSummary(): array
+    public function updateApplicationStatus($id)
     {
-        $branches = $this->branchModel->getAllBranches();
-        $summary = [];
-
-        foreach ($branches as $branch) {
-            // Exclude "central" branch (case-insensitive check)
-            $branchName = strtolower($branch['name'] ?? '');
-            $branchCode = strtolower($branch['code'] ?? '');
-            
-            if (strpos($branchName, 'central') !== false || strpos($branchCode, 'central') !== false) {
-                continue; // Skip central branch
-            }
-
-            // Get products for this branch (normalized - using branch_id)
-            $branchProducts = $this->db->table('products')
-                ->where('branch_id', $branch['id'])
-                ->get()
-                ->getResultArray();
-
-            $summary[] = [
-                'branch_id' => $branch['id'],
-                'branch_name' => $branch['name'],
-                'branch_code' => $branch['code'],
-                'branch_address' => $branch['address'] ?? '',
-                'total_products' => count($branchProducts),
-            ];
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
         }
 
-        // Limit to 5 branches only
-        return array_slice($summary, 0, 5);
+        try {
+            $status = $this->request->getPost('status');
+            
+            $data = [
+                'status' => $status,
+                'reviewed_by' => $session->get('user_id'),
+                'reviewed_at' => date('Y-m-d H:i:s'),
+            ];
+
+            if ($this->applicationModel->update($id, $data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Application updated successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to update application']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function getApplicationsList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        $applications = $this->applicationModel->orderBy('created_at', 'DESC')->findAll();
+        return $this->response->setJSON(['status' => 'success', 'data' => $applications]);
+    }
+
+    // ==================== SUPPLY ALLOCATION METHODS ====================
+    
+    public function createAllocation()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $allocatedQty = (int)$this->request->getPost('allocated_qty');
+            $unitPrice = (float)$this->request->getPost('unit_price');
+            
+            $data = [
+                'branch_id' => $this->request->getPost('branch_id'),
+                'product_id' => $this->request->getPost('product_id'),
+                'allocated_qty' => $allocatedQty,
+                'unit_price' => $unitPrice,
+                'total_amount' => $allocatedQty * $unitPrice,
+                'status' => 'pending',
+                'allocation_date' => $this->request->getPost('allocation_date') ?? date('Y-m-d'),
+                'delivery_date' => $this->request->getPost('delivery_date'),
+                'notes' => $this->request->getPost('notes') ?? '',
+                'created_by' => $session->get('user_id'),
+            ];
+
+            if ($this->allocationModel->insert($data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Allocation created successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create allocation']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function updateAllocationStatus($id)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $status = $this->request->getPost('status');
+            
+            $data = ['status' => $status];
+
+            if ($this->allocationModel->update($id, $data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Allocation updated successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to update allocation']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function getAllocationsList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        $allocations = $this->allocationModel->getAllocationsWithDetails();
+        return $this->response->setJSON(['status' => 'success', 'data' => $allocations]);
+    }
+
+    // ==================== ROYALTY PAYMENT METHODS ====================
+    
+    public function createRoyalty()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $grossSales = (float)$this->request->getPost('gross_sales');
+            $royaltyRate = (float)($this->request->getPost('royalty_rate') ?? 5);
+            $marketingFee = (float)($this->request->getPost('marketing_fee') ?? 0);
+            
+            $royaltyAmount = ($grossSales * $royaltyRate) / 100;
+            $totalDue = $royaltyAmount + $marketingFee;
+            
+            $data = [
+                'branch_id' => $this->request->getPost('branch_id'),
+                'period_month' => $this->request->getPost('period_month'),
+                'period_year' => $this->request->getPost('period_year'),
+                'gross_sales' => $grossSales,
+                'royalty_rate' => $royaltyRate,
+                'royalty_amount' => $royaltyAmount,
+                'marketing_fee' => $marketingFee,
+                'total_due' => $totalDue,
+                'amount_paid' => 0,
+                'balance' => $totalDue,
+                'status' => 'pending',
+                'due_date' => $this->request->getPost('due_date'),
+            ];
+
+            if ($this->royaltyModel->insert($data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Royalty record created successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create royalty record']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function recordPayment($id)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $royalty = $this->royaltyModel->find($id);
+            if (!$royalty) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Royalty record not found']);
+            }
+
+            $paymentAmount = (float)$this->request->getPost('amount_paid');
+            $newAmountPaid = $royalty['amount_paid'] + $paymentAmount;
+            $newBalance = $royalty['total_due'] - $newAmountPaid;
+            
+            $data = [
+                'amount_paid' => $newAmountPaid,
+                'balance' => $newBalance,
+                'status' => $newBalance <= 0 ? 'paid' : ($newBalance < $royalty['total_due'] ? 'partial' : 'pending'),
+                'paid_date' => date('Y-m-d H:i:s'),
+                'payment_reference' => $this->request->getPost('payment_reference') ?? '',
+            ];
+
+            if ($this->royaltyModel->update($id, $data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Payment recorded successfully']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record payment']);
+            }
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function getRoyaltiesList()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        $royalties = $this->royaltyModel->getPaymentsWithBranch();
+        return $this->response->setJSON(['status' => 'success', 'data' => $royalties]);
     }
 }
+

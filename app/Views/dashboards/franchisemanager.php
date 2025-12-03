@@ -602,6 +602,9 @@ $currentSection = $currentSection ?? 'overview';
                                     </tbody>
                                 </table>
                             </div>
+                            <?php if (isset($applicationsPager)): ?>
+                                <?= render_pagination($applicationsPager, 'applications_page') ?>
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="empty-state">
                                 <i class="fas fa-file-alt"></i>
@@ -664,6 +667,9 @@ $currentSection = $currentSection ?? 'overview';
                                     </tbody>
                                 </table>
                             </div>
+                            <?php if (isset($allocationsPager)): ?>
+                                <?= render_pagination($allocationsPager, 'allocations_page') ?>
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="empty-state">
                                 <i class="fas fa-boxes"></i>
@@ -741,6 +747,9 @@ $currentSection = $currentSection ?? 'overview';
                                     </tbody>
                                 </table>
                             </div>
+                            <?php if (isset($royaltiesPager)): ?>
+                                <?= render_pagination($royaltiesPager, 'royalties_page') ?>
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="empty-state">
                                 <i class="fas fa-money-bill-wave"></i>
