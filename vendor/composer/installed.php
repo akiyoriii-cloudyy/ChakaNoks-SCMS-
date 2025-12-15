@@ -3,7 +3,7 @@
         'name' => 'codeigniter4/framework',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '7844916d0573b4cde4c4e08dab59e7b4b3f0eaaf',
+        'reference' => '8f83fdb56fcfa5f3c0626772b2980dcbd42afcf9',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -31,7 +31,7 @@
         'codeigniter4/framework' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '7844916d0573b4cde4c4e08dab59e7b4b3f0eaaf',
+            'reference' => '8f83fdb56fcfa5f3c0626772b2980dcbd42afcf9',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -171,6 +171,15 @@
             'install_path' => __DIR__ . '/../phar-io/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'phpmailer/phpmailer' => array(
+            'pretty_version' => 'v7.0.1',
+            'version' => '7.0.1.0',
+            'reference' => '360ae911ce62e25e11249f6140fa58939f556ebe',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpmailer/phpmailer',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'phpunit/php-code-coverage' => array(
             'pretty_version' => '11.0.11',

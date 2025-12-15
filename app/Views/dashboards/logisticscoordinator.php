@@ -44,6 +44,11 @@
             color: #fff; 
         }
         
+        .status-received { 
+            background: #17a2b8; 
+            color: #fff; 
+        }
+        
         .status-approved {
             background: #17a2b8;
             color: #fff;
@@ -1307,7 +1312,7 @@
                         </div>
                         <div class="mb-3">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Search by Order Number, Supplier, or Branch..." id="searchOrders">
+                                <input type="text" class="form-control" placeholder="Search by Order Number, Supplier, or Branch..." id="searchOrders" onkeypress="handleSearchKeyPress(event)">
                                 <button class="btn btn-primary" onclick="searchOrders()">
                                     <i class="fas fa-search"></i> Search
                                 </button>
@@ -1318,70 +1323,13 @@
                         </div>
                         
                         <div id="trackingResults">
-                            <?php if (empty($allOrders ?? [])): ?>
-                                <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                                    <i class="fas fa-inbox" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
-                                    <p style="margin: 0; font-size: 1rem; font-weight: 500;">No purchase orders found</p>
+                            <!-- Content will be loaded dynamically via JavaScript -->
+                            <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
-                            <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>PO Number</th>
-                                                <th>Supplier</th>
-                                                <th>Branch</th>
-                                                <th>Status</th>
-                                                <th>Expected Date</th>
-                                                <th class="text-end">Total Amount</th>
-                                                <th class="text-center">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($allOrders as $order): ?>
-                                            <tr>
-                                                <td>
-                                                    <span style="font-weight: 600; color: #1e293b;"><?= esc($order['order_number'] ?? 'N/A') ?></span>
-                                                </td>
-                                                <td><?= esc($order['supplier']['name'] ?? ($order['supplier_id'] ?? 'N/A')) ?></td>
-                                                <td><?= esc($order['branch']['name'] ?? ($order['branch_id'] ?? 'N/A')) ?></td>
-                                                <td>
-                                                    <?php 
-                                                    $status = strtolower($order['status'] ?? 'pending');
-                                                    if ($status === 'partial_delivery') {
-                                                        $status = 'partial';
-                                                    }
-                                                    $statusDisplay = ucwords(str_replace('_', ' ', $order['status'] ?? 'pending'));
-                                                    ?>
-                                                    <span class="status-badge status-<?= esc($status) ?>">
-                                                        <?= esc($statusDisplay) ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?php if ($order['expected_delivery_date']): ?>
-                                                        <i class="fas fa-calendar-alt me-1 text-muted"></i>
-                                                        <?= date('M d, Y', strtotime($order['expected_delivery_date'])) ?>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">Not set</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td class="text-end" style="font-weight: 600; color: var(--primary-green);">
-                                                    ₱<?= number_format($order['total_amount'] ?? 0, 2) ?>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-info" onclick="trackOrder(<?= $order['id'] ?>)">
-                                                        <i class="fas fa-eye me-1"></i> Track
-                                                    </button>
-                                                    <button class="btn btn-sm btn-secondary" onclick="viewOrderHistory(<?= $order['id'] ?>)">
-                                                        <i class="fas fa-history"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <?php endif; ?>
+                                <p style="margin-top: 15px; font-size: 1rem;">Loading orders...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1513,20 +1461,8 @@
                             </div>
                         </div>
                         
-                        <?php if (empty($scheduledDeliveries)): ?>
-                            <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                                <i class="fas fa-calendar-times" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
-                                <p style="margin: 0; font-size: 1rem; font-weight: 500;">No scheduled deliveries</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                                <?php foreach ($scheduledDeliveries as $delivery): ?>
-                                <div class="delivery-card">
-                                    <!-- Delivery card content same as in dashboard -->
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
+                        <!-- Calendar view loads deliveries dynamically -->
+                        <!-- No need for static PHP content here -->
                     </div>
                 </div>
                 
@@ -1625,7 +1561,43 @@
                                         </div>
                                     </div>
                                     <h3 class="stat-value" id="totalDrivers">0</h3>
-                                    <p class="stat-label">Active Drivers</p>
+                                    <p class="stat-label">Total Drivers</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                                    <div class="stat-card-header">
+                                        <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="stat-value" id="confirmedDrivers" style="color: white;">0</h3>
+                                    <p class="stat-label" style="color: rgba(255,255,255,0.9);">Confirmed Drivers</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white;">
+                                    <div class="stat-card-header">
+                                        <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
+                                            <i class="fas fa-user-check"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="stat-value" id="availableConfirmedDrivers" style="color: white;">0</h3>
+                                    <p class="stat-label" style="color: rgba(255,255,255,0.9);">Available & Confirmed</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white;">
+                                    <div class="stat-card-header">
+                                        <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="stat-value" id="pendingDrivers" style="color: white;">0</h3>
+                                    <p class="stat-label" style="color: rgba(255,255,255,0.9);">Pending Confirmation</p>
                                 </div>
                             </div>
                         </div>
@@ -1839,6 +1811,26 @@
     </div>
 </div>
 
+<!-- Day Deliveries Modal -->
+<div class="modal fade" id="dayDeliveriesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-day"></i> Deliveries for <span id="modalDayDate"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="dayDeliveriesContent">
+                <!-- Deliveries will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1872,6 +1864,11 @@ $(document).ready(function() {
     
     // Set default date for filter
     $('#filterDate').val(new Date().toISOString().split('T')[0]);
+    
+    // Load initial data for track orders section if it's the active section
+    if ($('#track-section').hasClass('active')) {
+        loadAllOrders();
+    }
 });
 
 // Section Navigation
@@ -1895,9 +1892,27 @@ function showSection(sectionId, event) {
     
     $('html, body').animate({ scrollTop: 0 }, 300);
     
-    // Load specific data if needed
-    if (sectionId === 'fleet') {
-        loadFleetManagementData();
+    // Load specific data based on section
+    switch(sectionId) {
+        case 'schedule':
+            loadPendingPOs();
+            break;
+        case 'track':
+            // Always load orders when track section is opened
+            loadAllOrders();
+            break;
+        case 'deliveries':
+            loadAllDeliveries();
+            break;
+        case 'schedules':
+            // Initialize calendar when schedules section is opened
+            if (typeof initializeCalendar === 'function') {
+                initializeCalendar();
+            }
+            break;
+        case 'fleet':
+            loadFleetManagementData();
+            break;
     }
     
     return false;
@@ -2116,9 +2131,122 @@ function submitSchedule() {
 }
 
 function rescheduleDelivery(deliveryId) {
-    // Similar to scheduleDelivery but for existing deliveries
-    // You would load existing delivery data and allow rescheduling
-    alert('Reschedule feature coming soon!');
+    // Load existing delivery data
+    $.get('<?= base_url('delivery/') ?>' + deliveryId + '/details', function(response) {
+        if (response.status === 'success') {
+            const delivery = response.delivery;
+            
+            // Create reschedule modal
+            const modalHtml = `
+                <div class="modal fade" id="rescheduleModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                                <h5 class="modal-title"><i class="fas fa-calendar-alt"></i> Reschedule Delivery</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="rescheduleForm">
+                                    <input type="hidden" id="rescheduleDeliveryId" value="${deliveryId}">
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Delivery Number:</strong></label>
+                                        <input type="text" class="form-control" value="${delivery.delivery_number || 'N/A'}" readonly>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Current Scheduled Date:</strong></label>
+                                        <input type="text" class="form-control" value="${delivery.scheduled_date || 'N/A'}" readonly>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>New Scheduled Date <span class="text-danger">*</span>:</strong></label>
+                                        <input type="date" class="form-control" id="newScheduledDate" required 
+                                               value="${delivery.scheduled_date || ''}" 
+                                               min="${new Date().toISOString().split('T')[0]}">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Driver Name:</strong></label>
+                                        <input type="text" class="form-control" id="rescheduleDriverName" 
+                                               value="${delivery.driver_name || ''}" 
+                                               placeholder="Enter driver name">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Vehicle Info:</strong></label>
+                                        <input type="text" class="form-control" id="rescheduleVehicleInfo" 
+                                               value="${delivery.vehicle_info || ''}" 
+                                               placeholder="e.g., Plate #, Model">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Notes:</strong></label>
+                                        <textarea class="form-control" id="rescheduleNotes" rows="3" 
+                                                  placeholder="Reason for rescheduling or additional notes">${delivery.notes || ''}</textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="submitReschedule()">
+                                    <i class="fas fa-save"></i> Reschedule Delivery
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#rescheduleModal').remove();
+            $('body').append(modalHtml);
+            $('#rescheduleModal').modal('show');
+        } else {
+            alert('Error loading delivery details: ' + (response.message || 'Unknown error'));
+        }
+    }).fail(function() {
+        alert('Error loading delivery details');
+    });
+}
+
+function submitReschedule() {
+    const deliveryId = $('#rescheduleDeliveryId').val();
+    const scheduledDate = $('#newScheduledDate').val();
+    const driverName = $('#rescheduleDriverName').val();
+    const vehicleInfo = $('#rescheduleVehicleInfo').val();
+    const notes = $('#rescheduleNotes').val();
+    
+    if (!scheduledDate) {
+        alert('Please select a new scheduled date');
+        return;
+    }
+    
+    const formData = {
+        scheduled_date: scheduledDate,
+        driver_name: driverName || null,
+        vehicle_info: vehicleInfo || null,
+        notes: notes || null
+    };
+    
+    $.ajax({
+        url: '<?= base_url('logisticscoordinator/delivery/') ?>' + deliveryId + '/reschedule',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            if (response.status === 'success') {
+                alert('Delivery rescheduled successfully!');
+                $('#rescheduleModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + (response.message || 'Unknown error'));
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Error rescheduling delivery: ' + error);
+        }
+    });
 }
 
 // ===== DELIVERY TRACKING FUNCTIONS =====
@@ -2442,8 +2570,88 @@ function refreshTracking(deliveryId) {
 }
 
 function contactDriver(deliveryId) {
-    // This would show driver contact information or initiate a call
-    alert('Driver contact feature coming soon!');
+    $.get('<?= base_url('logisticscoordinator/delivery/') ?>' + deliveryId + '/driver-contact', function(response) {
+        if (response.status === 'success') {
+            const driver = response.driver;
+            
+            let html = `
+                <div class="modal fade" id="driverContactModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                                <h5 class="modal-title"><i class="fas fa-user-tie"></i> Driver Contact Information</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="info-detail-box mb-3">
+                                    <div class="info-label">Driver Name</div>
+                                    <div class="info-value">${driver.name || 'N/A'}</div>
+                                </div>
+                                
+                                <div class="info-detail-box mb-3">
+                                    <div class="info-label">Vehicle Information</div>
+                                    <div class="info-value">${driver.vehicle_info || 'N/A'}</div>
+                                </div>
+                                
+                                <div class="info-detail-box mb-3">
+                                    <div class="info-label">Active Deliveries</div>
+                                    <div class="info-value">${driver.active_deliveries || 0} delivery(ies)</div>
+                                </div>
+                                
+                                ${driver.deliveries && driver.deliveries.length > 0 ? `
+                                    <div class="mt-3">
+                                        <h6><strong>Current Schedule:</strong></h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Delivery #</th>
+                                                        <th>Scheduled Date</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${driver.deliveries.map(d => `
+                                                        <tr>
+                                                            <td>${d.delivery_number || 'N/A'}</td>
+                                                            <td>${new Date(d.scheduled_date).toLocaleDateString()}</td>
+                                                            <td><span class="status-badge status-${d.status}">${d.status}</span></td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-primary" onclick="viewDriverScheduleByName('${driver.name}')">
+                                        <i class="fas fa-calendar"></i> View Full Schedule
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#driverContactModal').remove();
+            $('body').append(html);
+            $('#driverContactModal').modal('show');
+        } else {
+            alert('Error: ' + (response.message || 'Unknown error'));
+        }
+    }).fail(function() {
+        alert('Error loading driver contact information');
+    });
+}
+
+function viewDriverScheduleByName(driverName) {
+    $('#driverContactModal').modal('hide');
+    viewDriverSchedule(null, driverName);
 }
 
 // ===== DELIVERY STATUS UPDATES =====
@@ -2520,21 +2728,7 @@ function updateDeliveryStatus(deliveryId, status) {
 }
 
 // ===== SEARCH AND FILTER FUNCTIONS =====
-function searchOrders() {
-    const searchTerm = $('#searchOrders').val().trim();
-    if (!searchTerm) {
-        alert('Please enter a search term');
-        return;
-    }
-    
-    $.get('<?= base_url('purchase/search') ?>', { q: searchTerm }, function(response) {
-        if (response.status === 'success') {
-            displaySearchResults(response.orders);
-        } else {
-            alert('Search error: ' + (response.message || 'Unknown error'));
-        }
-    });
-}
+// searchOrders is now defined in the section data loading functions above
 
 function displaySearchResults(orders) {
     let html = '';
@@ -2597,29 +2791,10 @@ function displaySearchResults(orders) {
 
 function clearSearch() {
     $('#searchOrders').val('');
-    location.reload();
+    loadAllOrders(); // Reload all orders without search filter
 }
 
-function filterDeliveries() {
-    const status = $('#filterStatus').val();
-    const date = $('#filterDate').val();
-    const driver = $('#filterDriver').val();
-    
-    // In a real application, this would make an AJAX call to filter deliveries
-    // For now, we'll just show an alert
-    alert(`Filtering deliveries by: Status=${status}, Date=${date}, Driver=${driver}`);
-    
-    // Example AJAX call:
-    /*
-    $.get('<?= base_url('delivery/filter') ?>', {
-        status: status,
-        date: date,
-        driver: driver
-    }, function(response) {
-        // Update the deliveries table with filtered results
-    });
-    */
-}
+// filterDeliveries is now defined in the section data loading functions above
 
 function resetFilters() {
     $('#filterStatus').val('');
@@ -2667,12 +2842,22 @@ function updateCalendar() {
         const dayNumber = day.getDate();
         const isToday = isSameDay(day, new Date());
         
+        const dayDateStr = day.toISOString().split('T')[0];
         calendarView.append(`
-            <div class="text-center ${isToday ? 'bg-light' : ''}" style="padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div class="text-center calendar-day ${isToday ? 'bg-light' : ''}" style="padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; min-height: 150px;" data-date="${dayDateStr}">
                 <div class="fw-bold ${isToday ? 'text-primary' : 'text-muted'}">${dayName}</div>
-                <div class="h4 ${isToday ? 'text-primary' : ''}">${dayNumber}</div>
-                <div id="deliveries-${day.toISOString().split('T')[0]}" class="mt-2">
+                <div class="h4 ${isToday ? 'text-primary' : ''}" style="cursor: pointer; user-select: none; transition: all 0.2s; padding: 5px; border-radius: 50%; display: inline-block; min-width: 40px;" 
+                     onclick="showDayDeliveries('${dayDateStr}')" 
+                     onmouseover="this.style.backgroundColor='#e7f3ff'; this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.backgroundColor='transparent'; this.style.transform='scale(1)'"
+                     title="Click to view all deliveries for this day">
+                    ${dayNumber}
+                </div>
+                <div id="deliveries-${dayDateStr}" class="mt-2" style="min-height: 60px;">
                     <!-- Deliveries for this day will be added here -->
+                </div>
+                <div id="delivery-count-${dayDateStr}" class="mt-1" style="font-size: 0.7rem; color: #64748b;">
+                    <!-- Delivery count will be shown here -->
                 </div>
             </div>
         `);
@@ -2683,32 +2868,93 @@ function updateCalendar() {
 }
 
 function loadWeekDeliveries(startDate, endDate) {
+    // Clear all day elements first
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(startDate);
+        day.setDate(day.getDate() + i);
+        const dayElement = $(`#deliveries-${day.toISOString().split('T')[0]}`);
+        if (dayElement.length) {
+            dayElement.empty();
+        }
+    }
+    
     $.get('<?= base_url('delivery/week-deliveries') ?>', {
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0]
     }, function(response) {
         if (response.status === 'success') {
-            response.deliveries.forEach(delivery => {
+            const deliveries = response.deliveries || [];
+            
+            if (deliveries.length === 0) {
+                // Show message if no deliveries
+                return;
+            }
+            
+            // Group deliveries by date
+            const deliveriesByDate = {};
+            deliveries.forEach(delivery => {
+                if (!delivery.scheduled_date) return;
                 const deliveryDate = new Date(delivery.scheduled_date).toISOString().split('T')[0];
-                const dayElement = $(`#deliveries-${deliveryDate}`);
+                if (!deliveriesByDate[deliveryDate]) {
+                    deliveriesByDate[deliveryDate] = [];
+                }
+                deliveriesByDate[deliveryDate].push(delivery);
+            });
+            
+            // Display deliveries for each day (show first 2, rest will be in modal)
+            Object.keys(deliveriesByDate).forEach(date => {
+                const dayDeliveries = deliveriesByDate[date];
+                const dayElement = $(`#deliveries-${date}`);
+                const countElement = $(`#delivery-count-${date}`);
                 
                 if (dayElement.length) {
-                    const statusColor = delivery.status === 'scheduled' ? 'primary' : 
-                                      delivery.status === 'in_transit' ? 'warning' : 
-                                      delivery.status === 'delivered' ? 'success' : 'secondary';
+                    // Show delivery count
+                    countElement.html(`<i class="fas fa-truck"></i> ${dayDeliveries.length} delivery${dayDeliveries.length !== 1 ? 'ies' : ''}`);
                     
-                    dayElement.append(`
-                        <div class="mb-1 p-1" style="background: var(--bs-${statusColor}-bg-subtle); border-left: 3px solid var(--bs-${statusColor}); border-radius: 4px;">
-                            <small style="font-size: 0.7rem;">
-                                <strong>${delivery.delivery_number}</strong><br>
-                                ${delivery.driver_name || 'No driver'}<br>
-                                <span class="badge bg-${statusColor}">${delivery.status}</span>
-                            </small>
-                        </div>
-                    `);
+                    // Show first 2 deliveries in calendar, rest will be in modal
+                    const deliveriesToShow = dayDeliveries.slice(0, 2);
+                    const remainingCount = dayDeliveries.length - 2;
+                    
+                    deliveriesToShow.forEach(delivery => {
+                        const statusColor = delivery.status === 'scheduled' ? 'primary' : 
+                                          delivery.status === 'in_transit' ? 'warning' : 
+                                          delivery.status === 'delivered' ? 'success' : 'secondary';
+                        
+                        const branchName = delivery.branch ? delivery.branch.name : 'N/A';
+                        const supplierName = delivery.supplier ? delivery.supplier.name : 'N/A';
+                        const timeDisplay = delivery.scheduled_time ? delivery.scheduled_time.substring(0, 5) : '';
+                        
+                        dayElement.append(`
+                            <div class="mb-2 p-2 delivery-item" style="background: ${statusColor === 'primary' ? '#e7f3ff' : statusColor === 'warning' ? '#fff3cd' : '#d1e7dd'}; border-left: 3px solid ${statusColor === 'primary' ? '#0d6efd' : statusColor === 'warning' ? '#ffc107' : '#198754'}; border-radius: 4px; cursor: pointer;" onclick="event.stopPropagation(); viewDeliveryDetails(${delivery.id})" title="Click to view details">
+                                <small style="font-size: 0.75rem; display: block;">
+                                    <strong style="color: #1e293b;">${delivery.delivery_number || 'N/A'}</strong>
+                                    ${timeDisplay ? `<br><i class="fas fa-clock text-muted"></i> ${timeDisplay}` : ''}
+                                    <br><span class="text-muted" style="font-size: 0.7rem;">${branchName}</span>
+                                </small>
+                            </div>
+                        `);
+                    });
+                    
+                    // Show "View more" if there are more deliveries
+                    if (remainingCount > 0) {
+                        dayElement.append(`
+                            <div class="text-center mt-1">
+                                <button class="btn btn-sm btn-link p-0" style="font-size: 0.7rem; color: #0d6efd;" onclick="event.stopPropagation(); showDayDeliveries('${date}')">
+                                    +${remainingCount} more
+                                </button>
+                            </div>
+                        `);
+                    }
                 }
             });
+            
+            // Store deliveries data for modal
+            window.weekDeliveriesData = deliveriesByDate;
+        } else {
+            console.error('Error loading week deliveries:', response.message);
         }
+    }).fail(function(xhr, status, error) {
+        console.error('Failed to load week deliveries:', error);
     });
 }
 
@@ -2720,6 +2966,93 @@ function prevWeek() {
 function nextWeek() {
     currentWeekStart.setDate(currentWeekStart.getDate() + 7);
     updateCalendar();
+}
+
+// Show all deliveries for a specific day
+function showDayDeliveries(dateStr) {
+    const date = new Date(dateStr);
+    const dateFormatted = date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    $('#modalDayDate').text(dateFormatted);
+    
+    // Get deliveries for this day
+    const deliveries = window.weekDeliveriesData && window.weekDeliveriesData[dateStr] ? window.weekDeliveriesData[dateStr] : [];
+    
+    const modalContent = $('#dayDeliveriesContent');
+    
+    if (deliveries.length === 0) {
+        modalContent.html(`
+            <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                <i class="fas fa-calendar-times" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
+                <p style="margin: 0; font-size: 1rem; font-weight: 500;">No deliveries scheduled for this day</p>
+            </div>
+        `);
+    } else {
+        let html = `
+            <div class="mb-3">
+                <p class="text-muted"><strong>${deliveries.length}</strong> delivery${deliveries.length !== 1 ? 'ies' : ''} scheduled for this day</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Delivery #</th>
+                            <th>Time</th>
+                            <th>Branch</th>
+                            <th>Supplier</th>
+                            <th>Driver</th>
+                            <th>Vehicle</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        deliveries.forEach(delivery => {
+            const status = (delivery.status || 'scheduled').toLowerCase();
+            const statusColor = status === 'scheduled' ? 'primary' : 
+                              status === 'in_transit' ? 'warning' : 
+                              status === 'delivered' ? 'success' : 'secondary';
+            const statusDisplay = (delivery.status || 'scheduled').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            const branchName = delivery.branch ? delivery.branch.name : 'N/A';
+            const supplierName = delivery.supplier ? delivery.supplier.name : 'N/A';
+            const timeDisplay = delivery.scheduled_time ? delivery.scheduled_time.substring(0, 5) : 'Not set';
+            
+            html += `
+                <tr>
+                    <td><strong>${delivery.delivery_number || 'N/A'}</strong></td>
+                    <td><i class="fas fa-clock text-muted"></i> ${timeDisplay}</td>
+                    <td>${branchName}</td>
+                    <td>${supplierName}</td>
+                    <td>${delivery.driver_name || 'Not assigned'}</td>
+                    <td>${delivery.vehicle_info || 'Not assigned'}</td>
+                    <td><span class="badge bg-${statusColor}">${statusDisplay}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewDeliveryDetails(${delivery.id}); $('#dayDeliveriesModal').modal('hide');">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        modalContent.html(html);
+    }
+    
+    $('#dayDeliveriesModal').modal('show');
 }
 
 function isSameDay(date1, date2) {
@@ -2794,8 +3127,20 @@ function loadFleetManagementData() {
             updateDriverList(response.drivers);
             updateMaintenanceList(response.maintenance);
             
-            // Update driver count
-            $('#totalDrivers').text(response.drivers.length);
+            // Update driver statistics
+            const drivers = response.drivers || [];
+            const totalDrivers = drivers.length;
+            const confirmedDrivers = drivers.filter(d => d.is_confirmed == 1 || d.is_confirmed === true || d.confirmed == 1 || d.confirmed === true).length;
+            const availableConfirmedDrivers = drivers.filter(d => 
+                (d.is_confirmed == 1 || d.is_confirmed === true || d.confirmed == 1 || d.confirmed === true) && 
+                d.status === 'available'
+            ).length;
+            const pendingDrivers = totalDrivers - confirmedDrivers;
+            
+            $('#totalDrivers').text(totalDrivers);
+            $('#confirmedDrivers').text(confirmedDrivers);
+            $('#availableConfirmedDrivers').text(availableConfirmedDrivers);
+            $('#pendingDrivers').text(pendingDrivers);
         }
     });
 }
@@ -2859,6 +3204,7 @@ function updateDriverList(drivers) {
                     <th>License #</th>
                     <th>Phone</th>
                     <th>Status</th>
+                    <th>Confirmed</th>
                     <th>Assigned Vehicle</th>
                     <th>Actions</th>
                 </tr>
@@ -2866,29 +3212,51 @@ function updateDriverList(drivers) {
             <tbody>
     `;
     
-    drivers.forEach(driver => {
-        const statusColor = driver.status === 'available' ? 'success' :
-                          driver.status === 'busy' ? 'warning' :
-                          driver.status === 'off_duty' ? 'secondary' : 'info';
-        
+    if (!drivers || drivers.length === 0) {
         html += `
             <tr>
-                <td>${driver.name}</td>
-                <td>${driver.license_number || 'N/A'}</td>
-                <td>${driver.phone || 'N/A'}</td>
-                <td><span class="badge bg-${statusColor}">${driver.status}</span></td>
-                <td>${driver.assigned_vehicle_id || 'Not assigned'}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="editDriver(${driver.id})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="viewDriverSchedule(${driver.id})">
-                        <i class="fas fa-calendar"></i>
-                    </button>
-                </td>
+                <td colspan="7" class="text-center text-muted">No drivers found</td>
             </tr>
         `;
-    });
+    } else {
+        drivers.forEach(driver => {
+            const statusColor = driver.status === 'available' ? 'success' :
+                              driver.status === 'busy' ? 'warning' :
+                              driver.status === 'off_duty' ? 'secondary' : 'info';
+            
+            const isConfirmed = driver.is_confirmed == 1 || driver.is_confirmed === true || driver.confirmed == 1 || driver.confirmed === true;
+            const confirmedBadge = isConfirmed 
+                ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Confirmed</span>'
+                : '<span class="badge bg-secondary"><i class="fas fa-clock"></i> Pending</span>';
+            
+            // Highlight row if confirmed and available
+            const rowClass = isConfirmed && driver.status === 'available' ? 'table-success' : '';
+            
+            html += `
+                <tr class="${rowClass}">
+                    <td><strong>${driver.name}</strong></td>
+                    <td>${driver.license_number || 'N/A'}</td>
+                    <td>${driver.phone || 'N/A'}</td>
+                    <td><span class="badge bg-${statusColor}">${driver.status}</span></td>
+                    <td>${confirmedBadge}</td>
+                    <td>${driver.assigned_vehicle_id || 'Not assigned'}</td>
+                    <td>
+                        ${!isConfirmed ? `
+                            <button class="btn btn-sm btn-success" onclick="confirmDriver(${driver.id}, '${driver.name}')" title="Confirm Driver">
+                                <i class="fas fa-check"></i> Confirm
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-info" onclick="editDriver(${driver.id})" title="Edit Driver">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="viewDriverSchedule(${driver.id})" title="View Schedule">
+                            <i class="fas fa-calendar"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
     
     html += `
             </tbody>
@@ -3187,10 +3555,187 @@ function editDriver(driverId) {
     });
 }
 
-function viewDriverSchedule(driverId) {
-    // This would show the driver's schedule for the week/month
-    alert('Driver schedule view coming soon!');
+function confirmDriver(driverId, driverName) {
+    if (!confirm(`Are you sure you want to confirm driver "${driverName}"?\n\nThis will mark the driver as confirmed and available for assignments.`)) {
+        return;
+    }
+    
+    $.ajax({
+        url: '<?= base_url('logisticscoordinator/driver/') ?>' + driverId + '/confirm',
+        method: 'POST',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                alert('Driver confirmed successfully!');
+                loadFleetManagementData(); // Reload the driver list
+            } else {
+                alert('Error: ' + (response.message || 'Failed to confirm driver'));
+            }
+        },
+        error: function(xhr) {
+            const errorMsg = xhr.responseJSON && xhr.responseJSON.message 
+                ? xhr.responseJSON.message 
+                : 'Error confirming driver';
+            alert('Error: ' + errorMsg);
+        }
+    });
 }
+
+function viewDriverSchedule(driverId, driverName = null) {
+    // If driverName is provided, use it directly; otherwise prompt
+    let targetDriverName = driverName;
+    
+    if (!targetDriverName) {
+        // Get all drivers first
+        $.get('<?= base_url('logisticscoordinator/api/drivers') ?>', function(driversResponse) {
+            if (driversResponse.status === 'success' && driversResponse.drivers.length > 0) {
+                let driverOptions = driversResponse.drivers.map(d => 
+                    `<option value="${d.driver_name}">${d.driver_name} (${d.delivery_count} deliveries)</option>`
+                ).join('');
+                
+                let html = `
+                    <div class="modal fade" id="driverScheduleModal" tabindex="-1">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                                    <h5 class="modal-title"><i class="fas fa-calendar-week"></i> Driver Schedule</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label"><strong>Select Driver:</strong></label>
+                                            <select class="form-select" id="driverSelect" onchange="loadDriverSchedule()">
+                                                <option value="">-- Select Driver --</option>
+                                                ${driverOptions}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label"><strong>From Date:</strong></label>
+                                            <input type="date" class="form-control" id="scheduleDateFrom" 
+                                                   value="${new Date().toISOString().split('T')[0]}" 
+                                                   onchange="loadDriverSchedule()">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label"><strong>To Date:</strong></label>
+                                            <input type="date" class="form-control" id="scheduleDateTo" 
+                                                   value="${new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]}" 
+                                                   onchange="loadDriverSchedule()">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">&nbsp;</label>
+                                            <button class="btn btn-primary w-100" onclick="loadDriverSchedule()">
+                                                <i class="fas fa-search"></i> Load
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="driverScheduleContent">
+                                        <p class="text-center text-muted">Please select a driver to view schedule</p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('#driverScheduleModal').remove();
+                $('body').append(html);
+                $('#driverScheduleModal').modal('show');
+            } else {
+                alert('No drivers found');
+            }
+        });
+    } else {
+        // Load schedule directly
+        loadDriverScheduleForName(targetDriverName);
+    }
+}
+
+function loadDriverSchedule() {
+    const driverName = $('#driverSelect').val();
+    if (!driverName) {
+        $('#driverScheduleContent').html('<p class="text-center text-muted">Please select a driver</p>');
+        return;
+    }
+    loadDriverScheduleForName(driverName);
+}
+
+function loadDriverScheduleForName(driverName) {
+    const dateFrom = $('#scheduleDateFrom').val() || new Date().toISOString().split('T')[0];
+    const dateTo = $('#scheduleDateTo').val() || new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
+    
+    $('#driverScheduleContent').html('<div class="text-center p-4"><div class="spinner-border text-primary"></div><p class="mt-2">Loading schedule...</p></div>');
+    
+    $.get('<?= base_url('logisticscoordinator/driver-schedule') ?>', {
+        driver_name: driverName,
+        date_from: dateFrom,
+        date_to: dateTo
+    }, function(response) {
+        if (response.status === 'success') {
+            const deliveries = response.deliveries || [];
+            
+            if (deliveries.length === 0) {
+                $('#driverScheduleContent').html(`
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No deliveries scheduled for ${driverName} in the selected date range.
+                    </div>
+                `);
+                return;
+            }
+            
+            let html = `
+                <div class="mb-3">
+                    <h6><strong>Schedule for: ${driverName}</strong></h6>
+                    <p class="text-muted">Date Range: ${new Date(dateFrom).toLocaleDateString()} to ${new Date(dateTo).toLocaleDateString()}</p>
+                    <p class="text-muted">Total Deliveries: ${response.total || deliveries.length}</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Delivery #</th>
+                                <th>Scheduled Date</th>
+                                <th>Status</th>
+                                <th>Branch</th>
+                                <th>Supplier</th>
+                                <th>Vehicle</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${deliveries.map(d => `
+                                <tr>
+                                    <td>${d.delivery_number || 'N/A'}</td>
+                                    <td>${new Date(d.scheduled_date).toLocaleDateString()}</td>
+                                    <td><span class="status-badge status-${d.status}">${d.status}</span></td>
+                                    <td>${d.branch ? d.branch.name : 'N/A'}</td>
+                                    <td>${d.supplier ? d.supplier.name : 'N/A'}</td>
+                                    <td>${d.vehicle_info || 'N/A'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="viewDeliveryDetails(${d.id}); $('#driverScheduleModal').modal('hide');">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#driverScheduleContent').html(html);
+        } else {
+            $('#driverScheduleContent').html(`<div class="alert alert-danger">Error: ${response.message || 'Unknown error'}</div>`);
+}
+    }).fail(function() {
+        $('#driverScheduleContent').html('<div class="alert alert-danger">Error loading driver schedule</div>');
+    });
+}
+
+// viewDeliveryDetails is already defined earlier in the file - using that one
 
 function viewMaintenanceDetails(maintenanceId) {
     $.get('<?= base_url('fleet/maintenance/') ?>' + maintenanceId, function(response) {
@@ -3244,6 +3789,275 @@ function markMaintenanceDone(maintenanceId) {
     }
 }
 
+// ===== SECTION DATA LOADING FUNCTIONS =====
+function loadPendingPOs() {
+    $.get('<?= base_url('logisticscoordinator/api/pending-pos') ?>', function(response) {
+        if (response.status === 'success') {
+            const pendingPOs = response.pendingPOs || [];
+            const scheduleSection = $('#schedule-section');
+            
+            if (pendingPOs.length === 0) {
+                scheduleSection.find('.content-card').html(`
+                    <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                        <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-calendar-plus" style="font-size: 1.5rem;"></i>
+                            Schedule Delivery
+                        </h3>
+                    </div>
+                    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
+                        <p style="margin: 0; font-size: 1rem; font-weight: 500;">No pending purchase orders to schedule</p>
+                    </div>
+                `);
+            } else {
+                // Reload the page section with new data - for now, just refresh
+                location.reload();
+            }
+        }
+    });
+}
+
+function loadAllOrders() {
+    const searchTerm = $('#searchOrders').val() || '';
+    console.log('loadAllOrders called with search term:', searchTerm); // Debug log
+    
+    // Show loading indicator
+    const trackingResults = $('#trackingResults');
+    if (!trackingResults.length) {
+        console.error('trackingResults element not found!');
+        return;
+    }
+    
+    trackingResults.html(`
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p style="margin-top: 15px; font-size: 1rem;">Searching orders...</p>
+        </div>
+    `);
+    
+    const apiUrl = '<?= base_url('logisticscoordinator/api/all-orders') ?>';
+    console.log('Calling API:', apiUrl, 'with search:', searchTerm);
+    
+    $.get(apiUrl, { search: searchTerm }, function(response) {
+        console.log('API Response:', response); // Debug log
+        if (response.status === 'success') {
+            const orders = response.orders || [];
+            
+            if (orders.length === 0) {
+                trackingResults.html(`
+                    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
+                        <p style="margin: 0; font-size: 1rem; font-weight: 500;">
+                            ${searchTerm ? 'No purchase orders found matching "' + searchTerm + '"' : 'No purchase orders found'}
+                        </p>
+                        ${searchTerm ? '<button class="btn btn-secondary mt-3" onclick="clearSearch()">Clear Search</button>' : ''}
+                    </div>
+                `);
+            } else {
+                let html = `
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>PO Number</th>
+                                    <th>Supplier</th>
+                                    <th>Branch</th>
+                                    <th>Status</th>
+                                    <th>Expected Date</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                orders.forEach(order => {
+                    const status = (order.status || 'pending').toLowerCase();
+                    let statusDisplay = (order.status || 'pending').replace(/_/g, ' ');
+                    statusDisplay = statusDisplay.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                    
+                    // Highlight search term in results
+                    const highlightText = (text, searchTerm) => {
+                        if (!searchTerm) return text;
+                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                        return text.replace(regex, '<mark style="background-color: #ffeb3b; padding: 2px 4px;">$1</mark>');
+                    };
+                    
+                    const orderNumber = order.order_number || 'N/A';
+                    const supplierName = order.supplier ? order.supplier.name : (order.supplier_id || 'N/A');
+                    const branchName = order.branch ? order.branch.name : (order.branch_id || 'N/A');
+                    
+                    html += `
+                        <tr>
+                            <td><span style="font-weight: 600; color: #1e293b;">${highlightText(orderNumber, searchTerm)}</span></td>
+                            <td>${highlightText(supplierName, searchTerm)}</td>
+                            <td>${highlightText(branchName, searchTerm)}</td>
+                            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+                            <td>
+                                ${order.expected_delivery_date ? 
+                                    `<i class="fas fa-calendar-alt me-1 text-muted"></i>${new Date(order.expected_delivery_date).toLocaleDateString()}` : 
+                                    '<span class="text-muted">Not set</span>'}
+                            </td>
+                            <td class="text-end" style="font-weight: 600; color: var(--primary-green);">
+                                ₱${parseFloat(order.total_amount || 0).toFixed(2)}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-info" onclick="trackOrder(${order.id})">
+                                    <i class="fas fa-eye me-1"></i> Track
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="viewOrderHistory(${order.id})">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                            </tbody>
+                        </table>
+                        ${searchTerm ? `<div class="mt-2 text-muted"><small>Found ${orders.length} order(s) matching "${searchTerm}"</small></div>` : ''}
+                    </div>
+                `;
+                
+                trackingResults.html(html);
+            }
+        } else {
+            trackingResults.html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Error: ${response.message || 'Failed to load orders'}
+                </div>
+            `);
+        }
+    }).fail(function(xhr, status, error) {
+        console.error('API Error:', status, error, xhr); // Debug log
+        trackingResults.html(`
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Error loading orders. Please try again.
+                <br><small>Error: ${error}</small>
+            </div>
+        `);
+    });
+}
+
+// Handle Enter key press in search input
+function handleSearchKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        searchOrders();
+    }
+}
+
+// Search function - calls loadAllOrders with search term
+function searchOrders() {
+    const searchTerm = $('#searchOrders').val().trim();
+    console.log('Searching for:', searchTerm); // Debug log
+    loadAllOrders();
+}
+
+// Clear search function
+function clearSearch() {
+    $('#searchOrders').val('');
+    console.log('Clearing search'); // Debug log
+    loadAllOrders();
+}
+
+function loadAllDeliveries() {
+    const statusFilter = $('#filterStatus').val() || '';
+    const dateFilter = $('#filterDate').val() || '';
+    const driverFilter = $('#filterDriver').val() || '';
+    
+    // Load drivers for filter dropdown if not already loaded
+    if ($('#filterDriver option').length <= 1) {
+        loadDriversForFilter();
+    }
+    
+    $.get('<?= base_url('logisticscoordinator/api/all-deliveries') ?>', {
+        status: statusFilter,
+        date: dateFilter,
+        driver: driverFilter
+    }, function(response) {
+        if (response.status === 'success') {
+            const deliveries = response.deliveries || [];
+            const deliveriesSection = $('#deliveries-section');
+            const tableBody = deliveriesSection.find('table tbody');
+            
+            if (deliveries.length === 0) {
+                tableBody.html(`
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px 20px; color: #64748b;">
+                            <i class="fas fa-truck" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
+                            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No deliveries found</p>
+                        </td>
+                    </tr>
+                `);
+            } else {
+                let html = '';
+                deliveries.forEach(delivery => {
+                    const status = (delivery.status || 'pending').toLowerCase();
+                    const statusDisplay = (delivery.status || 'pending').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    
+                    html += `
+                        <tr>
+                            <td><strong>${delivery.delivery_number || 'N/A'}</strong></td>
+                            <td>${delivery.purchase_order ? delivery.purchase_order.order_number : (delivery.purchase_order_id || 'N/A')}</td>
+                            <td>${delivery.supplier ? delivery.supplier.name : (delivery.supplier_id || 'N/A')}</td>
+                            <td>${delivery.branch ? delivery.branch.name : (delivery.branch_id || 'N/A')}</td>
+                            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+                            <td>${delivery.scheduled_date ? new Date(delivery.scheduled_date).toLocaleDateString() : 'Not set'}</td>
+                            <td>${delivery.driver_name || 'N/A'}</td>
+                            <td>${delivery.vehicle_info || 'N/A'}</td>
+                            <td>
+                                <div class="btn-group">
+                                    ${delivery.status === 'scheduled' ? 
+                                        `<button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(${delivery.id}, 'in_transit')" title="Mark In Transit">
+                                            <i class="fas fa-truck"></i>
+                                        </button>` : ''}
+                                    ${delivery.status === 'in_transit' ? 
+                                        `<button class="btn btn-sm btn-success" onclick="updateDeliveryStatus(${delivery.id}, 'delivered')" title="Mark Delivered">
+                                            <i class="fas fa-check"></i>
+                                        </button>` : ''}
+                                    <button class="btn btn-sm btn-info" onclick="viewDeliveryDetails(${delivery.id})" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="viewDeliveryHistory(${delivery.id})" title="History">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.html(html);
+            }
+        }
+    });
+}
+
+function loadScheduledDeliveries() {
+    $.get('<?= base_url('logisticscoordinator/api/scheduled-deliveries') ?>', function(response) {
+        if (response.status === 'success') {
+            const deliveries = response.deliveries || [];
+            // Update calendar view if needed
+            if (typeof initializeCalendar === 'function') {
+                initializeCalendar();
+            }
+        }
+    });
+}
+
+// searchOrders and filterDeliveries are defined above in the section data loading functions
+
+function resetFilters() {
+    $('#filterStatus').val('');
+    $('#filterDate').val('');
+    $('#filterDriver').val('');
+    loadAllDeliveries();
+}
+
 // ===== UTILITY FUNCTIONS =====
 function generateDeliveryReport() {
     const startDate = prompt('Enter start date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
@@ -3283,13 +4097,220 @@ function generateDeliveryReport() {
 }
 
 function viewOrderHistory(orderId) {
-    // This would show the complete history of an order
-    alert('Order history feature coming soon!');
+    $.get('<?= base_url('logisticscoordinator/order/') ?>' + orderId + '/history', function(response) {
+        if (response.status === 'success') {
+            const order = response.order;
+            const history = response.history || [];
+            const deliveries = response.deliveries || [];
+            
+            let html = `
+                <div class="modal fade" id="orderHistoryModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                                <h5 class="modal-title"><i class="fas fa-history"></i> Order History - ${order.order_number || 'N/A'}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="info-detail-box">
+                                            <div class="info-label">Order Number</div>
+                                            <div class="info-value">${order.order_number || 'N/A'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-detail-box">
+                                            <div class="info-label">Status</div>
+                                            <div class="info-value"><span class="status-badge status-${order.status}">${order.status}</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                ${deliveries.length > 0 ? `
+                                    <div class="mb-4">
+                                        <h6><strong>Related Deliveries:</strong></h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Delivery #</th>
+                                                        <th>Scheduled Date</th>
+                                                        <th>Status</th>
+                                                        <th>Driver</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${deliveries.map(d => `
+                                                        <tr>
+                                                            <td>${d.delivery_number || 'N/A'}</td>
+                                                            <td>${new Date(d.scheduled_date).toLocaleDateString()}</td>
+                                                            <td><span class="status-badge status-${d.status}">${d.status}</span></td>
+                                                            <td>${d.driver_name || 'N/A'}</td>
+                                                            <td>
+                                                                <button class="btn btn-sm btn-info" onclick="viewDeliveryHistory(${d.id})">
+                                                                    <i class="fas fa-history"></i> History
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div>
+                                    <h6><strong>Audit Trail:</strong></h6>
+                                    ${history.length > 0 ? `
+                                        <div class="timeline">
+                                            ${history.map(h => {
+                                                const oldVals = h.old_values ? JSON.parse(h.old_values) : {};
+                                                const newVals = h.new_values ? JSON.parse(h.new_values) : {};
+                                                const changedFields = h.changed_fields ? h.changed_fields.split(',') : [];
+                                                
+                                                return `
+                                                    <div class="timeline-item">
+                                                        <div class="card mb-2">
+                                                            <div class="card-body">
+                                                                <div class="d-flex justify-content-between">
+                                                                    <strong>${h.action}</strong>
+                                                                    <small class="text-muted">${new Date(h.created_at).toLocaleString()}</small>
+                                                                </div>
+                                                                <p class="mb-1"><small>Changed by: ${h.changed_by_email || 'System'}</small></p>
+                                                                ${changedFields.length > 0 ? `
+                                                                    <div class="mt-2">
+                                                                        <strong>Changes:</strong>
+                                                                        <ul class="mb-0">
+                                                                            ${changedFields.map(field => {
+                                                                                const oldVal = oldVals[field] !== undefined ? oldVals[field] : 'N/A';
+                                                                                const newVal = newVals[field] !== undefined ? newVals[field] : 'N/A';
+                                                                                return `<li><strong>${field}:</strong> ${oldVal} → ${newVal}</li>`;
+                                                                            }).join('')}
+                                                                        </ul>
+                                                                    </div>
+                                                                ` : ''}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    ` : '<p class="text-muted">No history available</p>'}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#orderHistoryModal').remove();
+            $('body').append(html);
+            $('#orderHistoryModal').modal('show');
+        } else {
+            alert('Error: ' + (response.message || 'Unknown error'));
+        }
+    }).fail(function() {
+        alert('Error loading order history');
+    });
 }
 
 function viewDeliveryHistory(deliveryId) {
-    // This would show the complete history of a delivery
-    alert('Delivery history feature coming soon!');
+    $.get('<?= base_url('logisticscoordinator/delivery/') ?>' + deliveryId + '/history', function(response) {
+        if (response.status === 'success') {
+            const delivery = response.delivery;
+            const history = response.history || [];
+            
+            let html = `
+                <div class="modal fade" id="deliveryHistoryModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                                <h5 class="modal-title"><i class="fas fa-history"></i> Delivery History - ${delivery.delivery_number || 'N/A'}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="info-detail-box">
+                                            <div class="info-label">Delivery Number</div>
+                                            <div class="info-value">${delivery.delivery_number || 'N/A'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="info-detail-box">
+                                            <div class="info-label">Status</div>
+                                            <div class="info-value"><span class="status-badge status-${delivery.status}">${delivery.status}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="info-detail-box">
+                                            <div class="info-label">Scheduled Date</div>
+                                            <div class="info-value">${new Date(delivery.scheduled_date).toLocaleDateString()}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h6><strong>Audit Trail:</strong></h6>
+                                    ${history.length > 0 ? `
+                                        <div class="timeline">
+                                            ${history.map(h => {
+                                                const oldVals = h.old_values ? JSON.parse(h.old_values) : {};
+                                                const newVals = h.new_values ? JSON.parse(h.new_values) : {};
+                                                const changedFields = h.changed_fields ? h.changed_fields.split(',') : [];
+                                                
+                                                return `
+                                                    <div class="timeline-item">
+                                                        <div class="card mb-2">
+                                                            <div class="card-body">
+                                                                <div class="d-flex justify-content-between">
+                                                                    <strong>${h.action}</strong>
+                                                                    <small class="text-muted">${new Date(h.created_at).toLocaleString()}</small>
+                                                                </div>
+                                                                <p class="mb-1"><small>Changed by: ${h.changed_by_email || 'System'}</small></p>
+                                                                ${changedFields.length > 0 ? `
+                                                                    <div class="mt-2">
+                                                                        <strong>Changes:</strong>
+                                                                        <ul class="mb-0">
+                                                                            ${changedFields.map(field => {
+                                                                                const oldVal = oldVals[field] !== undefined ? oldVals[field] : 'N/A';
+                                                                                const newVal = newVals[field] !== undefined ? newVals[field] : 'N/A';
+                                                                                return `<li><strong>${field}:</strong> ${oldVal} → ${newVal}</li>`;
+                                                                            }).join('')}
+                                                                        </ul>
+                                                                    </div>
+                                                                ` : ''}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    ` : '<p class="text-muted">No history available</p>'}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#deliveryHistoryModal').remove();
+            $('body').append(html);
+            $('#deliveryHistoryModal').modal('show');
+        } else {
+            alert('Error: ' + (response.message || 'Unknown error'));
+        }
+    }).fail(function() {
+        alert('Error loading delivery history');
+    });
 }
 
 // Helper function for string manipulation (from PHP)

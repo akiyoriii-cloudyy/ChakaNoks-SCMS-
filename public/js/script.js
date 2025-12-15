@@ -9,38 +9,9 @@ function switchTab(tabName) {
   const targetTab = document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`);
   if (targetTab) targetTab.classList.add('active');
 
-  if (tabName === 'signin') {
-    const forgotEmail = document.getElementById('forgot-email');
-    if (forgotEmail) forgotEmail.value = '';
-  }
-}
-
-// ✅ Show forgot password form
-function showForgotPassword() {
-  document.querySelectorAll('.form-content').forEach(form => form.classList.remove('active'));
-  document.getElementById('forgot-form').classList.add('active');
 }
 
 // ❌ Removed handleSignIn() because the form now posts directly to CI route
-
-// ✅ Handle Forgot Password
-function handleForgotPassword() {
-  const email = document.getElementById('forgot-email').value.trim();
-
-  if (!email) {
-    showNotification('Please enter your email address', 'error');
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showNotification('Please enter a valid email address', 'error');
-    return;
-  }
-
-  showNotification('Password reset link sent to your email!', 'success');
-  document.getElementById('forgot-email').value = '';
-  switchTab('signin');
-}
 
 // ✅ Email validation
 function isValidEmail(email) {
@@ -99,10 +70,6 @@ document.head.appendChild(style);
 // ✅ Input animations
 document.addEventListener('DOMContentLoaded', function() {
   // ❌ Removed Enter key submit binding to handleSignIn()
-  const forgotForm = document.getElementById('forgot-form');
-  forgotForm.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') handleForgotPassword();
-  });
 
   const inputs = document.querySelectorAll('input');
   inputs.forEach(input => {

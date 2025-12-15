@@ -125,6 +125,12 @@ class DeliveryModel extends Model
      */
     public function updateDeliveryStatus(int $id, string $status, ?string $actualDeliveryDate = null, ?int $receivedBy = null): bool
     {
+        // Get old values for audit trail
+        $oldDelivery = $this->find($id);
+        if (!$oldDelivery) {
+            return false;
+        }
+
         $data = ['status' => $status];
 
         if ($status === 'delivered' || $status === 'partial_delivery') {
@@ -140,7 +146,38 @@ class DeliveryModel extends Model
             }
         }
 
-        return $this->update($id, $data);
+        $updated = $this->update($id, $data);
+
+        // Log to audit trail if update successful
+        if ($updated) {
+            $auditTrailModel = new \App\Models\AuditTrailModel();
+            $newDelivery = $this->find($id);
+            
+            $oldValues = [
+                'status' => $oldDelivery['status'],
+                'actual_delivery_date' => $oldDelivery['actual_delivery_date'],
+                'received_by' => $oldDelivery['received_by'],
+                'received_at' => $oldDelivery['received_at']
+            ];
+            
+            $newValues = [
+                'status' => $newDelivery['status'],
+                'actual_delivery_date' => $newDelivery['actual_delivery_date'],
+                'received_by' => $newDelivery['received_by'],
+                'received_at' => $newDelivery['received_at']
+            ];
+
+            $auditTrailModel->logChange(
+                'deliveries',
+                $id,
+                'STATUS_UPDATE',
+                $oldValues,
+                $newValues,
+                $receivedBy
+            );
+        }
+
+        return $updated;
     }
 
     /**

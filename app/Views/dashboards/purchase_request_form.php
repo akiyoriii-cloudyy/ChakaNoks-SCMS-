@@ -822,116 +822,461 @@ function updateItemOptionsForRow(rowId) {
 
 // Get relevant unit options for a product/category
 function getRelevantUnitOptions(productName, category) {
-    const nameLower = productName.toLowerCase();
+    const nameLower = (productName || '').toLowerCase();
+    const categoryLower = (category || '').toLowerCase();
     let allowedUnits = [];
     let defaultUnit = 'pcs';
     
-    // First, try to find exact match in inventory products
+    // First, try to find exact match in inventory products and use its unit
     for (let product of inventoryProducts) {
-        if (product.name === productName && product.unit) {
-            // Return the product's unit as primary, plus common alternatives
-            const productUnit = product.unit;
-            allowedUnits = getUnitAlternatives(productUnit, category);
+        if (product.name && product.name.toLowerCase() === nameLower && product.unit) {
+            // Get product-specific units based on the product's unit
+            const productUnit = product.unit.toLowerCase();
+            allowedUnits = getProductSpecificUnits(productName, productUnit, category);
             return { units: allowedUnits, default: productUnit };
         }
     }
     
-    // Beverages - bottles, cans, liters
-    if (category === 'Beverages' || nameLower.includes('cola') || nameLower.includes('pepsi') || 
-        nameLower.includes('juice') || nameLower.includes('water') || nameLower.includes('soda')) {
-        allowedUnits = ['bottles', 'cans', 'liters', 'pcs'];
-        defaultUnit = nameLower.includes('can') ? 'cans' : 'bottles';
+    // Try partial match (contains) in inventory products
+    for (let product of inventoryProducts) {
+        if (product.name && product.name.toLowerCase().includes(nameLower) && product.unit) {
+            const productUnit = product.unit.toLowerCase();
+            allowedUnits = getProductSpecificUnits(productName, productUnit, category);
+            return { units: allowedUnits, default: productUnit };
+        }
     }
     
-    // Condiments/Sauces - bottles, liters, packs
-    else if (category === 'Condiments' || nameLower.includes('sauce') || nameLower.includes('vinegar') || 
-        nameLower.includes('ketchup') || nameLower.includes('soy sauce')) {
-        allowedUnits = ['bottles', 'liters', 'packs', 'pcs'];
-        defaultUnit = 'bottles';
+    // ===== BEVERAGES CATEGORY =====
+    // Soft drinks / Carbonated beverages - ONLY cans, liters, bottles (NO pcs)
+    if (nameLower.includes('coca-cola') || nameLower.includes('cocacola') || nameLower.includes('coke') ||
+        nameLower.includes('pepsi') || nameLower.includes('sprite') || nameLower.includes('7up') ||
+        nameLower.includes('royal') || nameLower.includes('mountain dew') || nameLower.includes('fanta') ||
+        nameLower.includes('mirinda') || nameLower.includes('root beer') ||
+        (nameLower.includes('soda') && !nameLower.includes('baking'))) {
+        allowedUnits = ['cans', 'liters', 'bottles'];
+        defaultUnit = 'cans';
     }
     
-    // Cooking Oil - liters, bottles
-    else if (category === 'Cooking Oil' || nameLower.includes('oil') || nameLower.includes('cooking')) {
-        allowedUnits = ['liters', 'bottles', 'pcs'];
+    // Juice products - liters, bottles, packs
+    else if (nameLower.includes('juice')) {
+        allowedUnits = ['liters', 'bottles', 'packs'];
         defaultUnit = 'liters';
     }
     
-    // Seasonings/Spices - packs, kg, pcs
-    else if (category === 'Seasonings' || category === 'Spices' || nameLower.includes('salt') || 
-        nameLower.includes('pepper') || nameLower.includes('garlic') || nameLower.includes('msg')) {
-        allowedUnits = ['packs', 'kg', 'pcs', 'bags'];
-        defaultUnit = 'packs';
+    // Water products - bottles, liters (NO pcs)
+    else if (nameLower.includes('water') || nameLower.includes('mineral water') || nameLower.includes('distilled water')) {
+        allowedUnits = ['bottles', 'liters'];
+        defaultUnit = 'bottles';
     }
     
-    // Rice - kg, sacks, bags
-    else if (category === 'Rice' || nameLower.includes('rice')) {
-        allowedUnits = ['kg', 'sacks', 'bags', 'pcs'];
+    // Milk products - liters, bottles, packs
+    else if ((nameLower.includes('milk') && !nameLower.includes('powder')) || 
+             (categoryLower === 'dairy' && nameLower.includes('milk'))) {
+        allowedUnits = ['liters', 'bottles', 'packs'];
+        defaultUnit = nameLower.includes('fresh') || nameLower.includes('liquid') ? 'liters' : 'packs';
+    }
+    
+    // Beer/Alcohol - bottles, cans
+    else if (nameLower.includes('beer') || nameLower.includes('alcohol') || nameLower.includes('wine') ||
+             nameLower.includes('liquor') || nameLower.includes('whiskey') || nameLower.includes('rum')) {
+        allowedUnits = ['bottles', 'cans'];
+        defaultUnit = 'bottles';
+    }
+    
+    // Energy drinks - cans, bottles
+    else if (nameLower.includes('energy drink') || nameLower.includes('red bull') || nameLower.includes('monster')) {
+        allowedUnits = ['cans', 'bottles'];
+        defaultUnit = 'cans';
+    }
+    
+    // Coffee/Tea (liquid) - liters, bottles, packs
+    else if ((nameLower.includes('coffee') && (nameLower.includes('liquid') || nameLower.includes('ready'))) ||
+             (nameLower.includes('tea') && (nameLower.includes('liquid') || nameLower.includes('iced')))) {
+        allowedUnits = ['liters', 'bottles', 'packs'];
+        defaultUnit = 'liters';
+    }
+    
+    // Beverages category fallback - bottles, cans, liters (NO pcs)
+    else if (categoryLower === 'beverages') {
+        allowedUnits = ['bottles', 'cans', 'liters'];
+        defaultUnit = nameLower.includes('can') ? 'cans' : 'bottles';
+    }
+    
+    // ===== FOOD CATEGORIES =====
+    // Rice - kg, sacks, bags (NO pcs)
+    else if (categoryLower === 'rice' || nameLower.includes('rice')) {
+        allowedUnits = ['kg', 'sacks', 'bags'];
         defaultUnit = nameLower.includes('sack') ? 'sacks' : 'kg';
     }
     
+    // Cooking Oil - liters, bottles (NO pcs)
+    else if (categoryLower === 'cooking oil' || nameLower.includes('oil') || nameLower.includes('cooking')) {
+        allowedUnits = ['liters', 'bottles'];
+        defaultUnit = 'liters';
+    }
+    
     // Vegetables/Fruits - kg, pcs, bags
-    else if (category === 'Vegetables' || category === 'Fruits' || nameLower.includes('vegetable') || nameLower.includes('fruit')) {
+    else if (categoryLower === 'vegetables' || categoryLower === 'fruits' || categoryLower === 'vegetables & produce' ||
+             nameLower.includes('vegetable') || nameLower.includes('fruit') ||
+             nameLower.includes('corn') || nameLower.includes('potato') || nameLower.includes('onion') ||
+             nameLower.includes('tomato') || nameLower.includes('cabbage') || nameLower.includes('carrot')) {
         allowedUnits = ['kg', 'pcs', 'bags', 'boxes'];
         defaultUnit = 'kg';
     }
     
     // Bread/Bakery - pcs, loaves, dozen, packs
-    else if (category === 'Bread' || category === 'Bakery' || nameLower.includes('bread') || nameLower.includes('pandesal')) {
+    else if (categoryLower === 'bread' || categoryLower === 'bakery' ||
+             nameLower.includes('bread') || nameLower.includes('pandesal') || nameLower.includes('loaf') ||
+             nameLower.includes('bun') || nameLower.includes('roll')) {
         allowedUnits = ['pcs', 'loaves', 'dozen', 'packs'];
         defaultUnit = nameLower.includes('loaf') ? 'loaves' : 'pcs';
     }
     
-    // Dairy - liters, pcs, packs, kg
-    else if (category === 'Dairy' || nameLower.includes('milk') || nameLower.includes('cheese') || nameLower.includes('butter')) {
-        allowedUnits = ['liters', 'pcs', 'packs', 'kg'];
-        defaultUnit = nameLower.includes('liter') || nameLower.includes('liquid') ? 'liters' : 'pcs';
+    // Eggs - pcs, dozen
+    else if (nameLower.includes('egg') || categoryLower === 'eggs' || categoryLower === 'poultry') {
+        allowedUnits = ['pcs', 'dozen'];
+        defaultUnit = 'pcs';
+    }
+    
+    // Meat/Chicken/Poultry - kg, pcs
+    else if (categoryLower === 'meat' || categoryLower === 'poultry' ||
+             nameLower.includes('chicken') || nameLower.includes('pork') || nameLower.includes('beef') || 
+             nameLower.includes('meat') || nameLower.includes('fish') || nameLower.includes('seafood')) {
+        allowedUnits = ['kg', 'pcs'];
+        defaultUnit = 'kg';
     }
     
     // Frozen Foods - kg, packs, boxes, pcs
-    else if (category === 'Frozen Foods' || nameLower.includes('frozen') || nameLower.includes('chicken')) {
+    else if (categoryLower === 'frozen foods' || nameLower.includes('frozen')) {
         allowedUnits = ['kg', 'packs', 'boxes', 'pcs'];
         defaultUnit = nameLower.includes('pack') || nameLower.includes('box') ? 'packs' : 'kg';
     }
     
+    // Dairy - liters, pcs, packs, kg
+    else if (categoryLower === 'dairy' || nameLower.includes('cheese') || nameLower.includes('butter') ||
+             nameLower.includes('yogurt') || nameLower.includes('margarine') || nameLower.includes('cream')) {
+        allowedUnits = ['liters', 'pcs', 'packs', 'kg'];
+        defaultUnit = nameLower.includes('liter') || nameLower.includes('liquid') || nameLower.includes('milk') ? 'liters' : 'pcs';
+    }
+    
+    // Canned Goods - cans, pcs
+    else if (nameLower.includes('canned') || nameLower.includes('tin') ||
+             categoryLower === 'canned goods' || categoryLower === 'canned foods') {
+        allowedUnits = ['cans', 'pcs'];
+        defaultUnit = 'cans';
+    }
+    
+    // Noodles/Pasta - packs, boxes, pcs
+    else if (nameLower.includes('noodle') || nameLower.includes('pasta') || nameLower.includes('spaghetti') ||
+             categoryLower === 'noodles' || categoryLower === 'pasta') {
+        allowedUnits = ['packs', 'boxes', 'pcs'];
+        defaultUnit = 'packs';
+    }
+    
+    // Snacks/Chips - packs, boxes, pcs
+    else if (nameLower.includes('chip') || nameLower.includes('snack') || nameLower.includes('cracker') ||
+             categoryLower === 'snacks') {
+        allowedUnits = ['packs', 'boxes', 'pcs'];
+        defaultUnit = 'packs';
+    }
+    
+    // ===== CONDIMENTS & SEASONINGS =====
+    // Condiments/Sauces - bottles, liters, packs
+    else if (categoryLower === 'condiments' ||
+             nameLower.includes('sauce') || nameLower.includes('vinegar') || 
+             nameLower.includes('ketchup') || nameLower.includes('soy sauce') ||
+             nameLower.includes('mayonnaise') || nameLower.includes('mustard')) {
+        allowedUnits = ['bottles', 'liters', 'packs'];
+        defaultUnit = 'bottles';
+    }
+    
+    // Seasonings/Spices - packs, kg, pcs, bags
+    else if (categoryLower === 'seasonings' || categoryLower === 'spices' ||
+             nameLower.includes('salt') || nameLower.includes('pepper') || 
+             nameLower.includes('garlic') || nameLower.includes('msg') ||
+             nameLower.includes('seasoning') || nameLower.includes('spice')) {
+        allowedUnits = ['packs', 'kg', 'pcs', 'bags'];
+        defaultUnit = 'packs';
+    }
+    
+    // Sugar - kg, packs, bags
+    else if (nameLower.includes('sugar')) {
+        allowedUnits = ['kg', 'packs', 'bags'];
+        defaultUnit = 'kg';
+    }
+    
+    // Flour - kg, packs, bags
+    else if (nameLower.includes('flour')) {
+        allowedUnits = ['kg', 'packs', 'bags'];
+        defaultUnit = 'kg';
+    }
+    
+    // ===== NON-FOOD CATEGORIES =====
+    // Cleaning Supplies - liters, bottles, pcs
+    else if (categoryLower === 'cleaning supplies' ||
+             nameLower.includes('cleaning') || nameLower.includes('detergent') ||
+             nameLower.includes('soap') || nameLower.includes('bleach') ||
+             nameLower.includes('cleaner') || nameLower.includes('disinfectant')) {
+        allowedUnits = ['liters', 'bottles', 'pcs'];
+        defaultUnit = nameLower.includes('liquid') || nameLower.includes('bleach') ? 'liters' : 'pcs';
+    }
+    
     // Packaging - pcs, rolls, packs, boxes
-    else if (category === 'Packaging' || nameLower.includes('bag') || nameLower.includes('container') || nameLower.includes('cup')) {
+    else if (categoryLower === 'packaging' ||
+             nameLower.includes('bag') || nameLower.includes('container') || nameLower.includes('cup') ||
+             nameLower.includes('plate') || nameLower.includes('straw') || nameLower.includes('wrapper')) {
         allowedUnits = ['pcs', 'rolls', 'packs', 'boxes'];
         defaultUnit = nameLower.includes('roll') ? 'rolls' : 'pcs';
     }
     
-    // Cleaning Supplies - liters, bottles, pcs, packs
-    else if (category === 'Cleaning Supplies' || nameLower.includes('cleaning') || nameLower.includes('detergent')) {
-        allowedUnits = ['liters', 'bottles', 'pcs', 'packs'];
-        defaultUnit = nameLower.includes('liquid') || nameLower.includes('bleach') ? 'liters' : 'pcs';
+    // Paper Products - rolls, packs, boxes, pcs
+    else if (nameLower.includes('paper') || nameLower.includes('tissue') || nameLower.includes('napkin') ||
+             nameLower.includes('toilet paper') || categoryLower === 'paper products') {
+        allowedUnits = ['rolls', 'packs', 'boxes', 'pcs'];
+        defaultUnit = nameLower.includes('roll') ? 'rolls' : 'packs';
     }
     
-    // Default - all common units
+    // Default - all common units (but still try to be smart)
     else {
-        allowedUnits = ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen', 'sacks', 'loaves'];
-        defaultUnit = 'pcs';
+        // Category-based defaults
+        if (categoryLower === 'beverages') {
+            allowedUnits = ['bottles', 'cans', 'liters'];
+            defaultUnit = 'bottles';
+        } else if (categoryLower === 'vegetables' || categoryLower === 'fruits') {
+            allowedUnits = ['kg', 'pcs', 'bags'];
+            defaultUnit = 'kg';
+        } else if (categoryLower === 'meat' || categoryLower === 'poultry') {
+            allowedUnits = ['kg', 'pcs'];
+            defaultUnit = 'kg';
+        } else {
+            allowedUnits = ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen', 'sacks', 'loaves'];
+            defaultUnit = 'pcs';
+        }
     }
     
     return { units: allowedUnits, default: defaultUnit };
 }
 
-// Get alternative units for a given primary unit
-function getUnitAlternatives(primaryUnit, category) {
-    const alternatives = {
-        'bottles': ['bottles', 'cans', 'liters', 'pcs'],
-        'cans': ['cans', 'bottles', 'pcs'],
-        'liters': ['liters', 'bottles', 'pcs'],
+// Get product-specific units based on product name and its primary unit
+function getProductSpecificUnits(productName, primaryUnit, category) {
+    const nameLower = (productName || '').toLowerCase();
+    const unitLower = (primaryUnit || '').toLowerCase();
+    const categoryLower = (category || '').toLowerCase();
+    
+    // ===== BEVERAGES CATEGORY =====
+    // Soft drinks / Carbonated beverages - ONLY cans, liters, bottles (NO pcs, kg, etc.)
+    if (nameLower.includes('coca-cola') || nameLower.includes('cocacola') || nameLower.includes('coke') ||
+        nameLower.includes('pepsi') || nameLower.includes('sprite') || nameLower.includes('7up') ||
+        nameLower.includes('royal') || nameLower.includes('mountain dew') || nameLower.includes('fanta') ||
+        nameLower.includes('mirinda') || nameLower.includes('root beer') || 
+        (nameLower.includes('soda') && !nameLower.includes('baking')) ||
+        categoryLower === 'beverages' && (nameLower.includes('soft drink') || nameLower.includes('carbonated'))) {
+        return ['cans', 'liters', 'bottles'];
+    }
+    
+    // Juice products - liters, bottles, packs
+    if (nameLower.includes('juice') || (categoryLower === 'beverages' && nameLower.includes('juice'))) {
+        return ['liters', 'bottles', 'packs'];
+    }
+    
+    // Water products - bottles, liters (NO pcs)
+    if (nameLower.includes('water') || nameLower.includes('mineral water') || nameLower.includes('distilled water')) {
+        return ['bottles', 'liters'];
+    }
+    
+    // Milk products - liters, bottles, packs
+    if ((nameLower.includes('milk') && !nameLower.includes('powder')) || 
+        (categoryLower === 'dairy' && nameLower.includes('milk'))) {
+        return ['liters', 'bottles', 'packs'];
+    }
+    
+    // Beer/Alcohol - bottles, cans
+    if (nameLower.includes('beer') || nameLower.includes('alcohol') || nameLower.includes('wine') ||
+        nameLower.includes('liquor') || nameLower.includes('whiskey') || nameLower.includes('rum')) {
+        return ['bottles', 'cans'];
+    }
+    
+    // Energy drinks - cans, bottles
+    if (nameLower.includes('energy drink') || nameLower.includes('red bull') || nameLower.includes('monster')) {
+        return ['cans', 'bottles'];
+    }
+    
+    // Coffee/Tea (liquid) - liters, bottles, packs
+    if ((nameLower.includes('coffee') && (nameLower.includes('liquid') || nameLower.includes('ready'))) ||
+        (nameLower.includes('tea') && (nameLower.includes('liquid') || nameLower.includes('iced')))) {
+        return ['liters', 'bottles', 'packs'];
+    }
+    
+    // ===== FOOD CATEGORIES =====
+    // Rice - kg, sacks, bags (NO pcs)
+    if (nameLower.includes('rice') || categoryLower === 'rice') {
+        return ['kg', 'sacks', 'bags'];
+    }
+    
+    // Cooking oil - liters, bottles (NO pcs)
+    if (nameLower.includes('oil') || nameLower.includes('cooking oil') || categoryLower === 'cooking oil') {
+        return ['liters', 'bottles'];
+    }
+    
+    // Vegetables/Fruits - kg, pcs, bags
+    if (categoryLower === 'vegetables' || categoryLower === 'fruits' || categoryLower === 'vegetables & produce' ||
+        nameLower.includes('vegetable') || nameLower.includes('fruit') || 
+        nameLower.includes('corn') || nameLower.includes('potato') || nameLower.includes('onion') ||
+        nameLower.includes('tomato') || nameLower.includes('cabbage') || nameLower.includes('carrot')) {
+        return ['kg', 'pcs', 'bags'];
+    }
+    
+    // Bread/Bakery - pcs, loaves, dozen, packs
+    if (categoryLower === 'bread' || categoryLower === 'bakery' ||
+        nameLower.includes('bread') || nameLower.includes('pandesal') || nameLower.includes('loaf') ||
+        nameLower.includes('bun') || nameLower.includes('roll')) {
+        return ['pcs', 'loaves', 'dozen', 'packs'];
+    }
+    
+    // Eggs - pcs, dozen
+    if (nameLower.includes('egg') || categoryLower === 'eggs' || categoryLower === 'poultry') {
+        return ['pcs', 'dozen'];
+    }
+    
+    // Meat/Chicken/Poultry - kg, pcs
+    if (categoryLower === 'meat' || categoryLower === 'poultry' ||
+        nameLower.includes('chicken') || nameLower.includes('pork') || nameLower.includes('beef') || 
+        nameLower.includes('meat') || nameLower.includes('fish') || nameLower.includes('seafood')) {
+        return ['kg', 'pcs'];
+    }
+    
+    // Frozen Foods - kg, packs, boxes, pcs
+    if (categoryLower === 'frozen foods' || nameLower.includes('frozen')) {
+        return ['kg', 'packs', 'boxes', 'pcs'];
+    }
+    
+    // Dairy (cheese, butter, yogurt) - pcs, packs, kg
+    if (categoryLower === 'dairy' ||
+        nameLower.includes('cheese') || nameLower.includes('butter') || nameLower.includes('yogurt') ||
+        nameLower.includes('margarine') || nameLower.includes('cream')) {
+        return ['pcs', 'packs', 'kg'];
+    }
+    
+    // Canned Goods - cans, pcs
+    if (nameLower.includes('canned') || nameLower.includes('tin') ||
+        (categoryLower === 'canned goods' || categoryLower === 'canned foods')) {
+        return ['cans', 'pcs'];
+    }
+    
+    // Noodles/Pasta - packs, boxes, pcs
+    if (nameLower.includes('noodle') || nameLower.includes('pasta') || nameLower.includes('spaghetti') ||
+        categoryLower === 'noodles' || categoryLower === 'pasta') {
+        return ['packs', 'boxes', 'pcs'];
+    }
+    
+    // Snacks/Chips - packs, boxes, pcs
+    if (nameLower.includes('chip') || nameLower.includes('snack') || nameLower.includes('cracker') ||
+        categoryLower === 'snacks') {
+        return ['packs', 'boxes', 'pcs'];
+    }
+    
+    // ===== CONDIMENTS & SEASONINGS =====
+    // Condiments/Sauces - bottles, liters, packs
+    if (categoryLower === 'condiments' ||
+        nameLower.includes('sauce') || nameLower.includes('ketchup') || nameLower.includes('soy') ||
+        nameLower.includes('vinegar') || nameLower.includes('mayonnaise') || nameLower.includes('mustard')) {
+        return ['bottles', 'liters', 'packs'];
+    }
+    
+    // Seasonings/Spices - packs, kg, pcs, bags
+    if (categoryLower === 'seasonings' || categoryLower === 'spices' ||
+        nameLower.includes('salt') || nameLower.includes('pepper') || nameLower.includes('garlic') ||
+        nameLower.includes('msg') || nameLower.includes('seasoning') || nameLower.includes('spice')) {
+        return ['packs', 'kg', 'pcs', 'bags'];
+    }
+    
+    // Sugar - kg, packs, bags
+    if (nameLower.includes('sugar')) {
+        return ['kg', 'packs', 'bags'];
+    }
+    
+    // Flour - kg, packs, bags
+    if (nameLower.includes('flour')) {
+        return ['kg', 'packs', 'bags'];
+    }
+    
+    // ===== NON-FOOD CATEGORIES =====
+    // Cleaning Supplies - liters, bottles, pcs
+    if (categoryLower === 'cleaning supplies' ||
+        nameLower.includes('detergent') || nameLower.includes('soap') || nameLower.includes('bleach') ||
+        nameLower.includes('cleaner') || nameLower.includes('disinfectant')) {
+        return ['liters', 'bottles', 'pcs'];
+    }
+    
+    // Packaging - pcs, rolls, packs, boxes
+    if (categoryLower === 'packaging' ||
+        nameLower.includes('bag') || nameLower.includes('container') || nameLower.includes('cup') ||
+        nameLower.includes('plate') || nameLower.includes('straw') || nameLower.includes('wrapper')) {
+        return ['pcs', 'rolls', 'packs', 'boxes'];
+    }
+    
+    // Paper Products - rolls, packs, boxes, pcs
+    if (nameLower.includes('paper') || nameLower.includes('tissue') || nameLower.includes('napkin') ||
+        nameLower.includes('toilet paper') || categoryLower === 'paper products') {
+        return ['rolls', 'packs', 'boxes', 'pcs'];
+    }
+    
+    // ===== UNIT-BASED FALLBACK =====
+    // Based on primary unit, return relevant alternatives
+    const unitBasedAlternatives = {
+        'bottles': ['bottles', 'liters', 'cans'],
+        'cans': ['cans', 'bottles', 'liters'],
+        'liters': ['liters', 'bottles'],
         'kg': ['kg', 'pcs', 'bags', 'sacks'],
-        'packs': ['packs', 'boxes', 'pcs', 'dozen'],
+        'packs': ['packs', 'boxes', 'pcs'],
         'boxes': ['boxes', 'packs', 'pcs'],
         'pcs': ['pcs', 'dozen', 'packs'],
-        'bags': ['bags', 'pcs', 'kg'],
+        'bags': ['bags', 'kg', 'pcs'],
         'rolls': ['rolls', 'pcs'],
-        'dozen': ['dozen', 'pcs', 'packs'],
+        'dozen': ['dozen', 'pcs'],
         'sacks': ['sacks', 'kg', 'bags'],
-        'loaves': ['loaves', 'pcs', 'dozen']
+        'loaves': ['loaves', 'pcs']
     };
     
-    return alternatives[primaryUnit] || ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles'];
+    // Special handling for beverages - never include 'pcs' if unit is bottles/cans/liters
+    if ((unitLower === 'bottles' || unitLower === 'cans' || unitLower === 'liters') && 
+        (categoryLower === 'beverages' || nameLower.includes('cola') || nameLower.includes('pepsi') || 
+         nameLower.includes('soda') || nameLower.includes('juice') || nameLower.includes('water') ||
+         nameLower.includes('drink'))) {
+        if (unitLower === 'cans') {
+            return ['cans', 'bottles', 'liters'];
+        } else if (unitLower === 'bottles') {
+            return ['bottles', 'liters', 'cans'];
+        } else if (unitLower === 'liters') {
+            return ['liters', 'bottles'];
+        }
+    }
+    
+    // Special handling for liquids - never include 'pcs' for liters/bottles
+    if ((unitLower === 'liters' || unitLower === 'bottles') && 
+        (nameLower.includes('oil') || nameLower.includes('liquid') || nameLower.includes('sauce'))) {
+        if (unitLower === 'liters') {
+            return ['liters', 'bottles'];
+        } else {
+            return ['bottles', 'liters'];
+        }
+    }
+    
+    // Return unit-specific alternatives if available
+    if (unitBasedAlternatives[unitLower]) {
+        return unitBasedAlternatives[unitLower];
+    }
+    
+    // Default fallback - but still try to be smart based on category
+    if (categoryLower === 'beverages') {
+        return ['bottles', 'cans', 'liters'];
+    } else if (categoryLower === 'vegetables' || categoryLower === 'fruits') {
+        return ['kg', 'pcs', 'bags'];
+    } else if (categoryLower === 'meat' || categoryLower === 'poultry') {
+        return ['kg', 'pcs'];
+    }
+    
+    return ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles'];
 }
 
 // Update unit dropdown options based on category only
@@ -940,54 +1285,15 @@ function updateUnitOptionsForCategory(unitSelect, category) {
     
     console.log(`📦 Updating unit options for category: "${category}"`);
     
-    let allowedUnits = [];
-    let defaultUnit = 'pcs';
-    
-    // Get category-appropriate units
-    if (category === 'Beverages') {
-        allowedUnits = ['bottles', 'cans', 'liters', 'pcs'];
-        defaultUnit = 'bottles';
-    } else if (category === 'Condiments') {
-        allowedUnits = ['bottles', 'liters', 'packs', 'pcs'];
-        defaultUnit = 'bottles';
-    } else if (category === 'Cooking Oil') {
-        allowedUnits = ['liters', 'bottles', 'pcs'];
-        defaultUnit = 'liters';
-    } else if (category === 'Seasonings' || category === 'Spices') {
-        allowedUnits = ['packs', 'kg', 'pcs', 'bags'];
-        defaultUnit = 'packs';
-    } else if (category === 'Rice') {
-        allowedUnits = ['kg', 'sacks', 'bags', 'pcs'];
-        defaultUnit = 'kg';
-    } else if (category === 'Vegetables' || category === 'Fruits') {
-        allowedUnits = ['kg', 'pcs', 'bags', 'boxes'];
-        defaultUnit = 'kg';
-    } else if (category === 'Bread' || category === 'Bakery') {
-        allowedUnits = ['pcs', 'loaves', 'dozen', 'packs'];
-        defaultUnit = 'pcs';
-    } else if (category === 'Dairy') {
-        allowedUnits = ['liters', 'pcs', 'packs', 'kg'];
-        defaultUnit = 'pcs';
-    } else if (category === 'Frozen Foods') {
-        allowedUnits = ['kg', 'packs', 'boxes', 'pcs'];
-        defaultUnit = 'kg';
-    } else if (category === 'Packaging') {
-        allowedUnits = ['pcs', 'rolls', 'packs', 'boxes'];
-        defaultUnit = 'pcs';
-    } else if (category === 'Cleaning Supplies') {
-        allowedUnits = ['liters', 'bottles', 'pcs', 'packs'];
-        defaultUnit = 'pcs';
-    } else {
-        // Default all units
-        allowedUnits = ['pcs', 'kg', 'liters', 'packs', 'boxes', 'bottles', 'cans', 'bags', 'rolls', 'dozen', 'sacks', 'loaves'];
-        defaultUnit = 'pcs';
-    }
+    // Use the comprehensive getRelevantUnitOptions function with empty product name
+    // This will use category-based logic
+    const { units, default: defaultUnit } = getRelevantUnitOptions('', category);
     
     const currentValue = unitSelect.value;
     
     // Clear and repopulate
     unitSelect.innerHTML = '';
-    allowedUnits.forEach(function(unit) {
+    units.forEach(function(unit) {
         const option = document.createElement('option');
         option.value = unit;
         option.textContent = unit;
@@ -995,10 +1301,12 @@ function updateUnitOptionsForCategory(unitSelect, category) {
     });
     
     // Set value
-    if (allowedUnits.includes(currentValue)) {
+    if (units.includes(currentValue)) {
         unitSelect.value = currentValue;
+        console.log(`✅ Kept current unit: ${currentValue}`);
     } else {
         unitSelect.value = defaultUnit;
+        console.log(`✅ Set default unit: ${defaultUnit}`);
     }
 }
 

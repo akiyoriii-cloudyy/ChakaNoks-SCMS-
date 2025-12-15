@@ -162,6 +162,9 @@ class DeliveryController extends BaseController
 
         // Get delivery branch ID
         $deliveryBranchId = (int)($delivery['branch_id'] ?? 0);
+        $userId = $session->get('user_id') ?? $session->get('id');
+        $stockInCount = 0;
+        $errors = [];
 
         try {
             foreach ($receivedItems as $item) {
@@ -178,8 +181,13 @@ class DeliveryController extends BaseController
                         ->get()
                         ->getRowArray();
 
-                    if ($deliveryItem) {
-                        $db->table('delivery_items')
+                    if (!$deliveryItem) {
+                        $errors[] = "Delivery item not found for product ID: {$productId}";
+                        continue;
+                    }
+
+                    // Update delivery item received quantity and condition
+                    $updateResult = $db->table('delivery_items')
                             ->where('delivery_id', $id)
                             ->where('product_id', $productId)
                             ->update([
@@ -189,9 +197,15 @@ class DeliveryController extends BaseController
                                 'updated_at' => date('Y-m-d H:i:s')
                             ]);
 
+                    if (!$updateResult) {
+                        $errors[] = "Failed to update delivery item for product ID: {$productId}";
+                        continue;
+                    }
+
                         // Get original product
                         $originalProduct = $this->productModel->find($productId);
                         if (!$originalProduct) {
+                        $errors[] = "Product not found: {$productId}";
                             continue;
                         }
 
@@ -215,35 +229,48 @@ class DeliveryController extends BaseController
                                 $newProductData = [
                                     'name' => $originalProduct['name'],
                                     'branch_id' => $deliveryBranchId,
-                                    'category_id' => $originalProduct['category_id'],
-                                    'price' => $originalProduct['price'],
+                                'category_id' => $originalProduct['category_id'] ?? null,
+                                'price' => $originalProduct['price'] ?? 0,
                                     'stock_qty' => 0, // Will be updated by stock-in
-                                    'unit' => $originalProduct['unit'],
-                                    'min_stock' => $originalProduct['min_stock'],
-                                    'max_stock' => $originalProduct['max_stock'],
+                                'unit' => $originalProduct['unit'] ?? 'pcs',
+                                'min_stock' => $originalProduct['min_stock'] ?? 0,
+                                'max_stock' => $originalProduct['max_stock'] ?? 0,
                                     'expiry' => $expiryDate,
                                     'status' => 'active',
-                                    'created_by' => $session->get('user_id') ?? $session->get('id'),
+                                'created_by' => $userId,
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
                                 ];
                                 
-                                $db->table('products')->insert($newProductData);
+                            $insertResult = $db->table('products')->insert($newProductData);
+                            if (!$insertResult) {
+                                $dbError = $db->error();
+                                $errors[] = "Failed to create product for branch: " . ($dbError['message'] ?? 'Unknown error');
+                                continue;
+                            }
+                            
                                 $targetProductId = $db->insertID();
-                                
                                 log_message('info', "Created new product ID {$targetProductId} for branch {$deliveryBranchId} from delivery {$id}");
                             }
                         }
 
                         // Record STOCK-IN transaction for the TARGET product (in delivery's branch)
-                        $this->stockTransactionModel->recordStockIn(
+                    $stockInResult = $this->stockTransactionModel->recordStockIn(
                             $targetProductId,
                             $receivedQty,
                             $id, // reference_id (delivery_id)
                             'delivery', // reference_type
-                            $session->get('user_id') ?? $session->get('id'), // created_by
+                        $userId, // created_by
                             $expiryDate
                         );
+
+                    if (!$stockInResult) {
+                        $errors[] = "Failed to record stock-in for product ID: {$targetProductId}";
+                        log_message('error', "Failed to record stock-in for product {$targetProductId} in delivery {$id}");
+                        continue;
+                    }
+
+                    $stockInCount++;
 
                         // Update purchase order item received quantity
                         if (!empty($delivery['purchase_order_id'])) {
@@ -263,15 +290,45 @@ class DeliveryController extends BaseController
                         }
                     }
                 }
+
+            // If no items were processed successfully, rollback
+            if ($stockInCount === 0 && !empty($errors)) {
+                $db->transRollback();
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to process any items: ' . implode('; ', $errors)
+                ]);
             }
 
-            // Update delivery status with received_by (user who received it)
-            $userId = $session->get('user_id') ?? $session->get('id');
-            $this->deliveryModel->updateDeliveryStatus(
+            // Update delivery status to 'received' (not 'delivered') - inventory/manager has verified receipt
+            // Logistics will mark as 'delivered' later if needed
+            $updateData = [
+                'status' => 'received',
+                'received_by' => $userId,
+                'received_at' => date('Y-m-d H:i:s'),
+                'actual_delivery_date' => date('Y-m-d'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $updateResult = $this->deliveryModel->update((int)$id, $updateData);
+            if (!$updateResult) {
+                $db->transRollback();
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to update delivery status'
+                ]);
+            }
+
+            // Log to audit trail
+            $auditTrailModel = new \App\Models\AuditTrailModel();
+            $oldDelivery = $this->deliveryModel->find((int)$id);
+            $auditTrailModel->logChange(
+                'deliveries',
                 (int)$id,
-                'delivered',
-                date('Y-m-d'),
-                (int)$userId
+                'RECEIVED',
+                ['status' => $delivery['status']],
+                ['status' => 'received', 'received_by' => $userId, 'received_at' => date('Y-m-d H:i:s')],
+                $userId
             );
 
             // Update purchase order status if all items received
@@ -282,16 +339,27 @@ class DeliveryController extends BaseController
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Transaction failed']);
+                $dbError = $db->error();
+                log_message('error', 'Transaction failed: ' . json_encode($dbError));
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Transaction failed: ' . ($dbError['message'] ?? 'Unknown database error')
+                ]);
+            }
+
+            $message = "Delivery received successfully. Stock updated for {$stockInCount} item(s).";
+            if (!empty($errors)) {
+                $message .= " Warnings: " . implode('; ', $errors);
             }
 
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Delivery received successfully. Stock updated (STOCK-IN → NEW STOCK)'
+                'message' => $message
             ]);
 
         } catch (\Exception $e) {
             $db->transRollback();
+            log_message('error', 'Error receiving delivery: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage()
@@ -469,20 +537,34 @@ class DeliveryController extends BaseController
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Delivery items not found']);
             }
 
+            // Store old values for audit trail
+            $oldStatus = $delivery['status'] ?? 'scheduled';
+
             // Update delivery with confirmation details
-            // received_by must be user ID (integer), not email/text
+            // Status should be 'received' (not 'delivered') - manager/inventory verifies receipt
+            // Logistics will mark as 'delivered' separately if needed
             $updateData = [
                 'actual_delivery_date' => $actualDeliveryDate,
                 'received_by' => (int)$userId, // Use user ID from session
                 'received_at' => $receivedAt,
-                'status' => 'delivered',
+                'status' => 'received', // Changed from 'delivered' to 'received'
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            $this->deliveryModel->update((int)$id, $updateData);
+            $updateResult = $this->deliveryModel->update((int)$id, $updateData);
+            if (!$updateResult) {
+                $db->transRollback();
+                $dbError = $db->error();
+                log_message('error', 'Failed to update delivery status: ' . json_encode($dbError));
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to update delivery status: ' . ($dbError['message'] ?? 'Unknown error')
+                ]);
+            }
 
             // Record STOCK-IN for all delivery items
             $stockInCount = 0;
+            $errors = [];
             
             foreach ($delivery['items'] as $item) {
                 $productId = (int)($item['product_id'] ?? 0);
@@ -497,24 +579,105 @@ class DeliveryController extends BaseController
                     $product = $this->productModel->find($productId);
                     
                     if (!$product) {
+                        $errors[] = "Product not found: {$productId}";
                         log_message('warning', 'Product ' . $productId . ' not found when confirming delivery ' . $id);
                         continue;
                     }
                     
-                    // Check if product belongs to this branch, if not, create/update it
-                    if (empty($product['branch_id']) || $product['branch_id'] != $branchId) {
-                        // Update product to belong to this branch
-                        $this->productModel->update($productId, [
-                            'branch_id' => $branchId
-                        ]);
-                        log_message('info', 'Updated product ' . $productId . ' branch_id to ' . $branchId . ' during delivery confirmation');
+                    // Check if product belongs to this branch, if not, find or create for this branch
+                    $targetProductId = $productId;
+                    if (empty($product['branch_id']) || (int)$product['branch_id'] != $branchId) {
+                        // Product is from a different branch - find or create for this branch
+                        $existingProduct = $db->table('products')
+                            ->where('name', $product['name'])
+                            ->where('branch_id', $branchId)
+                            ->get()
+                            ->getRowArray();
+
+                        if ($existingProduct) {
+                            // Use existing product in this branch
+                            $targetProductId = (int)$existingProduct['id'];
+                            // Reload to ensure we have latest data
+                            $targetProduct = $this->productModel->find($targetProductId);
+                            if (!$targetProduct) {
+                                $errors[] = "Target product not found: {$targetProductId}";
+                                log_message('error', "Target product {$targetProductId} not found in delivery {$id}");
+                                continue;
+                            }
+                        } else {
+                            // Create new product for this branch
+                            $newProductData = [
+                                'name' => $product['name'],
+                                'branch_id' => $branchId,
+                                'category_id' => $product['category_id'] ?? null,
+                                'price' => $product['price'] ?? 0,
+                                'stock_qty' => 0, // Will be updated by stock-in
+                                'unit' => $product['unit'] ?? 'pcs',
+                                'min_stock' => $product['min_stock'] ?? 0,
+                                'max_stock' => $product['max_stock'] ?? 0,
+                                'expiry' => $product['expiry'] ?? null,
+                                'status' => 'active',
+                                'created_by' => $userId,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            ];
+                            
+                            $insertResult = $db->table('products')->insert($newProductData);
+                            if (!$insertResult) {
+                                $dbError = $db->error();
+                                $errors[] = "Failed to create product for branch: " . ($dbError['message'] ?? 'Unknown error');
+                                log_message('error', 'Failed to create product for branch: ' . json_encode($dbError));
+                                continue;
+                            }
+                            
+                            $targetProductId = $db->insertID();
+                            if (!$targetProductId || $targetProductId <= 0) {
+                                $errors[] = "Failed to get new product ID after creation";
+                                log_message('error', 'Failed to get new product ID after creation');
+                                continue;
+                            }
+                            
+                            log_message('info', 'Created new product ID ' . $targetProductId . ' for branch ' . $branchId . ' during delivery confirmation');
+                            
+                            // Reload the newly created product to ensure we have all fields
+                            $targetProduct = $this->productModel->find($targetProductId);
+                            if (!$targetProduct) {
+                                $errors[] = "Failed to load newly created product: {$targetProductId}";
+                                log_message('error', "Failed to load newly created product {$targetProductId}");
+                                continue;
+                            }
+                        }
+                    } else {
+                        // Product belongs to this branch - use it directly
+                        $targetProduct = $product;
+                        $targetProductId = $productId;
                     }
                     
-                    $expiryDate = $product['expiry'] ?? null;
+                    // Verify target product exists and has required data
+                    if (!$targetProduct) {
+                        $errors[] = "Target product not found after processing: {$targetProductId}";
+                        log_message('error', "Target product {$targetProductId} not found after processing in delivery {$id}");
+                        continue;
+                    }
+                    
+                    // Ensure target product has branch_id set
+                    if (empty($targetProduct['branch_id'])) {
+                        $updateResult = $this->productModel->update($targetProductId, ['branch_id' => $branchId]);
+                        if ($updateResult) {
+                            $targetProduct['branch_id'] = $branchId;
+                            log_message('info', "Updated product {$targetProductId} branch_id to {$branchId}");
+                        } else {
+                            $errors[] = "Failed to update product branch_id: {$targetProductId}";
+                            log_message('error', "Failed to update product {$targetProductId} branch_id to {$branchId}");
+                            continue;
+                        }
+                    }
+                    
+                    $expiryDate = $targetProduct['expiry'] ?? $product['expiry'] ?? null;
                     
                     // Record STOCK-IN transaction (NEW STOCK)
                     $stockInRecorded = $this->stockTransactionModel->recordStockIn(
-                        $productId,
+                        $targetProductId,
                         $quantityToStock,
                         $id, // reference_id (delivery_id)
                         'delivery', // reference_type
@@ -535,11 +698,52 @@ class DeliveryController extends BaseController
                                     'updated_at' => date('Y-m-d H:i:s')
                                 ]);
                         }
+                        
+                        // Update purchase order item received quantity
+                        if (!empty($delivery['purchase_order_id'])) {
+                            $poItem = $db->table('purchase_order_items')
+                                ->where('purchase_order_id', $delivery['purchase_order_id'])
+                                ->where('product_id', $productId)
+                                ->get()
+                                ->getRowArray();
+
+                            if ($poItem) {
+                                $newReceivedQty = ($poItem['received_quantity'] ?? 0) + $quantityToStock;
+                                $db->table('purchase_order_items')
+                                    ->where('purchase_order_id', $delivery['purchase_order_id'])
+                                    ->where('product_id', $productId)
+                                    ->update(['received_quantity' => $newReceivedQty]);
+                            }
+                        }
                     } else {
-                        log_message('error', 'Failed to record stock-in for product ' . $productId . ' in delivery ' . $id);
+                        // Get more detailed error from the model
+                        $dbError = $this->db->error();
+                        $errorMsg = $dbError['message'] ?? 'Unknown error';
+                        $errors[] = "Failed to record stock-in for product ID: {$targetProductId} ({$errorMsg})";
+                        log_message('error', "Failed to record stock-in for product {$targetProductId} in delivery {$id}. Product data: " . json_encode($targetProduct));
                     }
                 }
             }
+
+            // If no items were processed successfully, rollback
+            if ($stockInCount === 0 && !empty($errors)) {
+                $db->transRollback();
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to process any items: ' . implode('; ', $errors)
+                ]);
+            }
+
+            // Log to audit trail
+            $auditTrailModel = new \App\Models\AuditTrailModel();
+            $auditTrailModel->logChange(
+                'deliveries',
+                (int)$id,
+                'CONFIRMED',
+                ['status' => $oldStatus],
+                ['status' => 'received', 'received_by' => $userId, 'received_at' => $receivedAt],
+                $userId
+            );
 
             // Update purchase order status if all items received
             if (!empty($delivery['purchase_order_id'])) {
@@ -549,19 +753,32 @@ class DeliveryController extends BaseController
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Transaction failed']);
+                $dbError = $db->error();
+                log_message('error', 'Transaction failed: ' . json_encode($dbError));
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Transaction failed: ' . ($dbError['message'] ?? 'Unknown database error')
+                ]);
+            }
+
+            $message = "Delivery confirmed successfully. Stock-IN recorded for {$stockInCount} item(s).";
+            if (!empty($errors)) {
+                $message .= " Warnings: " . implode('; ', $errors);
             }
 
             log_message('info', 'Delivery ' . $id . ' confirmed by branch manager. Stock-IN recorded for ' . $stockInCount . ' items.');
             
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Delivery confirmed successfully. Stock-IN recorded for ' . $stockInCount . ' items.'
+                'message' => $message
             ]);
         } catch (\Exception $e) {
             $db->transRollback();
-            log_message('error', 'Error confirming delivery: ' . $e->getMessage());
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
+            log_message('error', 'Error confirming delivery: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
         }
     }
 

@@ -1,0 +1,14 @@
+__ci_last_regenerate|i:1765738202;_ci_previous_url|s:42:"http://localhost:8080/auth/forgot-password";error|s:1022:"Failed to send email. <br><small style="font-family: monospace; font-size: 0.85em;">220 smtp.gmail.com ESMTP 98e67ed59e1d1-34abe1ffd98sm6955214a91.2 - gsmtp<br />
+&lt;br&gt;&lt;pre&gt;hello: 250-smtp.gmail.com at your service, [2001:4455:644:9500:c8e1:cc41:f851:82ab]<br />
+250-SIZE 35882577<br />
+250-8BITMIME<br />
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH<br />
+250-ENHANCEDSTATUSCODES<br />
+250-PIPELINING<br />
+250-CHUNKING<br />
+250 SMTPUTF8<br />
+&lt;/pre&gt;Failed to authenticate password. Error: 535-5.7.8 Username and Password not accepted. For more information, go to<br />
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-34abe1ffd98sm6955214a91.2 - gsmtp<br />
+&lt;br&gt;Unable to send email using SMTP. Your server might not be configured to send mail using this method.&lt;br&gt;&lt;pre&gt;Date: Mon, 15 Dec 2025 02:44:18 +0800<br />
+From: &amp;quot;CHAKANOKS SCMS&amp;quot; &amp;lt;chakanoks.system@gmail.com&amp;gt;<br />
+Return-Path: </small>";__ci_vars|a:1:{s:5:"error";s:3:"old";}

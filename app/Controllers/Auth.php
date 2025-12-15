@@ -107,10 +107,4 @@ class Auth extends BaseController
         return redirect()->to('/auth/login');
     }
 
-    // -------------------- FORGOT PASSWORD --------------------
-    public function forgotPasswordForm()
-    {
-        // This shows the OTP form but action points to Forgot::sendOtp
-        return view('auth/forgotPasswordForm');
-    }
 }

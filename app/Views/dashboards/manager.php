@@ -107,6 +107,17 @@
             </header>
 
             <div class="dashboard-content">
+                <!-- Welcome Banner -->
+                <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 10px; padding: 12px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15); display: inline-flex; align-items: center; gap: 12px; max-width: fit-content;">
+                    <div style="width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-check" style="font-size: 18px; color: #28a745;"></i>
+                    </div>
+                    <div>
+                        <div style="color: white; font-size: 1rem; font-weight: 700; line-height: 1.2;">Welcome to Branch Manager</div>
+                        <div style="color: rgba(255, 255, 255, 0.95); font-size: 0.875rem; font-weight: 500; line-height: 1.2;">Dashboard</div>
+                    </div>
+                </div>
+
                 <!-- Key Metrics -->
                 <div class="stats-grid">
                     <div class="stat-card">

@@ -90,8 +90,7 @@
                 <span class="checkmark"></span>
                 Remember me
               </label>
-              <!-- ✅ Correct link to forgot password form -->
-              <a href="<?= base_url('/auth/forgotPasswordForm') ?>" class="forgot-link">Forgot password?</a>
+              <a href="<?= base_url('/auth/forgot-password') ?>" class="forgot-link" style="margin-left: auto; color: #2d5016; text-decoration: none; font-weight: 500;">Forgot password?</a>
             </div>
 
             <!-- Submit -->

@@ -20,10 +20,7 @@ class MigrateDataToNormalizedStructure extends Migration
         // (Note: This will be approximate since we don't have batch_id in old data)
         $this->migrateStockTransactions();
 
-        // STEP 4: Migrate password reset data to separate table
-        $this->migratePasswordResetData();
-
-        // STEP 5: Link branches to franchise structure
+        // STEP 4: Link branches to franchise structure
         $this->setupFranchiseStructure();
 
         log_message('info', 'Data migration to normalized structure completed!');
@@ -140,36 +137,6 @@ class MigrateDataToNormalizedStructure extends Migration
         log_message('warning', 'Stock transaction migration requires manual review and batch assignment');
     }
 
-    private function migratePasswordResetData()
-    {
-        log_message('info', 'Migrating password reset data...');
-
-        // Get users with active reset tokens
-        $users = $this->db->query("
-            SELECT id, reset_otp, otp_expires, reset_expires
-            FROM users
-            WHERE reset_otp IS NOT NULL OR reset_expires IS NOT NULL
-        ")->getResultArray();
-
-        foreach ($users as $user) {
-            if ($user['reset_otp']) {
-                // Create token entry
-                $token = bin2hex(random_bytes(32));
-                
-                $this->db->table('password_reset_tokens')->insert([
-                    'user_id' => $user['id'],
-                    'token' => $token,
-                    'otp' => $user['reset_otp'],
-                    'otp_expires' => $user['otp_expires'],
-                    'reset_expires' => $user['reset_expires'],
-                    'is_used' => false,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
-            }
-        }
-
-        log_message('info', 'Migrated password reset data for ' . count($users) . ' users');
-    }
 
     private function setupFranchiseStructure()
     {
@@ -233,7 +200,6 @@ class MigrateDataToNormalizedStructure extends Migration
         // Truncate new tables (preserve old data in products table)
         $this->db->table('stock_batches')->truncate();
         $this->db->table('product_catalog')->truncate();
-        $this->db->table('password_reset_tokens')->truncate();
 
         // Remove added columns from branches
         $fields = $this->db->getFieldNames('branches');

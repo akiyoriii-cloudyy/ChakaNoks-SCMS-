@@ -42,6 +42,8 @@
         }
         .status-scheduled { background: #fff3cd; color: #856404; }
         .status-in_transit { background: #cfe2ff; color: #084298; }
+        .status-received { background: #17a2b8; color: #fff; }
+        .status-delivered { background: #28a745; color: #fff; }
         .status-pending { background: #f8d7da; color: #842029; }
     </style>
 </head>

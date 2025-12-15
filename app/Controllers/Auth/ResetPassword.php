@@ -1,59 +1,57 @@
-<?php namespace App\Controllers\Auth;
+<?php
+
+namespace App\Controllers\Auth;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\PasswordResetTokenModel;
-use CodeIgniter\I18n\Time;
 
 class ResetPassword extends BaseController
 {
     protected $userModel;
     protected $tokenModel;
-    protected $session;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->tokenModel = new PasswordResetTokenModel();
-        $this->session   = session();
     }
 
     /**
-     * Show reset password form (if token valid).
+     * Show reset password form
      */
     public function index()
     {
         $token = $this->request->getGet('token');
-
+        
         if (empty($token)) {
-            return redirect()->to('auth/forgot')->with('error', 'Invalid reset token.');
+            return redirect()->to('auth/forgot-password')->with('error', 'Invalid reset link.');
         }
 
-        // Verify token using new password_reset_tokens table
+        // Verify token
         $tokenData = $this->tokenModel->verifyToken($token);
 
         if (!$tokenData) {
-            return redirect()->to('auth/forgot')->with('error', 'Invalid or expired reset link.');
+            return redirect()->to('auth/forgot-password')->with('error', 'Invalid or expired reset link.');
         }
 
         return view('auth/reset_password', ['token' => $token]);
     }
 
     /**
-     * Handle reset password submission.
+     * Process password reset
      */
     public function submit()
     {
-        $token       = $this->request->getPost('token');
-        $password    = trim($this->request->getPost('password'));
-        $confirmPass = trim($this->request->getPost('confirm_password'));
+        $token = $this->request->getPost('token');
+        $password = $this->request->getPost('password');
+        $confirmPassword = $this->request->getPost('confirm_password');
 
-        // Validate form fields
-        if (!$token || !$password || !$confirmPass) {
+        if (empty($token) || empty($password) || empty($confirmPassword)) {
             return redirect()->back()->with('error', 'Please fill in all fields.');
         }
 
-        if ($password !== $confirmPass) {
+        if ($password !== $confirmPassword) {
             return redirect()->back()->with('error', 'Passwords do not match.');
         }
 
@@ -61,21 +59,24 @@ class ResetPassword extends BaseController
             return redirect()->back()->with('error', 'Password must be at least 8 characters long.');
         }
 
-        // Verify token using new password_reset_tokens table
+        // Verify token
         $tokenData = $this->tokenModel->verifyToken($token);
 
         if (!$tokenData) {
-            return redirect()->to('auth/forgot')->with('error', 'Invalid or expired reset link.');
+            return redirect()->to('auth/forgot-password')->with('error', 'Invalid or expired reset link.');
         }
 
-        // Update password
-        $this->userModel->update($tokenData['user_id'], [
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-        ]);
+        // Update user password
+        $success = $this->userModel->updatePassword($tokenData['user_id'], $password);
 
-        // Mark token as used
-        $this->tokenModel->markAsUsed($tokenData['id']);
-
-        return redirect()->to('auth/login')->with('success', '✅ Password updated. You can now log in.');
+        if ($success) {
+            // Mark token as used
+            $this->tokenModel->markAsUsed($tokenData['id']);
+            
+            log_message('info', "Password reset successfully for user ID: {$tokenData['user_id']}");
+            return redirect()->to('auth/login')->with('success', 'Password reset successfully. Please login with your new password.');
+        } else {
+            return redirect()->back()->with('error', 'Failed to reset password. Please try again.');
+        }
     }
 }

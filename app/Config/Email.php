@@ -7,7 +7,7 @@ class Email extends BaseConfig
     public $protocol   = 'smtp';
     public $SMTPHost   = 'smtp.gmail.com';
     public $SMTPUser   = 'mansuetomarky@gmail.com';
-    public $SMTPPass   = 'jzbrbmtrwdfoieyc'; // Gmail App Password (spaces removed)
+    public $SMTPPass   = 'xlinukvsigvqnjgr'; // Gmail App Password for CHAKANOKS SCMS (spaces removed)
     public $SMTPPort   = 587;
     public $SMTPCrypto = 'tls';
     public $mailType   = 'html';

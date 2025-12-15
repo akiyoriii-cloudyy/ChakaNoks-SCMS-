@@ -15,30 +15,22 @@ $routes->post('auth/checkLogin', 'Auth::checkLogin');
 $routes->get('auth/logout', 'Auth::logout');
 
 // ---------- FORGOT PASSWORD ----------
-$routes->get('auth/forgotPasswordForm', 'Auth\Forgot::index'); // main form
-$routes->get('auth/forgot', 'Auth\Forgot::index');             // alternate URL
-
-// ---------- SEND RESET LINK + OTP ----------
-$routes->post('auth/forgot/sendResetLink', 'Auth\Forgot::sendResetLink'); // send email with link + OTP
-$routes->post('auth/forgot/submit', 'Auth\Forgot::sendResetLink');        // backward compatibility
-
-// ---------- OTP FLOW ----------
-$routes->get('auth/forgot/otp', 'Auth\Forgot::otpForm');          // show OTP input form
-$routes->post('auth/forgot/verifyOtp', 'Auth\Forgot::verifyOtp'); // verify submitted OTP
+$routes->get('auth/forgot-password', 'Auth\ForgotPassword::index');
+$routes->post('auth/forgot-password/send', 'Auth\ForgotPassword::sendResetLink');
 
 // ---------- RESET PASSWORD ----------
-$routes->get('auth/reset-password', 'Auth\ResetPassword::index');           // reset form (via token)
-$routes->post('auth/reset-password/submit', 'Auth\ResetPassword::submit'); // reset password submit
+$routes->get('auth/reset-password', 'Auth\ResetPassword::index');
+$routes->post('auth/reset-password/submit', 'Auth\ResetPassword::submit');
 
 // ---------- EMAIL TEST ----------
 $routes->get('auth/emailtest', 'Auth\EmailTest::index');
+$routes->get('auth/phpmailer-test', 'Auth\EmailTestPHPMailer::test');
 $routes->post('auth/emailtest/send', 'Auth\EmailTest::sendTest');
 $routes->get('auth/emailtest/sendTest', 'Auth\EmailTest::sendTest'); // original
 $routes->get('auth/emailtest/sendtest', 'Auth\EmailTest::sendTest'); // ✅ lowercase alias
 $routes->get('email-test', 'Auth\EmailTest::index');
 $routes->get('email-test/send', 'Auth\EmailTest::sendTest');
 $routes->get('emailtest/sendtest', 'Auth\EmailTest::sendTest');
-
 
 // ---------- GENERIC DASHBOARD ----------
 $routes->get('dashboard', 'Auth::dashboard');
@@ -76,6 +68,22 @@ $routes->get('logisticscoordinator/schedule', 'LogisticsCoordinator::scheduleDel
 $routes->get('logisticscoordinator/track-orders', 'LogisticsCoordinator::trackOrders');
 $routes->get('logisticscoordinator/deliveries', 'LogisticsCoordinator::deliveries');
 $routes->get('logisticscoordinator/schedules', 'LogisticsCoordinator::schedules');
+
+// ---------- LOGISTICS COORDINATOR APIs ----------
+$routes->post('logisticscoordinator/delivery/(:num)/reschedule', 'LogisticsCoordinator::rescheduleDelivery/$1');
+$routes->get('logisticscoordinator/delivery/(:num)/driver-contact', 'LogisticsCoordinator::getDriverContact/$1');
+$routes->get('logisticscoordinator/driver-schedule', 'LogisticsCoordinator::getDriverSchedule');
+$routes->get('logisticscoordinator/order/(:num)/history', 'LogisticsCoordinator::getOrderHistory/$1');
+$routes->get('logisticscoordinator/delivery/(:num)/history', 'LogisticsCoordinator::getDeliveryHistory/$1');
+$routes->get('logisticscoordinator/api/drivers', 'LogisticsCoordinator::getAllDrivers');
+$routes->post('logisticscoordinator/driver/(:num)/confirm', 'LogisticsCoordinator::confirmDriver/$1');
+$routes->get('fleet/management-data', 'LogisticsCoordinator::getFleetManagementData');
+$routes->get('logisticscoordinator/api/pending-pos', 'LogisticsCoordinator::getPendingPOs');
+$routes->get('logisticscoordinator/api/all-orders', 'LogisticsCoordinator::getAllOrders');
+$routes->get('logisticscoordinator/api/all-deliveries', 'LogisticsCoordinator::getAllDeliveries');
+$routes->get('logisticscoordinator/api/scheduled-deliveries', 'LogisticsCoordinator::getScheduledDeliveries');
+$routes->get('delivery/week-deliveries', 'LogisticsCoordinator::getWeekDeliveries');
+$routes->get('delivery/week-deliveries', 'LogisticsCoordinator::getWeekDeliveries');
 
 // ---------- STAFF DASHBOARD & ACTIONS ----------
 $routes->get('staff/dashboard', 'Staff::dashboard');

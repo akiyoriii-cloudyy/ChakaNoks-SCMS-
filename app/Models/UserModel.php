@@ -20,10 +20,6 @@ class UserModel extends Model
         'username',
         'password',
         'role',
-        'reset_otp',        // OTP for password reset
-        'otp_expires',      // OTP expiration timestamp
-        'reset_token',      // Token for password reset via email
-        'token_expires',    // Token expiration timestamp
         'created_at',
         'updated_at',
     ];
@@ -68,60 +64,12 @@ class UserModel extends Model
     }
 
     /**
-     * Update user password and clear reset tokens
+     * Update user password
      */
     public function updatePassword(int $userId, string $newPassword): bool
     {
         return $this->update($userId, [
-            'password'      => password_hash($newPassword, PASSWORD_DEFAULT),
-            'reset_token'   => null,
-            'token_expires' => null,
-            'reset_otp'     => null,
-            'otp_expires'   => null,
+            'password' => password_hash($newPassword, PASSWORD_DEFAULT),
         ]);
-    }
-
-    /**
-     * Set reset token + expiry for email reset
-     */
-    public function setResetToken(int $userId, string $token, string $expires): bool
-    {
-        return $this->update($userId, [
-            'reset_token'   => $token,
-            'token_expires' => $expires,
-        ]);
-    }
-
-    /**
-     * Get user by reset token
-     */
-    public function getUserByResetToken(string $token)
-    {
-        return $this->where('reset_token', $token)
-                    ->where('token_expires >=', date('Y-m-d H:i:s'))
-                    ->first();
-    }
-
-    /**
-     * Set OTP + expiry for forgot password OTP flow
-     */
-    public function setResetOtp(int $userId, string $otp, string $expires): bool
-    {
-        return $this->update($userId, [
-            'reset_otp'   => $otp,
-            'otp_expires' => $expires,
-        ]);
-    }
-
-    /**
-     * Verify OTP
-     */
-    public function verifyResetOtp(int $userId, string $otp): bool
-    {
-        $user = $this->find($userId);
-        if ($user && $user['reset_otp'] === $otp && strtotime($user['otp_expires']) >= time()) {
-            return true;
-        }
-        return false;
     }
 }
