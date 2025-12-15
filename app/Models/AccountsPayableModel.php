@@ -11,22 +11,19 @@ class AccountsPayableModel extends Model
 
     protected $allowedFields = [
         'purchase_order_id',
-        'supplier_id',
-        'branch_id',
         'invoice_number',
         'invoice_date',
         'due_date',
         'amount',
-        'paid_amount',
-        'balance',
+        'amount_paid', // Normalized schema uses amount_paid instead of paid_amount
         'payment_status',
-        'payment_date',
-        'payment_method',
-        'payment_reference',
         'notes',
         'created_by',
         'created_at',
         'updated_at'
+        // Note: supplier_id and branch_id removed in normalized schema - get from purchase_orders via join
+        // Note: balance is a computed column (amount - amount_paid)
+        // Note: payment_date, payment_method, payment_reference moved to payment_transactions table
     ];
 
     protected $useTimestamps = true;
@@ -36,8 +33,6 @@ class AccountsPayableModel extends Model
 
     protected $validationRules = [
         'purchase_order_id' => 'required|integer',
-        'supplier_id' => 'required|integer',
-        'branch_id' => 'required|integer',
         'amount' => 'required|decimal',
     ];
 
@@ -82,16 +77,19 @@ class AccountsPayableModel extends Model
         // Set defaults
         if (is_array($data)) {
             $data['payment_status'] = $data['payment_status'] ?? 'unpaid';
-            $data['paid_amount'] = $data['paid_amount'] ?? 0.00;
-            $data['balance'] = $data['balance'] ?? ($data['amount'] ?? 0);
+            $data['amount_paid'] = $data['amount_paid'] ?? 0.00; // Use amount_paid (normalized schema)
             $data['invoice_date'] = $data['invoice_date'] ?? date('Y-m-d');
             
-            // Calculate due date if not provided and we have payment terms from supplier
-            if (empty($data['due_date']) && !empty($data['supplier_id'])) {
-                $supplierModel = new \App\Models\SupplierModel();
-                $supplier = $supplierModel->find($data['supplier_id']);
-                if ($supplier && !empty($supplier['payment_terms'])) {
-                    $data['due_date'] = $this->calculateDueDate($supplier['payment_terms'], $data['invoice_date']);
+            // Calculate due date if not provided - get supplier from purchase_order
+            if (empty($data['due_date']) && !empty($data['purchase_order_id'])) {
+                $purchaseOrderModel = new \App\Models\PurchaseOrderModel();
+                $po = $purchaseOrderModel->find($data['purchase_order_id']);
+                if ($po && !empty($po['supplier_id'])) {
+                    $supplierModel = new \App\Models\SupplierModel();
+                    $supplier = $supplierModel->find($po['supplier_id']);
+                    if ($supplier && !empty($supplier['payment_terms'])) {
+                        $data['due_date'] = $this->calculateDueDate($supplier['payment_terms'], $data['invoice_date']);
+                    }
                 }
             }
             
@@ -112,24 +110,26 @@ class AccountsPayableModel extends Model
         $db = \Config\Database::connect();
         $builder = $db->table('accounts_payable')
             ->select('accounts_payable.*, 
-                     purchase_orders.order_number, 
+                     purchase_orders.order_number,
+                     purchase_orders.supplier_id,
+                     purchase_orders.branch_id,
                      suppliers.name as supplier_name,
                      suppliers.payment_terms,
                      branches.name as branch_name')
             ->join('purchase_orders', 'purchase_orders.id = accounts_payable.purchase_order_id', 'left')
-            ->join('suppliers', 'suppliers.id = accounts_payable.supplier_id', 'left')
-            ->join('branches', 'branches.id = accounts_payable.branch_id', 'left');
+            ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id', 'left')
+            ->join('branches', 'branches.id = purchase_orders.branch_id', 'left');
 
         if (!empty($filters['payment_status'])) {
             $builder->where('accounts_payable.payment_status', $filters['payment_status']);
         }
 
         if (!empty($filters['supplier_id'])) {
-            $builder->where('accounts_payable.supplier_id', $filters['supplier_id']);
+            $builder->where('purchase_orders.supplier_id', $filters['supplier_id']);
         }
 
         if (!empty($filters['branch_id'])) {
-            $builder->where('accounts_payable.branch_id', $filters['branch_id']);
+            $builder->where('purchase_orders.branch_id', $filters['branch_id']);
         }
 
         if (!empty($filters['overdue'])) {
@@ -187,7 +187,7 @@ class AccountsPayableModel extends Model
         }
 
         $amount = (float)$ap['amount'];
-        $paidAmount = (float)$ap['paid_amount'];
+        $paidAmount = (float)($ap['amount_paid'] ?? 0); // Use amount_paid (normalized schema)
         $balance = $amount - $paidAmount;
         
         // Determine payment status
@@ -207,10 +207,10 @@ class AccountsPayableModel extends Model
         }
 
         $updateData = [
-            'balance' => $balance,
             'payment_status' => $paymentStatus,
-            'payment_date' => $paymentStatus === 'paid' ? date('Y-m-d') : null,
             'updated_at' => date('Y-m-d H:i:s')
+            // Note: balance is computed column, no need to update
+            // Note: payment_date moved to payment_transactions table
         ];
 
         return $this->update($id, $updateData);
@@ -226,13 +226,12 @@ class AccountsPayableModel extends Model
             return false;
         }
 
-        $newPaidAmount = (float)$ap['paid_amount'] + $amount;
+        $newPaidAmount = (float)($ap['amount_paid'] ?? 0) + $amount;
         
         $updateData = [
-            'paid_amount' => $newPaidAmount,
-            'payment_method' => $paymentMethod,
-            'payment_reference' => $paymentReference,
+            'amount_paid' => $newPaidAmount, // Use amount_paid (normalized schema)
             'updated_at' => date('Y-m-d H:i:s')
+            // Note: payment_method and payment_reference moved to payment_transactions table
         ];
 
         $updated = $this->update($id, $updateData);

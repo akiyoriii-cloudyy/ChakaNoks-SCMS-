@@ -101,8 +101,15 @@ class DeliveryController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Delivery ID required']);
         }
 
-        $status = $this->request->getPost('status');
-        $actualDeliveryDate = $this->request->getPost('actual_delivery_date');
+        // Handle both JSON and form data
+        $jsonData = $this->request->getJSON(true);
+        if ($jsonData) {
+            $status = $jsonData['status'] ?? null;
+            $actualDeliveryDate = $jsonData['actual_delivery_date'] ?? null;
+        } else {
+            $status = $this->request->getPost('status');
+            $actualDeliveryDate = $this->request->getPost('actual_delivery_date');
+        }
 
         if (!$status) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Status is required']);

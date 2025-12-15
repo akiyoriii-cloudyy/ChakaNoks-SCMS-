@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\AccountsPayableModel;
 use App\Models\PurchaseOrderModel;
 use App\Models\SupplierModel;
+use App\Models\PaymentTransactionModel;
 use Config\Database;
 
 class AccountsPayableController extends BaseController
@@ -13,6 +14,7 @@ class AccountsPayableController extends BaseController
     protected $accountsPayableModel;
     protected $purchaseOrderModel;
     protected $supplierModel;
+    protected $paymentTransactionModel;
 
     public function __construct()
     {
@@ -20,6 +22,7 @@ class AccountsPayableController extends BaseController
         $this->accountsPayableModel = new AccountsPayableModel();
         $this->purchaseOrderModel = new PurchaseOrderModel();
         $this->supplierModel = new SupplierModel();
+        $this->paymentTransactionModel = new PaymentTransactionModel();
     }
 
     /**
@@ -139,11 +142,13 @@ class AccountsPayableController extends BaseController
         // Fetch accounts payable data server-side
         try {
             $builder = $this->db->table('accounts_payable')
-                ->select('accounts_payable.*, suppliers.name as supplier_name, purchase_orders.order_number, purchase_orders.branch_id')
-                ->join('suppliers', 'suppliers.id = accounts_payable.supplier_id', 'left')
-                ->join('purchase_orders', 'purchase_orders.id = accounts_payable.purchase_order_id', 'left');
+                ->select('accounts_payable.*, suppliers.name as supplier_name, purchase_orders.order_number, purchase_orders.branch_id, purchase_orders.supplier_id, branches.name as branch_name')
+                ->join('purchase_orders', 'purchase_orders.id = accounts_payable.purchase_order_id', 'left')
+                ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id', 'left')
+                ->join('branches', 'branches.id = purchase_orders.branch_id', 'left');
             
             // Branch managers and staff only see their branch's accounts payable
+            // Get branch_id from purchase_orders (normalized schema)
             if (!in_array($role, ['central_admin', 'superadmin']) && $branchId) {
                 $builder->where('purchase_orders.branch_id', $branchId);
             }
@@ -249,6 +254,34 @@ class AccountsPayableController extends BaseController
             }
             
             $apData = $apList[0];
+            
+            // Get payment transactions for this accounts payable
+            try {
+                $paymentTransactions = $this->paymentTransactionModel->getByInvoice((int)$id);
+                
+                // Get the latest payment transaction for display
+                $latestPayment = !empty($paymentTransactions) ? $paymentTransactions[0] : null;
+                
+                // Add payment information to AP data
+                if ($latestPayment) {
+                    $apData['payment_method'] = $latestPayment['payment_method'] ?? null;
+                    $apData['payment_reference'] = $latestPayment['payment_reference'] ?? null;
+                    $apData['payment_date'] = $latestPayment['payment_date'] ?? null;
+                    $apData['payment_transactions'] = $paymentTransactions;
+                } else {
+                    $apData['payment_method'] = null;
+                    $apData['payment_reference'] = null;
+                    $apData['payment_date'] = null;
+                    $apData['payment_transactions'] = [];
+                }
+            } catch (\Exception $e) {
+                // If payment_transactions table doesn't exist, set defaults
+                log_message('info', 'Payment transactions not available: ' . $e->getMessage());
+                $apData['payment_method'] = null;
+                $apData['payment_reference'] = null;
+                $apData['payment_date'] = null;
+                $apData['payment_transactions'] = [];
+            }
             
             // Get purchase order details
             $order = $this->purchaseOrderModel->getOrderWithDetails($apData['purchase_order_id']);
@@ -358,7 +391,7 @@ class AccountsPayableController extends BaseController
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Accounts payable not found']);
             }
 
-            $currentPaid = (float)$ap['paid_amount'];
+            $currentPaid = (float)($ap['amount_paid'] ?? $ap['paid_amount'] ?? 0);
             $totalAmount = (float)$ap['amount'];
             $newPaidAmount = $currentPaid + (float)$paymentAmount;
 
@@ -367,6 +400,15 @@ class AccountsPayableController extends BaseController
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Payment amount exceeds total amount. Maximum payment: ₱' . number_format($totalAmount - $currentPaid, 2)]);
             }
 
+            // Auto-generate payment reference if not provided
+            if (empty($paymentReference)) {
+                $paymentReference = $this->generatePaymentReference();
+            }
+
+            // Start transaction
+            $this->db->transStart();
+
+            // Update accounts payable amount_paid
             $updated = $this->accountsPayableModel->recordPayment(
                 (int)$id,
                 (float)$paymentAmount,
@@ -374,13 +416,38 @@ class AccountsPayableController extends BaseController
                 $paymentReference
             );
 
+            // Create payment transaction record
             if ($updated) {
+                try {
+                    $session = session();
+                    $paymentTransactionData = [
+                        'accounts_payable_id' => (int)$id,
+                        'payment_date' => date('Y-m-d'),
+                        'payment_amount' => (float)$paymentAmount,
+                        'payment_method' => $paymentMethod,
+                        'payment_reference' => $paymentReference,
+                        'recorded_by' => $session->get('user_id'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    
+                    $this->paymentTransactionModel->insert($paymentTransactionData);
+                } catch (\Exception $e) {
+                    // If payment_transactions table doesn't exist, just log and continue
+                    log_message('info', 'Payment transaction record not created (table may not exist): ' . $e->getMessage());
+                }
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() && $updated) {
                 // Get updated AP data
                 $updatedAP = $this->accountsPayableModel->find((int)$id);
                 
                 return $this->response->setJSON([
                     'status' => 'success',
-                    'message' => 'Payment recorded successfully',
+                    'message' => 'Payment recorded successfully. Reference: ' . $paymentReference,
+                    'payment_reference' => $paymentReference,
                     'accounts_payable' => $updatedAP
                 ]);
             }
@@ -504,20 +571,15 @@ class AccountsPayableController extends BaseController
                 $invoiceNumber = $this->accountsPayableModel->generateInvoiceNumber();
                 
                 // Create accounts payable entry
+                // Note: supplier_id and branch_id are removed in normalized schema - they come from purchase_orders
                 $apData = [
                     'purchase_order_id' => $order['id'],
-                    'supplier_id' => (int)$order['supplier_id'],
-                    'branch_id' => (int)$order['branch_id'],
                     'invoice_number' => $invoiceNumber, // Auto-generated invoice number
                     'invoice_date' => $invoiceDate,
                     'due_date' => $dueDate,
                     'amount' => (float)$order['total_amount'],
-                    'paid_amount' => 0.00,
-                    'balance' => (float)$order['total_amount'],
+                    'amount_paid' => 0.00, // Use amount_paid instead of paid_amount
                     'payment_status' => 'unpaid',
-                    'payment_date' => null,
-                    'payment_method' => null,
-                    'payment_reference' => null,
                     'notes' => 'Auto-created from approved purchase order: ' . $order['order_number'],
                     'created_by' => $order['approved_by'],
                     'created_at' => $order['approved_at'] ?? date('Y-m-d H:i:s'),
@@ -543,5 +605,51 @@ class AccountsPayableController extends BaseController
             log_message('error', 'Error backfilling accounts payable: ' . $e->getMessage());
             return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to backfill: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Generate unique payment reference
+     * Format: PAY-YYYYMMDD-XXXXX (e.g., PAY-20251215-00001)
+     */
+    private function generatePaymentReference(): string
+    {
+        $prefix = 'PAY';
+        $date = date('Ymd');
+        $random = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+        $paymentReference = $prefix . '-' . $date . '-' . $random;
+        
+        // Ensure unique payment reference by checking payment_transactions table if it exists
+        $maxAttempts = 10;
+        $attempts = 0;
+        
+        // Check if payment_transactions table exists and has records
+        try {
+            $existing = $this->db->table('payment_transactions')
+                ->where('payment_reference', $paymentReference)
+                ->countAllResults();
+            
+            while ($existing > 0 && $attempts < $maxAttempts) {
+                $random = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+                $paymentReference = $prefix . '-' . $date . '-' . $random;
+                $existing = $this->db->table('payment_transactions')
+                    ->where('payment_reference', $paymentReference)
+                    ->countAllResults();
+                $attempts++;
+            }
+        } catch (\Exception $e) {
+            // Table might not exist, use timestamp as fallback
+            if ($attempts >= $maxAttempts) {
+                $timestamp = time();
+                $paymentReference = $prefix . '-' . $date . '-' . substr($timestamp, -5);
+            }
+        }
+        
+        // If still not unique after max attempts, add timestamp
+        if ($attempts >= $maxAttempts) {
+            $timestamp = time();
+            $paymentReference = $prefix . '-' . $date . '-' . substr($timestamp, -5);
+        }
+        
+        return $paymentReference;
     }
 }

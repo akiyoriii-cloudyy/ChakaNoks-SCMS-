@@ -190,6 +190,11 @@
                             <button class="btn btn-sm btn-info" onclick="location.reload()" style="background: #17a2b8; border: none; padding: 8px 16px; border-radius: 6px; color: white;">
                                 <i class="fas fa-sync"></i> Refresh
                             </button>
+                            <?php if (in_array(strtolower($me['role'] ?? ''), ['central_admin', 'centraladmin', 'superadmin'])): ?>
+                                <button class="btn btn-sm btn-warning" onclick="backfillAccountsPayable()" style="background: #ffc107; border: none; padding: 8px 16px; border-radius: 6px; color: #000; font-weight: 600;" title="Create AP entries for approved POs that don't have AP records">
+                                    <i class="fas fa-database"></i> Backfill Missing AP
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <div class="table-responsive" style="overflow-x: auto;">
@@ -200,35 +205,16 @@
                                     <th>Supplier</th>
                                     <th>Purchase Order</th>
                                     <th>Amount</th>
-                                    <th>Paid</th>
-                                    <th>Balance</th>
-                                    <th>Status</th>
-                                    <th>Payment Date</th>
-                                    <th>Payment Method</th>
-                                    <th>Payment Reference</th>
-                                    <th>Due Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($accounts_payable)): ?>
                                     <tr>
-                                        <td colspan="12" class="text-center">No accounts payable found</td>
+                                        <td colspan="5" class="text-center">No accounts payable found</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($accounts_payable as $ap): ?>
-                                        <?php
-                                        $statusClass = 'badge-secondary';
-                                        if ($ap['payment_status'] === 'paid') {
-                                            $statusClass = 'badge-success';
-                                        } elseif ($ap['payment_status'] === 'partial') {
-                                            $statusClass = 'badge-warning';
-                                        } elseif ($ap['payment_status'] === 'unpaid') {
-                                            $statusClass = 'badge-danger';
-                                        } elseif ($ap['payment_status'] === 'overdue') {
-                                            $statusClass = 'badge-danger';
-                                        }
-                                        ?>
                                         <tr>
                                             <td>
                                                 <?php if (!empty($ap['invoice_number'])): ?>
@@ -243,14 +229,7 @@
                                             </td>
                                             <td><?= esc($ap['supplier']['name'] ?? 'N/A') ?></td>
                                             <td><?= esc($ap['purchase_order']['order_number'] ?? 'N/A') ?></td>
-                                            <td>₱<?= number_format($ap['total_amount'] ?? 0, 2) ?></td>
-                                            <td>₱<?= number_format($ap['paid_amount'] ?? 0, 2) ?></td>
-                                            <td>₱<?= number_format($ap['balance'] ?? 0, 2) ?></td>
-                                            <td><span class="badge <?= $statusClass ?>"><?= esc(ucfirst($ap['payment_status'] ?? 'unpaid')) ?></span></td>
-                                            <td><?= !empty($ap['payment_date']) ? date('M d, Y', strtotime($ap['payment_date'])) : '<span style="color: #999; font-style: italic;">-</span>' ?></td>
-                                            <td><?= !empty($ap['payment_method']) ? esc($ap['payment_method']) : '<span style="color: #999; font-style: italic;">-</span>' ?></td>
-                                            <td><?= !empty($ap['payment_reference']) ? esc($ap['payment_reference']) : '<span style="color: #999; font-style: italic;">-</span>' ?></td>
-                                            <td><?= !empty($ap['due_date']) ? date('M d, Y', strtotime($ap['due_date'])) : 'N/A' ?></td>
+                                            <td><strong>₱<?= number_format($ap['total_amount'] ?? 0, 2) ?></strong></td>
                                             <td>
                                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                                     <button class="btn btn-sm btn-info" onclick="viewAccountsPayable(<?= $ap['id'] ?>)" title="View details" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px;">
@@ -416,15 +395,15 @@
             }
             
             const paymentMethod = prompt('Enter payment method (e.g., Bank Transfer, Cash, Check):') || 'Bank Transfer';
-            const paymentReference = prompt('Enter payment reference (e.g., Check #, Transaction ID):') || '';
+            // Payment reference will be auto-generated on the backend
             
             $.ajax({
                 url: '<?= base_url('accounts-payable/') ?>' + apId + '/record-payment',
                 method: 'POST',
                 data: {
                     payment_amount: paymentAmount,
-                    payment_method: paymentMethod,
-                    payment_reference: paymentReference
+                    payment_method: paymentMethod
+                    // payment_reference will be auto-generated on backend
                 },
                 dataType: 'json',
                 success: function(response) {
@@ -478,48 +457,137 @@
                     const ap = response.accounts_payable;
                     const order = response.purchase_order || null;
                     
+                    // Helper function to format payment method
+                    function formatPaymentMethod(method) {
+                        if (!method) return 'Not specified';
+                        const methods = {
+                            'bank_transfer': 'Bank Transfer',
+                            'credit_card': 'Credit Card',
+                            'cash': 'Cash',
+                            'check': 'Check',
+                            'online': 'Online Payment',
+                            'other': 'Other'
+                        };
+                        return methods[method.toLowerCase()] || method.charAt(0).toUpperCase() + method.slice(1).replace(/_/g, ' ');
+                    }
+                    
                     let html = '<div style="padding: 20px;">';
-                    html += '<h5 style="margin-bottom: 20px; color: #2d5016; font-weight: 700;">Invoice Information</h5>';
+                    html += '<h5 style="margin-bottom: 20px; color: #2d5016; font-weight: 700;"><i class="fas fa-file-invoice" style="margin-right: 8px;"></i>Invoice Information</h5>';
                     html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">';
                     html += '<div><strong>Invoice Number:</strong><br>' + (ap.invoice_number || 'N/A') + '</div>';
-                    html += '<div><strong>Payment Status:</strong><br><span class="badge ' + (ap.payment_status === 'paid' ? 'badge-success' : ap.payment_status === 'overdue' ? 'badge-danger' : ap.payment_status === 'partial' ? 'badge-warning' : 'badge-secondary') + '">' + (ap.payment_status || 'unpaid') + '</span></div>';
+                    html += '<div><strong>Payment Status:</strong><br><span class="badge ' + (ap.payment_status === 'paid' ? 'badge-success' : ap.payment_status === 'overdue' ? 'badge-danger' : ap.payment_status === 'partial' ? 'badge-warning' : 'badge-secondary') + '" style="font-size: 0.9rem; padding: 6px 12px;">' + (ap.payment_status ? ap.payment_status.toUpperCase() : 'UNPAID') + '</span></div>';
                     html += '<div><strong>Supplier:</strong><br>' + (ap.supplier_name || 'N/A') + '</div>';
                     html += '<div><strong>Purchase Order:</strong><br>' + (ap.order_number || 'N/A') + '</div>';
                     if (ap.invoice_date) {
-                        html += '<div><strong>Invoice Date:</strong><br>' + ap.invoice_date + '</div>';
+                        html += '<div><strong>Invoice Date:</strong><br>' + new Date(ap.invoice_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + '</div>';
                     }
-                    html += '<div><strong>Due Date:</strong><br>' + (ap.due_date || 'N/A') + '</div>';
+                    html += '<div><strong>Due Date:</strong><br>' + (ap.due_date ? new Date(ap.due_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A') + '</div>';
                     html += '</div>';
                     
                     html += '<hr style="margin: 30px 0; border: none; border-top: 2px solid #e5e7eb;">';
                     html += '<h6 style="margin-bottom: 15px; color: #2d5016; font-weight: 600;"><i class="fas fa-dollar-sign" style="margin-right: 8px;"></i>Payment Details:</h6>';
                     html += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">';
-                    html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">';
+                    html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;">';
                     html += '<div style="font-size: 1.5rem; font-weight: 700; color: #2d5016;">₱' + parseFloat(ap.amount || 0).toFixed(2) + '</div>';
-                    html += '<div style="color: #6c757d; font-size: 0.9rem;">Total Amount</div>';
+                    html += '<div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Total Amount</div>';
                     html += '</div>';
-                    html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">';
-                    html += '<div style="font-size: 1.5rem; font-weight: 700; color: #28a745;">₱' + parseFloat(ap.paid_amount || 0).toFixed(2) + '</div>';
-                    html += '<div style="color: #6c757d; font-size: 0.9rem;">Paid Amount</div>';
+                    html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;">';
+                    html += '<div style="font-size: 1.5rem; font-weight: 700; color: #28a745;">₱' + parseFloat(ap.paid_amount || ap.amount_paid || 0).toFixed(2) + '</div>';
+                    html += '<div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Paid Amount</div>';
                     html += '</div>';
-                    html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">';
-                    const balance = parseFloat(ap.amount || 0) - parseFloat(ap.paid_amount || 0);
+                    html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;">';
+                    const balance = parseFloat(ap.amount || 0) - parseFloat(ap.paid_amount || ap.amount_paid || 0);
                     html += '<div style="font-size: 1.5rem; font-weight: 700; color: ' + (balance > 0 ? '#dc3545' : '#28a745') + ';">₱' + balance.toFixed(2) + '</div>';
-                    html += '<div style="color: #6c757d; font-size: 0.9rem;">Balance</div>';
+                    html += '<div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Balance</div>';
                     html += '</div>';
                     html += '</div>';
                     
-                    if (ap.payment_method || ap.payment_reference || ap.payment_date) {
+                    html += '<hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">';
+                    html += '<h6 style="margin-bottom: 15px; color: #2d5016; font-weight: 600;"><i class="fas fa-credit-card" style="margin-right: 8px;"></i>Payment Information:</h6>';
+                    
+                    // Show latest payment information if available
+                    if (ap.payment_transactions && ap.payment_transactions.length > 0) {
+                        // Show all payment transactions in a table
+                        html += '<div style="margin-bottom: 20px;">';
+                        html += '<table class="table table-sm" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">';
+                        html += '<thead style="background: #f8f9fa;"><tr>';
+                        html += '<th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Date</th>';
+                        html += '<th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Amount</th>';
+                        html += '<th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Method</th>';
+                        html += '<th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Reference</th>';
+                        html += '</tr></thead><tbody>';
+                        
+                        ap.payment_transactions.forEach(function(payment) {
+                            html += '<tr>';
+                            html += '<td style="padding: 10px; border-bottom: 1px solid #f0f0f0;">' + (payment.payment_date ? new Date(payment.payment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A') + '</td>';
+                            html += '<td style="padding: 10px; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: #28a745;">₱' + parseFloat(payment.payment_amount || 0).toFixed(2) + '</td>';
+                            html += '<td style="padding: 10px; border-bottom: 1px solid #f0f0f0;">' + formatPaymentMethod(payment.payment_method) + '</td>';
+                            html += '<td style="padding: 10px; border-bottom: 1px solid #f0f0f0; font-family: monospace; color: #2d5016; font-weight: 600;">' + (payment.payment_reference || 'N/A') + '</td>';
+                            html += '</tr>';
+                        });
+                        
+                        html += '</tbody></table>';
+                        html += '</div>';
+                        
+                        // Show latest payment summary
+                        const latestPayment = ap.payment_transactions[0];
                         html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">';
-                        if (ap.payment_method) {
-                            html += '<div><strong>Payment Method:</strong><br>' + ap.payment_method + '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #28a745;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Latest Payment Method</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem; font-weight: 600;">' + formatPaymentMethod(latestPayment.payment_method) + '</div>';
+                        html += '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #17a2b8;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Latest Payment Reference</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem; font-weight: 600; font-family: monospace; color: #2d5016;">' + (latestPayment.payment_reference || 'Not specified') + '</div>';
+                        html += '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Latest Payment Date</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem; font-weight: 600;">' + (latestPayment.payment_date ? new Date(latestPayment.payment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not paid') + '</div>';
+                        html += '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #6c757d;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Total Payments</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem; font-weight: 600;">' + ap.payment_transactions.length + ' transaction(s)</div>';
+                        html += '</div>';
+                        html += '</div>';
+                    } else {
+                        // No payments yet
+                        html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Payment Method</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem;">' + (ap.payment_method || '<span style="color: #999; font-style: italic;">Not specified</span>') + '</div>';
+                        html += '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Payment Reference</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem;">' + (ap.payment_reference || '<span style="color: #999; font-style: italic;">Not specified</span>') + '</div>';
+                        html += '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Payment Date</strong><br>';
+                        html += '<div style="margin-top: 5px; font-size: 1rem;">' + (ap.payment_date ? new Date(ap.payment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '<span style="color: #999; font-style: italic;">Not paid</span>') + '</div>';
+                        html += '</div>';
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Days Until Due</strong><br>';
+                        if (ap.due_date) {
+                            const today = new Date();
+                            const dueDate = new Date(ap.due_date);
+                            const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                            const daysText = daysDiff < 0 ? Math.abs(daysDiff) + ' days overdue' : daysDiff === 0 ? 'Due today' : daysDiff + ' days remaining';
+                            html += '<div style="margin-top: 5px; font-size: 1rem; color: ' + (daysDiff < 0 ? '#dc3545' : daysDiff <= 7 ? '#ffc107' : '#28a745') + '; font-weight: 600;">' + daysText + '</div>';
+                        } else {
+                            html += '<div style="margin-top: 5px; font-size: 1rem; color: #999; font-style: italic;">N/A</div>';
                         }
-                        if (ap.payment_reference) {
-                            html += '<div><strong>Payment Reference:</strong><br>' + ap.payment_reference + '</div>';
-                        }
-                        if (ap.payment_date) {
-                            html += '<div><strong>Payment Date:</strong><br>' + ap.payment_date + '</div>';
-                        }
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    
+                    // Always show days until due
+                    if (ap.due_date) {
+                        html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 15px;">';
+                        html += '<strong style="color: #6c757d; font-size: 0.85rem; text-transform: uppercase;">Days Until Due</strong><br>';
+                        const today = new Date();
+                        const dueDate = new Date(ap.due_date);
+                        const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                        const daysText = daysDiff < 0 ? Math.abs(daysDiff) + ' days overdue' : daysDiff === 0 ? 'Due today' : daysDiff + ' days remaining';
+                        html += '<div style="margin-top: 5px; font-size: 1rem; color: ' + (daysDiff < 0 ? '#dc3545' : daysDiff <= 7 ? '#ffc107' : '#28a745') + '; font-weight: 600;">' + daysText + '</div>';
                         html += '</div>';
                     }
                     
@@ -560,6 +628,42 @@
                 alert('Error loading accounts payable details');
             });
         };
+        
+        // Backfill accounts payable for missing approved POs
+        function backfillAccountsPayable() {
+            if (!confirm('This will create accounts payable entries for all approved purchase orders that don\'t have AP records yet. This may take a few moments. Continue?')) {
+                return;
+            }
+            
+            // Show loading state
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            $.ajax({
+                url: '<?= base_url('accounts-payable/backfill') ?>',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    if (response.status === 'success') {
+                        alert('Success! Created ' + response.created + ' accounts payable entries.' + (response.errors && response.errors.length > 0 ? '\n\nErrors: ' + response.errors.join(', ') : ''));
+                        location.reload(); // Reload the page to show new entries
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to backfill'));
+                    }
+                },
+                error: function(xhr) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error backfilling accounts payable';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
         
         // Pagination
         (function initPagination() {

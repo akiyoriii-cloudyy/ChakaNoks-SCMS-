@@ -847,176 +847,18 @@
                     <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
                         <!-- Scheduled Deliveries -->
                         <div class="content-card">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h3 class="card-title">
                                     <i class="fas fa-calendar-check" style="color: var(--info); margin-right: 8px;"></i>
                                     Scheduled Deliveries
                                 </h3>
+                                <button class="btn btn-sm btn-info" onclick="loadScheduledDeliveriesSection()" title="Refresh">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
                             </div>
-                            <?php if (empty($scheduledDeliveries)): ?>
-                                <div style="text-align: center; padding: 20px; color: #64748b;">
-                                    <i class="fas fa-calendar-times" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
-                                    <p style="margin: 0; font-size: 0.9rem;">No scheduled deliveries</p>
-                                </div>
-                            <?php else: ?>
-                                <!-- ===== SCHEDULED DELIVERIES DETAILS GUIDE ===== -->
-                                <!-- 
-                                    DATABASE STRUCTURE REQUIRED for Scheduled Deliveries:
-                                    
-                                    1. deliveries table:
-                                       - id (Primary Key)
-                                       - delivery_number (VARCHAR, unique)
-                                       - purchase_order_id (INT, foreign key)
-                                       - scheduled_date (DATE)
-                                       - scheduled_time (TIME)
-                                       - driver_id (INT, foreign key to drivers table)
-                                       - vehicle_id (INT, foreign key to vehicles table)
-                                       - status (ENUM: 'scheduled', 'in_transit', 'delivered', 'cancelled')
-                                       - notes (TEXT)
-                                       - scheduled_by (INT, foreign key to users table)
-                                       - created_at (TIMESTAMP)
-                                       - updated_at (TIMESTAMP)
-                                    
-                                    2. drivers table:
-                                       - id (Primary Key)
-                                       - name (VARCHAR)
-                                       - license_number (VARCHAR)
-                                       - phone (VARCHAR)
-                                       - status (ENUM: 'available', 'busy', 'off_duty')
-                                    
-                                    3. vehicles table:
-                                       - id (Primary Key)
-                                       - vehicle_number (VARCHAR)
-                                       - vehicle_type (ENUM: 'truck', 'van', 'car')
-                                       - capacity (VARCHAR)
-                                       - status (ENUM: 'available', 'in_transit', 'maintenance')
-                                    
-                                    4. delivery_items table (if tracking per item):
-                                       - id (Primary Key)
-                                       - delivery_id (INT, foreign key)
-                                       - purchase_order_item_id (INT, foreign key)
-                                       - quantity (INT)
-                                       - status (ENUM: 'pending', 'loaded', 'delivered')
-                                -->
-                                
-                                <?php foreach ($scheduledDeliveries as $delivery): ?>
-                                <div class="delivery-card">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong><?= esc($delivery['delivery_number']) ?></strong>
-                                            <span class="status-badge status-scheduled ms-2">Scheduled</span>
-                                        </div>
-                                        <div class="text-end">
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar-alt"></i> 
-                                                <?= date('M d, Y', strtotime($delivery['scheduled_date'])) ?>
-                                                <?php if (!empty($delivery['scheduled_time'])): ?>
-                                                    at <?= date('h:i A', strtotime($delivery['scheduled_time'])) ?>
-                                                <?php endif; ?>
-                                            </small>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Delivery Progress -->
-                                    <div class="progress-container">
-                                        <div class="progress-bar progress-scheduled" style="width: 33%"></div>
-                                    </div>
-                                    
-                                    <!-- Timeline -->
-                                    <div class="timeline">
-                                        <div class="timeline-item completed">
-                                            <small class="text-muted">Order Approved</small>
-                                        </div>
-                                        <div class="timeline-item active">
-                                            <small class="text-muted">Scheduled for Delivery</small>
-                                        </div>
-                                        <div class="timeline-item">
-                                            <small class="text-muted">In Transit</small>
-                                        </div>
-                                        <div class="timeline-item">
-                                            <small class="text-muted">Delivered</small>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row mt-3">
-                                        <div class="col-md-6">
-                                            <div class="info-detail-box">
-                                                <div class="info-label">Driver Information</div>
-                                                <div class="info-value">
-                                                    <?= esc($delivery['driver_name'] ?? 'Not assigned') ?>
-                                                    <?php if (!empty($delivery['driver_phone'])): ?>
-                                                        <br><small class="text-muted">
-                                                            <i class="fas fa-phone"></i> <?= esc($delivery['driver_phone']) ?>
-                                                        </small>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <?php if (!empty($delivery['driver_status'])): ?>
-                                                    <div class="driver-status mt-1">
-                                                        <i class="fas fa-circle <?= $delivery['driver_status'] === 'available' ? 'driver-online' : ($delivery['driver_status'] === 'busy' ? 'driver-busy' : 'driver-offline') ?>"></i>
-                                                        <small class="text-muted"><?= ucfirst($delivery['driver_status']) ?></small>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="info-detail-box">
-                                                <div class="info-label">Vehicle Information</div>
-                                                <div class="info-value">
-                                                    <?= esc($delivery['vehicle_info'] ?? 'Not assigned') ?>
-                                                    <?php if (!empty($delivery['vehicle_type'])): ?>
-                                                        <br><small class="text-muted">
-                                                            <i class="fas fa-truck"></i> <?= ucfirst($delivery['vehicle_type']) ?>
-                                                        </small>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($delivery['vehicle_capacity'])): ?>
-                                                        <br><small class="text-muted">
-                                                            <i class="fas fa-weight-hanging"></i> <?= $delivery['vehicle_capacity'] ?>
-                                                        </small>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <?php if (!empty($delivery['vehicle_status'])): ?>
-                                                    <span class="vehicle-status vehicle-<?= $delivery['vehicle_status'] ?>">
-                                                        <?= ucfirst($delivery['vehicle_status']) ?>
-                                                    </span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="info-detail-box mt-3">
-                                        <div class="info-label">Delivery Details</div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <small class="text-muted">PO Number:</small><br>
-                                                <strong><?= esc($delivery['purchase_order']['order_number'] ?? $delivery['purchase_order_id'] ?? 'N/A') ?></strong>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <small class="text-muted">Branch:</small><br>
-                                                <strong><?= esc($delivery['branch']['name'] ?? ($delivery['branch_id'] ?? 'N/A')) ?></strong>
-                                            </div>
-                                        </div>
-                                        <?php if (!empty($delivery['notes'])): ?>
-                                            <div class="mt-2">
-                                                <small class="text-muted">Notes:</small><br>
-                                                <small><?= esc($delivery['notes']) ?></small>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    
-                                    <div class="mt-2">
-                                        <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(<?= $delivery['id'] ?>, 'in_transit')">
-                                            <i class="fas fa-truck"></i> Mark In Transit
-                                        </button>
-                                        <button class="btn btn-sm btn-info ms-1" onclick="viewDeliveryDetails(<?= $delivery['id'] ?>)">
-                                            <i class="fas fa-eye"></i> View Details
-                                        </button>
-                                        <button class="btn btn-sm btn-secondary ms-1" onclick="rescheduleDelivery(<?= $delivery['id'] ?>)">
-                                            <i class="fas fa-calendar-alt"></i> Reschedule
-                                        </button>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <div id="scheduledDeliveriesContainer">
+                                <!-- Content will be loaded dynamically -->
+                            </div>
                         </div>
 
                         <!-- In Transit Deliveries -->
@@ -1196,18 +1038,24 @@
                 <!-- Schedule Delivery Section -->
                 <div id="schedule-section" class="content-section">
                     <div class="content-card">
-                        <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
                             <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
                                 <i class="fas fa-calendar-plus" style="font-size: 1.5rem;"></i>
                                 Schedule Delivery
                             </h3>
+                            <button class="btn btn-sm btn-light" onclick="loadPendingPOs()" title="Refresh">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
                         </div>
-                        <?php if (empty($pendingPOs)): ?>
+                        <div id="scheduleDeliveryContent">
                             <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                                <i class="fas fa-inbox" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
-                                <p style="margin: 0; font-size: 1rem; font-weight: 500;">No pending purchase orders to schedule</p>
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p style="margin-top: 15px; font-size: 1rem;">Loading pending purchase orders...</p>
                             </div>
-                        <?php else: ?>
+                        </div>
+                        <?php if (false): // Changed to false to use dynamic loading ?>
                             <div class="mb-3" style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
                                 <div class="row text-center">
                                     <div class="col-md-3">
@@ -1869,6 +1717,27 @@ $(document).ready(function() {
     if ($('#track-section').hasClass('active')) {
         loadAllOrders();
     }
+    
+    // Load scheduled deliveries on page load if dashboard section is active
+    if ($('#dashboard-section').hasClass('active') || $('#dashboard-section').is(':visible')) {
+        if (typeof loadScheduledDeliveriesSection === 'function') {
+            loadScheduledDeliveriesSection();
+        }
+    }
+    
+    // Load schedule delivery section data on page load
+    if ($('#schedule-section').hasClass('active') || $('#schedule-section').is(':visible')) {
+        if (typeof loadPendingPOs === 'function') {
+            loadPendingPOs();
+        }
+    }
+    
+    // Load deliveries section data on page load
+    if ($('#deliveries-section').hasClass('active') || $('#deliveries-section').is(':visible')) {
+        if (typeof loadAllDeliveries === 'function') {
+            loadAllDeliveries();
+        }
+    }
 });
 
 // Section Navigation
@@ -1894,6 +1763,12 @@ function showSection(sectionId, event) {
     
     // Load specific data based on section
     switch(sectionId) {
+        case 'dashboard':
+            // Load scheduled deliveries when dashboard is shown
+            if (typeof loadScheduledDeliveriesSection === 'function') {
+                loadScheduledDeliveriesSection();
+            }
+            break;
         case 'schedule':
             loadPendingPOs();
             break;
@@ -2132,7 +2007,7 @@ function submitSchedule() {
 
 function rescheduleDelivery(deliveryId) {
     // Load existing delivery data
-    $.get('<?= base_url('delivery/') ?>' + deliveryId + '/details', function(response) {
+    $.get('<?= base_url('delivery/') ?>' + deliveryId + '/track', function(response) {
         if (response.status === 'success') {
             const delivery = response.delivery;
             
@@ -2238,7 +2113,12 @@ function submitReschedule() {
             if (response.status === 'success') {
                 alert('Delivery rescheduled successfully!');
                 $('#rescheduleModal').modal('hide');
-                location.reload();
+                // Reload scheduled deliveries section if it exists
+                if (typeof loadScheduledDeliveriesSection === 'function') {
+                    loadScheduledDeliveriesSection();
+                } else {
+                    location.reload();
+                }
             } else {
                 alert('Error: ' + (response.message || 'Unknown error'));
             }
@@ -2355,7 +2235,7 @@ function trackOrder(poId) {
 }
 
 function viewDeliveryDetails(deliveryId) {
-    $.get('<?= base_url('delivery/') ?>' + deliveryId + '/details', function(response) {
+    $.get('<?= base_url('delivery/') ?>' + deliveryId + '/track', function(response) {
         if (response.status === 'success') {
             const delivery = response.delivery;
             let html = `
@@ -2678,7 +2558,12 @@ function updateDeliveryStatus(deliveryId, status) {
             success: function(response) {
                 if (response.status === 'success') {
                     alert('Delivery status updated successfully!');
-                    location.reload();
+                    // Reload scheduled deliveries section if it exists
+                    if (typeof loadScheduledDeliveriesSection === 'function') {
+                        loadScheduledDeliveriesSection();
+                    } else {
+                        location.reload();
+                    }
                 } else {
                     alert('Error: ' + (response.message || 'Unknown error'));
                 }
@@ -2690,42 +2575,7 @@ function updateDeliveryStatus(deliveryId, status) {
     }
 }
 
-function updateDeliveryStatus(deliveryId, status) {
-    if (status === 'delayed') {
-        const reason = prompt('Please enter the reason for delay:');
-        if (!reason) return;
-        
-        const data = {
-            status: 'delayed',
-            delay_reason: reason,
-            estimated_arrival_time: prompt('Enter new estimated arrival time (YYYY-MM-DD HH:MM):')
-        };
-        
-        $.ajax({
-            url: '<?= base_url('delivery/') ?>' + deliveryId + '/update-status',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function(response) {
-                if (response.status === 'success') {
-                    alert('Delivery marked as delayed');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (response.message || 'Unknown error'));
-                }
-            }
-        });
-    } else {
-        // Existing code for other status updates
-        const data = {
-            status: status,
-            actual_delivery_date: status === 'delivered' ? new Date().toISOString().split('T')[0] : null,
-            actual_departure_time: status === 'in_transit' ? new Date().toISOString() : null
-        };
-        
-        // ... rest of existing code
-    }
-}
+// Removed duplicate function - using the one defined above
 
 // ===== SEARCH AND FILTER FUNCTIONS =====
 // searchOrders is now defined in the section data loading functions above
@@ -3791,29 +3641,143 @@ function markMaintenanceDone(maintenanceId) {
 
 // ===== SECTION DATA LOADING FUNCTIONS =====
 function loadPendingPOs() {
+    const contentDiv = $('#scheduleDeliveryContent');
+    if (!contentDiv.length) return;
+    
+    contentDiv.html(`
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p style="margin-top: 15px; font-size: 1rem;">Loading pending purchase orders...</p>
+        </div>
+    `);
+    
     $.get('<?= base_url('logisticscoordinator/api/pending-pos') ?>', function(response) {
         if (response.status === 'success') {
             const pendingPOs = response.pendingPOs || [];
-            const scheduleSection = $('#schedule-section');
             
             if (pendingPOs.length === 0) {
-                scheduleSection.find('.content-card').html(`
-                    <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
-                        <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-calendar-plus" style="font-size: 1.5rem;"></i>
-                            Schedule Delivery
-                        </h3>
-                    </div>
+                contentDiv.html(`
                     <div style="text-align: center; padding: 40px 20px; color: #64748b;">
                         <i class="fas fa-inbox" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
                         <p style="margin: 0; font-size: 1rem; font-weight: 500;">No pending purchase orders to schedule</p>
                     </div>
                 `);
             } else {
-                // Reload the page section with new data - for now, just refresh
-                location.reload();
+                // Calculate statistics
+                const totalAmount = pendingPOs.reduce((sum, po) => sum + (parseFloat(po.total_amount) || 0), 0);
+                const avgAmount = totalAmount / pendingPOs.length;
+                const today = new Date();
+                let urgentCount = 0;
+                
+                pendingPOs.forEach(po => {
+                    if (po.expected_delivery_date) {
+                        const expectedDate = new Date(po.expected_delivery_date);
+                        const daysDiff = Math.ceil((expectedDate - today) / (1000 * 60 * 60 * 24));
+                        if (daysDiff <= 3 && daysDiff >= 0) {
+                            urgentCount++;
+                        }
+                    }
+                });
+                
+                let html = `
+                    <div class="mb-3" style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="info-label">Total Pending</div>
+                                <div class="info-value" style="font-size: 1.5rem;">${pendingPOs.length}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-label">Total Amount</div>
+                                <div class="info-value" style="font-size: 1.5rem;">₱${totalAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-label">Urgent Orders</div>
+                                <div class="info-value" style="font-size: 1.5rem; color: #dc3545;">${urgentCount}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-label">Avg. Amount</div>
+                                <div class="info-value" style="font-size: 1.5rem;">₱${avgAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                `;
+                
+                pendingPOs.forEach(po => {
+                    const orderDate = po.created_at ? new Date(po.created_at) : (po.order_date ? new Date(po.order_date) : null);
+                    const expectedDate = po.expected_delivery_date ? new Date(po.expected_delivery_date) : null;
+                    const today = new Date();
+                    let daysLeft = null;
+                    let isUrgent = false;
+                    let isOverdue = false;
+                    
+                    if (expectedDate) {
+                        daysLeft = Math.ceil((expectedDate - today) / (1000 * 60 * 60 * 24));
+                        if (expectedDate < today) {
+                            isOverdue = true;
+                            daysLeft = -daysLeft;
+                        } else if (daysLeft <= 3) {
+                            isUrgent = true;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="col-12">
+                            <div class="card" style="border: 2px solid ${isOverdue ? '#dc3545' : (isUrgent ? '#ffc107' : '#d4e8c9')}; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                <div class="card-body" style="padding: 20px;">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h5 class="mb-1">${po.order_number || 'N/A'}</h5>
+                                            <p class="text-muted mb-2">
+                                                Supplier: ${po.supplier ? po.supplier.name : 'N/A'} | 
+                                                Branch: ${po.branch ? po.branch.name : 'N/A'}
+                                            </p>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-boxes"></i> ${po.items_count || 0} items
+                                                </span>
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-money-bill-wave"></i> ₱${(parseFloat(po.total_amount) || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                </span>
+                                                ${expectedDate ? `
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-calendar"></i> Expected: ${expectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <button class="btn btn-primary" onclick="openScheduleModal(${po.id})">
+                                                <i class="fas fa-calendar"></i> Schedule Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                contentDiv.html(html);
             }
+        } else {
+            contentDiv.html(`
+                <div style="text-align: center; padding: 40px 20px; color: #dc3545;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+                    <p style="margin: 0; font-size: 1rem; font-weight: 500;">Error loading pending purchase orders: ${response.message || 'Unknown error'}</p>
+                </div>
+            `);
         }
+    }).fail(function(xhr, status, error) {
+        $('#scheduleDeliveryContent').html(`
+            <div style="text-align: center; padding: 40px 20px; color: #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+                <p style="margin: 0; font-size: 1rem; font-weight: 500;">Error loading pending purchase orders: ${error}</p>
+            </div>
+        `);
     });
 }
 
@@ -3969,6 +3933,18 @@ function loadAllDeliveries() {
     const dateFilter = $('#filterDate').val() || '';
     const driverFilter = $('#filterDriver').val() || '';
     
+    const contentDiv = $('#deliveriesContent');
+    if (!contentDiv.length) return;
+    
+    contentDiv.html(`
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p style="margin-top: 15px; font-size: 1rem;">Loading deliveries...</p>
+        </div>
+    `);
+    
     // Load drivers for filter dropdown if not already loaded
     if ($('#filterDriver option').length <= 1) {
         loadDriversForFilter();
@@ -3981,20 +3957,34 @@ function loadAllDeliveries() {
     }, function(response) {
         if (response.status === 'success') {
             const deliveries = response.deliveries || [];
-            const deliveriesSection = $('#deliveries-section');
-            const tableBody = deliveriesSection.find('table tbody');
             
             if (deliveries.length === 0) {
-                tableBody.html(`
-                    <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px 20px; color: #64748b;">
-                            <i class="fas fa-truck" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
-                            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No deliveries found</p>
-                        </td>
-                    </tr>
+                contentDiv.html(`
+                    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                        <i class="fas fa-truck" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
+                        <p style="margin: 0; font-size: 1rem; font-weight: 500;">No deliveries found</p>
+                    </div>
                 `);
             } else {
-                let html = '';
+                let html = `
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Delivery Number</th>
+                                    <th>PO Number</th>
+                                    <th>Supplier</th>
+                                    <th>Branch</th>
+                                    <th>Status</th>
+                                    <th>Scheduled Date</th>
+                                    <th>Driver</th>
+                                    <th>Vehicle</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
                 deliveries.forEach(delivery => {
                     const status = (delivery.status || 'pending').toLowerCase();
                     const statusDisplay = (delivery.status || 'pending').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -4031,9 +4021,29 @@ function loadAllDeliveries() {
                     `;
                 });
                 
-                tableBody.html(html);
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                contentDiv.html(html);
             }
+        } else {
+            contentDiv.html(`
+                <div style="text-align: center; padding: 40px 20px; color: #dc3545;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+                    <p style="margin: 0; font-size: 1rem; font-weight: 500;">Error loading deliveries: ${response.message || 'Unknown error'}</p>
+                </div>
+            `);
         }
+    }).fail(function(xhr, status, error) {
+        $('#deliveriesContent').html(`
+            <div style="text-align: center; padding: 40px 20px; color: #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+                <p style="margin: 0; font-size: 1rem; font-weight: 500;">Error loading deliveries: ${error}</p>
+            </div>
+        `);
     });
 }
 
@@ -4046,6 +4056,166 @@ function loadScheduledDeliveries() {
                 initializeCalendar();
             }
         }
+    });
+}
+
+// Load scheduled deliveries section dynamically
+function loadScheduledDeliveriesSection() {
+    const container = $('#scheduledDeliveriesContainer');
+    if (!container.length) return;
+    
+    container.html(`
+        <div style="text-align: center; padding: 20px; color: #64748b;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+            <p style="margin: 0; font-size: 0.9rem;">Loading scheduled deliveries...</p>
+        </div>
+    `);
+    
+    $.get('<?= base_url('logisticscoordinator/api/scheduled-deliveries') ?>', function(response) {
+        if (response.status === 'success') {
+            const deliveries = response.deliveries || [];
+            
+            if (deliveries.length === 0) {
+                container.html(`
+                    <div style="text-align: center; padding: 20px; color: #64748b;">
+                        <i class="fas fa-calendar-times" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0; font-size: 0.9rem;">No scheduled deliveries</p>
+                    </div>
+                `);
+            } else {
+                let html = '';
+                deliveries.forEach(function(delivery) {
+                    const scheduledDate = delivery.scheduled_date ? new Date(delivery.scheduled_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+                    const scheduledTime = delivery.scheduled_time ? new Date('1970-01-01T' + delivery.scheduled_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+                    const branchName = delivery.branch ? delivery.branch.name : (delivery.branch_id || 'N/A');
+                    const supplierName = delivery.supplier ? delivery.supplier.name : (delivery.supplier_id || 'N/A');
+                    const poNumber = delivery.purchase_order ? delivery.purchase_order.order_number : (delivery.purchase_order_id || 'N/A');
+                    
+                    html += `
+                        <div class="delivery-card" style="margin-bottom: 20px; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background: white;">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>${delivery.delivery_number || 'N/A'}</strong>
+                                    <span class="status-badge status-scheduled ms-2">Scheduled</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt"></i> ${scheduledDate}
+                                        ${scheduledTime ? ' at ' + scheduledTime : ''}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Delivery Progress -->
+                            <div class="progress-container">
+                                <div class="progress-bar progress-scheduled" style="width: 33%"></div>
+                            </div>
+                            
+                            <!-- Timeline -->
+                            <div class="timeline">
+                                <div class="timeline-item completed">
+                                    <small class="text-muted">Order Approved</small>
+                                </div>
+                                <div class="timeline-item active">
+                                    <small class="text-muted">Scheduled for Delivery</small>
+                                </div>
+                                <div class="timeline-item">
+                                    <small class="text-muted">In Transit</small>
+                                </div>
+                                <div class="timeline-item">
+                                    <small class="text-muted">Delivered</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="info-detail-box">
+                                        <div class="info-label">Driver Information</div>
+                                        <div class="info-value">
+                                            ${delivery.driver_name || 'Not assigned'}
+                                            ${delivery.driver_phone ? '<br><small class="text-muted"><i class="fas fa-phone"></i> ' + delivery.driver_phone + '</small>' : ''}
+                                        </div>
+                                        ${delivery.driver_status ? `
+                                            <div class="driver-status mt-1">
+                                                <i class="fas fa-circle ${delivery.driver_status === 'available' ? 'driver-online' : (delivery.driver_status === 'busy' ? 'driver-busy' : 'driver-offline')}"></i>
+                                                <small class="text-muted">${delivery.driver_status.charAt(0).toUpperCase() + delivery.driver_status.slice(1)}</small>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-detail-box">
+                                        <div class="info-label">Vehicle Information</div>
+                                        <div class="info-value">
+                                            ${delivery.vehicle_info || 'Not assigned'}
+                                            ${delivery.vehicle_type ? '<br><small class="text-muted"><i class="fas fa-truck"></i> ' + delivery.vehicle_type.charAt(0).toUpperCase() + delivery.vehicle_type.slice(1) + '</small>' : ''}
+                                            ${delivery.vehicle_capacity ? '<br><small class="text-muted"><i class="fas fa-weight-hanging"></i> ' + delivery.vehicle_capacity + '</small>' : ''}
+                                        </div>
+                                        ${delivery.vehicle_status ? `
+                                            <span class="vehicle-status vehicle-${delivery.vehicle_status}">
+                                                ${delivery.vehicle_status.charAt(0).toUpperCase() + delivery.vehicle_status.slice(1)}
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-detail-box mt-3">
+                                <div class="info-label">Delivery Details</div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">PO Number:</small><br>
+                                        <strong>${poNumber}</strong>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Branch:</small><br>
+                                        <strong>${branchName}</strong>
+                                    </div>
+                                    <div class="col-md-6 mt-2">
+                                        <small class="text-muted">Supplier:</small><br>
+                                        <strong>${supplierName}</strong>
+                                    </div>
+                                </div>
+                                ${delivery.notes ? `
+                                    <div class="mt-2">
+                                        <small class="text-muted">Notes:</small><br>
+                                        <small>${delivery.notes}</small>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-warning" onclick="updateDeliveryStatus(${delivery.id}, 'in_transit')">
+                                    <i class="fas fa-truck"></i> Mark In Transit
+                                </button>
+                                <button class="btn btn-sm btn-info ms-1" onclick="viewDeliveryDetails(${delivery.id})">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="btn btn-sm btn-secondary ms-1" onclick="rescheduleDelivery(${delivery.id})">
+                                    <i class="fas fa-calendar-alt"></i> Reschedule
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.html(html);
+            }
+        } else {
+            container.html(`
+                <div style="text-align: center; padding: 20px; color: #dc3545;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                    <p style="margin: 0; font-size: 0.9rem;">Error loading scheduled deliveries: ${response.message || 'Unknown error'}</p>
+                </div>
+            `);
+        }
+    }).fail(function(xhr, status, error) {
+        $('#scheduledDeliveriesContainer').html(`
+            <div style="text-align: center; padding: 20px; color: #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                <p style="margin: 0; font-size: 0.9rem;">Error loading scheduled deliveries: ${error}</p>
+            </div>
+        `);
     });
 }
 

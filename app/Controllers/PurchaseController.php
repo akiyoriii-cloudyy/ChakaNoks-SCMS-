@@ -1389,8 +1389,30 @@ class PurchaseController extends BaseController
                 return true;
             }
 
+            // Validate required fields
+            if (empty($order['supplier_id'])) {
+                log_message('error', 'Cannot create AP entry: supplier_id is missing for PO ' . $purchaseOrderId);
+                return false;
+            }
+            
+            // Note: branch_id is not stored in accounts_payable (normalized schema) - it comes from purchase_orders
+            // But we still validate it exists in the PO for logging purposes
+            if (empty($order['branch_id'])) {
+                log_message('warning', 'PO ' . $purchaseOrderId . ' has no branch_id, but continuing with AP creation');
+            }
+            
+            if (empty($order['total_amount']) || $order['total_amount'] <= 0) {
+                log_message('error', 'Cannot create AP entry: total_amount is invalid for PO ' . $purchaseOrderId);
+                return false;
+            }
+
             // Get supplier to get payment terms
             $supplier = $this->supplierModel->find($order['supplier_id']);
+            if (!$supplier) {
+                log_message('error', 'Cannot create AP entry: supplier not found (ID: ' . $order['supplier_id'] . ') for PO ' . $purchaseOrderId);
+                return false;
+            }
+            
             $paymentTerms = $supplier['payment_terms'] ?? 'Net 30';
             
             // Calculate due date based on payment terms
@@ -1401,37 +1423,36 @@ class PurchaseController extends BaseController
             $invoiceNumber = $this->accountsPayableModel->generateInvoiceNumber();
             
             // Create accounts payable entry
+            // Note: supplier_id and branch_id are removed in normalized schema - they come from purchase_orders via purchase_order_id
             $apData = [
                 'purchase_order_id' => $purchaseOrderId,
-                'supplier_id' => (int)$order['supplier_id'],
-                'branch_id' => (int)$order['branch_id'],
                 'invoice_number' => $invoiceNumber, // Auto-generated invoice number
                 'invoice_date' => $invoiceDate,
                 'due_date' => $dueDate,
                 'amount' => (float)$order['total_amount'],
-                'paid_amount' => 0.00,
-                'balance' => (float)$order['total_amount'],
+                'amount_paid' => 0.00, // Use amount_paid instead of paid_amount (normalized schema)
                 'payment_status' => 'unpaid',
-                'payment_date' => null,
-                'payment_method' => null,
-                'payment_reference' => null,
-                'notes' => 'Auto-created from approved purchase order: ' . $order['order_number'],
+                'notes' => 'Auto-created from approved purchase order: ' . ($order['order_number'] ?? 'PO-' . $purchaseOrderId),
                 'created_by' => $createdBy,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
+            log_message('info', 'Creating AP entry for PO ' . $purchaseOrderId . ' with data: ' . json_encode($apData));
+            
             $apId = $this->accountsPayableModel->insert($apData);
             
             if ($apId) {
-                log_message('info', 'Accounts payable entry created with ID: ' . $apId . ' for PO ' . $purchaseOrderId);
+                log_message('info', 'Accounts payable entry created successfully with ID: ' . $apId . ' for PO ' . $purchaseOrderId . ' (Branch ID: ' . $apData['branch_id'] . ')');
                 return true;
             } else {
-                log_message('error', 'Failed to create accounts payable entry for PO ' . $purchaseOrderId);
+                $errors = $this->accountsPayableModel->errors();
+                log_message('error', 'Failed to create accounts payable entry for PO ' . $purchaseOrderId . '. Errors: ' . json_encode($errors));
                 return false;
             }
         } catch (\Exception $e) {
-            log_message('error', 'Exception creating accounts payable entry: ' . $e->getMessage());
+            log_message('error', 'Exception creating accounts payable entry for PO ' . $purchaseOrderId . ': ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
             return false;
         }
     }
