@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 04:05 PM
+-- Generation Time: Dec 15, 2025 at 04:42 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -51,7 +51,10 @@ INSERT INTO `accounts_payable` (`id`, `purchase_order_id`, `invoice_number`, `in
 (28, 33, 'INV-20251129-59705', '2025-11-29', '2025-12-29', 18000.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251129-5677', 2, '2025-11-29 02:57:28', '2025-11-29 02:57:59'),
 (29, 35, 'INV-20251129-13002', '2025-11-29', '2025-12-29', 9000.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251129-7054', 2, '2025-11-29 03:05:39', '2025-11-29 03:06:09'),
 (30, 34, 'INV-20251129-94056', '2025-11-29', '2025-12-14', 24000.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251129-6834', 2, '2025-11-29 03:05:41', '2025-11-29 03:05:52'),
-(31, 36, 'INV-20251201-33201', '2025-12-01', '2025-12-31', 17500.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251201-5995', 2, '2025-12-01 13:40:35', '2025-12-01 13:41:23');
+(31, 36, 'INV-20251201-33201', '2025-12-01', '2025-12-31', 17500.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251201-5995', 2, '2025-12-01 13:40:35', '2025-12-01 13:41:23'),
+(32, 37, 'INV-20251215-03279', '2025-12-15', '2026-01-14', 18000.00, 18000.00, 'paid', 'Auto-created from approved purchase order: PO-20251215-1867', 2, '2025-12-15 09:22:36', '2025-12-15 09:50:59'),
+(33, 38, 'INV-20251215-32605', '2025-12-15', '2026-01-14', 4550.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251215-4974', 2, '2025-12-15 09:22:29', '2025-12-15 09:38:03'),
+(34, 39, 'INV-20251215-68862', '2025-12-15', '2026-01-14', 11000.00, 0.00, 'unpaid', 'Auto-created from approved purchase order: PO-20251215-6735', 2, '2025-12-15 09:22:26', '2025-12-15 09:38:03');
 
 -- --------------------------------------------------------
 
@@ -72,6 +75,18 @@ CREATE TABLE `audit_trail` (
   `user_agent` text DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Comprehensive audit trail for all database changes';
+
+--
+-- Dumping data for table `audit_trail`
+--
+
+INSERT INTO `audit_trail` (`id`, `table_name`, `record_id`, `action`, `old_values`, `new_values`, `changed_fields`, `changed_by`, `ip_address`, `user_agent`, `created_at`) VALUES
+(3, 'deliveries', 30, '', '{\"status\":\"scheduled\"}', '{\"status\":\"received\",\"received_by\":\"6\",\"received_at\":\"2025-12-15T02:14\"}', 'status,received_by,received_at', 6, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-15 02:14:57'),
+(4, 'deliveries', 32, '', '{\"status\":\"in_transit\"}', '{\"status\":\"received\",\"received_by\":\"16\",\"received_at\":\"2025-12-15 08:46:10\"}', 'status,received_by,received_at', 16, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-15 08:46:10'),
+(5, 'deliveries', 34, '', '{\"status\":\"scheduled\",\"actual_delivery_date\":null,\"received_by\":null,\"received_at\":null}', '{\"status\":\"in_transit\",\"actual_delivery_date\":null,\"received_by\":null,\"received_at\":null}', 'status,actual_delivery_date,received_by,received_at', 11, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-15 10:18:05'),
+(6, 'deliveries', 34, '', '{\"status\":\"in_transit\",\"actual_delivery_date\":null,\"received_by\":null,\"received_at\":null}', '{\"status\":\"delayed\",\"actual_delivery_date\":null,\"received_by\":null,\"received_at\":null}', 'status,actual_delivery_date,received_by,received_at', 11, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-15 10:23:21'),
+(7, 'deliveries', 35, '', '{\"status\":\"scheduled\",\"actual_delivery_date\":null,\"received_by\":null,\"received_at\":null}', '{\"status\":\"in_transit\",\"actual_delivery_date\":null,\"received_by\":null,\"received_at\":null}', 'status,actual_delivery_date,received_by,received_at', 11, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-15 10:24:41'),
+(8, 'deliveries', 35, '', '{\"status\":\"in_transit\"}', '{\"status\":\"received\",\"received_by\":\"5\",\"received_at\":\"2025-12-15T10:24\"}', 'status,received_by,received_at', 5, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-15 10:25:04');
 
 -- --------------------------------------------------------
 
@@ -180,7 +195,7 @@ CREATE TABLE `deliveries` (
   `supplier_id` int(10) UNSIGNED NOT NULL,
   `branch_id` int(10) UNSIGNED NOT NULL,
   `scheduled_by` int(10) UNSIGNED DEFAULT NULL,
-  `status` enum('scheduled','in_transit','delivered','partial_delivery','cancelled','delayed') NOT NULL DEFAULT 'scheduled',
+  `status` enum('scheduled','in_transit','received','delivered','partial_delivery','cancelled','delayed') NOT NULL DEFAULT 'scheduled',
   `scheduled_date` date NOT NULL,
   `actual_delivery_date` date DEFAULT NULL,
   `driver_name` varchar(100) DEFAULT NULL,
@@ -197,10 +212,13 @@ CREATE TABLE `deliveries` (
 --
 
 INSERT INTO `deliveries` (`id`, `delivery_number`, `purchase_order_id`, `supplier_id`, `branch_id`, `scheduled_by`, `status`, `scheduled_date`, `actual_delivery_date`, `driver_name`, `vehicle_info`, `received_by`, `received_at`, `notes`, `created_at`, `updated_at`) VALUES
-(30, 'DEL-20251129-3229', 33, 42, 4, 2, 'scheduled', '2025-12-06', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
-(31, 'DEL-20251129-4785', 34, 11, 5, NULL, 'scheduled', '2025-12-06', NULL, NULL, NULL, NULL, NULL, 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
-(32, 'DEL-20251129-7561', 35, 63, 6, 2, 'in_transit', '2025-11-30', NULL, 'BossKakak', 'L300 AB3123', NULL, NULL, 'Auto-created from Purchase Order #35', '2025-11-29 03:04:18', '2025-11-29 03:06:49'),
-(33, 'DEL-20251201-8294', 36, 1, 2, 2, 'delivered', '2025-12-01', '2025-12-01', 'Marky Hatdog', 'L300 AB8930', 4, '2025-12-01 13:41:00', 'Auto-created from Purchase Order #36', '2025-12-01 13:40:27', '2025-12-01 13:41:58');
+(30, 'DEL-20251129-3229', 33, 42, 4, 2, 'received', '2025-12-06', '2025-12-15', NULL, NULL, 6, '2025-12-15 02:14:00', 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-12-15 02:14:57'),
+(31, 'DEL-20251129-4785', 34, 11, 5, NULL, 'delivered', '2025-12-06', '2025-12-15', NULL, NULL, 7, '2025-12-15 01:05:00', 'Auto-created from Purchase Order (seeder)', '2025-11-29 03:02:50', '2025-12-15 01:05:43'),
+(32, 'DEL-20251129-7561', 35, 63, 6, 2, 'received', '2025-11-30', '2025-12-15', 'BossKakak', 'L300 AB3123', 16, '2025-12-15 08:46:10', 'Auto-created from Purchase Order #35', '2025-11-29 03:04:18', '2025-12-15 08:46:10'),
+(33, 'DEL-20251201-8294', 36, 1, 2, 2, 'delivered', '2025-12-01', '2025-12-01', 'Marky Hatdog', 'L300 AB8930', 4, '2025-12-01 13:41:00', 'Auto-created from Purchase Order #36', '2025-12-01 13:40:27', '2025-12-01 13:41:58'),
+(34, 'DEL-20251215-7810', 37, 4, 2, 2, 'delayed', '2025-12-16', NULL, 'Markypadilla', 'L300 AB8930', NULL, NULL, 'Auto-created from Purchase Order #37', '2025-12-15 09:21:21', '2025-12-15 10:23:21'),
+(35, 'DEL-20251215-6738', 38, 5, 3, 2, 'received', '2025-12-15', '2025-12-15', 'AbbyRuales', 'L300 RE2122', 5, '2025-12-15 10:24:00', 'Auto-created from Purchase Order #38', '2025-12-15 09:21:54', '2025-12-15 10:25:04'),
+(36, 'DEL-20251215-9971', 39, 1, 4, 2, 'scheduled', '2025-12-18', NULL, 'DocMaykzz', 'L300 RE3949', NULL, NULL, 'Auto-created from Purchase Order #39', '2025-12-15 09:22:08', '2025-12-15 09:22:08');
 
 -- --------------------------------------------------------
 
@@ -225,10 +243,13 @@ CREATE TABLE `delivery_items` (
 --
 
 INSERT INTO `delivery_items` (`id`, `delivery_id`, `product_id`, `expected_quantity`, `received_quantity`, `condition_status`, `notes`, `created_at`, `updated_at`) VALUES
-(30, 30, 298, 150, 0, 'good', NULL, '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
-(31, 31, 113, 200, 0, 'good', NULL, '2025-11-29 03:02:50', '2025-11-29 03:02:50'),
-(32, 32, 222, 50, 0, 'good', NULL, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
-(33, 33, 285, 50, 50, 'good', NULL, '2025-12-01 13:40:27', '2025-12-01 13:41:58');
+(30, 30, 298, 150, 150, 'good', NULL, '2025-11-29 03:02:50', '2025-12-15 02:14:57'),
+(31, 31, 113, 200, 200, 'good', NULL, '2025-11-29 03:02:50', '2025-12-15 01:05:43'),
+(32, 32, 222, 50, 50, 'good', '', '2025-11-29 03:04:18', '2025-12-15 08:46:10'),
+(33, 33, 285, 50, 50, 'good', NULL, '2025-12-01 13:40:27', '2025-12-01 13:41:58'),
+(34, 34, 107, 150, 0, 'good', NULL, '2025-12-15 09:21:21', '2025-12-15 09:21:21'),
+(35, 35, 337, 130, 130, 'good', NULL, '2025-12-15 09:21:54', '2025-12-15 10:25:04'),
+(36, 36, 52, 100, 0, 'good', NULL, '2025-12-15 09:22:08', '2025-12-15 09:22:08');
 
 -- --------------------------------------------------------
 
@@ -358,7 +379,10 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (35, '2025-12-03-000010', 'App\\Database\\Migrations\\CreateAuditTrailTable', 'default', 'App', 1764722058, 8),
 (36, '2025-12-03-000011', 'App\\Database\\Migrations\\MigrateDataToNormalizedStructure', 'default', 'App', 1764722059, 8),
 (37, '2025-12-03-000012', 'App\\Database\\Migrations\\NormalizeAccountsPayableTable', 'default', 'App', 1764724564, 9),
-(38, '2025-12-03-100000', 'App\\Database\\Migrations\\AddForeignKeysToFranchiseTables', 'default', 'App', 1764726252, 10);
+(38, '2025-12-03-100000', 'App\\Database\\Migrations\\AddForeignKeysToFranchiseTables', 'default', 'App', 1764726252, 10),
+(39, '2025-12-03-000013', 'App\\Database\\Migrations\\AddReceivedStatusToDeliveries', 'default', 'App', 1765731765, 11),
+(40, '2025-12-15-000001', 'App\\Database\\Migrations\\RemovePasswordResetFunctionality', 'default', 'App', 1765736561, 12),
+(41, '2025-12-15-000002', 'App\\Database\\Migrations\\CreatePasswordResetTokensTable', 'default', 'App', 1765736925, 13);
 
 -- --------------------------------------------------------
 
@@ -369,16 +393,23 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 CREATE TABLE `password_reset_tokens` (
   `id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL,
-  `token` varchar(255) NOT NULL,
-  `otp` varchar(10) DEFAULT NULL,
-  `otp_expires` datetime DEFAULT NULL,
-  `reset_expires` datetime DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `otp` varchar(6) NOT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
   `is_used` tinyint(1) NOT NULL DEFAULT 0,
-  `used_at` datetime DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Password reset tokens (normalized from users table)';
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Password reset tokens and OTP codes';
+
+--
+-- Dumping data for table `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`id`, `user_id`, `email`, `otp`, `token`, `expires_at`, `is_used`, `created_at`, `updated_at`) VALUES
+(12, 2, 'mansuetomarky@gmail.com', '', 'bf041712fb1caef5c2c7dc575171b418de12191a35e16c1aac6eb613b37fa5de', '2025-12-15 04:00:14', 1, '2025-12-15 03:30:14', '2025-12-15 03:31:09'),
+(13, 3, 'rualesabigail09@gmail.com', '', '40f68d0dec323f0b74ddf2917582e7d55b0f01e7faefdc91bd10c3231dabd079', '2025-12-15 04:28:19', 0, '2025-12-15 03:58:19', '2025-12-15 03:58:19'),
+(15, 17, 'hunzkie123@gmail.com', '', '6a1baf1db100192777dd3d80d3294504f09d4070528c1b2f806b781ed1573804', '2025-12-15 08:54:41', 1, '2025-12-15 08:24:41', '2025-12-15 08:25:43');
 
 -- --------------------------------------------------------
 
@@ -402,6 +433,13 @@ CREATE TABLE `payment_transactions` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Individual payment transactions for accounts payable';
+
+--
+-- Dumping data for table `payment_transactions`
+--
+
+INSERT INTO `payment_transactions` (`id`, `payment_number`, `accounts_payable_id`, `payment_date`, `payment_amount`, `payment_method`, `payment_reference`, `bank_name`, `check_number`, `notes`, `paid_by`, `recorded_by`, `created_at`, `updated_at`) VALUES
+(1, 'PAY-20251215-4253', 32, '2025-12-15', 18000.00, 'cash', 'PAY-20251215-94049', NULL, NULL, NULL, NULL, 2, '2025-12-15 09:51:00', '2025-12-15 09:51:00');
 
 -- --------------------------------------------------------
 
@@ -492,7 +530,7 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (110, 5, 12, 5, 'Vegetable Oil (20L)', 1850.00, 15, 'pcs', 5, 50, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (111, 4, 12, 5, 'Vegetable Oil (5L)', 480.00, 30, 'pcs', 10, 100, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (112, 1, 12, 5, 'Palm Oil (20L)', 1650.00, 10, 'pcs', 5, 40, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
-(113, 6, 12, 5, 'Shortening', 120.00, 20, 'kg', 10, 80, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
+(113, 5, 12, 5, 'Shortening', 120.00, 220, 'kg', 10, 80, '2026-11-27', 'active', '2025-11-27 15:11:09', '2025-12-15 01:05:43'),
 (114, 5, 12, 6, 'Salt (1kg)', 25.00, 100, 'packs', 30, 300, '2028-11-26', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (115, 4, 12, 6, 'Black Pepper (Ground)', 85.00, 50, 'packs', 20, 150, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
 (116, 1, 12, 6, 'Garlic Powder', 95.00, 40, 'packs', 15, 120, '2027-11-27', 'active', '2025-11-27 15:11:09', '2025-11-27 15:11:09'),
@@ -731,7 +769,10 @@ INSERT INTO `products` (`id`, `branch_id`, `created_by`, `category_id`, `name`, 
 (349, 5, 12, 20, 'Colander', 200.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (350, 5, 12, 21, 'Safety Shoes', 850.00, 0, 'pairs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
 (351, 5, 12, 21, 'Polo Shirt (Staff)', 350.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
-(352, 5, 12, 21, 'Name Tag', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30');
+(352, 5, 12, 21, 'Name Tag', 25.00, 0, 'pcs', 0, 0, NULL, 'active', '2025-11-29 02:18:30', '2025-11-29 02:18:30'),
+(359, 4, 6, 12, 'Wax Paper', 120.00, 150, 'rolls', 0, 0, NULL, 'active', '2025-12-15 02:14:57', '2025-12-15 02:14:57'),
+(360, 6, 16, 10, 'Cheese Sauce', 180.00, 50, 'bottles', 0, 0, NULL, 'active', '2025-12-15 08:46:10', '2025-12-15 08:46:10'),
+(361, 3, 5, 19, 'Paper Plates', 35.00, 130, 'packs', 0, 0, NULL, 'active', '2025-12-15 10:25:04', '2025-12-15 10:25:04');
 
 -- --------------------------------------------------------
 
@@ -1074,10 +1115,13 @@ CREATE TABLE `purchase_orders` (
 --
 
 INSERT INTO `purchase_orders` (`id`, `order_number`, `purchase_request_id`, `supplier_id`, `branch_id`, `status`, `order_date`, `expected_delivery_date`, `actual_delivery_date`, `total_amount`, `approved_by`, `approved_at`, `notes`, `created_at`, `updated_at`) VALUES
-(33, 'PO-20251129-5677', 38, 42, 4, 'approved', '2025-11-29', '2025-12-06', NULL, 18000.00, 2, '2025-11-29 02:57:28', 'Auto-created from approved purchase request', '2025-11-29 02:57:16', '2025-11-29 02:57:28'),
+(33, 'PO-20251129-5677', 38, 42, 4, 'delivered', '2025-11-29', '2025-12-06', NULL, 18000.00, 2, '2025-11-29 02:57:28', 'Auto-created from approved purchase request', '2025-11-29 02:57:16', '2025-12-15 02:14:57'),
 (34, 'PO-20251129-6834', 39, 11, 5, 'approved', '2025-11-29', '2025-12-06', NULL, 24000.00, 2, '2025-11-29 03:05:41', 'Auto-created from approved purchase request', '2025-11-29 02:59:07', '2025-11-29 03:05:41'),
-(35, 'PO-20251129-7054', 40, 63, 6, 'approved', '2025-11-29', '2025-12-06', NULL, 9000.00, 2, '2025-11-29 03:05:39', 'Auto-created from approved purchase request', '2025-11-29 03:04:18', '2025-11-29 03:05:39'),
-(36, 'PO-20251201-5995', 41, 1, 2, 'approved', '2025-12-01', '2025-12-08', NULL, 17500.00, 2, '2025-12-01 13:40:35', 'Auto-created from approved purchase request', '2025-12-01 13:40:27', '2025-12-01 13:40:35');
+(35, 'PO-20251129-7054', 40, 63, 6, 'delivered', '2025-11-29', '2025-12-06', NULL, 9000.00, 2, '2025-11-29 03:05:39', 'Auto-created from approved purchase request', '2025-11-29 03:04:18', '2025-12-15 08:46:10'),
+(36, 'PO-20251201-5995', 41, 1, 2, 'approved', '2025-12-01', '2025-12-08', NULL, 17500.00, 2, '2025-12-01 13:40:35', 'Auto-created from approved purchase request', '2025-12-01 13:40:27', '2025-12-01 13:40:35'),
+(37, 'PO-20251215-1867', 42, 4, 2, 'approved', '2025-12-15', '2025-12-22', NULL, 18000.00, 2, '2025-12-15 09:22:36', 'Auto-created from approved purchase request', '2025-12-15 09:21:21', '2025-12-15 09:22:36'),
+(38, 'PO-20251215-4974', 43, 5, 3, 'delivered', '2025-12-15', '2025-12-22', NULL, 4550.00, 2, '2025-12-15 09:22:29', 'Auto-created from approved purchase request', '2025-12-15 09:21:54', '2025-12-15 10:25:04'),
+(39, 'PO-20251215-6735', 44, 1, 4, 'approved', '2025-12-15', '2025-12-22', NULL, 11000.00, 2, '2025-12-15 09:22:26', 'Auto-created from approved purchase request', '2025-12-15 09:22:08', '2025-12-15 09:22:26');
 
 -- --------------------------------------------------------
 
@@ -1103,10 +1147,13 @@ CREATE TABLE `purchase_order_items` (
 --
 
 INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `quantity`, `unit`, `unit_price`, `subtotal`, `received_quantity`, `created_at`, `updated_at`) VALUES
-(32, 33, 298, 150, NULL, 120.00, 18000.00, 0, '2025-11-29 02:57:16', '2025-11-29 02:57:16'),
+(32, 33, 298, 150, NULL, 120.00, 18000.00, 150, '2025-11-29 02:57:16', '2025-11-29 02:57:16'),
 (33, 34, 113, 200, NULL, 120.00, 24000.00, 0, '2025-11-29 02:59:07', '2025-11-29 02:59:07'),
-(34, 35, 222, 50, NULL, 180.00, 9000.00, 0, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
-(35, 36, 285, 50, NULL, 350.00, 17500.00, 0, '2025-12-01 13:40:27', '2025-12-01 13:40:27');
+(34, 35, 222, 50, NULL, 180.00, 9000.00, 50, '2025-11-29 03:04:18', '2025-11-29 03:04:18'),
+(35, 36, 285, 50, NULL, 350.00, 17500.00, 0, '2025-12-01 13:40:27', '2025-12-01 13:40:27'),
+(36, 37, 107, 150, 'boxes', 120.00, 18000.00, 0, '2025-12-15 09:21:21', '2025-12-15 09:21:21'),
+(37, 38, 337, 130, 'packs', 35.00, 4550.00, 130, '2025-12-15 09:21:54', '2025-12-15 09:21:54'),
+(38, 39, 52, 100, 'dozen', 110.00, 11000.00, 0, '2025-12-15 09:22:08', '2025-12-15 09:22:08');
 
 -- --------------------------------------------------------
 
@@ -1139,7 +1186,10 @@ INSERT INTO `purchase_requests` (`id`, `request_number`, `branch_id`, `requested
 (38, 'PR-20251129-5115', 4, 4, 'converted_to_po', 'urgent', 18000.00, '', 2, '2025-11-29 02:57:16', 42, NULL, '2025-11-29 02:55:52', '2025-11-29 02:57:16'),
 (39, 'PR-20251129-4567', 5, 7, 'converted_to_po', 'low', 24000.00, '', 2, '2025-11-29 02:59:07', 11, NULL, '2025-11-29 02:56:18', '2025-11-29 02:59:07'),
 (40, 'PR-20251129-1540', 6, 8, 'converted_to_po', 'normal', 9000.00, '', 2, '2025-11-29 03:04:18', 63, NULL, '2025-11-29 02:56:41', '2025-11-29 03:04:18'),
-(41, 'PR-20251201-8406', 2, 12, 'converted_to_po', 'high', 17500.00, '', 2, '2025-12-01 13:40:27', NULL, NULL, '2025-12-01 13:39:02', '2025-12-01 13:40:27');
+(41, 'PR-20251201-8406', 2, 12, 'converted_to_po', 'high', 17500.00, '', 2, '2025-12-01 13:40:27', NULL, NULL, '2025-12-01 13:39:02', '2025-12-01 13:40:27'),
+(42, 'PR-20251215-1524', 2, 4, 'converted_to_po', 'normal', 18000.00, '', 2, '2025-12-15 09:21:21', 4, NULL, '2025-12-15 09:17:04', '2025-12-15 09:21:21'),
+(43, 'PR-20251215-5677', 3, 5, 'converted_to_po', 'urgent', 4550.00, '', 2, '2025-12-15 09:21:54', 5, NULL, '2025-12-15 09:18:27', '2025-12-15 09:21:54'),
+(44, 'PR-20251215-7487', 4, 6, 'converted_to_po', 'low', 11000.00, '', 2, '2025-12-15 09:22:08', NULL, NULL, '2025-12-15 09:19:22', '2025-12-15 09:22:08');
 
 -- --------------------------------------------------------
 
@@ -1168,7 +1218,10 @@ INSERT INTO `purchase_request_items` (`id`, `purchase_request_id`, `product_id`,
 (35, 38, 298, 150, NULL, 120.00, 18000.00, '', '2025-11-29 02:55:52', '2025-11-29 02:55:52'),
 (36, 39, 113, 200, NULL, 120.00, 24000.00, '', '2025-11-29 02:56:18', '2025-11-29 02:56:18'),
 (37, 40, 222, 50, NULL, 180.00, 9000.00, '', '2025-11-29 02:56:41', '2025-11-29 02:56:41'),
-(38, 41, 285, 50, NULL, 350.00, 17500.00, '', '2025-12-01 13:39:02', '2025-12-01 13:39:02');
+(38, 41, 285, 50, NULL, 350.00, 17500.00, '', '2025-12-01 13:39:02', '2025-12-01 13:39:02'),
+(39, 42, 107, 150, 'boxes', 120.00, 18000.00, '', '2025-12-15 09:17:04', '2025-12-15 09:17:04'),
+(40, 43, 337, 130, 'packs', 35.00, 4550.00, '', '2025-12-15 09:18:27', '2025-12-15 09:18:27'),
+(41, 44, 52, 100, 'dozen', 110.00, 11000.00, '', '2025-12-15 09:19:22', '2025-12-15 09:19:22');
 
 -- --------------------------------------------------------
 
@@ -1468,7 +1521,11 @@ CREATE TABLE `stock_transactions` (
 --
 
 INSERT INTO `stock_transactions` (`id`, `transaction_number`, `batch_id`, `product_id`, `branch_id`, `transaction_type`, `quantity`, `unit_cost`, `reference_type`, `reference_id`, `stock_before`, `stock_after`, `batch_qty_before`, `batch_qty_after`, `branch_total_before`, `branch_total_after`, `is_new_stock`, `is_expired`, `is_old_stock`, `expiry_date`, `reason`, `notes`, `created_by`, `approved_by`, `transaction_date`, `created_at`, `updated_at`) VALUES
-(1, 'OUT-20251203-165213-854', NULL, 96, 2, 'stock_out', 25, 65.00, 'stock_out', NULL, 225, 200, NULL, NULL, NULL, NULL, 0, 0, 0, '2026-11-27', 'damaged', 'damaged', 12, NULL, '2025-12-03 16:52:13', '2025-12-03 16:52:13', '2025-12-03 16:52:13');
+(1, 'OUT-20251203-165213-854', NULL, 96, 2, 'stock_out', 25, 65.00, 'stock_out', NULL, 225, 200, NULL, NULL, NULL, NULL, 0, 0, 0, '2026-11-27', 'damaged', 'damaged', 12, NULL, '2025-12-03 16:52:13', '2025-12-03 16:52:13', '2025-12-03 16:52:13'),
+(4, 'IN-20251215-010543-095', NULL, 113, 5, 'stock_in', 200, 120.00, 'delivery', 31, 20, 220, NULL, NULL, NULL, NULL, 1, 0, 0, '2026-11-27', NULL, NULL, 7, NULL, '2025-12-15 01:05:43', '2025-12-15 01:05:43', '2025-12-15 01:05:43'),
+(10, 'IN-20251215-021457-751', NULL, 272, 4, 'stock_in', 150, 120.00, 'delivery', 30, 0, 150, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, NULL, NULL, 6, NULL, '2025-12-15 02:14:57', '2025-12-15 02:14:57', '2025-12-15 02:14:57'),
+(11, 'IN-20251215-084610-758', NULL, 45, 6, 'stock_in', 50, 180.00, 'delivery', 32, 0, 50, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, NULL, NULL, 16, NULL, '2025-12-15 08:46:10', '2025-12-15 08:46:10', '2025-12-15 08:46:10'),
+(12, 'IN-20251215-102504-947', NULL, 198, 3, 'stock_in', 130, 35.00, 'delivery', 35, 0, 130, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, NULL, NULL, 5, NULL, '2025-12-15 10:25:04', '2025-12-15 10:25:04', '2025-12-15 10:25:04');
 
 -- --------------------------------------------------------
 
@@ -1640,32 +1697,30 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `role` enum('superadmin','central_admin','branch_manager','staff','franchise_manager','logistics_coordinator','inventory_staff') NOT NULL DEFAULT 'branch_manager',
   `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `reset_otp` varchar(255) DEFAULT NULL,
-  `otp_expires` datetime DEFAULT NULL,
-  `reset_expires` datetime DEFAULT NULL
+  `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Application users';
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `branch_id`, `email`, `password`, `role`, `created_at`, `updated_at`, `reset_otp`, `otp_expires`, `reset_expires`) VALUES
-(1, NULL, 'superadmin1@chakanoks.test', '$2y$10$gqWg8q30wEM7PTiior3zT.EdYJty93GtLEQQ/027I3J6ssIArt/fy', 'superadmin', NULL, NULL, NULL, NULL, NULL),
-(2, 1, 'mansuetomarky@gmail.com', '$2y$10$g1UjHDsOe2hLXsvyGXKTxuxkPlgkFt4jHNWIJsc4TYTTZ9oAE4eUi', 'central_admin', NULL, NULL, NULL, NULL, NULL),
-(3, 2, 'rualesabigail09@gmail.com', '$2y$10$0f2TzYrQ2atjT7H80Z/MruzBdRL4Tx3PaC7zHnStuF8Og2gqvIMKy', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(4, 2, 'matina.manager@chakanoks.test', '$2y$10$70yi53r0xC5s7oJcqOz4aeQ2hP/sujY2Kzo3PzqKnpcUFaBegrPqe', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(5, 3, 'toril.manager@chakanoks.test', '$2y$10$GfUZ92ahWuX/ozlI9xznmucok5.3C7ifnMLVHWDyk4SBnvqxOTgHO', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(6, 4, 'buhangin.manager@chakanoks.test', '$2y$10$aaKRlp1KfV3IgIiF09nQBeuYjmQO2qJR9wvEQ4/PeuGKgIRmzkOcy', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(7, 5, 'agdao.manager@chakanoks.test', '$2y$10$YbAh.zCMvth4jVDiIU6piO4MPDyH2.d2r1Y7V2Dlx4AUbStCkFn2u', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(8, 6, 'lanang.manager@chakanoks.test', '$2y$10$4wzAqdl/5XN6oOjRoL4HT.SShUsRlWWcmD5SXzkvf33aj/5uu0IyS', 'branch_manager', NULL, NULL, NULL, NULL, NULL),
-(9, 4, 'imonakoplss@gmail.com', '$2y$10$VEGImgsPqqqnIrLCKTyFb.sH4KaMrTQW.Dd6GAshdMmJaZ987AJji', 'franchise_manager', NULL, NULL, NULL, NULL, NULL),
-(11, 6, 'gpalagpalag@gmail.com', '$2y$10$0F.WdPUd7jN0VeyKVL1mQeQt2eivBlj9FnsczspjCdewNryQSg2xO', 'logistics_coordinator', NULL, NULL, NULL, NULL, NULL),
-(12, 2, 'matina.inventory@chakanoks.test', '$2y$10$7vomot3tmjnu6wK7G7Zgs.iE.6cG9txDNkrIZSVng2fW2LqHOe1wG', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
-(13, 3, 'toril.inventory@chakanoks.test', '$2y$10$K0roKmNK/84ZcjjfN0yJkOJZ9ENENAKA9oiiBQJ12DFtin4zzWqnq', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
-(14, 4, 'buhangin.inventory@chakanoks.test', '$2y$10$A9fWl5lcyWl9A1K/Wt6zW.VfS7g/4YoUJER/32P7NsvafSRtf.vBy', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
-(15, 5, 'agdao.inventory@chakanoks.test', '$2y$10$iC2BAjS4ukmQ9a.L6DlPqOaVnzXDd5GZy.AI0HDse81xyuqpvEo4y', 'inventory_staff', NULL, NULL, NULL, NULL, NULL),
-(16, 6, 'lanang.inventory@chakanoks.test', '$2y$10$NiBxn3qFxyiEWP4kytdsdeSrqiBj/bAAokrv33ixs5FO1rWk2AfMW', 'inventory_staff', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `users` (`id`, `branch_id`, `email`, `password`, `role`, `created_at`, `updated_at`) VALUES
+(1, NULL, 'superadmin1@chakanoks.test', '$2y$10$gqWg8q30wEM7PTiior3zT.EdYJty93GtLEQQ/027I3J6ssIArt/fy', 'superadmin', NULL, NULL),
+(2, 1, 'mansuetomarky@gmail.com', '$2y$10$g04AacFsbYM69MvvJgdum..Ci/vgn.Yx02guOA4PLztNIhCkRYCSi', 'central_admin', NULL, '2025-12-15 03:31:09'),
+(3, 2, 'rualesabigail09@gmail.com', '$2y$10$X5gF0QQRAzjNAf0KUso6q.phohyv10oUV25jFo3SW64q7q6/mRQSC', 'branch_manager', NULL, NULL),
+(4, 2, 'matina.manager@chakanoks.test', '$2y$10$pXG1heD7ZOE41eezgTKUWOLLpe.xXwf7PKHhP/XIGafwZJIu.uiUe', 'branch_manager', NULL, NULL),
+(5, 3, 'toril.manager@chakanoks.test', '$2y$10$UnNaM8KM8/nUG.A..sBZaeROpkc3hYY2eAIG0T92Y.ts5BbvHFknW', 'branch_manager', NULL, NULL),
+(6, 4, 'buhangin.manager@chakanoks.test', '$2y$10$V.2Gqzh5SuIruMAhVPyXT.pgeyabY6WF1odqwiawm8gcJ.Q1KrIjK', 'branch_manager', NULL, NULL),
+(7, 5, 'agdao.manager@chakanoks.test', '$2y$10$Z.lX.mQ8pXHKxTQMZv46UeY/YZ4sWKxn.jmwVAt9jvgs5lGAdp05i', 'branch_manager', NULL, NULL),
+(8, 6, 'lanang.manager@chakanoks.test', '$2y$10$A2ftuWjmX.QiWIEGwWLgJeAVq9Mj8XPgVVLe681Nfh/EOnwjW7b7e', 'branch_manager', NULL, NULL),
+(9, 4, 'imonakoplss@gmail.com', '$2y$10$3NkatzhpbxrXANoLVr1.VOcs3T.d2HK1VcmTP3FC2WPKPegZRZpyW', 'franchise_manager', NULL, NULL),
+(11, 6, 'gpalagpalag@gmail.com', '$2y$10$M65YWJFFSijiGGR3VmbLgucPrX3DP2ho8ULI1mD8PVS42UvDXeaiC', 'logistics_coordinator', NULL, NULL),
+(12, 2, 'matina.inventory@chakanoks.test', '$2y$10$DNZivaDHaoVFINxTZ4fFIOAQ8anWvByzBHQHJLOkMoWNGcJnfLCiy', 'inventory_staff', NULL, NULL),
+(13, 3, 'toril.inventory@chakanoks.test', '$2y$10$R2Oj1QeKImicjoEMyfY08e2N2QWwYCweJNq5X4sWR1MogGvZihXiy', 'inventory_staff', NULL, NULL),
+(14, 4, 'buhangin.inventory@chakanoks.test', '$2y$10$Z09xHrPamrG4YUwBFVcDJuy/VdM1WYP0HHqVHpaXC4Zigi4SS.9Wi', 'inventory_staff', NULL, NULL),
+(15, 5, 'agdao.inventory@chakanoks.test', '$2y$10$PNfU5ITkbCe/9OwNplYqRu.Q1YvLRYK4UVndEsTUV8PyKHv1M8/7q', 'inventory_staff', NULL, NULL),
+(16, 6, 'lanang.inventory@chakanoks.test', '$2y$10$Y0Y0h83poso/HxdWKtkVPelrFnrZGAOYvGZtxh7ICk/81nfY5pFOe', 'inventory_staff', NULL, NULL),
+(17, NULL, 'hunzkie123@gmail.com', '$2y$10$mMjlYvI1UniC/hByMQlpqezZnzxdao8IrTbFs3x2tCf6D9RE67jnK', 'superadmin', NULL, '2025-12-15 08:25:43');
 
 --
 -- Indexes for dumped tables
@@ -1764,8 +1819,11 @@ ALTER TABLE `migrations`
 --
 ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `token` (`token`),
-  ADD KEY `user_id_is_used_reset_expires` (`user_id`,`is_used`,`reset_expires`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `email` (`email`),
+  ADD KEY `otp` (`otp`),
+  ADD KEY `token` (`token`),
+  ADD KEY `expires_at` (`expires_at`);
 
 --
 -- Indexes for table `payment_transactions`
@@ -1939,13 +1997,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `accounts_payable`
 --
 ALTER TABLE `accounts_payable`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `audit_trail`
 --
 ALTER TABLE `audit_trail`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `auth_logs`
@@ -1969,13 +2027,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `deliveries`
 --
 ALTER TABLE `deliveries`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `delivery_items`
 --
 ALTER TABLE `delivery_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `franchise_applications`
@@ -1993,25 +2051,25 @@ ALTER TABLE `franchise_owners`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `payment_transactions`
 --
 ALTER TABLE `payment_transactions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=355;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=362;
 
 --
 -- AUTO_INCREMENT for table `product_catalog`
@@ -2023,25 +2081,25 @@ ALTER TABLE `product_catalog`
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `purchase_order_items`
 --
 ALTER TABLE `purchase_order_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `purchase_requests`
 --
 ALTER TABLE `purchase_requests`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `purchase_request_items`
 --
 ALTER TABLE `purchase_request_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `purchase_request_quotations`
@@ -2071,7 +2129,7 @@ ALTER TABLE `stock_batches`
 -- AUTO_INCREMENT for table `stock_transactions`
 --
 ALTER TABLE `stock_transactions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
@@ -2095,7 +2153,7 @@ ALTER TABLE `supply_allocations`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables
