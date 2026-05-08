@@ -22,12 +22,17 @@ class UserModel extends Model
         'role',
         'created_at',
         'updated_at',
+        'deleted_at',
     ];
 
     // Enable timestamps
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
+    
+    // Enable soft deletes
+    protected $useSoftDeletes = true;
 
     // -------------------- HELPER METHODS --------------------
 
@@ -71,5 +76,21 @@ class UserModel extends Model
         return $this->update($userId, [
             'password' => password_hash($newPassword, PASSWORD_DEFAULT),
         ]);
+    }
+
+    /**
+     * Restore a soft-deleted user
+     */
+    public function restoreUser(int $userId): bool
+    {
+        return $this->update($userId, ['deleted_at' => null]);
+    }
+
+    /**
+     * Get user by email (including deleted users)
+     */
+    public function getUserByEmailWithDeleted(string $email)
+    {
+        return $this->withDeleted()->where('email', $email)->first();
     }
 }

@@ -95,6 +95,7 @@ class PaymentTransactionModel extends Model
             ->join('users u2', 'u2.id = payment_transactions.recorded_by', 'left')
             ->where('payment_transactions.accounts_payable_id', $apId)
             ->orderBy('payment_transactions.payment_date', 'DESC')
+            ->orderBy('payment_transactions.id', 'DESC') // Ensure most recent is first
             ->findAll();
     }
 

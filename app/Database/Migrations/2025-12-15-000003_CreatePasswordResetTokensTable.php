@@ -8,6 +8,11 @@ class CreatePasswordResetTokensTable extends Migration
 {
     public function up()
     {
+        // Check if table already exists
+        if ($this->db->tableExists('password_reset_tokens')) {
+            return;
+        }
+        
         $this->forge->addField([
             'id' => [
                 'type' => 'INT',

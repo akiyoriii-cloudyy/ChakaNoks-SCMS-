@@ -297,6 +297,10 @@
                     <i class="fas fa-truck-loading"></i>
                     <span>Fleet Management</span>
                 </a>
+                <a href="javascript:void(0);" class="nav-item" onclick="showSection('reports', event);">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
             </nav>
             
             <div class="sidebar-footer">
@@ -327,15 +331,16 @@
                         <p class="page-subtitle">Manage deliveries, schedule shipments, and track orders</p>
                     </div>
                 </div>
-                <div class="header-right">
+                <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
                     <button class="btn btn-secondary" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                         <span>Refresh</span>
                     </button>
-                    <button class="btn btn-primary ms-2" onclick="generateDeliveryReport()">
+                    <button class="btn btn-primary" onclick="generateDeliveryReport()">
                         <i class="fas fa-file-export"></i>
                         <span>Export Report</span>
                     </button>
+                    <?= view('components/notifications') ?>
                 </div>
             </header>
 
@@ -1251,6 +1256,16 @@
                                                 <span class="status-badge status-<?= esc($delivery['status'] ?? 'pending') ?>">
                                                     <?= esc(ucwords(str_replace('_', ' ', $delivery['status'] ?? 'pending'))) ?>
                                                 </span>
+                                                <?php if (isset($delivery['payment_status'])): ?>
+                                                    <?php
+                                                    $paymentStatus = strtolower($delivery['payment_status'] ?? 'unpaid');
+                                                    $paymentBadge = $paymentStatus === 'paid' ? 'badge-success' : 
+                                                                   ($paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger');
+                                                    ?>
+                                                    <br><small class="badge <?= $paymentBadge ?>" style="margin-top: 4px; display: inline-block;">
+                                                        Payment: <?= ucfirst($paymentStatus) ?>
+                                                    </small>
+                                                <?php endif; ?>
                                             </td>
                                             <td><?= $delivery['scheduled_date'] ? date('M d, Y', strtotime($delivery['scheduled_date'])) : 'Not set' ?></td>
                                             <td><?= esc($delivery['driver_name'] ?? 'N/A') ?></td>
@@ -1315,6 +1330,39 @@
                 </div>
                 
                 <!-- Fleet Management Section -->
+                <!-- Reports Section -->
+                <div id="reports-section" class="content-section">
+                    <div class="content-card">
+                        <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                            <h3 class="card-title" style="color: white; margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-chart-bar" style="font-size: 1.5rem;"></i>
+                                Monthly Delivery Reports
+                            </h3>
+                        </div>
+                        
+                        <div style="padding: 20px;">
+                            <!-- Month Filter -->
+                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                <label for="reportMonthFilter" style="color: #2d5016; font-weight: 600; font-size: 0.9rem; margin: 0;">
+                                    <i class="fas fa-calendar-alt" style="margin-right: 5px;"></i>
+                                    Select Month:
+                                </label>
+                                <input type="month" id="reportMonthFilter" class="form-control" style="width: 200px; display: inline-block;">
+                                <button id="btnPrintMonthlyReport" class="btn btn-primary" style="background: #2d5016; border: none; padding: 8px 20px; border-radius: 6px; color: white; font-weight: 500;">
+                                    <i class="fas fa-print"></i> Print Monthly Report
+                                </button>
+                            </div>
+                            
+                            <div id="reportPreview" style="padding: 20px; background: #f8f9fa; border-radius: 8px; min-height: 200px;">
+                                <p style="text-align: center; color: #64748b; margin: 50px 0;">
+                                    <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                    Select a month and click "Print Monthly Report" to generate the delivery report.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="fleet-section" class="content-section">
                     <div class="content-card">
                         <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
@@ -1757,7 +1805,7 @@ function showSection(sectionId, event) {
     }
     
     // Set active nav item
-    $(event ? event.target.closest('.nav-item') : $('.nav-item').eq(['dashboard', 'schedule', 'track', 'deliveries', 'schedules', 'fleet'].indexOf(sectionId))).addClass('active');
+    $(event ? event.target.closest('.nav-item') : $('.nav-item').eq(['dashboard', 'schedule', 'track', 'deliveries', 'schedules', 'fleet', 'reports'].indexOf(sectionId))).addClass('active');
     
     $('html, body').animate({ scrollTop: 0 }, 300);
     
@@ -1787,6 +1835,12 @@ function showSection(sectionId, event) {
             break;
         case 'fleet':
             loadFleetManagementData();
+            break;
+        case 'reports':
+            // Initialize month filter for reports
+            const today = new Date();
+            const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            $('#reportMonthFilter').val(monthStr);
             break;
     }
     
@@ -4628,7 +4682,255 @@ function str_replace(search, replace, subject) {
         setTimeout(function() {
             showNotification('Welcome to Logistics Coordinator Dashboard', 'success');
         }, 1000);
+        
+        // Initialize month filter with current month
+        const today = new Date();
+        const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+        $('#reportMonthFilter').val(monthStr);
+        
+        // Print Monthly Report button click handler
+        $('#btnPrintMonthlyReport').on('click', function() {
+            generateMonthlyDeliveryReport();
+        });
     });
+    
+    // Generate Monthly Delivery Report
+    function generateMonthlyDeliveryReport() {
+        const month = $('#reportMonthFilter').val();
+        if (!month) {
+            alert('Please select a month');
+            return;
+        }
+        
+        // Show loading state
+        const btn = $('#btnPrintMonthlyReport');
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Loading...');
+        
+        $.ajax({
+            url: '<?= base_url('logisticscoordinator/api/monthly-deliveries') ?>',
+            method: 'GET',
+            data: { month: month },
+            dataType: 'json',
+            success: function(response) {
+                btn.prop('disabled', false).html(originalText);
+                
+                if (response.status === 'success') {
+                    printMonthlyDeliveryReport(response);
+                } else {
+                    alert('Error loading monthly data: ' + (response.message || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                btn.prop('disabled', false).html(originalText);
+                console.error('Error:', error);
+                console.error('Response:', xhr.responseText);
+                alert('Error loading monthly data: ' + (xhr.responseJSON?.message || error || 'Failed to fetch monthly deliveries'));
+            }
+        });
+    }
+    
+    // Print Monthly Delivery Report (A4 size)
+    function printMonthlyDeliveryReport(data) {
+        const deliveries = data.deliveries || [];
+        const month = data.month || '';
+        const userEmail = data.user?.email || 'N/A';
+        
+        // Parse month
+        const [year, monthNum] = month.split('-');
+        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const generatedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        
+        // Group deliveries by branch
+        const deliveriesByBranch = {};
+        deliveries.forEach(delivery => {
+            const branchName = delivery.branch_name || 'Unknown Branch';
+            if (!deliveriesByBranch[branchName]) {
+                deliveriesByBranch[branchName] = {
+                    name: branchName,
+                    address: delivery.branch_address || 'N/A',
+                    deliveries: []
+                };
+            }
+            deliveriesByBranch[branchName].deliveries.push(delivery);
+        });
+        
+        // Status badge helper
+        function getStatusBadge(status) {
+            const statusMap = {
+                'scheduled': '<span style="background: #0d6efd; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">SCHEDULED</span>',
+                'in_transit': '<span style="background: #fd7e14; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">IN TRANSIT</span>',
+                'delivered': '<span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">DELIVERED</span>',
+                'received': '<span style="background: #17a2b8; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">RECEIVED</span>',
+                'partial_delivery': '<span style="background: #ffc107; color: #000; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">PARTIAL</span>',
+                'cancelled': '<span style="background: #dc3545; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">CANCELLED</span>',
+                'delayed': '<span style="background: #6c757d; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">DELAYED</span>'
+            };
+            return statusMap[status?.toLowerCase()] || '<span style="background: #6c757d; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">' + (status || 'N/A').toUpperCase() + '</span>';
+        }
+        
+        // Format date helper
+        function formatDate(dateString) {
+            if (!dateString || dateString === 'N/A') return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) {
+                return dateString;
+            }
+        }
+        
+        let reportHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>CHAKANOKS - Monthly Delivery Report</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                @page { size: A4; margin: 15mm; }
+                body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }
+                .report-container { max-width: 210mm; margin: 0 auto; padding: 20px; }
+                .report-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #2d5016; }
+                .report-header img { max-height: 50px; margin-bottom: 10px; }
+                .report-header h1 { color: #2d5016; font-size: 24pt; margin: 10px 0; font-weight: bold; }
+                .report-header h2 { color: #666; font-size: 14pt; margin: 5px 0; font-weight: normal; }
+                .report-info { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+                .report-info p { margin: 5px 0; }
+                .branch-section { margin: 30px 0; page-break-inside: avoid; }
+                .branch-header { background: #2d5016; color: white; padding: 15px; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+                .branch-header h3 { margin: 0; font-size: 16pt; }
+                .branch-address { padding: 10px 15px; background: #e8f5e9; color: #2d5016; font-size: 10pt; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                table th { background: #2d5016; color: white; padding: 12px; text-align: left; font-weight: 600; }
+                table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
+                table tr:nth-child(even) { background: #f8f9fa; }
+                .summary-section { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+                .summary-section h3 { color: #2d5016; margin-bottom: 15px; }
+                .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+                .summary-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center; }
+                .summary-card h4 { color: #2d5016; margin-bottom: 10px; font-size: 14pt; }
+                .summary-card .value { font-size: 24pt; font-weight: bold; color: #2d5016; }
+                .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #666; font-size: 10pt; }
+                @media print {
+                    body { margin: 0; }
+                    .report-container { padding: 0; }
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="report-container">
+                <!-- Company Header -->
+                <div class="report-header">
+                    <img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo">
+                    <h1>CHAKANOKS</h1>
+                    <h2>Supply Chain Management System</h2>
+                    <h2 style="margin-top: 15px; color: #2d5016;">Monthly Delivery Report</h2>
+                </div>
+                
+                <!-- Report Information -->
+                <div class="report-info">
+                    <p><strong>Report Period:</strong> ${monthName}</p>
+                    <p><strong>Total Deliveries:</strong> ${deliveries.length}</p>
+                    <p><strong>Generated:</strong> ${generatedDate}</p>
+                    <p><strong>Prepared by:</strong> ${userEmail}</p>
+                </div>
+                
+                <!-- Deliveries by Branch -->
+                ${Object.keys(deliveriesByBranch).map(branchName => {
+                    const branch = deliveriesByBranch[branchName];
+                    return `
+                    <div class="branch-section">
+                        <div class="branch-header">
+                            <h3>${branch.name}</h3>
+                        </div>
+                        <div class="branch-address">
+                            <strong>Address:</strong> ${branch.address}
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Delivery #</th>
+                                    <th>Order #</th>
+                                    <th>Supplier</th>
+                                    <th>Status</th>
+                                    <th>Scheduled Date</th>
+                                    <th>Actual Date</th>
+                                    <th>Driver</th>
+                                    <th>Vehicle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${branch.deliveries.map(delivery => `
+                                    <tr>
+                                        <td>${delivery.delivery_number || 'N/A'}</td>
+                                        <td>${delivery.order_number || 'N/A'}</td>
+                                        <td>${delivery.supplier_name || 'N/A'}</td>
+                                        <td>${getStatusBadge(delivery.status)}</td>
+                                        <td>${formatDate(delivery.scheduled_date)}</td>
+                                        <td>${formatDate(delivery.actual_delivery_date)}</td>
+                                        <td>${delivery.driver_name || 'N/A'}</td>
+                                        <td>${delivery.vehicle_info || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 10px; color: #666; font-size: 10pt;"><strong>Total for ${branch.name}:</strong> ${branch.deliveries.length} delivery(ies)</p>
+                    </div>
+                    `;
+                }).join('')}
+                
+                <!-- Summary Section -->
+                <div class="summary-section">
+                    <h3>Summary by Branch</h3>
+                    <div class="summary-grid">
+                        ${Object.keys(deliveriesByBranch).map(branchName => {
+                            const branch = deliveriesByBranch[branchName];
+                            return `
+                            <div class="summary-card">
+                                <h4>${branch.name}</h4>
+                                <div class="value">${branch.deliveries.length}</div>
+                                <p style="color: #666; font-size: 10pt; margin-top: 5px;">deliveries</p>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="footer">
+                    <p><strong>CHAKANOKS Supply Chain Management System</strong></p>
+                    <p>This report was generated on ${generatedDate} by ${userEmail}</p>
+                    <p style="margin-top: 10px; color: #999;">Report Period: ${monthName}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+        
+        const printWindow = window.open('', '_blank', 'width=800,height=1000');
+        if (!printWindow) {
+            alert('Please allow popups to print the report');
+            return;
+        }
+        
+        printWindow.document.write(reportHTML);
+        printWindow.document.close();
+        
+        printWindow.onload = function() {
+            setTimeout(function() {
+                printWindow.focus();
+                printWindow.print();
+            }, 500);
+        };
+        
+        setTimeout(function() {
+            if (printWindow.document.readyState === 'complete') {
+                printWindow.focus();
+                printWindow.print();
+            }
+        }, 1000);
+    }
 </script>
 </body>
 </html>

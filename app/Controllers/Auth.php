@@ -71,6 +71,9 @@ class Auth extends BaseController
             case 'staff':
             case 'inventory_staff':
                 return redirect()->to('/staff/dashboard');
+            case 'system_admin':
+            case 'systemadministrator':
+                return redirect()->to('/systemadministrator/dashboard');
             default:
                 return redirect()->to('/dashboard'); // fallback
         }

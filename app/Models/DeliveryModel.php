@@ -211,6 +211,31 @@ class DeliveryModel extends Model
         $poModel = new \App\Models\PurchaseOrderModel();
         $delivery['purchase_order'] = $poModel->find($delivery['purchase_order_id']);
 
+        // Get payment status from accounts payable
+        if (!empty($delivery['purchase_order_id'])) {
+            $accountsPayableModel = new \App\Models\AccountsPayableModel();
+            $accountsPayable = $accountsPayableModel
+                ->where('purchase_order_id', $delivery['purchase_order_id'])
+                ->first();
+            
+            if ($accountsPayable) {
+                $delivery['payment_status'] = $accountsPayable['payment_status'] ?? 'unpaid';
+                $delivery['payment_amount'] = (float)($accountsPayable['amount'] ?? 0);
+                $delivery['payment_amount_paid'] = (float)($accountsPayable['amount_paid'] ?? 0);
+                $delivery['payment_balance'] = $delivery['payment_amount'] - $delivery['payment_amount_paid'];
+                $delivery['is_paid'] = strtolower($delivery['payment_status']) === 'paid';
+            } else {
+                $delivery['payment_status'] = 'unpaid';
+                $delivery['payment_amount'] = 0;
+                $delivery['payment_amount_paid'] = 0;
+                $delivery['payment_balance'] = 0;
+                $delivery['is_paid'] = false;
+            }
+        } else {
+            $delivery['payment_status'] = null;
+            $delivery['is_paid'] = false;
+        }
+
         // Get supplier info
         $supplierModel = new \App\Models\SupplierModel();
         $delivery['supplier'] = $supplierModel->find($delivery['supplier_id']);

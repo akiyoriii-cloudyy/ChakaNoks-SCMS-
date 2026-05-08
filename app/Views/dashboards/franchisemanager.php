@@ -406,6 +406,10 @@ $currentSection = $currentSection ?? 'overview';
                     <i class="fas fa-handshake"></i>
                     <span>Franchise Partners</span>
                 </a>
+                <a href="<?= $baseUrl ?>?section=reports" class="nav-item <?= $currentSection === 'reports' ? 'active' : '' ?>">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
             </nav>
             
             <div class="sidebar-footer">
@@ -436,11 +440,12 @@ $currentSection = $currentSection ?? 'overview';
                         <p class="page-subtitle">Manage franchise applications, supply allocations, and royalty payments</p>
                     </div>
                 </div>
-                <div class="header-right">
+                <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
                     <button class="btn" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                         <span>Refresh</span>
                     </button>
+                    <?= view('components/notifications') ?>
                 </div>
             </header>
 
@@ -821,6 +826,35 @@ $currentSection = $currentSection ?? 'overview';
                                     <p>Approved franchise applications will appear here as partners.</p>
                                 </div>
                             <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports-section" class="dashboard-section <?= $currentSection === 'reports' ? 'active' : '' ?>">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-chart-bar"></i> Monthly Franchise Reports</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <!-- Month Filter -->
+                            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                <label for="reportMonthFilter" style="color: #2d5016; font-weight: 600; font-size: 0.9rem; margin: 0;">
+                                    <i class="fas fa-calendar-alt" style="margin-right: 5px;"></i>
+                                    Select Month:
+                                </label>
+                                <input type="month" id="reportMonthFilter" class="form-control" style="width: 200px; display: inline-block;">
+                                <button id="btnPrintMonthlyReport" class="btn btn-primary" style="background: #2d5016; border: none; padding: 8px 20px; border-radius: 6px; color: white; font-weight: 500;">
+                                    <i class="fas fa-print"></i> Print Monthly Report
+                                </button>
+                            </div>
+                            
+                            <div id="reportPreview" style="padding: 20px; background: #f8f9fa; border-radius: 8px; min-height: 200px;">
+                                <p style="text-align: center; color: #64748b; margin: 50px 0;">
+                                    <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                    Select a month and click "Print Monthly Report" to generate the franchise report.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1442,6 +1476,228 @@ $currentSection = $currentSection ?? 'overview';
             const price = $(this).find(':selected').data('price') || 0;
             $('#allocPrice').val(price);
         });
+        
+        // Initialize month filter with current month
+        $(document).ready(function() {
+            const today = new Date();
+            const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            $('#reportMonthFilter').val(monthStr);
+            
+            // Print Monthly Report button click handler
+            $('#btnPrintMonthlyReport').on('click', function() {
+                generateMonthlyFranchiseReport();
+            });
+        });
+        
+        // Generate Monthly Franchise Report
+        function generateMonthlyFranchiseReport() {
+            const month = $('#reportMonthFilter').val();
+            if (!month) {
+                alert('Please select a month');
+                return;
+            }
+            
+            // Show loading state
+            const btn = $('#btnPrintMonthlyReport');
+            const originalText = btn.html();
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Loading...');
+            
+            $.ajax({
+                url: '<?= base_url('franchisemanager/api/monthly-franchise') ?>',
+                method: 'GET',
+                data: { month: month },
+                dataType: 'json',
+                success: function(response) {
+                    btn.prop('disabled', false).html(originalText);
+                    
+                    if (response.status === 'success') {
+                        printMonthlyFranchiseReport(response);
+                    } else {
+                        alert('Error loading monthly data: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    btn.prop('disabled', false).html(originalText);
+                    console.error('Error:', error);
+                    console.error('Response:', xhr.responseText);
+                    alert('Error loading monthly data: ' + (xhr.responseJSON?.message || error || 'Failed to fetch monthly franchise data'));
+                }
+            });
+        }
+        
+        // Print Monthly Franchise Report (A4 size)
+        function printMonthlyFranchiseReport(data) {
+            const branches = data.branches || [];
+            const month = data.month || '';
+            const userEmail = data.user?.email || 'N/A';
+            
+            // Parse month
+            const [year, monthNum] = month.split('-');
+            const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const generatedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Format date helper
+            function formatDate(dateString) {
+                if (!dateString || dateString === 'N/A') return 'N/A';
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                } catch (e) {
+                    return dateString;
+                }
+            }
+            
+            // Status badge helper
+            function getStatusBadge(status) {
+                const statusMap = {
+                    'active': '<span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">ACTIVE</span>',
+                    'inactive': '<span style="background: #6c757d; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">INACTIVE</span>',
+                    'suspended': '<span style="background: #dc3545; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">SUSPENDED</span>'
+                };
+                return statusMap[status?.toLowerCase()] || '<span style="background: #6c757d; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">' + (status || 'N/A').toUpperCase() + '</span>';
+            }
+            
+            let reportHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>CHAKANOKS - Monthly Franchise Report</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    @page { size: A4; margin: 15mm; }
+                    body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }
+                    .report-container { max-width: 210mm; margin: 0 auto; padding: 20px; }
+                    .report-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #2d5016; }
+                    .report-header img { max-height: 50px; margin-bottom: 10px; }
+                    .report-header h1 { color: #2d5016; font-size: 24pt; margin: 10px 0; font-weight: bold; }
+                    .report-header h2 { color: #666; font-size: 14pt; margin: 5px 0; font-weight: normal; }
+                    .report-info { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+                    .report-info p { margin: 5px 0; }
+                    .branch-section { margin: 30px 0; page-break-inside: avoid; }
+                    .branch-header { background: #2d5016; color: white; padding: 15px; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+                    .branch-header h3 { margin: 0; font-size: 16pt; }
+                    .branch-details { padding: 15px; background: #f8f9fa; border: 1px solid #e5e7eb; border-top: none; }
+                    .branch-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+                    .detail-item { margin-bottom: 10px; }
+                    .detail-item strong { color: #2d5016; display: inline-block; min-width: 120px; }
+                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                    table th { background: #2d5016; color: white; padding: 12px; text-align: left; font-weight: 600; }
+                    table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
+                    table tr:nth-child(even) { background: #f8f9fa; }
+                    .summary-section { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+                    .summary-section h3 { color: #2d5016; margin-bottom: 15px; }
+                    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+                    .summary-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center; }
+                    .summary-card h4 { color: #2d5016; margin-bottom: 10px; font-size: 14pt; }
+                    .summary-card .value { font-size: 24pt; font-weight: bold; color: #2d5016; }
+                    .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #666; font-size: 10pt; }
+                    @media print {
+                        body { margin: 0; }
+                        .report-container { padding: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-container">
+                    <!-- Company Header -->
+                    <div class="report-header">
+                        <img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo">
+                        <h1>CHAKANOKS</h1>
+                        <h2>Supply Chain Management System</h2>
+                        <h2 style="margin-top: 15px; color: #2d5016;">Monthly Franchise Report</h2>
+                    </div>
+                    
+                    <!-- Report Information -->
+                    <div class="report-info">
+                        <p><strong>Report Period:</strong> ${monthName}</p>
+                        <p><strong>Total Franchise Branches:</strong> ${branches.length}</p>
+                        <p><strong>Generated:</strong> ${generatedDate}</p>
+                        <p><strong>Prepared by:</strong> ${userEmail}</p>
+                    </div>
+                    
+                    <!-- Franchise Branches -->
+                    ${branches.map(branch => `
+                    <div class="branch-section">
+                        <div class="branch-header">
+                            <h3>${branch.name} (${branch.code})</h3>
+                        </div>
+                        <div class="branch-details">
+                            <div class="branch-details-grid">
+                                <div>
+                                    <div class="detail-item"><strong>Branch Address:</strong> ${branch.address}</div>
+                                    <div class="detail-item"><strong>Franchise Type:</strong> ${branch.franchise_type.toUpperCase()}</div>
+                                    <div class="detail-item"><strong>Created:</strong> ${formatDate(branch.created_at)}</div>
+                                </div>
+                                <div>
+                                    <div class="detail-item"><strong>Owner Name:</strong> ${branch.owner_name}</div>
+                                    <div class="detail-item"><strong>Owner Email:</strong> ${branch.owner_email}</div>
+                                    <div class="detail-item"><strong>Owner Phone:</strong> ${branch.owner_phone}</div>
+                                    <div class="detail-item"><strong>Owner Status:</strong> ${getStatusBadge(branch.owner_status)}</div>
+                                    ${branch.joined_date && branch.joined_date !== 'N/A' ? '<div class="detail-item"><strong>Joined Date:</strong> ' + formatDate(branch.joined_date) + '</div>' : ''}
+                                </div>
+                            </div>
+                            ${branch.owner_address && branch.owner_address !== 'N/A' ? '<div class="detail-item" style="margin-top: 10px;"><strong>Owner Address:</strong> ' + branch.owner_address + '</div>' : ''}
+                        </div>
+                    </div>
+                    `).join('')}
+                    
+                    <!-- Summary Section -->
+                    <div class="summary-section">
+                        <h3>Summary</h3>
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <h4>Total Branches</h4>
+                                <div class="value">${branches.length}</div>
+                                <p style="color: #666; font-size: 10pt; margin-top: 5px;">franchise branches</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Active Owners</h4>
+                                <div class="value">${branches.filter(b => b.owner_status === 'active').length}</div>
+                                <p style="color: #666; font-size: 10pt; margin-top: 5px;">active franchise owners</p>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Report Period</h4>
+                                <div class="value" style="font-size: 14pt;">${monthName}</div>
+                                <p style="color: #666; font-size: 10pt; margin-top: 5px;">monthly report</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="footer">
+                        <p><strong>CHAKANOKS Supply Chain Management System</strong></p>
+                        <p>This report was generated on ${generatedDate} by ${userEmail}</p>
+                        <p style="margin-top: 10px; color: #999;">Report Period: ${monthName}</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `;
+            
+            const printWindow = window.open('', '_blank', 'width=800,height=1000');
+            if (!printWindow) {
+                alert('Please allow popups to print the report');
+                return;
+            }
+            
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 500);
+            };
+            
+            setTimeout(function() {
+                if (printWindow.document.readyState === 'complete') {
+                    printWindow.focus();
+                    printWindow.print();
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>

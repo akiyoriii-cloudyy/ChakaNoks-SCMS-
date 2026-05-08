@@ -187,6 +187,13 @@
                                 <option value="with_invoice" <?= $currentInvoiceFilter === 'with_invoice' ? 'selected' : '' ?>>With Invoice #</option>
                                 <option value="without_invoice" <?= $currentInvoiceFilter === 'without_invoice' ? 'selected' : '' ?>>Without Invoice #</option>
                             </select>
+                            <div style="display: flex; gap: 5px; align-items: center; padding: 0 5px;">
+                                <label style="font-size: 0.9rem; color: #2d5016; font-weight: 600; white-space: nowrap;">Month:</label>
+                                <input type="month" id="receiptMonthFilter" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.875rem; width: 140px;">
+                            </div>
+                            <button id="btnPrintMonthlyReport" class="btn btn-sm btn-success" style="background: #28a745; border: none; padding: 8px 16px; border-radius: 6px; color: white; font-weight: 600;">
+                                <i class="fas fa-print"></i> Print Monthly Report
+                            </button>
                             <button class="btn btn-sm btn-info" onclick="location.reload()" style="background: #17a2b8; border: none; padding: 8px 16px; border-radius: 6px; color: white;">
                                 <i class="fas fa-sync"></i> Refresh
                             </button>
@@ -235,9 +242,22 @@
                                                     <button class="btn btn-sm btn-info" onclick="viewAccountsPayable(<?= $ap['id'] ?>)" title="View details" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px;">
                                                         <i class="fas fa-eye"></i> View
                                                     </button>
-                                                    <?php if (($ap['payment_status'] ?? 'unpaid') !== 'paid'): ?>
+                                                    <?php 
+                                                    $paymentStatus = strtolower($ap['payment_status'] ?? 'unpaid');
+                                                    $paidAmount = (float)($ap['paid_amount'] ?? $ap['amount_paid'] ?? 0);
+                                                    $hasPayment = $paidAmount > 0 || $paymentStatus === 'paid' || $paymentStatus === 'partial';
+                                                    ?>
+                                                    <?php if ($paymentStatus !== 'paid' && ($ap['balance'] ?? 0) > 0): ?>
                                                         <button class="btn btn-sm btn-success recordPaymentBtn" data-id="<?= $ap['id'] ?>" data-balance="<?= $ap['balance'] ?? 0 ?>" title="Record payment" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px;">
                                                             <i class="fas fa-money-bill-wave"></i> Pay
+                                                        </button>
+                                                    <?php endif; ?>
+                                                    <?php if ($hasPayment): ?>
+                                                        <button class="btn btn-sm btn-primary viewReceiptBtn" data-id="<?= $ap['id'] ?>" title="View receipt" style="background: #2d5016; color: white; border: none; padding: 6px 12px; border-radius: 6px;">
+                                                            <i class="fas fa-receipt"></i> Receipt
+                                                        </button>
+                                                        <button class="btn btn-sm btn-success printReceiptBtn" data-id="<?= $ap['id'] ?>" title="Print receipt" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px;">
+                                                            <i class="fas fa-print"></i> Print Receipt
                                                         </button>
                                                     <?php endif; ?>
                                                     <button class="btn btn-sm btn-warning updateInvoiceBtn" data-id="<?= $ap['id'] ?>" data-invoice="<?= esc($ap['invoice_number'] ?? '', 'attr') ?>" title="Update invoice" style="background: #ffc107; color: #000; border: none; padding: 6px 12px; border-radius: 6px;">
@@ -281,9 +301,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Initialize month filter with current month
+            const today = new Date();
+            const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            
+            $('#receiptMonthFilter').val(monthStr);
+            
             // Filter change handlers
             $('#apStatusFilter, #apInvoiceFilter').on('change', function() {
                 filterAccountsPayable();
+            });
+            
+            // Print Monthly Report button handler
+            $('#btnPrintMonthlyReport').on('click', function() {
+                printMonthlyReport();
             });
             
             // Editable invoice number handler
@@ -459,16 +490,54 @@
                     
                     // Helper function to format payment method
                     function formatPaymentMethod(method) {
-                        if (!method) return 'Not specified';
-                        const methods = {
-                            'bank_transfer': 'Bank Transfer',
-                            'credit_card': 'Credit Card',
+                        if (!method || method.trim() === '') {
+                            return 'Not specified';
+                        }
+                        
+                        // Normalize the method string
+                        const normalizedMethod = method.trim().toLowerCase();
+                        
+                        // Map database ENUM values and common variations to standardized format
+                        const methodMap = {
+                            // Database ENUM values
                             'cash': 'Cash',
                             'check': 'Check',
+                            'bank_transfer': 'Bank Transfer',
+                            'credit_card': 'Credit Card',
                             'online': 'Online Payment',
-                            'other': 'Other'
+                            'other': 'Other',
+                            // Common variations
+                            'cheque': 'Check',
+                            'bank transfer': 'Bank Transfer',
+                            'banktransfer': 'Bank Transfer',
+                            'transfer': 'Bank Transfer',
+                            'bank': 'Bank Transfer',
+                            'credit card': 'Credit Card',
+                            'creditcard': 'Credit Card',
+                            'card': 'Credit Card',
+                            'online payment': 'Online Payment',
+                            'onlinepayment': 'Online Payment',
+                            'paypal': 'PayPal',
+                            'gcash': 'GCash',
+                            'maya': 'Maya'
                         };
-                        return methods[method.toLowerCase()] || method.charAt(0).toUpperCase() + method.slice(1).replace(/_/g, ' ');
+                        
+                        // Check if method matches any key in the map
+                        if (methodMap[normalizedMethod]) {
+                            return methodMap[normalizedMethod];
+                        }
+                        
+                        // If not found in map, try to match partial strings
+                        for (const key in methodMap) {
+                            if (normalizedMethod.includes(key) || key.includes(normalizedMethod)) {
+                                return methodMap[key];
+                            }
+                        }
+                        
+                        // If not found, capitalize first letter of each word
+                        return method.split(/[\s_-]+/)
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                            .join(' ');
                     }
                     
                     let html = '<div style="padding: 20px;">';
@@ -665,6 +734,670 @@
             });
         }
         
+        // Print Receipt Functions
+        function showReceipt(apId, paymentTransactionId = null) {
+            let url = '<?= base_url('accounts-payable/') ?>' + apId + '/receipt';
+            if (paymentTransactionId) {
+                url += '/' + paymentTransactionId;
+            }
+            
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.receipt) {
+                        renderReceipt(response.receipt);
+                        $('#receiptModal').modal('show');
+                    } else {
+                        alert('Error loading receipt: ' + (response.message || 'Failed to load receipt'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error loading receipt';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        function printReceiptDirect(apId, paymentTransactionId = null) {
+            let url = '<?= base_url('accounts-payable/') ?>' + apId + '/receipt';
+            if (paymentTransactionId) {
+                url += '/' + paymentTransactionId;
+            }
+            
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.receipt) {
+                        renderReceipt(response.receipt);
+                        setTimeout(function() {
+                            const printContent = document.getElementById('receiptContent');
+                            if (printContent) {
+                                const printWindow = window.open('', '_blank', 'width=800,height=600');
+                                
+                                if (!printWindow) {
+                                    alert('Please allow popups to print the receipt');
+                                    return;
+                                }
+                                
+                                printWindow.document.write('<!DOCTYPE html><html><head><title>CHAKANOKS - Payment Receipt</title>');
+                                printWindow.document.write('<meta name="viewport" content="width=80mm">');
+                                printWindow.document.write('<style>');
+                                printWindow.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
+                                printWindow.document.write('html, body { width: 80mm; margin: 0; padding: 0; background: white; overflow: hidden; }');
+                                printWindow.document.write('body { font-family: "Courier New", monospace; margin: 0; padding: 0; }');
+                                printWindow.document.write('.receipt-container { max-width: 80mm; width: 80mm; min-width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-size: 10pt; line-height: 1.3; color: #000; }');
+                                printWindow.document.write('img { max-height: 30px; max-width: 30px; object-fit: contain; }');
+                                printWindow.document.write('@page { size: 80mm auto; margin: 0; width: 80mm; }');
+                                printWindow.document.write('@media print { html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; } .receipt-container { max-width: 80mm !important; width: 80mm !important; min-width: 80mm !important; padding: 10mm 5mm !important; } @page { size: 80mm auto !important; margin: 0 !important; width: 80mm !important; } }');
+                                printWindow.document.write('</style></head><body>');
+                                printWindow.document.write(printContent.innerHTML);
+                                printWindow.document.write('</body></html>');
+                                printWindow.document.close();
+                                
+                                // Trigger print after content is loaded
+                                printWindow.onload = function() {
+                                    setTimeout(function() {
+                                        printWindow.focus();
+                                        printWindow.print();
+                                        // Don't close immediately - let user interact with print dialog
+                                    }, 250);
+                                };
+                                
+                                // Fallback if onload doesn't fire
+                                setTimeout(function() {
+                                    if (printWindow.document.readyState === 'complete') {
+                                        printWindow.focus();
+                                        printWindow.print();
+                                    }
+                                }, 500);
+                            } else {
+                                alert('Receipt content not found');
+                            }
+                        }, 100);
+                    } else {
+                        alert('Error loading receipt: ' + (response.message || 'Failed to load receipt'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error loading receipt';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        function renderReceipt(receipt) {
+            // Helper function to format dates
+            function formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            
+            // Helper function to format payment method
+            function formatPaymentMethod(method) {
+                if (!method || method.trim() === '') {
+                    return 'Not specified';
+                }
+                
+                const normalizedMethod = method.trim().toLowerCase();
+                const methodMap = {
+                    'cash': 'Cash',
+                    'check': 'Check',
+                    'bank_transfer': 'Bank Transfer',
+                    'credit_card': 'Credit Card',
+                    'online': 'Online Payment',
+                    'other': 'Other',
+                    'cheque': 'Check',
+                    'bank transfer': 'Bank Transfer',
+                    'banktransfer': 'Bank Transfer',
+                    'transfer': 'Bank Transfer',
+                    'bank': 'Bank Transfer',
+                    'credit card': 'Credit Card',
+                    'creditcard': 'Credit Card',
+                    'card': 'Credit Card',
+                    'online payment': 'Online Payment',
+                    'onlinepayment': 'Online Payment',
+                    'paypal': 'PayPal',
+                    'gcash': 'GCash',
+                    'maya': 'Maya'
+                };
+                
+                if (methodMap[normalizedMethod]) {
+                    return methodMap[normalizedMethod];
+                }
+                
+                for (const key in methodMap) {
+                    if (normalizedMethod.includes(key) || key.includes(normalizedMethod)) {
+                        return methodMap[key];
+                    }
+                }
+                
+                return method.split(/[\s_-]+/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            }
+            
+            const statusClass = receipt.payment_status === 'paid' ? 'badge-success' : 
+                               receipt.payment_status === 'partial' ? 'badge-warning' : 
+                               receipt.payment_status === 'overdue' ? 'badge-danger' : 'badge-secondary';
+            const statusText = receipt.payment_status === 'paid' ? 'PAID' : 
+                              receipt.payment_status === 'partial' ? 'PARTIAL' : 
+                              receipt.payment_status === 'overdue' ? 'OVERDUE' : 'UNPAID';
+            
+            // Grocery store receipt style - narrow width (80mm/3 inches)
+            let html = '<div class="receipt-container" id="receiptContent" style="max-width: 80mm; width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-family: "Courier New", monospace; font-size: 10pt; line-height: 1.3; color: #000;">';
+            
+            // Company Header - Compact
+            html += '<div style="text-align: center; margin-bottom: 8mm; padding-bottom: 5mm; border-bottom: 1px dashed #000;">';
+            html += '<img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo" style="max-height: 30px; max-width: 30px; height: auto; width: auto; object-fit: contain; display: block; margin: 0 auto 3mm;">';
+            html += '<div style="font-weight: bold; font-size: 14pt; letter-spacing: 1px; margin-bottom: 2mm;">CHAKANOKS</div>';
+            html += '<div style="font-size: 8pt; color: #666; margin-bottom: 3mm;">Supply Chain Management System</div>';
+            html += '<div style="font-weight: bold; font-size: 11pt; text-transform: uppercase; margin-top: 3mm;">PAYMENT RECEIPT</div>';
+            html += '</div>';
+            
+            // Invoice Information - Compact single column
+            html += '<div style="text-align: center; margin-bottom: 5mm; padding-bottom: 3mm; border-bottom: 1px dashed #000;">';
+            html += '<div style="font-weight: bold; font-size: 9pt; margin-bottom: 2mm;">INVOICE #: ' + (receipt.invoice_number || 'N/A') + '</div>';
+            html += '<div style="font-size: 8pt; margin-bottom: 1mm;">Status: <strong>' + statusText + '</strong></div>';
+            html += '</div>';
+            
+            // Supplier and Order Info
+            html += '<div style="margin-bottom: 4mm; font-size: 9pt;">';
+            html += '<div style="margin-bottom: 2mm;"><strong>Supplier:</strong> ' + (receipt.supplier ? receipt.supplier.name : 'N/A') + '</div>';
+            html += '<div style="margin-bottom: 2mm;"><strong>PO #:</strong> ' + (receipt.purchase_order ? receipt.purchase_order.order_number : 'N/A') + '</div>';
+            if (receipt.invoice_date) {
+                html += '<div style="margin-bottom: 2mm;"><strong>Invoice Date:</strong> ' + formatDate(receipt.invoice_date) + '</div>';
+            }
+            if (receipt.due_date) {
+                html += '<div style="margin-bottom: 2mm;"><strong>Due Date:</strong> ' + formatDate(receipt.due_date) + '</div>';
+            }
+            html += '</div>';
+            
+            // Payment Amounts - Compact
+            html += '<div style="text-align: center; margin-bottom: 4mm; padding: 3mm 0; border-top: 1px dashed #000; border-bottom: 1px dashed #000;">';
+            html += '<div style="margin-bottom: 2mm;"><span style="font-size: 8pt;">Total Amount:</span><br><span style="font-size: 12pt; font-weight: bold;">₱' + parseFloat(receipt.amounts.total_amount || 0).toFixed(2) + '</span></div>';
+            html += '<div style="margin-bottom: 2mm;"><span style="font-size: 8pt;">Paid Amount:</span><br><span style="font-size: 12pt; font-weight: bold; color: #28a745;">₱' + parseFloat(receipt.amounts.total_paid || 0).toFixed(2) + '</span></div>';
+            const balance = parseFloat(receipt.amounts.balance || 0);
+            html += '<div><span style="font-size: 8pt;">Balance:</span><br><span style="font-size: 12pt; font-weight: bold; color: ' + (balance > 0 ? '#dc3545' : '#28a745') + ';">₱' + balance.toFixed(2) + '</span></div>';
+            html += '</div>';
+            
+            // Payment Information - Compact
+            html += '<div style="margin-bottom: 4mm; font-size: 9pt;">';
+            html += '<div style="text-align: center; font-weight: bold; margin-bottom: 2mm; padding-bottom: 2mm; border-bottom: 1px dashed #000;">PAYMENT DETAILS</div>';
+            
+            if (receipt.all_payments && receipt.all_payments.length > 0) {
+                const latestPayment = receipt.all_payments[0];
+                html += '<div style="margin-bottom: 2mm;"><strong>Method:</strong> ' + formatPaymentMethod(latestPayment.payment_method || '') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Reference:</strong> ' + (latestPayment.payment_reference || 'N/A') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Date:</strong> ' + formatDate(latestPayment.payment_date) + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Amount:</strong> ₱' + parseFloat(latestPayment.payment_amount || 0).toFixed(2) + '</div>';
+                if (receipt.all_payments.length > 1) {
+                    html += '<div style="margin-top: 2mm; font-size: 8pt; color: #666;">Total Payments: ' + receipt.all_payments.length + ' transaction(s)</div>';
+                }
+            } else if (receipt.payment_details) {
+                html += '<div style="margin-bottom: 2mm;"><strong>Method:</strong> ' + formatPaymentMethod(receipt.payment_details.payment_method || '') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Reference:</strong> ' + (receipt.payment_details.payment_reference || 'N/A') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Date:</strong> ' + (receipt.payment_details.payment_date ? formatDate(receipt.payment_details.payment_date) : 'N/A') + '</div>';
+            }
+            html += '</div>';
+            
+            // Receipt Footer - Compact
+            html += '<div style="text-align: center; margin-top: 5mm; padding-top: 3mm; border-top: 1px dashed #000; font-size: 8pt; color: #666;">';
+            html += '<div style="margin-bottom: 1mm;">Receipt #: ' + (receipt.receipt_number || 'N/A') + '</div>';
+            html += '<div style="margin-bottom: 1mm;">Date: ' + formatDate(receipt.receipt_date) + '</div>';
+            if (receipt.recorded_by) {
+                html += '<div style="margin-bottom: 1mm;">Recorded by: ' + (receipt.recorded_by.name || 'N/A') + '</div>';
+            }
+            // Get month from filter
+            const receiptMonth = $('#receiptMonthFilter').val(); // Format: YYYY-MM
+            
+            // Get month name for display
+            let monthName = '';
+            if (receiptMonth) {
+                const [year, month] = receiptMonth.split('-');
+                monthName = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            } else {
+                const now = new Date();
+                monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+            
+            const generatedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            html += '<div style="margin-top: 3mm; font-size: 7pt;">Report Period: ' + monthName + '</div>';
+            html += '<div style="margin-top: 1mm; font-size: 7pt;">Generated: ' + generatedDate + '</div>';
+            html += '</div>';
+            
+            // Thank you message
+            html += '<div style="text-align: center; margin-top: 5mm; padding-top: 3mm; border-top: 1px dashed #000; font-size: 9pt; font-weight: bold;">';
+            html += 'Thank you for your payment!';
+            html += '</div>';
+            
+            html += '</div>';
+            
+            $('#receiptModalBody').html(html);
+        }
+        
+        function printReceipt() {
+            const printContent = document.getElementById('receiptContent');
+            if (!printContent) {
+                alert('Receipt content not found');
+                return;
+            }
+            
+            // Create a new window for printing (better approach - doesn't affect current page)
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            
+            if (!printWindow) {
+                alert('Please allow popups to print the receipt');
+                return;
+            }
+            
+            // Write the print content with narrow receipt styling (80mm thermal receipt)
+            printWindow.document.write('<!DOCTYPE html><html><head><title>CHAKANOKS - Payment Receipt</title>');
+            printWindow.document.write('<meta name="viewport" content="width=80mm">');
+            printWindow.document.write('<style>');
+            printWindow.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
+            printWindow.document.write('html, body { width: 80mm; margin: 0; padding: 0; background: white; overflow: hidden; }');
+            printWindow.document.write('body { font-family: "Courier New", monospace; margin: 0; padding: 0; }');
+            printWindow.document.write('.receipt-container { max-width: 80mm; width: 80mm; min-width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-size: 10pt; line-height: 1.3; color: #000; }');
+            printWindow.document.write('img { max-height: 30px; max-width: 30px; object-fit: contain; }');
+            printWindow.document.write('@page { size: 80mm auto; margin: 0; width: 80mm; }');
+            printWindow.document.write('@media print { html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; } .receipt-container { max-width: 80mm !important; width: 80mm !important; min-width: 80mm !important; padding: 10mm 5mm !important; } @page { size: 80mm auto !important; margin: 0 !important; width: 80mm !important; } }');
+            printWindow.document.write('</style></head><body>');
+            printWindow.document.write(printContent.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            
+            // Wait for content to load, then trigger print
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                    // Don't close immediately - let user see the print dialog
+                }, 250);
+            };
+            
+            // Fallback if onload doesn't fire
+            setTimeout(function() {
+                if (printWindow.document.readyState === 'complete') {
+                    printWindow.focus();
+                    printWindow.print();
+                }
+            }, 500);
+        }
+        
+        // Attach event handlers for receipt buttons
+        $(document).on('click', '.viewReceiptBtn', function() {
+            const apId = $(this).data('id');
+            showReceipt(apId);
+        });
+        
+        $(document).on('click', '.printReceiptBtn', function() {
+            const apId = $(this).data('id');
+            printReceiptDirect(apId);
+        });
+        
+        // Print Monthly Report Function
+        function printMonthlyReport() {
+            console.log('Print Monthly Report button clicked');
+            
+            // Get month from filter
+            const reportMonthFilter = document.getElementById('receiptMonthFilter');
+            if (!reportMonthFilter) {
+                alert('Month filter not found. Please refresh the page.');
+                console.error('receiptMonthFilter element not found');
+                return;
+            }
+            
+            const reportMonth = reportMonthFilter.value; // Format: YYYY-MM
+            console.log('Selected month:', reportMonth);
+            
+            // Determine the month to filter
+            let selectedMonth, selectedYear;
+            if (reportMonth) {
+                const [year, month] = reportMonth.split('-');
+                selectedYear = parseInt(year);
+                selectedMonth = parseInt(month);
+            } else {
+                // Use current month if not specified
+                const now = new Date();
+                selectedYear = now.getFullYear();
+                selectedMonth = now.getMonth() + 1;
+            }
+            
+            const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const formattedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const formattedDateShort = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+            
+            // Show loading message
+            const btn = document.getElementById('btnPrintMonthlyReport');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            
+            // Fetch ALL accounts payable from the database for the selected month via AJAX
+            const monthParam = reportMonth || (selectedYear + '-' + String(selectedMonth).padStart(2, '0'));
+            console.log('Fetching accounts payable for month:', monthParam);
+            
+            $.ajax({
+                url: '<?= base_url('accounts-payable/api/monthly') ?>',
+                method: 'GET',
+                data: {
+                    month: monthParam
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('AJAX response:', response);
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    if (response.status === 'success' && response.accounts_payable) {
+                        const filteredAP = response.accounts_payable;
+                        console.log('Accounts payable loaded:', filteredAP.length);
+                        
+                        // Generate report with all accounts payable
+                        generateMonthlyAPReport(filteredAP, monthName, formattedDate, formattedDateShort);
+                    } else {
+                        alert('Error loading monthly data: ' + (response.message || 'Failed to load accounts payable'));
+                        console.error('Error response:', response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('XHR Error:', xhr);
+                    console.error('Status:', status);
+                    console.error('Error:', error);
+                    console.error('Response Text:', xhr.responseText);
+                    
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    let errorMessage = 'Error loading monthly data. Please check your connection and try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = 'Error: ' + xhr.responseJSON.message;
+                    } else if (xhr.status === 404) {
+                        errorMessage = 'Error: API endpoint not found. Please check the route configuration.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Error: You are not authorized to access this resource.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Error: Server error. Please contact the administrator.';
+                    }
+                    
+                    alert(errorMessage);
+                }
+            });
+        }
+        
+        // Function to generate monthly accounts payable report
+        function generateMonthlyAPReport(accountsPayable, monthName, formattedDate, formattedDateShort) {
+            if (!accountsPayable || accountsPayable.length === 0) {
+                alert('No accounts payable found for the selected month.');
+                return;
+            }
+            
+            // Calculate totals
+            let totalAmount = 0;
+            let totalPaid = 0;
+            let totalBalance = 0;
+            let paidCount = 0;
+            let unpaidCount = 0;
+            let partialCount = 0;
+            
+            accountsPayable.forEach(function(ap) {
+                const amount = parseFloat(ap.total_amount || ap.amount || 0);
+                const paid = parseFloat(ap.paid_amount || 0);
+                const balance = parseFloat(ap.balance || (amount - paid));
+                
+                totalAmount += amount;
+                totalPaid += paid;
+                totalBalance += balance;
+                
+                const status = (ap.payment_status || 'unpaid').toLowerCase();
+                if (status === 'paid') {
+                    paidCount++;
+                } else if (status === 'partial') {
+                    partialCount++;
+                } else {
+                    unpaidCount++;
+                }
+            });
+            
+            // Helper function to format payment method
+            function formatPaymentMethod(method) {
+                if (!method || method.trim() === '') {
+                    return 'N/A';
+                }
+                const normalizedMethod = method.trim().toLowerCase();
+                const methodMap = {
+                    'cash': 'Cash',
+                    'check': 'Check',
+                    'bank_transfer': 'Bank Transfer',
+                    'credit_card': 'Credit Card',
+                    'online': 'Online Payment',
+                    'other': 'Other',
+                    'cheque': 'Check',
+                    'bank transfer': 'Bank Transfer',
+                    'banktransfer': 'Bank Transfer',
+                    'transfer': 'Bank Transfer',
+                    'bank': 'Bank Transfer',
+                    'credit card': 'Credit Card',
+                    'creditcard': 'Credit Card',
+                    'card': 'Credit Card',
+                    'online payment': 'Online Payment',
+                    'onlinepayment': 'Online Payment',
+                    'paypal': 'PayPal',
+                    'gcash': 'GCash',
+                    'maya': 'Maya'
+                };
+                
+                if (methodMap[normalizedMethod]) {
+                    return methodMap[normalizedMethod];
+                }
+                
+                for (const key in methodMap) {
+                    if (normalizedMethod.includes(key) || key.includes(normalizedMethod)) {
+                        return methodMap[key];
+                    }
+                }
+                
+                return method.split(/[\s_-]+/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            }
+            
+            // Group by branch for summary
+            const branchSummary = {};
+            accountsPayable.forEach(function(ap) {
+                const branchName = ap.branch ? ap.branch.name : 'N/A';
+                if (!branchSummary[branchName]) {
+                    branchSummary[branchName] = {
+                        count: 0,
+                        totalAmount: 0,
+                        totalPaid: 0,
+                        totalBalance: 0
+                    };
+                }
+                branchSummary[branchName].count++;
+                branchSummary[branchName].totalAmount += parseFloat(ap.total_amount || ap.amount || 0);
+                branchSummary[branchName].totalPaid += parseFloat(ap.paid_amount || 0);
+                branchSummary[branchName].totalBalance += parseFloat(ap.balance || (parseFloat(ap.total_amount || ap.amount || 0) - parseFloat(ap.paid_amount || 0)));
+            });
+            
+            let reportHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>CHAKANOKS - Monthly Accounts Payable Report</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    html, body { margin: 0; padding: 0; background: white; font-family: "Arial", "Helvetica", sans-serif; }
+                    .report-container { max-width: 210mm; width: 210mm; margin: 0 auto; padding: 20mm; font-size: 11pt; line-height: 1.5; color: #000; }
+                    .header { text-align: center; margin-bottom: 15mm; padding-bottom: 10mm; border-bottom: 2px solid #2d5016; }
+                    .header img { max-height: 50px; max-width: 50px; height: auto; width: auto; object-fit: contain; display: block; margin: 0 auto 5mm; }
+                    .company-name { font-weight: bold; font-size: 24pt; letter-spacing: 2px; margin-bottom: 5mm; color: #2d5016; }
+                    .tagline { font-size: 11pt; color: #666; margin-bottom: 5mm; }
+                    .report-title { font-weight: bold; font-size: 18pt; text-transform: uppercase; margin-top: 5mm; color: #2d5016; }
+                    .info-section { margin-bottom: 10mm; font-size: 11pt; }
+                    .info-section div { margin-bottom: 3mm; }
+                    .branch-info { background: #f8f9fa; padding: 8mm; border-radius: 5px; margin-bottom: 10mm; border-left: 5px solid #2d5016; }
+                    .branch-info h3 { color: #2d5016; margin-bottom: 3mm; font-size: 14pt; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 5mm; font-size: 10pt; }
+                    table th, table td { padding: 8mm 5mm; text-align: left; border-bottom: 1px solid #ddd; }
+                    table th { background: #2d5016; color: white; font-weight: bold; }
+                    table tr:hover { background-color: #f8f9fa; }
+                    table tr:last-child td { border-bottom: none; }
+                    .summary { margin-top: 10mm; padding: 10mm; background: #f8f9fa; border-radius: 5px; font-size: 11pt; }
+                    .summary-row { display: flex; justify-content: space-between; margin-bottom: 5mm; padding: 3mm 0; }
+                    .summary-label { font-weight: bold; color: #2d5016; }
+                    .summary-value { font-weight: bold; }
+                    .branch-summary { margin-top: 5mm; padding-top: 5mm; border-top: 1px solid #ddd; }
+                    .branch-summary h4 { color: #2d5016; margin-bottom: 3mm; font-size: 12pt; }
+                    .footer { text-align: center; margin-top: 15mm; padding-top: 10mm; border-top: 2px solid #2d5016; font-size: 10pt; color: #666; }
+                    @page { size: A4; margin: 20mm; }
+                    @media print { 
+                        html, body { width: 210mm !important; margin: 0 !important; padding: 0 !important; } 
+                        .report-container { max-width: 210mm !important; width: 210mm !important; padding: 20mm !important; } 
+                        @page { size: A4 !important; margin: 20mm !important; }
+                        .no-print { display: none !important; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-container">
+                    <div class="header">
+                        <img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo">
+                        <div class="company-name">CHAKANOKS</div>
+                        <div class="tagline">Supply Chain Management System</div>
+                        <div class="report-title">Monthly Accounts Payable Report</div>
+                        <div style="font-size: 12pt; color: #666; margin-top: 5mm; font-weight: normal;">Period: ${monthName}</div>
+                    </div>
+                    <div class="info-section">
+                        <div><strong>Generated:</strong> ${formattedDate}</div>
+                        <div><strong>Total Records:</strong> ${accountsPayable.length}</div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Branch</th>
+                                <th>Supplier</th>
+                                <th>Amount</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            accountsPayable.forEach(function(ap) {
+                const invoiceNum = ap.invoice_number || 'N/A';
+                const branch = ap.branch ? ap.branch.name : 'N/A';
+                const supplier = ap.supplier ? ap.supplier.name : 'N/A';
+                const amount = parseFloat(ap.total_amount || ap.amount || 0);
+                const paid = parseFloat(ap.paid_amount || 0);
+                const balance = parseFloat(ap.balance || (amount - paid));
+                const status = (ap.payment_status || 'unpaid').toUpperCase();
+                
+                reportHTML += `
+                            <tr>
+                                <td>${invoiceNum}</td>
+                                <td>${branch}</td>
+                                <td>${supplier}</td>
+                                <td>₱${amount.toFixed(2)}</td>
+                                <td>₱${paid.toFixed(2)}</td>
+                                <td style="color: ${balance > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">₱${balance.toFixed(2)}</td>
+                                <td>${status}</td>
+                            </tr>
+                `;
+            });
+            
+            reportHTML += `
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h3 style="color: #2d5016; margin-bottom: 5mm; font-size: 14pt;">Overall Summary</h3>
+                        <div class="summary-row">
+                            <span class="summary-label">Total Amount:</span>
+                            <span class="summary-value">₱${totalAmount.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Total Paid:</span>
+                            <span class="summary-value" style="color: #28a745;">₱${totalPaid.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Total Balance:</span>
+                            <span class="summary-value" style="color: ${totalBalance > 0 ? '#dc3545' : '#28a745'}; font-size: 12pt;">₱${totalBalance.toFixed(2)}</span>
+                        </div>
+                        <div style="margin-top: 5mm; padding-top: 5mm; border-top: 1px solid #ddd; font-size: 10pt;">
+                            <div class="summary-row">
+                                <span><strong>Paid:</strong> ${paidCount}</span>
+                                <span><strong>Partial:</strong> ${partialCount}</span>
+                                <span><strong>Unpaid:</strong> ${unpaidCount}</span>
+                            </div>
+                        </div>
+                        <div class="branch-summary">
+                            <h4>Summary by Branch</h4>
+            `;
+            
+            // Add branch summaries
+            for (const branchName in branchSummary) {
+                const branchData = branchSummary[branchName];
+                reportHTML += `
+                            <div style="margin-bottom: 3mm; padding: 3mm; background: white; border-left: 3px solid #2d5016;">
+                                <div style="font-weight: bold; color: #2d5016; margin-bottom: 2mm;">${branchName}</div>
+                                <div style="display: flex; justify-content: space-between; font-size: 10pt;">
+                                    <span>Records: ${branchData.count}</span>
+                                    <span>Total: ₱${branchData.totalAmount.toFixed(2)}</span>
+                                    <span>Paid: ₱${branchData.totalPaid.toFixed(2)}</span>
+                                    <span style="color: ${branchData.totalBalance > 0 ? '#dc3545' : '#28a745'};">Balance: ₱${branchData.totalBalance.toFixed(2)}</span>
+                                </div>
+                            </div>
+                `;
+            }
+            
+            reportHTML += `
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <div style="margin-bottom: 3mm; font-size: 11pt;"><strong>Report Period:</strong> ${monthName}</div>
+                        <div style="margin-bottom: 3mm; font-size: 11pt;"><strong>Generated:</strong> ${formattedDate}</div>
+                        <div style="margin-top: 5mm; font-weight: bold; font-size: 14pt; color: #2d5016;">CHAKANOKS SCMS</div>
+                        <div style="margin-top: 3mm; font-size: 11pt;">Thank you!</div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `;
+            
+            const printWindow = window.open('', '_blank', 'width=800,height=1000');
+            if (!printWindow) {
+                alert('Please allow popups to print the report');
+                return;
+            }
+            
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 500);
+            };
+            
+            setTimeout(function() {
+                if (printWindow.document.readyState === 'complete') {
+                    printWindow.focus();
+                    printWindow.print();
+                }
+            }, 1000);
+        }
+        
         // Pagination
         (function initPagination() {
             const ITEMS_PER_PAGE = 10;
@@ -692,5 +1425,28 @@
             }
         })();
     </script>
+    
+    <!-- Payment Receipt Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title" id="receiptModalLabel">
+                        <i class="fas fa-receipt"></i> Payment Receipt
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="receiptModalBody" style="padding: 0;">
+                    <!-- Receipt content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

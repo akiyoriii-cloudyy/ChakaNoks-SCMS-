@@ -25,6 +25,12 @@ class UsersSeeder extends Seeder
                 'role'      => 'superadmin',
             ],
             [
+                'branch_id' => null,
+                'email'     => 'system.admin@chakanoks.test',
+                'password'  => password_hash('password123', PASSWORD_DEFAULT),
+                'role'      => 'system_admin',
+            ],
+            [
                 'branch_id' => $central ? $central->id : null,
                 'email'     => 'mansuetomarky@gmail.com',
                 'password'  => password_hash('password123', PASSWORD_DEFAULT),

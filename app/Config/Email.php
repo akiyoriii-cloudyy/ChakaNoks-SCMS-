@@ -28,7 +28,9 @@ class Email extends BaseConfig
         $this->SMTPHost   = getenv('email.SMTPHost') ?: $this->SMTPHost;
         $this->SMTPUser   = getenv('email.SMTPUser') ?: $this->SMTPUser;
         $this->SMTPPass   = getenv('email.SMTPPass') ?: $this->SMTPPass;
-        $this->SMTPPort   = getenv('email.SMTPPort') ?: $this->SMTPPort;
+        // Ensure SMTPPort is an integer (getenv returns string)
+        $port = getenv('email.SMTPPort');
+        $this->SMTPPort   = $port ? (int)$port : $this->SMTPPort;
         $this->SMTPCrypto = getenv('email.SMTPCrypto') ?: $this->SMTPCrypto;
         $this->mailType   = getenv('email.mailType') ?: $this->mailType;
         $this->charset    = getenv('email.charset') ?: $this->charset;

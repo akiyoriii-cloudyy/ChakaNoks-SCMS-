@@ -3,6 +3,8 @@ namespace App\Controllers;
 
 use App\Models\ProductModel;
 use App\Models\SupplierModel;
+use App\Models\UserModel;
+use App\Models\AuditTrailModel;
 use Config\Database;
 use Exception;
 
@@ -11,12 +13,16 @@ class Manager extends BaseController
     protected $db;
     protected $model;
     protected $supplierModel;
+    protected $userModel;
+    protected $auditTrailModel;
 
     public function __construct()
     {
         $this->db = Database::connect();
         $this->model = new ProductModel();
         $this->supplierModel = new SupplierModel();
+        $this->userModel = new UserModel();
+        $this->auditTrailModel = new AuditTrailModel();
     }
 
     public function dashboard()
@@ -36,14 +42,18 @@ class Manager extends BaseController
 
         // Get dashboard data
         $dashboardData = $this->getDashboardData((int)$branchId);
+        
+        $activeTab = $this->request->getGet('tab') ?: 'dashboard';
 
         return view('dashboards/manager', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
                 'branch_id' => $branchId,
+                'user_id' => $session->get('user_id'),
             ],
-            'data' => $dashboardData
+            'data' => array_merge($dashboardData, ['users' => $this->getUsersData($branchId)]),
+            'activeTab' => $activeTab,
         ]);
     }
 
@@ -582,24 +592,32 @@ class Manager extends BaseController
                 ->get()
                 ->getResultArray();
 
-            // Format deliveries
+            // Format deliveries using trackDelivery to get payment status
+            $deliveryModel = new \App\Models\DeliveryModel();
             $formattedDeliveries = [];
             foreach ($deliveries as $delivery) {
-                $formattedDeliveries[] = [
-                    'id' => $delivery['id'],
-                    'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
-                    'purchase_order' => ['id' => $delivery['purchase_order_id'], 'order_number' => $delivery['order_number'] ?? 'N/A'],
-                    'supplier' => ['id' => $delivery['supplier_id'], 'name' => $delivery['supplier_name'] ?? 'N/A'],
-                    'status' => $delivery['status'] ?? 'scheduled',
-                    'scheduled_date' => $delivery['scheduled_date'],
-                    'actual_delivery_date' => $delivery['actual_delivery_date'],
-                    'driver_name' => $delivery['driver_name'],
-                    'vehicle_info' => $delivery['vehicle_info'],
-                    'received_by' => $delivery['received_by'],
-                    'received_at' => $delivery['received_at'],
-                    'notes' => $delivery['notes'],
-                    'created_at' => $delivery['created_at']
-                ];
+                // Use trackDelivery to get full details including payment status
+                $deliveryDetails = $deliveryModel->trackDelivery($delivery['id']);
+                if ($deliveryDetails) {
+                    $formattedDeliveries[] = $deliveryDetails;
+                } else {
+                    // Fallback to basic data if trackDelivery fails
+                    $formattedDeliveries[] = [
+                        'id' => $delivery['id'],
+                        'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
+                        'purchase_order' => ['id' => $delivery['purchase_order_id'], 'order_number' => $delivery['order_number'] ?? 'N/A'],
+                        'supplier' => ['id' => $delivery['supplier_id'], 'name' => $delivery['supplier_name'] ?? 'N/A'],
+                        'status' => $delivery['status'] ?? 'scheduled',
+                        'scheduled_date' => $delivery['scheduled_date'],
+                        'actual_delivery_date' => $delivery['actual_delivery_date'],
+                        'driver_name' => $delivery['driver_name'],
+                        'vehicle_info' => $delivery['vehicle_info'],
+                        'received_by' => $delivery['received_by'],
+                        'received_at' => $delivery['received_at'],
+                        'notes' => $delivery['notes'],
+                        'created_at' => $delivery['created_at']
+                    ];
+                }
             }
         } catch (Exception $e) {
             log_message('error', 'Error fetching deliveries: ' . $e->getMessage());
@@ -809,6 +827,354 @@ class Manager extends BaseController
             $db->transRollback();
             log_message('error', 'Error recording stock out: ' . $e->getMessage());
             return $this->response->setJSON(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    // ==================== USER MANAGEMENT ====================
+
+    /**
+     * Get users data for management (including deleted users) - filtered by branch
+     */
+    private function getUsersData(int $branchId): array
+    {
+        try {
+            // Get users for this branch - ONLY Inventory Staff and Staff roles
+            // Branch manager can only manage inventory staff and staff
+            $users = $this->db->table('users u')
+                ->select('u.*, b.name as branch_name, u.deleted_at')
+                ->join('branches b', 'b.id = u.branch_id', 'left')
+                ->where('u.branch_id', $branchId)
+                ->whereIn('u.role', ['inventory_staff', 'inventorystaff', 'staff'])
+                ->orderBy('u.deleted_at', 'ASC') // Deleted users at the bottom
+                ->orderBy('u.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+            
+            // Sort users: active first (deleted_at is NULL), then deleted
+            usort($users, function($a, $b) {
+                $aDeleted = !empty($a['deleted_at']) ? 1 : 0;
+                $bDeleted = !empty($b['deleted_at']) ? 1 : 0;
+                if ($aDeleted !== $bDeleted) {
+                    return $aDeleted - $bDeleted; // Active (0) comes before deleted (1)
+                }
+                // If both have same deletion status, sort by created_at
+                $aTime = strtotime($a['created_at'] ?? '1970-01-01');
+                $bTime = strtotime($b['created_at'] ?? '1970-01-01');
+                return $bTime - $aTime; // Newer first
+            });
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error fetching users in Manager: ' . $e->getMessage());
+            $users = [];
+        }
+
+        // Separate active and deleted users
+        $activeUsers = [];
+        $deletedUsers = [];
+        
+        foreach ($users as $user) {
+            if (!empty($user['deleted_at'])) {
+                $deletedUsers[] = $user;
+            } else {
+                $activeUsers[] = $user;
+            }
+        }
+
+        // Count users by role (only active users)
+        $usersByRole = [];
+        foreach ($activeUsers as $user) {
+            $role = $user['role'] ?? 'unknown';
+            if (!isset($usersByRole[$role])) {
+                $usersByRole[$role] = 0;
+            }
+            $usersByRole[$role]++;
+        }
+
+        return [
+            'all_users' => $users,
+            'active_users' => $activeUsers,
+            'deleted_users' => $deletedUsers,
+            'users_by_role' => $usersByRole,
+            'total_count' => count($activeUsers),
+            'deleted_count' => count($deletedUsers),
+        ];
+    }
+
+    /**
+     * Create a new user (only Inventory Staff or Staff)
+     */
+    public function createUser()
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $data = $this->request->getJSON(true);
+
+        // Validate required fields
+        if (empty($data['email']) || empty($data['password']) || empty($data['role'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Email, password, and role are required']);
+        }
+
+        // RESTRICTION: Only allow Inventory Staff and Staff roles
+        $allowedRoles = ['inventory_staff', 'inventorystaff', 'staff'];
+        if (!in_array($data['role'], $allowedRoles)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Only Inventory Staff and Staff roles are allowed']);
+        }
+
+        // Check if email already exists
+        $existingUser = $this->userModel->where('email', $data['email'])->first();
+        if ($existingUser) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Email already exists']);
+        }
+
+        try {
+            // Create user
+            $userData = [
+                'email' => $data['email'],
+                'password' => password_hash($data['password'], PASSWORD_DEFAULT),
+                'role' => $data['role'],
+                'branch_id' => $branchId, // Always assign to manager's branch
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            $userId = $this->userModel->insert($userData);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'CREATE',
+                null,
+                $userData,
+                $session->get('user_id'),
+                'User created by branch manager'
+            );
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User created successfully',
+                'user_id' => $userId
+            ]);
+        } catch (Exception $e) {
+            log_message('error', 'Error creating user in Manager: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error creating user: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update a user
+     */
+    public function updateUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $data = $this->request->getJSON(true);
+
+        // Get user (including deleted)
+        $user = $this->userModel->withDeleted()->find($userId);
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Verify user belongs to manager's branch
+        if ($user['branch_id'] != $branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized to update this user']);
+        }
+
+        // RESTRICTION: Only allow Inventory Staff and Staff roles
+        if (isset($data['role'])) {
+            $allowedRoles = ['inventory_staff', 'inventorystaff', 'staff'];
+            if (!in_array($data['role'], $allowedRoles)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Only Inventory Staff and Staff roles are allowed']);
+            }
+        }
+
+        // Check email uniqueness if changed
+        if (isset($data['email']) && $data['email'] !== $user['email']) {
+            $existingUser = $this->userModel->where('email', $data['email'])->first();
+            if ($existingUser) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Email already exists']);
+            }
+        }
+
+        try {
+            $oldData = $user;
+            $updateData = [];
+
+            if (isset($data['email'])) {
+                $updateData['email'] = $data['email'];
+            }
+            if (isset($data['password']) && !empty($data['password'])) {
+                $updateData['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            }
+            if (isset($data['role'])) {
+                $updateData['role'] = $data['role'];
+            }
+            if (isset($data['branch_id'])) {
+                $updateData['branch_id'] = $data['branch_id'];
+            }
+
+            $updateData['updated_at'] = date('Y-m-d H:i:s');
+
+            $this->userModel->update($userId, $updateData);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'UPDATE',
+                $oldData,
+                array_merge($user, $updateData),
+                $session->get('user_id'),
+                'User updated by branch manager'
+            );
+
+            return $this->response->setJSON(['status' => 'success', 'message' => 'User updated successfully']);
+        } catch (Exception $e) {
+            log_message('error', 'Error updating user in Manager: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error updating user: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete a user (soft delete)
+     */
+    public function deleteUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $currentUserId = $session->get('user_id');
+
+        // Prevent deleting yourself
+        if ($userId == $currentUserId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'You cannot delete your own account']);
+        }
+
+        $user = $this->userModel->find($userId);
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Verify user belongs to manager's branch
+        if ($user['branch_id'] != $branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized to delete this user']);
+        }
+
+        // RESTRICTION: Only allow deleting Inventory Staff and Staff
+        $allowedRoles = ['inventory_staff', 'inventorystaff', 'staff'];
+        if (!in_array($user['role'], $allowedRoles)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'You can only delete Inventory Staff and Staff accounts']);
+        }
+
+        try {
+            // Soft delete
+            $this->userModel->delete($userId);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'DELETE',
+                $user,
+                array_merge($user, ['deleted_at' => date('Y-m-d H:i:s')]),
+                $session->get('user_id'),
+                'User deleted by branch manager'
+            );
+
+            return $this->response->setJSON(['status' => 'success', 'message' => 'User deleted successfully']);
+        } catch (Exception $e) {
+            log_message('error', 'Error deleting user in Manager: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error deleting user: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Get a single user
+     */
+    public function getUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $user = $this->userModel->withDeleted()->find($userId);
+
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Verify user belongs to manager's branch
+        if ($user['branch_id'] != $branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        // Remove password from response
+        unset($user['password']);
+
+        return $this->response->setJSON(['status' => 'success', 'user' => $user]);
+    }
+
+    /**
+     * Restore a deleted user
+     */
+    public function restoreUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['manager', 'branch_manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $branchId = $session->get('branch_id');
+        $user = $this->userModel->withDeleted()->find($userId);
+        
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Verify user belongs to manager's branch
+        if ($user['branch_id'] != $branchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized to restore this user']);
+        }
+
+        // Check if user is actually deleted
+        if (empty($user['deleted_at'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User is not deleted']);
+        }
+
+        try {
+            // Restore user by clearing deleted_at
+            $this->userModel->restoreUser($userId);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'RESTORE',
+                $user,
+                array_merge($user, ['deleted_at' => null]),
+                $session->get('user_id')
+            );
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User restored successfully',
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 }

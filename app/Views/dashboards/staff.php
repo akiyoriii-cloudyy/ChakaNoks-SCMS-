@@ -277,6 +277,7 @@
     </style>
 </head>
 <body>
+    <?= view('components/barcode_scanner') ?>
     <div class="dashboard-wrapper">
         <!-- Sidebar -->
         <aside class="dashboard-sidebar">
@@ -349,15 +350,26 @@
                         <p class="page-subtitle">Manage and track your inventory items</p>
                     </div>
                 </div>
-                <div class="header-right">
+                <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
+                    <button onclick="openBarcodeScanner()" class="btn btn-success">
+                        <i class="fas fa-barcode"></i>
+                        <span>Scan Barcode</span>
+                    </button>
                     <button id="btnAdd" class="btn btn-primary">
                         <i class="fas fa-plus"></i>
                         <span>Add New Item</span>
                     </button>
-                    <button id="btnPrintAll" class="btn btn-secondary">
-                        <i class="fas fa-print"></i>
-                        <span>Print Reports</span>
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <label style="font-size: 0.9rem; color: #fff; font-weight: 600; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">Month:</label>
+                            <input type="month" id="reportMonthFilter" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.875rem;">
+                        </div>
+                        <button id="btnPrintAll" class="btn btn-secondary">
+                            <i class="fas fa-print"></i>
+                            <span>Print Monthly Report</span>
+                        </button>
+                    </div>
+                    <?= view('components/notifications') ?>
                 </div>
             </header>
 
@@ -488,6 +500,12 @@
                                     <label for="stockOutOtherReason" class="form-label">Specify Reason</label>
                                     <input type="text" class="form-control" id="stockOutOtherReason" placeholder="Enter reason...">
                                 </div>
+                                <div class="mb-3" id="stockOutTransferBranchDiv" style="display: none;">
+                                    <label for="stockOutTransferBranch" class="form-label">Transfer To Branch</label>
+                                    <select class="form-control" id="stockOutTransferBranch">
+                                        <option value="">Select branch...</option>
+                                    </select>
+                                </div>
                                 <div class="mb-3">
                                     <label for="stockOutProduct" class="form-label">Select Product</label>
                                     <select class="form-control" id="stockOutProduct" required>
@@ -546,17 +564,36 @@
                                                           ($status === 'delivered' ? 'badge-success' :
                                                           ($status === 'delayed' ? 'badge-danger' : 'badge-secondary'))));
                                             $statusText = ucwords(str_replace('_', ' ', $status));
+                                            
+                                            // Check payment status
+                                            $paymentStatus = strtolower($delivery['payment_status'] ?? 'unpaid');
+                                            $isPaid = $paymentStatus === 'paid';
+                                            $paymentBadge = $paymentStatus === 'paid' ? 'badge-success' : 
+                                                           ($paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger');
                                             ?>
                                             <tr>
                                                 <td><?= esc($delivery['delivery_number']) ?></td>
                                                 <td><?= esc($delivery['purchase_order']['order_number'] ?? 'N/A') ?></td>
                                                 <td><?= esc($delivery['supplier']['name'] ?? 'N/A') ?></td>
                                                 <td><?= $delivery['scheduled_date'] ? date('M d, Y', strtotime($delivery['scheduled_date'])) : 'N/A' ?></td>
-                                                <td><span class="badge <?= $statusBadge ?>"><?= $statusText ?></span></td>
+                                                <td>
+                                                    <span class="badge <?= $statusBadge ?>"><?= $statusText ?></span>
+                                                    <?php if (isset($delivery['payment_status'])): ?>
+                                                        <br><small class="badge <?= $paymentBadge ?>" style="margin-top: 4px; display: inline-block;">
+                                                            Payment: <?= ucfirst($paymentStatus) ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td style="text-align: right;">
-                                                    <button class="btn btn-sm btn-primary" onclick="receiveDelivery(<?= $delivery['id'] ?>)">
-                                                        <i class="fas fa-check"></i> Receive
-                                                    </button>
+                                                    <?php if ($isPaid): ?>
+                                                        <button class="btn btn-sm btn-primary" onclick="receiveDelivery(<?= $delivery['id'] ?>)">
+                                                            <i class="fas fa-check"></i> Receive
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-sm btn-secondary" disabled title="Payment not completed. Full payment required before receiving delivery.">
+                                                            <i class="fas fa-lock"></i> Payment Required
+                                                        </button>
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -582,6 +619,16 @@
             <form id="addForm">
                 <input type="hidden" name="id" value="">
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Barcode (Optional)</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" name="barcode" id="addBarcode" placeholder="Scan or enter barcode" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <button type="button" onclick="openBarcodeScanner()" style="padding: 10px 20px; background: #2d5016; color: white; border: none; border-radius: var(--radius-md); cursor: pointer; font-weight: 500;">
+                                <i class="fas fa-barcode"></i> Scan
+                            </button>
+                        </div>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Use barcode scanner or click Scan button</small>
+                    </div>
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Category</label>
                         <select name="category" id="addCategory" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md);" onchange="updateItemOptions()">
@@ -666,53 +713,69 @@
         </div>
     </div>
 
-    <!-- View Item Modal -->
+    <!-- View Item Modal - Enhanced to match accounts payable details modal -->
     <div class="modal" id="viewItemModal" hidden style="position: fixed; inset: 0; z-index: 2000; display: none; align-items: center; justify-content: center;">
         <div class="backdrop" style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);" onclick="document.getElementById('viewItemModal').hidden = true;"></div>
-        <div class="modal-card" style="background: white; border-radius: var(--radius-lg); padding: 2rem; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; z-index: 1; box-shadow: var(--shadow-xl);">
+        <div class="modal-card" style="background: white; border-radius: var(--radius-lg); padding: 2rem; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; z-index: 1; box-shadow: var(--shadow-xl);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h3 id="viewItemTitle" style="margin: 0; font-size: 1.5rem; font-weight: 700;">Item Name</h3>
+                <h5 style="margin: 0; color: #2d5016; font-weight: 700;"><i class="fas fa-box" style="margin-right: 8px;"></i>Item Information</h5>
                 <button class="icon-btn" id="viewClose" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 15px; padding: 20px 0;">
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Category:</b> <span id="viewCategory"></span>
+            
+            <div style="padding: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                    <div><strong>Item Name:</strong><br><span id="viewItemTitle" style="font-size: 1.1rem; font-weight: 600; color: #2d5016;"></span></div>
+                    <div><strong>Status:</strong><br><span id="viewStatus" class="badge badge-success" style="font-size: 0.9rem; padding: 6px 12px;"></span></div>
+                    <div><strong>Category:</strong><br><span id="viewCategory"></span></div>
+                    <div><strong>Branch:</strong><br><span id="viewBranch"></span></div>
+                    <div><strong>Price:</strong><br><span id="viewPrice" style="font-weight: 600; color: #2d5016;"></span></div>
+                    <div><strong>Last Updated:</strong><br><span id="viewUpdated"></span></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Branch:</b> <span id="viewBranch"></span>
+                
+                <!-- Barcode Display Section -->
+                <hr style="margin: 20px 0; border: none; border-top: 2px solid #e5e7eb;">
+                <h6 style="margin-bottom: 15px; color: #2d5016; font-weight: 600;"><i class="fas fa-barcode" style="margin-right: 8px;"></i>Barcode:</h6>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb; margin-bottom: 15px;">
+                    <div id="viewBarcode" style="font-size: 1.5rem; font-weight: 700; color: #2d5016; font-family: 'Courier New', monospace; letter-spacing: 2px; margin-bottom: 10px;">-</div>
+                    <div id="viewBarcodeLabel" style="color: #6c757d; font-size: 0.85rem; margin-top: 5px;">Scan this barcode to view item details</div>
+                    <div id="viewBarcodeGenerate" style="margin-top: 10px; display: none;">
+                        <button class="btn btn-sm btn-primary" id="btnGenerateBarcode" style="padding: 8px 16px; background: #2d5016; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-qrcode"></i> Generate Barcode
+                        </button>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Stock:</b> <span id="viewStock"></span>
+                
+                <hr style="margin: 30px 0; border: none; border-top: 2px solid #e5e7eb;">
+                
+                <h6 style="margin-bottom: 15px; color: #2d5016; font-weight: 600;"><i class="fas fa-warehouse" style="margin-right: 8px;"></i>Stock Information:</h6>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #2d5016;" id="viewStock"></div>
+                        <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Current Stock</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffc107;" id="viewMinMax"></div>
+                        <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Min / Max Stock</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #17a2b8;" id="viewExpiry"></div>
+                        <div style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">Expiry Date</div>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Min/Max:</b> <span id="viewMinMax"></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Price:</b> <span id="viewPrice"></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Status:</b> <span id="viewStatus" class="badge badge-success"></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    <b>Last Updated:</b> <span id="viewUpdated"></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 10px 0;">
-                    <b>Expiry Date:</b> <span id="viewExpiry"></span>
-                </div>
-
-                <div id="updateStockContainer" style="display: none; gap: 10px; align-items: center; margin-top: 10px;">
-                    <input type="number" id="updateStockInput" style="padding: 8px; flex: 1; border: 1px solid var(--border-color); border-radius: var(--radius-md);" min="0">
-                    <button class="btn btn-primary" id="saveStockBtn">Save</button>
-                    <button class="btn btn-secondary" id="cancelStockBtn">Cancel</button>
+                
+                <div id="updateStockContainer" style="display: none; gap: 10px; align-items: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <input type="number" id="updateStockInput" style="padding: 10px; flex: 1; border: 1px solid var(--border-color); border-radius: var(--radius-md);" min="0" placeholder="Enter new stock quantity">
+                    <button class="btn btn-primary" id="saveStockBtn" style="padding: 10px 20px; background: #2d5016; color: white; border: none; border-radius: 6px; cursor: pointer;">Save</button>
+                    <button class="btn btn-secondary" id="cancelStockBtn" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                <button class="btn btn-primary" id="btnUpdateStock">Update Stock</button>
-                <button class="btn btn-success" id="btnReceiveDelivery">Receive Delivery</button>
-                <button class="btn btn-info" id="btnTrackInventory">Track Inventory</button>
-                <button class="btn btn-secondary" id="btnCheckExpiry">Check Expiry</button>
-                <button class="btn btn-secondary" id="btnPrintReport">Print Report</button>
+            <div style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e5e7eb;">
+                <button class="btn btn-primary" id="btnUpdateStock" style="padding: 10px 20px; background: #2d5016; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"><i class="fas fa-edit"></i> Update Stock</button>
+                <button class="btn btn-success" id="btnReceiveDelivery" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"><i class="fas fa-truck"></i> Receive Delivery</button>
+                <button class="btn btn-info" id="btnTrackInventory" style="padding: 10px 20px; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"><i class="fas fa-chart-line"></i> Track Inventory</button>
+                <button class="btn btn-warning" id="btnCheckExpiry" style="padding: 10px 20px; background: #ffc107; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"><i class="fas fa-calendar-check"></i> Check Expiry</button>
+                <button class="btn btn-secondary" id="btnPrintReport" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"><i class="fas fa-print"></i> Print Report</button>
             </div>
         </div>
     </div>
@@ -752,22 +815,117 @@
         const categoryUnits = typeof CHAKANOKS_CATEGORY_UNITS !== 'undefined' ? CHAKANOKS_CATEGORY_UNITS : {};
         const categoryAllowedUnits = typeof CHAKANOKS_CATEGORY_ALLOWED_UNITS !== 'undefined' ? CHAKANOKS_CATEGORY_ALLOWED_UNITS : {};
         const itemUnits = typeof CHAKANOKS_ITEM_UNITS !== 'undefined' ? CHAKANOKS_ITEM_UNITS : {};
+        
+        // Inventory products for price lookup
+        let inventoryProducts = [];
+        
+        // Load inventory products for price auto-population
+        function loadInventoryProducts() {
+            const url = '<?= base_url('inventory/items') ?>';
+            
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' && data.items && Array.isArray(data.items)) {
+                    inventoryProducts = data.items;
+                    console.log(`✅ Loaded ${inventoryProducts.length} inventory products for price lookup`);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading inventory products:', error);
+            });
+        }
+        
+        // Find product price by name and category
+        function findProductPrice(productName, category) {
+            if (!productName || inventoryProducts.length === 0) return 0;
+            
+            const normalizedName = productName.trim().toLowerCase();
+            const normalizedCategory = category ? category.trim().toLowerCase() : '';
+            
+            // Strategy 1: Exact match with category
+            if (normalizedCategory) {
+                const exactMatch = inventoryProducts.find(function(product) {
+                    const prodName = (product.name || '').trim().toLowerCase();
+                    const prodCategory = (product.category || '').trim().toLowerCase();
+                    return prodName === normalizedName && prodCategory === normalizedCategory;
+                });
+                if (exactMatch) {
+                    return parseFloat(exactMatch.price) || 0;
+                }
+            }
+            
+            // Strategy 2: Exact match without category
+            const exactMatchNoCat = inventoryProducts.find(function(product) {
+                const prodName = (product.name || '').trim().toLowerCase();
+                return prodName === normalizedName;
+            });
+            if (exactMatchNoCat) {
+                return parseFloat(exactMatchNoCat.price) || 0;
+            }
+            
+            // Strategy 3: Match without parentheses
+            const nameWithoutParens = normalizedName.replace(/\([^)]*\)/g, '').trim();
+            if (nameWithoutParens && nameWithoutParens !== normalizedName) {
+                const matchNoParens = inventoryProducts.find(function(product) {
+                    const prodName = (product.name || '').trim().toLowerCase().replace(/\([^)]*\)/g, '').trim();
+                    return prodName === nameWithoutParens;
+                });
+                if (matchNoParens) {
+                    return parseFloat(matchNoParens.price) || 0;
+                }
+            }
+            
+            // Strategy 4: Partial match (contains)
+            const partialMatch = inventoryProducts.find(function(product) {
+                const prodName = (product.name || '').trim().toLowerCase();
+                return prodName.includes(normalizedName) || normalizedName.includes(prodName);
+            });
+            if (partialMatch) {
+                return parseFloat(partialMatch.price) || 0;
+            }
+            
+            return 0;
+        }
+        
+        // Load products on page load
+        loadInventoryProducts();
 
         // Update item options based on selected category
         function updateItemOptions() {
             const categorySelect = document.getElementById('addCategory');
             const itemSelect = document.getElementById('addItemName');
             const unitSelect = document.getElementById('addUnit');
+            const priceInput = document.querySelector('input[name="price"]');
             const selectedCategory = categorySelect.value;
             
-            // Clear current options
+            // Clear current options and reset price
             itemSelect.innerHTML = '<option value="">Select Item</option>';
+            if (priceInput) {
+                priceInput.value = '';
+            }
             
             if (selectedCategory && categoryItems[selectedCategory]) {
                 categoryItems[selectedCategory].forEach(function(item) {
                     const option = document.createElement('option');
                     option.value = item;
                     option.textContent = item;
+                    
+                    // Pre-load price if available
+                    if (inventoryProducts.length > 0) {
+                        const itemPrice = findProductPrice(item, selectedCategory);
+                        if (itemPrice > 0) {
+                            option.setAttribute('data-price', itemPrice.toFixed(2));
+                        }
+                    }
+                    
                     itemSelect.appendChild(option);
                 });
                 
@@ -847,21 +1005,43 @@
             const customInput = document.getElementById('addCustomName');
             const useCustomCheckbox = document.getElementById('useCustomName');
             const categorySelect = document.getElementById('addCategory');
+            const priceInput = document.querySelector('input[name="price"]');
             const selectedCategory = categorySelect ? categorySelect.value : '';
+            const selectedItem = this.value;
             
-            if (this.value === '__other__') {
+            if (selectedItem === '__other__') {
                 customInput.style.display = 'block';
                 customInput.required = true;
                 useCustomCheckbox.checked = true;
                 // Reset to category default units for custom items
                 updateUnitOptionsForCategory(selectedCategory);
+                // Clear price for custom items
+                if (priceInput) {
+                    priceInput.value = '';
+                }
             } else {
                 customInput.style.display = 'none';
                 customInput.required = false;
                 useCustomCheckbox.checked = false;
                 // Update units based on selected item
-                if (this.value) {
-                    updateUnitOptionsForItem(this.value, selectedCategory);
+                if (selectedItem) {
+                    updateUnitOptionsForItem(selectedItem, selectedCategory);
+                    
+                    // Auto-populate price from data attribute or lookup
+                    if (priceInput) {
+                        const selectedOption = this.options[this.selectedIndex];
+                        const dataPrice = selectedOption.getAttribute('data-price');
+                        
+                        if (dataPrice) {
+                            priceInput.value = dataPrice;
+                        } else if (inventoryProducts.length > 0) {
+                            // Try to find price if not in data attribute
+                            const itemPrice = findProductPrice(selectedItem, selectedCategory);
+                            if (itemPrice > 0) {
+                                priceInput.value = itemPrice.toFixed(2);
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -871,17 +1051,57 @@
             const customInput = document.getElementById('addCustomName');
             const itemSelect = document.getElementById('addItemName');
             const useCustom = document.getElementById('useCustomName').checked;
+            const priceInput = document.querySelector('input[name="price"]');
+            const categorySelect = document.getElementById('addCategory');
+            const selectedCategory = categorySelect ? categorySelect.value : '';
             
             if (useCustom) {
                 customInput.style.display = 'block';
                 customInput.required = true;
                 itemSelect.required = false;
+                // Clear price when switching to custom
+                if (priceInput) {
+                    priceInput.value = '';
+                }
             } else {
                 customInput.style.display = 'none';
                 customInput.required = false;
                 itemSelect.required = true;
+                // Try to populate price if item is selected
+                if (itemSelect.value && itemSelect.value !== '__other__' && priceInput) {
+                    const itemPrice = findProductPrice(itemSelect.value, selectedCategory);
+                    if (itemPrice > 0) {
+                        priceInput.value = itemPrice.toFixed(2);
+                    }
+                }
             }
         }
+        
+        // Handle custom name input changes to auto-populate price
+        document.getElementById('addCustomName')?.addEventListener('input', function() {
+            const priceInput = document.querySelector('input[name="price"]');
+            const categorySelect = document.getElementById('addCategory');
+            const selectedCategory = categorySelect ? categorySelect.value : '';
+            const customName = this.value.trim();
+            
+            // Debounce: only search after user stops typing for 500ms
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
+            }
+            
+            if (customName.length >= 2 && priceInput && inventoryProducts.length > 0) {
+                this.searchTimeout = setTimeout(function() {
+                    const productPrice = findProductPrice(customName, selectedCategory);
+                    if (productPrice > 0) {
+                        priceInput.value = productPrice.toFixed(2);
+                        console.log(`💰 Auto-filled price for "${customName}": ₱${productPrice.toFixed(2)}`);
+                    }
+                }, 500);
+            } else if (priceInput && (!customName || customName.length === 0)) {
+                // Clear price if custom name is empty
+                priceInput.value = '';
+            }
+        });
         
         document.getElementById('viewClose')?.addEventListener('click', function() {
             document.getElementById('viewItemModal').hidden = true;
@@ -891,130 +1111,439 @@
         // Stock action handlers are now in inventorystaff.js
         // The base URL is passed via meta tag for the JS to use
 
-        // Print All Reports
-        document.getElementById('btnPrintAll')?.addEventListener('click', function() {
-            const items = JSON.parse(document.getElementById('initial-items').textContent);
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
+        // Function to generate monthly report
+        function generateMonthlyReport(filteredItems, monthName, formattedDate, formattedDateShort, branchInfo, userInfo) {
+            if (!filteredItems || filteredItems.length === 0) {
+                alert('No items found for the selected month.');
+                return;
+            }
+            
+            // Get branch information
+            const branchName = branchInfo ? (branchInfo.name || 'N/A') : 'N/A';
+            const branchAddress = branchInfo ? (branchInfo.address || 'N/A') : 'N/A';
+            
+            // Get user information (prepared by)
+            const preparedBy = userInfo ? (userInfo.email || 'N/A') : 'N/A';
+
+            // Group items by category
+            const itemsByCategory = {};
+            filteredItems.forEach(item => {
+                const category = item.category || 'Uncategorized';
+                if (!itemsByCategory[category]) {
+                    itemsByCategory[category] = [];
+                }
+                itemsByCategory[category].push(item);
+            });
 
             let reportHTML = `
+            <!DOCTYPE html>
             <html>
             <head>
-                <title>Inventory Report — CHAKANOKS</title>
+                <title>CHAKANOKS - Monthly Inventory Report</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    html, body { margin: 0; padding: 0; background: white; font-family: Arial, sans-serif; }
+                    body { padding: 20px; }
+                    .report-container { max-width: 210mm; width: 100%; margin: 0 auto; padding: 20mm; background: white; }
+                    .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2d5016; }
+                    .header img { max-height: 50px; max-width: 50px; height: auto; width: auto; object-fit: contain; display: block; margin: 0 auto 10px; }
+                    .header .company-name { font-weight: bold; font-size: 24pt; letter-spacing: 2px; margin-bottom: 5px; color: #2d5016; }
+                    .header .tagline { font-size: 12pt; color: #666; margin-bottom: 10px; }
+                    .header .report-title { font-weight: bold; font-size: 18pt; text-transform: uppercase; margin-top: 10px; color: #2d5016; }
+                    .info-section { margin-bottom: 20px; font-size: 11pt; }
+                    .info-section .date { text-align: center; margin-bottom: 10px; font-weight: bold; }
+                    .info-section .branch-info { text-align: center; margin-top: 10px; }
+                    .info-section .prepared-by { text-align: right; margin-top: 15px; font-size: 10pt; }
+                    table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10pt; }
+                    table th { background: #2d5016; color: white; padding: 10px; border: 1px solid #1a3a0e; font-weight: bold; text-align: left; }
+                    table td { padding: 8px; border: 1px solid #ddd; }
+                    table tr:nth-child(even) { background-color: #f9f9f9; }
+                    .category-header { background: #4a7c2a !important; color: white !important; font-weight: bold; font-size: 11pt; }
+                    .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 2px solid #2d5016; font-size: 10pt; color: #666; }
                     @page { size: A4; margin: 20mm; }
-                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                    h1, h2 { text-align: center; margin: 5px 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { border: 1px solid #333; padding: 8px; text-align: left; font-size: 12px; }
-                    th { background-color: #f0f0f0; }
-                    .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #555; }
+                    @media print { 
+                        html, body { margin: 0; padding: 0; } 
+                        .report-container { padding: 0; margin: 0; }
+                        @page { size: A4; margin: 20mm; }
+                    }
                 </style>
             </head>
             <body>
-                <h1>CHAKANOKS</h1>
-                <h2>Inventory Report</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Category</th>
-                            <th>Branch</th>
-                            <th>Stock Quantity</th>
-                            <th>Min Stock</th>
-                            <th>Max Stock</th>
-                            <th>Unit</th>
-                            <th>Expiry Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="report-container">
+                    <div class="header">
+                        <img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo">
+                        <div class="company-name">CHAKANOKS</div>
+                        <div class="tagline">Supply Chain Management System</div>
+                        <div class="report-title">Monthly Inventory Report</div>
+                        <div style="font-size: 12pt; color: #666; margin-top: 5px; font-weight: normal;">Period: ${monthName}</div>
+                    </div>
+                    <div class="info-section">
+                        <div class="date">Generated: ${formattedDateShort}</div>
+                        <div class="branch-info">
+                            <div style="font-weight: bold; font-size: 12pt; margin-top: 5px;">Branch: ${branchName}</div>
+                            <div style="font-size: 10pt; color: #666; margin-top: 3px;">${branchAddress}</div>
+                        </div>
+                        <div class="prepared-by">
+                            <strong>Prepared by:</strong> ${preparedBy}
+                        </div>
+                    </div>
             `;
 
-            items.forEach(item => {
+            // Generate table grouped by category
+            Object.keys(itemsByCategory).sort().forEach(category => {
                 reportHTML += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>${item.category}</td>
-                    <td>${item.branch_name || item.branch_label || ''}</td>
-                    <td>${item.stock_qty}</td>
-                    <td>${item.min_stock}</td>
-                    <td>${item.max_stock}</td>
-                    <td>${item.unit}</td>
-                    <td>${item.expiry}</td>
-                </tr>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="category-header" colspan="7">${category}</th>
+                            </tr>
+                            <tr>
+                                <th>Product</th>
+                                <th>Stock In</th>
+                                <th>Stock Out</th>
+                                <th>Current Stock</th>
+                                <th>Unit</th>
+                                <th>Price</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                itemsByCategory[category].forEach(item => {
+                    const lastUpdated = item.last_updated || item.updated_at ? new Date(item.last_updated || item.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+                    reportHTML += `
+                    <tr>
+                        <td style="font-weight: bold;">${item.name || 'N/A'}</td>
+                        <td>${item.stock_in || 0}</td>
+                        <td>${item.stock_out || 0}</td>
+                        <td>${item.stock_qty || 0}</td>
+                        <td>${item.unit || 'N/A'}</td>
+                        <td>₱${parseFloat(item.price || 0).toFixed(2)}</td>
+                        <td>${lastUpdated}</td>
+                    </tr>
+                    `;
+                });
+                
+                reportHTML += `
+                        </tbody>
+                    </table>
                 `;
             });
 
             reportHTML += `
-                    </tbody>
-                </table>
-                <div class="footer">Generated on ${formattedDate}</div>
+                    <div class="footer">
+                        <div style="margin-bottom: 5px;">Report Period: ${monthName}</div>
+                        <div style="margin-bottom: 5px;">Branch: ${branchName}</div>
+                        <div style="margin-bottom: 5px;">Total Items: ${filteredItems.length}</div>
+                        <div style="margin-bottom: 5px;">Prepared by: ${preparedBy}</div>
+                        <div>Generated: ${formattedDate}</div>
+                    </div>
+                </div>
             </body>
             </html>
             `;
 
-            const printWindow = window.open('', '', 'width=900,height=700');
+            const printWindow = window.open('', '_blank', 'width=800,height=1000');
+            if (!printWindow) {
+                alert('Please allow popups to print the report');
+                return;
+            }
+            
             printWindow.document.write(reportHTML);
             printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
+            
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 500);
+            };
+            
+            setTimeout(function() {
+                if (printWindow.document.readyState === 'complete') {
+                    printWindow.focus();
+                    printWindow.print();
+                }
+            }, 1000);
+        }
+        
+        // Function to send notification to central admin when report is generated
+        function sendReportNotification(branchInfo, monthName, itemCount) {
+            $.ajax({
+                url: '<?= base_url('staff/api/notify-report-generated') ?>',
+                method: 'POST',
+                data: {
+                    branch_id: branchInfo.id,
+                    branch_name: branchInfo.name,
+                    branch_address: branchInfo.address,
+                    month: monthName,
+                    item_count: itemCount
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Notification sent:', response);
+                },
+                error: function(xhr) {
+                    console.error('Failed to send notification:', xhr);
+                    // Don't show error to user, just log it
+                }
+            });
+        }
+
+        // Print All Reports - Monthly Report Format
+        document.getElementById('btnPrintAll')?.addEventListener('click', function() {
+            console.log('Print Monthly Report button clicked');
+            
+            // Get month from filter
+            const reportMonthFilter = document.getElementById('reportMonthFilter');
+            if (!reportMonthFilter) {
+                alert('Month filter not found. Please refresh the page.');
+                console.error('reportMonthFilter element not found');
+                return;
+            }
+            
+            const reportMonth = reportMonthFilter.value; // Format: YYYY-MM
+            console.log('Selected month:', reportMonth);
+            
+            // Determine the month to filter
+            let selectedMonth, selectedYear;
+            if (reportMonth) {
+                const [year, month] = reportMonth.split('-');
+                selectedYear = parseInt(year);
+                selectedMonth = parseInt(month);
+            } else {
+                // Use current month if not specified
+                const now = new Date();
+                selectedYear = now.getFullYear();
+                selectedMonth = now.getMonth() + 1;
+            }
+            
+            const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const formattedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const formattedDateShort = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+            
+            // Show loading message
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            
+            // Fetch ALL items from the database for the selected month via AJAX
+            const monthParam = reportMonth || (selectedYear + '-' + String(selectedMonth).padStart(2, '0'));
+            console.log('Fetching items for month:', monthParam);
+            
+            $.ajax({
+                url: '<?= base_url('staff/api/monthly-items') ?>',
+                method: 'GET',
+                data: {
+                    month: monthParam
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('AJAX response:', response);
+                    console.log('Month requested:', monthParam);
+                    console.log('Date range:', response.start_date, 'to', response.end_date);
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    if (response.status === 'success' && response.items) {
+                        const filteredItems = response.items;
+                        const branchInfo = response.branch || null;
+                        const userInfo = response.user || null;
+                        console.log('Items loaded for month ' + monthParam + ':', filteredItems.length);
+                        console.log('Branch info:', branchInfo);
+                        console.log('User info:', userInfo);
+                        
+                        if (filteredItems.length === 0) {
+                            alert('No products with stock transactions found for ' + monthName + '. Please select a different month.');
+                            return;
+                        }
+                        
+                        // Generate report with all items, branch info, and user info
+                        generateMonthlyReport(filteredItems, monthName, formattedDate, formattedDateShort, branchInfo, userInfo);
+                        
+                        // Send notification to central admin
+                        if (branchInfo) {
+                            sendReportNotification(branchInfo, monthName, filteredItems.length);
+                        }
+                    } else {
+                        alert('Error loading monthly data: ' + (response.message || 'Failed to load items'));
+                        console.error('Error response:', response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    console.error('XHR:', xhr);
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    alert('Error loading monthly data. Please check your connection and try again.\n\nError: ' + error);
+                }
+            });
         });
 
-        // Print Report for Individual Item
+        // Print Report for Individual Item - Enhanced to match accounts-payable receipt design
         document.getElementById('btnPrintReport')?.addEventListener('click', function() {
             const itemName = document.getElementById('viewItemTitle').textContent;
             const itemCategory = document.getElementById('viewCategory').textContent;
             const itemBranch = document.getElementById('viewBranch').textContent;
             const itemStock = document.getElementById('viewStock').textContent;
             const itemMinMax = document.getElementById('viewMinMax').textContent;
+            const itemPrice = document.getElementById('viewPrice') ? document.getElementById('viewPrice').textContent : 'N/A';
             const itemStatus = document.getElementById('viewStatus').textContent;
             const itemUpdated = document.getElementById('viewUpdated').textContent;
             const itemExpiry = document.getElementById('viewExpiry').textContent;
 
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
+            // Get month from filter
+            const reportMonth = document.getElementById('reportMonthFilter').value;
+            
+            // Determine the month
+            let selectedYear, selectedMonth;
+            if (reportMonth) {
+                const [year, month] = reportMonth.split('-');
+                selectedYear = parseInt(year);
+                selectedMonth = parseInt(month);
+            } else {
+                const now = new Date();
+                selectedYear = now.getFullYear();
+                selectedMonth = now.getMonth() + 1;
+            }
+            
+            const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const formattedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const formattedDateShort = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+
+            // Determine status color
+            let statusColor = '#28a745'; // Default green
+            const statusText = itemStatus.toLowerCase();
+            if (statusText.includes('low') || statusText.includes('warning')) {
+                statusColor = '#ffc107'; // Orange/Yellow
+            } else if (statusText.includes('out') || statusText.includes('critical')) {
+                statusColor = '#dc3545'; // Red
+            }
+
+            // Helper function to format date
+            function formatDate(dateString) {
+                if (!dateString || dateString === 'N/A') return 'N/A';
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                } catch (e) {
+                    return dateString;
+                }
+            }
 
             let reportHTML = `
+            <!DOCTYPE html>
             <html>
             <head>
-                <title>Item Report — CHAKANOKS</title>
+                <title>CHAKANOKS - Inventory Item Report</title>
+                <meta name="viewport" content="width=80mm">
                 <style>
-                    @page { size: A4; margin: 20mm; }
-                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                    h1, h2 { text-align: center; margin: 5px 0; }
-                    .item-details { margin: 20px 0; }
-                    .detail-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px; border-bottom: 1px solid #eee; }
-                    .detail-label { font-weight: bold; }
-                    .footer { margin-top: 30px; font-size: 12px; text-align: center; color: #555; }
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    html, body { width: 80mm; margin: 0; padding: 0; background: white; overflow: hidden; }
+                    body { font-family: "Courier New", monospace; margin: 0; padding: 0; }
+                    .receipt-container { max-width: 80mm; width: 80mm; min-width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-family: "Courier New", monospace; font-size: 10pt; line-height: 1.3; color: #000; }
+                    img { max-height: 30px; max-width: 30px; object-fit: contain; }
+                    @page { size: 80mm auto; margin: 0; width: 80mm; }
+                    @media print { 
+                        html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; } 
+                        .receipt-container { max-width: 80mm !important; width: 80mm !important; min-width: 80mm !important; padding: 10mm 5mm !important; } 
+                        @page { size: 80mm auto !important; margin: 0 !important; width: 80mm !important; } 
+                    }
                 </style>
             </head>
             <body>
-                <h1>CHAKANOKS</h1>
-                <h2>Item Report</h2>
-                <div class="item-details">
-                    <div class="detail-row"><span class="detail-label">Item Name:</span><span>${itemName}</span></div>
-                    <div class="detail-row"><span class="detail-label">Category:</span><span>${itemCategory}</span></div>
-                    <div class="detail-row"><span class="detail-label">Branch:</span><span>${itemBranch}</span></div>
-                    <div class="detail-row"><span class="detail-label">Current Stock:</span><span>${itemStock}</span></div>
-                    <div class="detail-row"><span class="detail-label">Min/Max Stock:</span><span>${itemMinMax}</span></div>
-                    <div class="detail-row"><span class="detail-label">Status:</span><span>${itemStatus}</span></div>
-                    <div class="detail-row"><span class="detail-label">Last Updated:</span><span>${itemUpdated}</span></div>
-                    <div class="detail-row"><span class="detail-label">Expiry Date:</span><span>${itemExpiry}</span></div>
+                <div class="receipt-container">
+                    <!-- Company Header - Compact (matching accounts payable exactly) -->
+                    <div style="text-align: center; margin-bottom: 8mm; padding-bottom: 5mm; border-bottom: 1px dashed #000;">
+                        <img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo" style="max-height: 30px; max-width: 30px; height: auto; width: auto; object-fit: contain; display: block; margin: 0 auto 3mm;">
+                        <div style="font-weight: bold; font-size: 14pt; letter-spacing: 1px; margin-bottom: 2mm;">CHAKANOKS</div>
+                        <div style="font-size: 8pt; color: #666; margin-bottom: 3mm;">Supply Chain Management System</div>
+                        <div style="font-weight: bold; font-size: 11pt; text-transform: uppercase; margin-top: 3mm;">INVENTORY ITEM REPORT</div>
+                    </div>
+                    
+                    <!-- Item Information - Compact single column (matching accounts payable structure) -->
+                    <div style="text-align: center; margin-bottom: 5mm; padding-bottom: 3mm; border-bottom: 1px dashed #000;">
+                        <div style="font-weight: bold; font-size: 9pt; margin-bottom: 2mm;">ITEM: ${itemName}</div>
+                        <div style="font-size: 8pt; margin-bottom: 1mm;">Status: <strong style="color: ${statusColor};">${itemStatus.toUpperCase()}</strong></div>
+                    </div>
+                    
+                    <!-- Item Details (matching accounts payable info section) -->
+                    <div style="margin-bottom: 4mm; font-size: 9pt;">
+                        <div style="margin-bottom: 2mm;"><strong>Category:</strong> ${itemCategory}</div>
+                        <div style="margin-bottom: 2mm;"><strong>Branch:</strong> ${itemBranch}</div>
+                        ${itemExpiry && itemExpiry !== 'N/A' ? '<div style="margin-bottom: 2mm;"><strong>Expiry Date:</strong> ' + formatDate(itemExpiry) + '</div>' : ''}
+                        <div style="margin-bottom: 2mm;"><strong>Last Updated:</strong> ${itemUpdated}</div>
+                    </div>
+                    
+                    <!-- Stock Information - Compact (matching accounts payable amounts section) -->
+                    <div style="text-align: center; margin-bottom: 4mm; padding: 3mm 0; border-top: 1px dashed #000; border-bottom: 1px dashed #000;">
+                        <div style="margin-bottom: 2mm;"><span style="font-size: 8pt;">Current Stock:</span><br><span style="font-size: 12pt; font-weight: bold; color: #2d5016;">${itemStock}</span></div>
+                        <div style="margin-bottom: 2mm;"><span style="font-size: 8pt;">Min/Max Stock:</span><br><span style="font-size: 10pt; font-weight: bold;">${itemMinMax}</span></div>
+                        <div><span style="font-size: 8pt;">Price:</span><br><span style="font-size: 12pt; font-weight: bold; color: #2d5016;">${itemPrice}</span></div>
+                    </div>
+                    
+                    <!-- Item Details Section (matching accounts payable payment details section) -->
+                    <div style="margin-bottom: 4mm; font-size: 9pt;">
+                        <div style="text-align: center; font-weight: bold; margin-bottom: 2mm; padding-bottom: 2mm; border-bottom: 1px dashed #000;">ITEM DETAILS</div>
+                        <div style="margin-bottom: 2mm;"><strong>Unit:</strong> ${itemStock.split(' ').slice(1).join(' ') || 'N/A'}</div>
+                        <div style="margin-bottom: 2mm;"><strong>Category:</strong> ${itemCategory}</div>
+                        <div style="margin-bottom: 2mm;"><strong>Branch:</strong> ${itemBranch}</div>
+                    </div>
+                    
+                    <!-- Receipt Footer - Compact (matching accounts payable footer exactly) -->
+                    <div style="text-align: center; margin-top: 5mm; padding-top: 3mm; border-top: 1px dashed #000; font-size: 8pt; color: #666;">
+                        <div style="margin-bottom: 1mm;">Report Period: ${monthName}</div>
+                        <div style="margin-bottom: 1mm;">Generated: ${formattedDate}</div>
+                        <div style="margin-top: 3mm; font-size: 7pt;">CHAKANOKS Supply Chain Management System</div>
+                    </div>
+                    
+                    <!-- Thank you message (matching accounts payable) -->
+                    <div style="text-align: center; margin-top: 5mm; padding-top: 3mm; border-top: 1px dashed #000; font-size: 9pt; font-weight: bold;">
+                        Thank you!
+                    </div>
                 </div>
-                <div class="footer">Generated on ${formattedDate}</div>
             </body>
             </html>
             `;
 
-            const printWindow = window.open('', '', 'width=900,height=700');
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            if (!printWindow) {
+                alert('Please allow popups to print the report');
+                return;
+            }
+            
             printWindow.document.write(reportHTML);
             printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
+            
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 250);
+            };
+            
+            setTimeout(function() {
+                if (printWindow.document.readyState === 'complete') {
+                    printWindow.focus();
+                    printWindow.print();
+                }
+            }, 500);
         });
 
         // Load section-specific data on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize month filter with current month
+            const today = new Date();
+            const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            
+            const reportMonthFilter = document.getElementById('reportMonthFilter');
+            const reportTimeFilter = document.getElementById('reportTimeFilter');
+            if (reportMonthFilter) reportMonthFilter.value = monthStr;
+            if (reportTimeFilter) reportTimeFilter.value = timeStr;
+            
             const urlParams = new URLSearchParams(window.location.search);
             const currentSection = urlParams.get('section') || '<?= $currentSection ?? 'inventory' ?>';
             
@@ -1105,14 +1634,51 @@
         
         // Reason change handlers
         $(document).on('change', '#stockOutReason', function() {
-            if ($(this).val() === 'other') {
+            const reason = $(this).val();
+            
+            if (reason === 'other') {
                 $('#stockOutOtherReasonDiv').show();
                 $('#stockOutOtherReason').prop('required', true);
+                $('#stockOutTransferBranchDiv').hide();
+                $('#stockOutTransferBranch').prop('required', false);
+            } else if (reason === 'transfer') {
+                $('#stockOutOtherReasonDiv').hide();
+                $('#stockOutOtherReason').prop('required', false);
+                $('#stockOutTransferBranchDiv').show();
+                $('#stockOutTransferBranch').prop('required', true);
+                loadTransferBranches();
             } else {
                 $('#stockOutOtherReasonDiv').hide();
                 $('#stockOutOtherReason').prop('required', false);
+                $('#stockOutTransferBranchDiv').hide();
+                $('#stockOutTransferBranch').prop('required', false);
             }
         });
+        
+        // Load branches for transfer
+        function loadTransferBranches() {
+            $.ajax({
+                url: '<?= base_url('staff/api/get-transfer-branches') ?>',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const select = $('#stockOutTransferBranch');
+                        select.empty();
+                        select.append('<option value="">Select branch...</option>');
+                        response.branches.forEach(function(branch) {
+                            select.append(`<option value="${branch.id}">${branch.name} (${branch.code})</option>`);
+                        });
+                    } else {
+                        alert('Error loading branches: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error loading branches';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
         
         // Submit Stock Out
         function submitStockOut() {
@@ -1138,6 +1704,13 @@
                 return;
             }
             
+            // Validate transfer branch if reason is transfer
+            const transferBranchId = $('#stockOutTransferBranch').val();
+            if (reason === 'transfer' && !transferBranchId) {
+                alert('Please select a branch to transfer to');
+                return;
+            }
+            
             $.ajax({
                 url: '<?= base_url('staff/api/stock-out') ?>',
                 method: 'POST',
@@ -1145,7 +1718,8 @@
                     product_id: productId,
                     quantity: quantity,
                     reason: finalReason,
-                    notes: notes
+                    notes: notes,
+                    transfer_branch_id: transferBranchId || null
                 },
                 dataType: 'json',
                 success: function(response) {
@@ -1153,6 +1727,7 @@
                         alert('Stock out recorded successfully!');
                         $('#stockOutForm')[0].reset();
                         $('#stockOutOtherReasonDiv').hide();
+                        $('#stockOutTransferBranchDiv').hide();
                         loadProductsForSection('stock-out');
                         // Refresh inventory if on inventory section
                         if (document.getElementById('inventory-section').style.display !== 'none') {
@@ -1208,17 +1783,42 @@
                                            normalizedStatus === 'delayed' ? 'badge-danger' : 'badge-secondary';
                         const statusText = normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1).replace('_', ' ');
                         
+                        // Check payment status
+                        const paymentStatus = (delivery.payment_status || 'unpaid').toLowerCase();
+                        const isPaid = paymentStatus === 'paid';
+                        const paymentBadge = paymentStatus === 'paid' ? 'badge-success' : 
+                                           paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger';
+                        const paymentText = paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1);
+                        
                         const row = `
                             <tr>
                                 <td>${delivery.delivery_number}</td>
                                 <td>${delivery.purchase_order?.order_number || 'N/A'}</td>
                                 <td>${delivery.supplier?.name || 'N/A'}</td>
                                 <td>${delivery.scheduled_date || 'N/A'}</td>
-                                <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                                <td>
+                                    <span class="badge ${statusBadge}">${statusText}</span>
+                                    ${delivery.payment_status ? `
+                                        <br><small class="badge ${paymentBadge}" style="margin-top: 4px; display: inline-block;">
+                                            Payment: ${paymentText}
+                                        </small>
+                                    ` : ''}
+                                </td>
                                 <td style="text-align: right;">
-                                    <button class="btn btn-sm btn-primary" onclick="receiveDelivery(${delivery.id})">
-                                        <i class="fas fa-check"></i> Receive
-                                    </button>
+                                    ${isPaid ? `
+                                        <button class="btn btn-sm btn-primary" onclick="receiveDelivery(${delivery.id})">
+                                            <i class="fas fa-check"></i> Receive
+                                        </button>
+                                    ` : `
+                                        <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end;">
+                                            <button class="btn btn-sm btn-secondary" disabled title="Payment not completed. Full payment required before receiving delivery.">
+                                                <i class="fas fa-lock"></i> Payment Required
+                                            </button>
+                                            <button class="btn btn-sm btn-info" onclick="checkPaymentStatus(${delivery.id})" title="Check if payment has been completed">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    `}
                                 </td>
                             </tr>
                         `;
@@ -1228,6 +1828,86 @@
                 error: function(xhr) {
                     const errorMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error loading deliveries';
                     $('#deliveriesBody').html(`<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">${errorMsg}</td></tr>`);
+                }
+            });
+        }
+        
+        // Check payment status for a delivery
+        function checkPaymentStatus(deliveryId) {
+            const refreshBtn = $(`button[onclick*="checkPaymentStatus(${deliveryId})"]`);
+            const originalHtml = refreshBtn.html();
+            refreshBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+            
+            $.ajax({
+                url: '<?= base_url('delivery/') ?>' + deliveryId + '/track',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    refreshBtn.prop('disabled', false).html(originalHtml);
+                    
+                    if (response.status === 'success' && response.delivery) {
+                        const paymentStatus = (response.delivery.payment_status || 'unpaid').toLowerCase();
+                        const isPaid = paymentStatus === 'paid';
+                        
+                        if (isPaid) {
+                            alert('Payment completed! Refreshing page to update delivery status...');
+                            location.reload();
+                        } else {
+                            alert('Payment status: ' + paymentStatus.toUpperCase() + '. Full payment is still required.');
+                        }
+                    } else {
+                        alert('Error checking payment status. Please refresh the page.');
+                    }
+                },
+                error: function(xhr) {
+                    refreshBtn.prop('disabled', false).html(originalHtml);
+                    alert('Error checking payment status. Please try again or refresh the page.');
+                }
+            });
+        }
+        
+        // Auto-refresh payment status every 30 seconds for unpaid deliveries
+        $(document).ready(function() {
+            setInterval(function() {
+                $('#deliveriesBody tr').each(function() {
+                    const row = $(this);
+                    const paymentRequiredBtn = row.find('button:contains("Payment Required")');
+                    
+                    if (paymentRequiredBtn.length > 0) {
+                        const refreshBtn = row.find('button[onclick*="checkPaymentStatus"]');
+                        if (refreshBtn.length > 0) {
+                            const onclickAttr = refreshBtn.attr('onclick');
+                            if (onclickAttr) {
+                                const match = onclickAttr.match(/checkPaymentStatus\((\d+)\)/);
+                                if (match) {
+                                    const deliveryId = match[1];
+                                    checkPaymentStatusSilent(deliveryId);
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 30000); // Check every 30 seconds
+        });
+        
+        function checkPaymentStatusSilent(deliveryId) {
+            $.ajax({
+                url: '<?= base_url('delivery/') ?>' + deliveryId + '/track',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.delivery) {
+                        const paymentStatus = (response.delivery.payment_status || 'unpaid').toLowerCase();
+                        const isPaid = paymentStatus === 'paid';
+                        
+                        if (isPaid) {
+                            // Reload to show updated status
+                            location.reload();
+                        }
+                    }
+                },
+                error: function() {
+                    // Silently fail
                 }
             });
         }
@@ -1370,7 +2050,14 @@
                         // Reload page to refresh deliveries list (server-rendered)
                         location.reload();
                     } else {
-                        alert('Error: ' + (response.message || 'Failed to receive delivery'));
+                        let errorMsg = response.message || 'Failed to receive delivery';
+                        if (response.payment_status) {
+                            errorMsg += '\n\nPayment Status: ' + response.payment_status.toUpperCase();
+                            if (response.balance) {
+                                errorMsg += '\nOutstanding Balance: ₱' + parseFloat(response.balance).toFixed(2);
+                            }
+                        }
+                        alert('Error: ' + errorMsg);
                         submitBtn.html(originalText).prop('disabled', false);
                     }
                 },

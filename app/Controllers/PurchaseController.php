@@ -8,6 +8,7 @@ use App\Models\ProductModel;
 use App\Models\BranchModel;
 use App\Models\AccountsPayableModel;
 use App\Models\SupplierModel;
+use App\Libraries\NotificationService;
 use Config\Database;
 
 class PurchaseController extends BaseController
@@ -19,6 +20,7 @@ class PurchaseController extends BaseController
     protected $branchModel;
     protected $accountsPayableModel;
     protected $supplierModel;
+    protected $notificationService;
 
     public function __construct()
     {
@@ -29,6 +31,7 @@ class PurchaseController extends BaseController
         $this->branchModel = new BranchModel();
         $this->accountsPayableModel = new AccountsPayableModel();
         $this->supplierModel = new SupplierModel();
+        $this->notificationService = new NotificationService();
     }
 
     /**
@@ -337,6 +340,17 @@ class PurchaseController extends BaseController
             // Re-enable foreign key checks
             $this->db->query('SET FOREIGN_KEY_CHECKS=1');
             
+            // Get created request for notification (don't let notification failure break the request)
+            try {
+                $request = $this->purchaseRequestModel->find($requestId);
+                if ($request) {
+                    $this->notificationService->notifyPurchaseRequest('created', $request);
+                }
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to send purchase request notification: ' . $e->getMessage());
+                // Continue even if notification fails
+            }
+            
             return $this->response->setJSON([
                 'status' => 'success',
                 'message' => 'Purchase request created successfully with ' . $savedItemsCount . ' items.',
@@ -628,6 +642,17 @@ class PurchaseController extends BaseController
                 'scheduled_delivery_date' => $scheduledDeliveryDate
             ];
             $this->autoCreateDelivery($poId, $poData, $deliveryDetails);
+
+            // Send notification (don't let notification failure break the approval)
+            try {
+                $request = $this->purchaseRequestModel->find((int)$id);
+                if ($request) {
+                    $this->notificationService->notifyPurchaseRequest('approved', $request);
+                }
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to send approval notification: ' . $e->getMessage());
+                // Continue even if notification fails
+            }
 
             return $this->response->setJSON([
                 'status' => 'success',

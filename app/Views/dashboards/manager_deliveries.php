@@ -154,9 +154,22 @@
                                         Purchase Order: <?= esc($delivery['purchase_order']['order_number']) ?>
                                     </p>
                                 </div>
-                                <span class="status-badge status-<?= esc($delivery['status']) ?>">
-                                    <?= esc(ucwords(str_replace('_', ' ', $delivery['status']))) ?>
-                                </span>
+                                <div>
+                                    <span class="status-badge status-<?= esc($delivery['status']) ?>">
+                                        <?= esc(ucwords(str_replace('_', ' ', $delivery['status']))) ?>
+                                    </span>
+                                    <?php if (isset($delivery['payment_status'])): ?>
+                                        <?php
+                                        $paymentStatus = strtolower($delivery['payment_status'] ?? 'unpaid');
+                                        $paymentBadge = $paymentStatus === 'paid' ? 'badge-success' : 
+                                                       ($paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger');
+                                        $isPaid = $paymentStatus === 'paid';
+                                        ?>
+                                        <br><small class="badge <?= $paymentBadge ?>" style="margin-top: 4px; display: inline-block;">
+                                            Payment: <?= ucfirst($paymentStatus) ?>
+                                        </small>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                             
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
@@ -185,9 +198,26 @@
                             </div>
                             
                             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-                                <button class="btn btn-primary" onclick="confirmDelivery(<?= $delivery['id'] ?>)" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
-                                    <i class="fas fa-check-circle"></i> Confirm Delivery
-                                </button>
+                                <?php 
+                                $isPaid = isset($delivery['payment_status']) && strtolower($delivery['payment_status']) === 'paid';
+                                $deliveryId = $delivery['id'];
+                                ?>
+                                <div id="delivery-<?= $deliveryId ?>-actions">
+                                    <?php if ($isPaid): ?>
+                                        <button class="btn btn-primary" onclick="confirmDelivery(<?= $deliveryId ?>)" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                                            <i class="fas fa-check-circle"></i> Confirm Delivery
+                                        </button>
+                                    <?php else: ?>
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <button class="btn btn-secondary" disabled title="Payment not completed. Full payment required before confirming delivery." style="padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                                                <i class="fas fa-lock"></i> Payment Required
+                                            </button>
+                                            <button class="btn btn-sm btn-info" onclick="checkPaymentStatus(<?= $deliveryId ?>)" title="Check if payment has been completed" style="padding: 8px 15px; border-radius: 8px;">
+                                                <i class="fas fa-sync-alt"></i> Refresh Payment Status
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -244,6 +274,54 @@
             $('#confirmDeliveryModal').modal('show');
         }
         
+        function checkPaymentStatus(deliveryId) {
+            const refreshBtn = $(`#delivery-${deliveryId}-actions button[onclick*="checkPaymentStatus"]`);
+            const originalHtml = refreshBtn.html();
+            refreshBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
+            
+            $.ajax({
+                url: '<?= base_url('delivery/') ?>' + deliveryId + '/track',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    refreshBtn.prop('disabled', false).html(originalHtml);
+                    
+                    if (response.status === 'success' && response.delivery) {
+                        const paymentStatus = (response.delivery.payment_status || 'unpaid').toLowerCase();
+                        const isPaid = paymentStatus === 'paid';
+                        
+                        if (isPaid) {
+                            // Update the button to show "Confirm Delivery"
+                            const actionsDiv = $(`#delivery-${deliveryId}-actions`);
+                            actionsDiv.html(`
+                                <button class="btn btn-primary" onclick="confirmDelivery(${deliveryId})" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                                    <i class="fas fa-check-circle"></i> Confirm Delivery
+                                </button>
+                            `);
+                            
+                            // Update payment badge if it exists
+                            const paymentBadge = $(`#delivery-${deliveryId}-actions`).closest('.delivery-card').find('.badge').filter(function() {
+                                return $(this).text().includes('Payment:');
+                            });
+                            if (paymentBadge.length) {
+                                paymentBadge.removeClass('badge-warning badge-danger').addClass('badge-success').text('Payment: Paid');
+                            }
+                            
+                            alert('Payment completed! You can now confirm the delivery.');
+                        } else {
+                            alert('Payment status: ' + paymentStatus.toUpperCase() + '. Full payment is still required.');
+                        }
+                    } else {
+                        alert('Error checking payment status. Please refresh the page.');
+                    }
+                },
+                error: function(xhr) {
+                    refreshBtn.prop('disabled', false).html(originalHtml);
+                    alert('Error checking payment status. Please try again or refresh the page.');
+                }
+            });
+        }
+        
         function submitDeliveryConfirmation() {
             const deliveryId = $('#confirmDeliveryId').val();
             const actualDeliveryDate = $('#actualDeliveryDate').val();
@@ -283,6 +361,59 @@
                     submitBtn.prop('disabled', false).html(originalText);
                     const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error confirming delivery';
                     alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        // Auto-refresh payment status every 30 seconds for unpaid deliveries
+        $(document).ready(function() {
+            setInterval(function() {
+                $('[id^="delivery-"][id$="-actions"]').each(function() {
+                    const actionsDiv = $(this);
+                    const paymentRequiredBtn = actionsDiv.find('button:contains("Payment Required")');
+                    
+                    if (paymentRequiredBtn.length > 0 && !paymentRequiredBtn.prop('disabled')) {
+                        const deliveryId = actionsDiv.attr('id').replace('delivery-', '').replace('-actions', '');
+                        // Silently check payment status (don't show alerts)
+                        checkPaymentStatusSilent(deliveryId);
+                    }
+                });
+            }, 30000); // Check every 30 seconds
+        });
+        
+        function checkPaymentStatusSilent(deliveryId) {
+            $.ajax({
+                url: '<?= base_url('delivery/') ?>' + deliveryId + '/track',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.delivery) {
+                        const paymentStatus = (response.delivery.payment_status || 'unpaid').toLowerCase();
+                        const isPaid = paymentStatus === 'paid';
+                        
+                        if (isPaid) {
+                            const actionsDiv = $(`#delivery-${deliveryId}-actions`);
+                            if (actionsDiv.find('button:contains("Payment Required")').length > 0) {
+                                // Update the button to show "Confirm Delivery"
+                                actionsDiv.html(`
+                                    <button class="btn btn-primary" onclick="confirmDelivery(${deliveryId})" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                                        <i class="fas fa-check-circle"></i> Confirm Delivery
+                                    </button>
+                                `);
+                                
+                                // Update payment badge
+                                const paymentBadge = actionsDiv.closest('.delivery-card').find('.badge').filter(function() {
+                                    return $(this).text().includes('Payment:');
+                                });
+                                if (paymentBadge.length) {
+                                    paymentBadge.removeClass('badge-warning badge-danger').addClass('badge-success').text('Payment: Paid');
+                                }
+                            }
+                        }
+                    }
+                },
+                error: function() {
+                    // Silently fail
                 }
             });
         }

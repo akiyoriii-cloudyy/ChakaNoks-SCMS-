@@ -389,5 +389,84 @@ class FranchiseManager extends BaseController
         $royalties = $this->royaltyModel->getPaymentsWithBranch();
         return $this->response->setJSON(['status' => 'success', 'data' => $royalties]);
     }
+
+    /**
+     * Get monthly franchise data for report
+     */
+    public function getMonthlyFranchiseData()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['franchise_manager', 'franchisemanager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        try {
+            $month = $this->request->getGet('month'); // Format: YYYY-MM
+            
+            if (!$month) {
+                // Use current month if not specified
+                $month = date('Y-m');
+            }
+            
+            // Parse month
+            list($year, $monthNum) = explode('-', $month);
+            $startDate = $year . '-' . $monthNum . '-01 00:00:00';
+            $endDate = date('Y-m-t 23:59:59', strtotime($startDate));
+            
+            // Get all franchise branches with their owners
+            // For monthly report, we'll show all franchise branches
+            $branches = $this->db->table('branches b')
+                ->select('b.*, fo.owner_name, fo.email as owner_email, fo.phone as owner_phone, fo.address as owner_address, fo.status as owner_status, fo.joined_date')
+                ->join('franchise_owners fo', 'fo.id = b.franchise_owner_id', 'left')
+                ->where('b.franchise_type', 'franchised')
+                ->orderBy('b.name', 'ASC')
+                ->get()
+                ->getResultArray();
+            
+            // Format branches
+            $formattedBranches = [];
+            foreach ($branches as $branch) {
+                $formattedBranches[] = [
+                    'id' => $branch['id'],
+                    'code' => $branch['code'] ?? 'N/A',
+                    'name' => $branch['name'] ?? 'N/A',
+                    'address' => $branch['address'] ?? 'N/A',
+                    'franchise_type' => $branch['franchise_type'] ?? 'N/A',
+                    'owner_name' => $branch['owner_name'] ?? 'N/A',
+                    'owner_email' => $branch['owner_email'] ?? 'N/A',
+                    'owner_phone' => $branch['owner_phone'] ?? 'N/A',
+                    'owner_address' => $branch['owner_address'] ?? 'N/A',
+                    'owner_status' => $branch['owner_status'] ?? 'N/A',
+                    'joined_date' => $branch['joined_date'] ?? 'N/A',
+                    'created_at' => $branch['created_at'] ?? 'N/A',
+                    'updated_at' => $branch['updated_at'] ?? 'N/A',
+                ];
+            }
+            
+            // Get user info for "Prepared by"
+            $userId = $session->get('user_id') ?? $session->get('id');
+            $userEmail = $session->get('email');
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'branches' => $formattedBranches,
+                'month' => $month,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'count' => count($formattedBranches),
+                'user' => [
+                    'id' => $userId,
+                    'email' => $userEmail
+                ]
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching monthly franchise data: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error fetching monthly franchise data: ' . $e->getMessage()
+            ]);
+        }
+    }
 }
 

@@ -12,6 +12,7 @@ class ProductModel extends Model
     protected $allowedFields = [
         'branch_id',
         'name',
+        'barcode',
         'category_id',
         'unit',
         'price',
@@ -20,7 +21,8 @@ class ProductModel extends Model
         'max_stock',
         'expiry',
         'status',
-        'created_by'
+        'created_by',
+        'deleted_at'
     ];
 
     protected $useTimestamps = true;
@@ -63,7 +65,12 @@ class ProductModel extends Model
                 ->groupEnd();
         }
 
-        $items = $builder->orderBy('products.created_at', 'DESC')->get()->getResultArray();
+        // Include deleted items (show all items, including deleted ones)
+        // Items with deleted_at will be shown with restore option
+        $items = $builder->orderBy('products.deleted_at', 'ASC')
+            ->orderBy('products.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
         
         // Process each item for accurate data
         foreach ($items as &$item) {
@@ -89,7 +96,7 @@ class ProductModel extends Model
     /**
      * Process timestamps to ensure accuracy
      */
-    private function processTimestamps(array $item): array
+    public function processTimestamps(array $item): array
     {
         $currentTime = date('Y-m-d H:i:s');
         
@@ -137,7 +144,7 @@ class ProductModel extends Model
     /**
      * Calculate item status based on stock and expiry
      */
-    private function calculateStatus(array $item): string
+    public function calculateStatus(array $item): string
     {
         $stock = (int)($item['stock_qty'] ?? 0);
         $minStock = (int)($item['min_stock'] ?? 0);

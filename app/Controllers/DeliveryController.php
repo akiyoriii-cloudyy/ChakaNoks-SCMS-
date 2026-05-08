@@ -6,6 +6,7 @@ use App\Models\DeliveryModel;
 use App\Models\PurchaseOrderModel;
 use App\Models\ProductModel;
 use App\Models\StockTransactionModel;
+use App\Libraries\NotificationService;
 use Config\Database;
 
 class DeliveryController extends BaseController
@@ -15,6 +16,7 @@ class DeliveryController extends BaseController
     protected $purchaseOrderModel;
     protected $productModel;
     protected $stockTransactionModel;
+    protected $notificationService;
 
     public function __construct()
     {
@@ -23,6 +25,7 @@ class DeliveryController extends BaseController
         $this->purchaseOrderModel = new PurchaseOrderModel();
         $this->productModel = new ProductModel();
         $this->stockTransactionModel = new StockTransactionModel();
+        $this->notificationService = new NotificationService();
     }
 
     /**
@@ -155,6 +158,33 @@ class DeliveryController extends BaseController
 
         if (!$delivery) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Delivery not found']);
+        }
+
+        // Check payment status - only allow delivery if fully paid
+        if (!empty($delivery['purchase_order_id'])) {
+            $accountsPayableModel = new \App\Models\AccountsPayableModel();
+            $accountsPayable = $accountsPayableModel
+                ->where('purchase_order_id', $delivery['purchase_order_id'])
+                ->first();
+
+            if ($accountsPayable) {
+                $paymentStatus = strtolower($accountsPayable['payment_status'] ?? 'unpaid');
+                
+                if ($paymentStatus !== 'paid') {
+                    $statusMessage = $paymentStatus === 'partial' 
+                        ? 'Partial payment received. Full payment required before delivery can be received.'
+                        : 'Payment not completed. Please complete payment before receiving delivery.';
+                    
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'message' => $statusMessage,
+                        'payment_status' => $paymentStatus,
+                        'amount' => (float)($accountsPayable['amount'] ?? 0),
+                        'amount_paid' => (float)($accountsPayable['amount_paid'] ?? 0),
+                        'balance' => (float)($accountsPayable['amount'] ?? 0) - (float)($accountsPayable['amount_paid'] ?? 0)
+                    ]);
+                }
+            }
         }
 
         // Get received quantities from POST
@@ -324,6 +354,12 @@ class DeliveryController extends BaseController
                     'status' => 'error',
                     'message' => 'Failed to update delivery status'
                 ]);
+            }
+            
+            // Get updated delivery for notification
+            $updatedDelivery = $this->deliveryModel->find((int)$id);
+            if ($updatedDelivery) {
+                $this->notificationService->notifyDelivery('received', $updatedDelivery);
             }
 
             // Log to audit trail

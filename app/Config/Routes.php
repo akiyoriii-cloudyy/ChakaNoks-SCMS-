@@ -38,17 +38,33 @@ $routes->get('dashboard', 'Auth::dashboard');
 // ---------- ROLE DASHBOARDS ----------
 $routes->get('superadmin/dashboard', 'Superadmin::dashboard');
 $routes->get('centraladmin/dashboard', 'CentralAdmin::dashboard');
+$routes->get('centraladmin/users', 'CentralAdmin::userManagement');
+$routes->get('systemadministrator/dashboard', 'SystemAdministrator::dashboard');
 $routes->get('centraladmin/dashboard/data', 'CentralAdmin::getDashboardDataAPI');
+$routes->get('centraladmin/test-users', 'CentralAdmin::testUsersData');
 $routes->get('centraladmin/deliveries/list', 'CentralAdmin::getDeliveriesList');
 $routes->get('centraladmin/suppliers', 'CentralAdmin::suppliersPage');
 $routes->get('centraladmin/deliveries', 'CentralAdmin::deliveriesPage');
 $routes->get('centraladmin/reports', 'CentralAdmin::reportsPage');
+$routes->get('centraladmin/api/monthly-reports', 'CentralAdmin::getMonthlyReports');
+$routes->get('centraladmin/get-user/(:num)', 'CentralAdmin::getUser/$1');
+$routes->get('centraladmin/get-users', 'CentralAdmin::getUsers');
+$routes->post('centraladmin/create-user', 'CentralAdmin::createUser');
+$routes->post('centraladmin/update-user/(:num)', 'CentralAdmin::updateUser/$1');
+$routes->post('centraladmin/delete-user/(:num)', 'CentralAdmin::deleteUser/$1');
+$routes->post('centraladmin/restore-user/(:num)', 'CentralAdmin::restoreUser/$1');
+$routes->get('centraladmin/get-branches', 'CentralAdmin::getBranches');
 $routes->get('manager/dashboard', 'Manager::dashboard');
 $routes->get('manager/deliveries', 'Manager::deliveries');
 $routes->get('manager/stock-out', 'Manager::stockOut');
 $routes->get('manager/settings', 'Manager::settings');
 $routes->get('manager/api/search-products', 'Manager::searchProducts');
 $routes->post('manager/api/stock-out', 'Manager::recordStockOut');
+$routes->get('manager/get-user/(:num)', 'Manager::getUser/$1');
+$routes->post('manager/create-user', 'Manager::createUser');
+$routes->post('manager/update-user/(:num)', 'Manager::updateUser/$1');
+$routes->post('manager/delete-user/(:num)', 'Manager::deleteUser/$1');
+$routes->post('manager/restore-user/(:num)', 'Manager::restoreUser/$1');
 $routes->get('franchisemanager/dashboard', 'FranchiseManager::dashboard');
 
 // ---------- FRANCHISE MANAGER APIs ----------
@@ -63,6 +79,7 @@ $routes->get('franchisemanager/api/allocations', 'FranchiseManager::getAllocatio
 $routes->post('franchisemanager/royalty/create', 'FranchiseManager::createRoyalty');
 $routes->post('franchisemanager/royalty/(:num)/payment', 'FranchiseManager::recordPayment/$1');
 $routes->get('franchisemanager/api/royalties', 'FranchiseManager::getRoyaltiesList');
+$routes->get('franchisemanager/api/monthly-franchise', 'FranchiseManager::getMonthlyFranchiseData');
 $routes->get('logisticscoordinator/dashboard', 'LogisticsCoordinator::dashboard');
 $routes->get('logisticscoordinator/schedule', 'LogisticsCoordinator::scheduleDelivery');
 $routes->get('logisticscoordinator/track-orders', 'LogisticsCoordinator::trackOrders');
@@ -82,6 +99,7 @@ $routes->get('logisticscoordinator/api/pending-pos', 'LogisticsCoordinator::getP
 $routes->get('logisticscoordinator/api/all-orders', 'LogisticsCoordinator::getAllOrders');
 $routes->get('logisticscoordinator/api/all-deliveries', 'LogisticsCoordinator::getAllDeliveries');
 $routes->get('logisticscoordinator/api/scheduled-deliveries', 'LogisticsCoordinator::getScheduledDeliveries');
+$routes->get('logisticscoordinator/api/monthly-deliveries', 'LogisticsCoordinator::getMonthlyDeliveries');
 $routes->get('delivery/week-deliveries', 'LogisticsCoordinator::getWeekDeliveries');
 $routes->get('delivery/week-deliveries', 'LogisticsCoordinator::getWeekDeliveries');
 
@@ -96,9 +114,16 @@ $routes->post('staff/receiveDelivery/(:num)', 'Staff::receiveDelivery/$1');
 $routes->post('staff/reportDamage/(:num)', 'Staff::reportDamage/$1');
 $routes->get('staff/checkExpiry/(:num)', 'Staff::checkExpiry/$1');
 $routes->get('staff/api/get-branch-products', 'Staff::getBranchProducts');
+$routes->get('staff/api/monthly-items', 'Staff::getMonthlyItems');
+$routes->get('staff/api/get-item/(:num)', 'Staff::getItem/$1');
+$routes->post('staff/api/notify-report-generated', 'Staff::notifyReportGenerated');
+$routes->get('staff/api/get-transfer-branches', 'Staff::getTransferBranches');
 $routes->post('staff/api/stock-in', 'Staff::recordStockIn');
 $routes->post('staff/api/stock-out', 'Staff::recordStockOut');
 $routes->get('staff/api/get-deliveries', 'Staff::getDeliveries');
+$routes->post('staff/api/delete-item/(:num)', 'Staff::deleteItem/$1');
+$routes->post('staff/api/restore-item/(:num)', 'Staff::restoreItem/$1');
+$routes->post('staff/api/generate-barcode/(:num)', 'Staff::generateBarcode/$1');
 $routes->get('delivery/(:num)/details', 'DeliveryController::trackDelivery/$1');
 
 // ---------- INVENTORY GROUP ----------
@@ -176,9 +201,44 @@ $routes->group('purchase/order', ['filter' => 'auth'], function($routes) {
 $routes->group('accounts-payable', ['filter' => 'auth'], function($routes) {
     $routes->get('list', 'AccountsPayableController::showAccountsPayableList');
     $routes->get('api/list', 'AccountsPayableController::getAccountsPayableList');
+    $routes->get('api/monthly', 'AccountsPayableController::getMonthlyAccountsPayable');
     $routes->get('summary', 'AccountsPayableController::getSummary');
     $routes->get('backfill', 'AccountsPayableController::backfillAccountsPayable');
     $routes->get('(:num)', 'AccountsPayableController::getAccountsPayable/$1');
+    $routes->get('(:num)/receipt', 'AccountsPayableController::getReceipt/$1');
+    $routes->get('(:num)/receipt/(:num)', 'AccountsPayableController::getReceipt/$1/$2');
     $routes->post('(:num)/update-invoice', 'AccountsPayableController::updateInvoice/$1');
     $routes->post('(:num)/record-payment', 'AccountsPayableController::recordPayment/$1');
+});
+
+// ---------- SYSTEM ADMINISTRATOR MODULE ----------
+$routes->group('systemadministrator', ['filter' => 'auth'], function($routes) {
+    $routes->get('dashboard', 'SystemAdministrator::dashboard');
+    $routes->get('users', 'SystemAdministrator::getUsers');
+    $routes->get('get-user/(:num)', 'SystemAdministrator::getUser/$1');
+    $routes->post('create-user', 'SystemAdministrator::createUser');
+    $routes->post('update-user/(:num)', 'SystemAdministrator::updateUser/$1');
+    $routes->post('delete-user/(:num)', 'SystemAdministrator::deleteUser/$1');
+    $routes->post('restore-user/(:num)', 'SystemAdministrator::restoreUser/$1');
+    $routes->post('create-backup', 'SystemAdministrator::createBackup');
+    $routes->get('download-backup/(:segment)', 'SystemAdministrator::downloadBackup/$1');
+    $routes->post('delete-backup/(:segment)', 'SystemAdministrator::deleteBackup/$1');
+    $routes->get('security-events', 'SystemAdministrator::getSecurityEvents');
+    $routes->get('audit-trail', 'SystemAdministrator::getAuditTrail');
+    $routes->get('get-audit-details/(:num)', 'SystemAdministrator::getAuditDetails/$1');
+});
+
+// ---------- NOTIFICATIONS MODULE ----------
+$routes->group('notifications', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'Notifications::getNotifications');
+    $routes->get('unread-count', 'Notifications::getUnreadCount');
+    $routes->post('mark-read/(:num)', 'Notifications::markAsRead/$1');
+    $routes->post('mark-all-read', 'Notifications::markAllAsRead');
+});
+
+// ---------- BARCODE SCANNER MODULE ----------
+$routes->group('barcode', ['filter' => 'auth'], function($routes) {
+    $routes->get('scan', 'BarcodeScanner::scan');
+    $routes->post('scan', 'BarcodeScanner::scan');
+    $routes->post('create-or-update', 'BarcodeScanner::createOrUpdate');
 });

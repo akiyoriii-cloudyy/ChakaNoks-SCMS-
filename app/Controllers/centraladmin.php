@@ -8,7 +8,10 @@ use App\Models\SupplierModel;
 use App\Models\DeliveryModel;
 use App\Models\BranchModel;
 use App\Models\StockTransactionModel;
+use App\Models\AuditTrailModel;
+use App\Models\UserModel;
 use Config\Database;
+use Exception;
 
 class CentralAdmin extends BaseController
 {
@@ -20,6 +23,8 @@ class CentralAdmin extends BaseController
     protected $deliveryModel;
     protected $branchModel;
     protected $stockTransactionModel;
+    protected $auditTrailModel;
+    protected $userModel;
 
     public function __construct()
     {
@@ -31,6 +36,8 @@ class CentralAdmin extends BaseController
         $this->deliveryModel = new DeliveryModel();
         $this->branchModel = new BranchModel();
         $this->stockTransactionModel = new StockTransactionModel();
+        $this->auditTrailModel = new AuditTrailModel();
+        $this->userModel = new UserModel();
     }
 
     public function dashboard()
@@ -41,15 +48,17 @@ class CentralAdmin extends BaseController
             return redirect()->to('/auth/login');
         }
 
+        // Get active tab from URL parameter
+        $activeTab = $this->request->getGet('tab') ?: 'dashboard';
+
         // Get dashboard data
         $dashboardData = $this->getDashboardData();
-
-        $activeTab = $this->request->getGet('tab') ?: 'dashboard';
 
         return view('dashboards/centraladmin', [
             'me' => [
                 'email' => $session->get('email'),
                 'role' => $session->get('role'),
+                'user_id' => $session->get('user_id'),
             ],
             'data' => $dashboardData,
             'activeTab' => $activeTab,
@@ -111,6 +120,7 @@ class CentralAdmin extends BaseController
             'purchaseRequests' => $this->getPurchaseRequestSummary(),
             'deliveries' => $this->getDeliveryTracking(),
             'pendingRequests' => $this->purchaseRequestModel->getPendingRequests(),
+            'users' => $this->getUsersData(),
         ];
     }
 
@@ -421,5 +431,946 @@ class CentralAdmin extends BaseController
             'data' => $data,
             'timestamp' => date('Y-m-d H:i:s')
         ]);
+    }
+
+    /**
+     * Get all branches (API) - for dropdowns
+     */
+    public function getBranches()
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        try {
+            $branches = $this->branchModel->getAllBranches();
+            return $this->response->setJSON([
+                'status' => 'success',
+                'branches' => $branches,
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ==================== USER MANAGEMENT ====================
+
+    /**
+     * Get users data for management (including deleted users)
+     */
+    private function getUsersData(): array
+    {
+        $users = [];
+        $activeUsers = [];
+        $deletedUsers = [];
+        $usersByRole = [];
+        
+        try {
+            // Get all users including deleted ones - use raw query to bypass soft deletes
+            $query = $this->db->query("
+                SELECT u.*, b.name as branch_name, u.deleted_at
+                FROM users u
+                LEFT JOIN branches b ON b.id = u.branch_id
+                ORDER BY 
+                    CASE WHEN u.deleted_at IS NULL THEN 0 ELSE 1 END ASC,
+                    u.created_at DESC
+            ");
+            
+            if ($query) {
+                $users = $query->getResultArray();
+            }
+            
+            // Log if no users found
+            if (empty($users)) {
+                log_message('debug', 'No users found in getUsersData - query returned empty result');
+            } else {
+                log_message('debug', 'Found ' . count($users) . ' users in getUsersData');
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error in getUsersData: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            $users = [];
+        }
+
+        // Separate active and deleted users
+        foreach ($users as $user) {
+            // Check if deleted_at is not null and not empty
+            if (isset($user['deleted_at']) && $user['deleted_at'] !== null && $user['deleted_at'] !== '') {
+                $deletedUsers[] = $user;
+            } else {
+                $activeUsers[] = $user;
+            }
+        }
+
+        // Count users by role (only active users)
+        foreach ($activeUsers as $user) {
+            $role = $user['role'] ?? 'unknown';
+            if (!isset($usersByRole[$role])) {
+                $usersByRole[$role] = 0;
+            }
+            $usersByRole[$role]++;
+        }
+
+        log_message('debug', 'Users data summary - Active: ' . count($activeUsers) . ', Deleted: ' . count($deletedUsers));
+
+        return [
+            'all_users' => $users,
+            'active_users' => $activeUsers,
+            'deleted_users' => $deletedUsers,
+            'users_by_role' => $usersByRole,
+            'total_count' => count($activeUsers),
+            'deleted_count' => count($deletedUsers),
+        ];
+    }
+
+    /**
+     * Get users list (API) with pagination
+     */
+    public function getUsers()
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $page = (int)($this->request->getGet('page') ?? 1);
+        $perPage = 10;
+        $type = $this->request->getGet('type') ?? 'active'; // 'active' or 'deleted'
+        
+        $usersData = $this->getUsersData();
+        $allUsers = $type === 'deleted' ? $usersData['deleted_users'] : $usersData['active_users'];
+        
+        $totalItems = count($allUsers);
+        $totalPages = ceil($totalItems / $perPage);
+        $offset = ($page - 1) * $perPage;
+        $paginatedUsers = array_slice($allUsers, $offset, $perPage);
+        
+        return $this->response->setJSON([
+            'status' => 'success',
+            'users' => $paginatedUsers,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total_items' => $totalItems,
+                'total_pages' => $totalPages,
+                'has_prev' => $page > 1,
+                'has_next' => $page < $totalPages,
+            ]
+        ]);
+    }
+
+    /**
+     * Create new user
+     */
+    public function createUser()
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $data = [
+            'email' => $this->request->getPost('email'),
+            'password' => $this->request->getPost('password'),
+            'role' => $this->request->getPost('role'),
+            'branch_id' => $this->request->getPost('branch_id') ?: null,
+        ];
+
+        // Validate
+        if (empty($data['email']) || empty($data['password']) || empty($data['role'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Email, password, and role are required']);
+        }
+
+        // Check if email already exists
+        if ($this->userModel->getUserByEmail($data['email'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Email already exists']);
+        }
+
+        try {
+            $userId = $this->userModel->createUser($data);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'INSERT',
+                null,
+                $data,
+                $session->get('user_id')
+            );
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User created successfully',
+                'user_id' => $userId,
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update user
+     */
+    public function updateUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $user = $this->userModel->withDeleted()->find($userId);
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        $oldValues = $user;
+        $updateData = [];
+
+        // Get user's branch information
+        $branchName = null;
+        if (!empty($user['branch_id'])) {
+            $branch = $this->db->table('branches')->where('id', $user['branch_id'])->get()->getRowArray();
+            $branchName = $branch['name'] ?? null;
+        }
+
+        // Check if user is protected (system_admin or central_admin in Central Office)
+        $isProtected = false;
+        if ($user['role'] === 'system_admin') {
+            $isProtected = true;
+        } elseif ($user['role'] === 'central_admin' && $branchName === 'Central Office') {
+            $isProtected = true;
+        }
+
+        if ($this->request->getPost('email')) {
+            $updateData['email'] = $this->request->getPost('email');
+        }
+        if ($this->request->getPost('role')) {
+            $newRole = $this->request->getPost('role');
+            // Prevent role changes for protected users
+            if ($isProtected && $newRole !== $user['role']) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot change the role of protected users (System Administrator IT or Central Admin in Central Office).']);
+            }
+            $updateData['role'] = $newRole;
+        }
+        if ($this->request->getPost('branch_id') !== null) {
+            $newBranchId = $this->request->getPost('branch_id') ?: null;
+            // Prevent branch changes for protected users
+            if ($isProtected) {
+                // Get current branch ID (handle null case)
+                $currentBranchId = $user['branch_id'] ?? null;
+                if ($newBranchId != $currentBranchId) {
+                    if ($user['role'] === 'system_admin') {
+                        return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot change the branch of System Administrator IT users. This account is protected.']);
+                    } else {
+                        return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot change the branch of Central Admin in Central Office. This account is protected.']);
+                    }
+                }
+            }
+            $updateData['branch_id'] = $newBranchId;
+        }
+        if ($this->request->getPost('password')) {
+            $updateData['password'] = $this->request->getPost('password');
+        }
+
+        if (empty($updateData)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No data to update']);
+        }
+
+        try {
+            // Hash password if provided
+            if (isset($updateData['password'])) {
+                $updateData['password'] = password_hash($updateData['password'], PASSWORD_DEFAULT);
+            }
+
+            $this->userModel->update($userId, $updateData);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'UPDATE',
+                $oldValues,
+                array_merge($user, $updateData),
+                $session->get('user_id')
+            );
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User updated successfully',
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete user (soft delete)
+     */
+    public function deleteUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $user = $this->userModel->withDeleted()->find($userId);
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Check if already deleted
+        if (!empty($user['deleted_at'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User is already deleted']);
+        }
+
+        // Prevent deleting yourself
+        if ($userId == $session->get('user_id')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot delete your own account']);
+        }
+
+        // Get user's branch information
+        $branchName = null;
+        if (!empty($user['branch_id'])) {
+            $branch = $this->db->table('branches')->where('id', $user['branch_id'])->get()->getRowArray();
+            $branchName = $branch['name'] ?? null;
+        }
+
+        // Protect System Administrator IT users (any branch)
+        if ($user['role'] === 'system_admin') {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot delete System Administrator IT users. This account is protected.']);
+        }
+
+        // Protect Central Admin in Central Office
+        if ($user['role'] === 'central_admin' && $branchName === 'Central Office') {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot delete Central Admin in Central Office. This account is protected.']);
+        }
+
+        try {
+            // Soft delete by setting deleted_at
+            $this->userModel->update($userId, ['deleted_at' => date('Y-m-d H:i:s')]);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'SOFT_DELETE',
+                $user,
+                array_merge($user, ['deleted_at' => date('Y-m-d H:i:s')]),
+                $session->get('user_id')
+            );
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User deleted successfully. You can restore it later.',
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Restore a deleted user
+     */
+    public function restoreUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $user = $this->userModel->withDeleted()->find($userId);
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Check if user is actually deleted
+        if (empty($user['deleted_at'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User is not deleted']);
+        }
+
+        try {
+            // Restore user by clearing deleted_at
+            $this->userModel->restoreUser($userId);
+            
+            // Log to audit trail
+            $this->auditTrailModel->logChange(
+                'users',
+                $userId,
+                'RESTORE',
+                $user,
+                array_merge($user, ['deleted_at' => null]),
+                $session->get('user_id')
+            );
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User restored successfully',
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Test endpoint to check users data
+     */
+    public function testUsersData()
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $usersData = $this->getUsersData();
+        
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => $usersData,
+            'counts' => [
+                'all' => count($usersData['all_users']),
+                'active' => count($usersData['active_users']),
+                'deleted' => count($usersData['deleted_users']),
+            ]
+        ]);
+    }
+
+    /**
+     * Get user by ID (API) - includes deleted users
+     */
+    public function getUser($userId)
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $user = $this->db->table('users u')
+            ->select('u.*, b.name as branch_name, b.id as branch_id, u.deleted_at')
+            ->join('branches b', 'b.id = u.branch_id', 'left')
+            ->where('u.id', $userId)
+            ->get()
+            ->getRowArray();
+
+        if (!$user) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+        }
+
+        // Remove password from response
+        unset($user['password']);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Get comprehensive monthly reports (API)
+     */
+    public function getMonthlyReports()
+    {
+        $session = session();
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        $month = $this->request->getGet('month'); // Format: YYYY-MM
+        if (!$month) {
+            $month = date('Y-m');
+        }
+
+        try {
+            [$year, $monthNum] = explode('-', $month);
+            $startDate = date('Y-m-01', strtotime("$year-$monthNum-01"));
+            $endDate = date('Y-m-t', strtotime("$year-$monthNum-01"));
+
+            $reports = [
+                'branch_manager' => $this->getBranchManagerReports($startDate, $endDate),
+                'inventory_staff' => $this->getInventoryStaffReports($startDate, $endDate),
+                'franchise_manager' => $this->getFranchiseManagerReports($startDate, $endDate),
+                'logistics_coordinator' => $this->getLogisticsCoordinatorReports($startDate, $endDate),
+            ];
+
+            // Get user information for prepared_by
+            $userId = $session->get('user_id');
+            $userEmail = $session->get('email');
+            $userName = $userEmail; // Default to email, can be enhanced to get full name if available
+            
+            // Try to get user's full name if available
+            $userModel = new \App\Models\UserModel();
+            $user = $userModel->find($userId);
+            if ($user && isset($user['name'])) {
+                $userName = $user['name'];
+            } elseif ($user && isset($user['email'])) {
+                $userName = $user['email'];
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'month' => $month,
+                'reports' => $reports,
+                'prepared_by' => [
+                    'name' => $userName,
+                    'email' => $userEmail,
+                    'role' => $session->get('role'),
+                ],
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get Branch Manager monthly reports (Sales, Inventory & Damage Products)
+     */
+    private function getBranchManagerReports($startDate, $endDate)
+    {
+        $reports = [
+            'sales' => [],
+            'inventory' => [],
+            'inventory_details' => [], // Detailed product data organized by branch → category → product
+            'damage_products' => [],
+        ];
+
+        // Get sales data by branch (check if sales table exists)
+        try {
+            $tables = $this->db->listTables();
+            if (in_array('sales', $tables)) {
+                $salesQuery = $this->db->table('sales s')
+                    ->select('b.id as branch_id, b.name as branch_name, 
+                             SUM(s.total_amount) as total_sales, 
+                             COUNT(s.id) as transaction_count,
+                             AVG(s.total_amount) as avg_transaction')
+                    ->join('branches b', 'b.id = s.branch_id', 'left')
+                    ->where('DATE(s.sale_date) >=', $startDate)
+                    ->where('DATE(s.sale_date) <=', $endDate)
+                    ->groupBy('b.id, b.name')
+                    ->get();
+
+                $reports['sales'] = $salesQuery->getResultArray();
+            } else {
+                // If sales table doesn't exist, try to get sales from stock_transactions
+                $startDateOnly = date('Y-m-d', strtotime($startDate));
+                $endDateOnly = date('Y-m-d', strtotime($endDate));
+                
+                $salesQuery = "
+                    SELECT 
+                        b.id as branch_id, 
+                        b.name as branch_name,
+                        SUM(ABS(st.quantity * COALESCE(st.unit_cost, p.price, 0))) as total_sales,
+                        COUNT(DISTINCT st.reference_id) as transaction_count,
+                        AVG(ABS(st.quantity * COALESCE(st.unit_cost, p.price, 0))) as avg_transaction
+                    FROM stock_transactions st
+                    LEFT JOIN products p ON p.id = st.product_id
+                    LEFT JOIN branches b ON b.id = st.branch_id
+                    WHERE st.transaction_type = 'stock_out'
+                    AND st.reference_type = 'sale'
+                    AND (
+                        (st.transaction_date IS NOT NULL AND DATE(st.transaction_date) >= " . $this->db->escape($startDateOnly) . " AND DATE(st.transaction_date) <= " . $this->db->escape($endDateOnly) . ")
+                        OR 
+                        (st.transaction_date IS NULL AND DATE(st.created_at) >= " . $this->db->escape($startDateOnly) . " AND DATE(st.created_at) <= " . $this->db->escape($endDateOnly) . ")
+                    )
+                    GROUP BY b.id, b.name
+                ";
+                
+                $salesFromTransactions = $this->db->query($salesQuery);
+                $reports['sales'] = $salesFromTransactions->getResultArray();
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error fetching sales data: ' . $e->getMessage());
+            $reports['sales'] = [];
+        }
+
+        // Get inventory summary by branch - filter by products active in the month
+        // First get active product IDs for the month
+        $activeProductIdsForSummary = $this->db->query("
+            SELECT DISTINCT p.id
+            FROM products p
+            WHERE p.deleted_at IS NULL
+            AND (
+                (DATE(p.updated_at) >= ? AND DATE(p.updated_at) <= ?)
+                OR
+                p.id IN (
+                    SELECT DISTINCT st.product_id
+                    FROM stock_transactions st
+                    WHERE (
+                        (st.transaction_date IS NOT NULL AND DATE(st.transaction_date) >= ? AND DATE(st.transaction_date) <= ?)
+                        OR
+                        (st.transaction_date IS NULL AND DATE(st.created_at) >= ? AND DATE(st.created_at) <= ?)
+                    )
+                )
+            )
+        ", [$startDate, $endDate, $startDate, $endDate, $startDate, $endDate])->getResultArray();
+        
+        $activeIdsForSummary = array_column($activeProductIdsForSummary, 'id');
+        
+        if (!empty($activeIdsForSummary)) {
+            $inventoryQuery = $this->db->table('products p')
+                ->select('b.id as branch_id, b.name as branch_name,
+                         COUNT(DISTINCT p.id) as total_items,
+                         SUM(p.stock_qty) as total_stock,
+                         SUM(p.stock_qty * p.price) as total_value,
+                         COUNT(CASE WHEN p.stock_qty <= p.min_stock THEN 1 END) as low_stock_items,
+                         COUNT(CASE WHEN p.expiry IS NOT NULL AND p.expiry < CURDATE() THEN 1 END) as expired_items')
+                ->join('branches b', 'b.id = p.branch_id', 'left')
+                ->where('p.deleted_at IS NULL')
+                ->whereIn('p.id', $activeIdsForSummary)
+                ->groupBy('b.id, b.name')
+                ->orderBy('b.name', 'ASC')
+                ->get();
+
+            $reports['inventory'] = $inventoryQuery->getResultArray();
+        }
+
+        // Get detailed product data organized by branch → category → product
+        $productDetailsQuery = $this->db->table('products p')
+            ->select('b.id as branch_id, 
+                     b.name as branch_name,
+                     COALESCE(c.id, 0) as category_id,
+                     COALESCE(c.name, "Uncategorized") as category_name,
+                     p.id as product_id,
+                     p.name as product_name,
+                     p.stock_qty,
+                     p.price,
+                     p.min_stock,
+                     p.expiry')
+            ->join('branches b', 'b.id = p.branch_id', 'left')
+            ->join('categories c', 'c.id = p.category_id', 'left')
+            ->where('p.deleted_at IS NULL')
+            ->whereIn('p.id', !empty($activeIdsForSummary) ? $activeIdsForSummary : [0])
+            ->orderBy('b.name', 'ASC')
+            ->orderBy('c.name', 'ASC')
+            ->orderBy('p.name', 'ASC')
+            ->get();
+
+        $products = $productDetailsQuery->getResultArray();
+        
+        // Organize products by branch → category → product and calculate derived values
+        $organizedProducts = [];
+        $today = date('Y-m-d');
+        foreach ($products as $product) {
+            $branchName = $product['branch_name'];
+            $categoryName = $product['category_name'];
+            
+            if (!isset($organizedProducts[$branchName])) {
+                $organizedProducts[$branchName] = [];
+            }
+            
+            if (!isset($organizedProducts[$branchName][$categoryName])) {
+                $organizedProducts[$branchName][$categoryName] = [];
+            }
+            
+            $totalValue = (float)$product['stock_qty'] * (float)$product['price'];
+            $isLowStock = ($product['stock_qty'] <= $product['min_stock']) ? 1 : 0;
+            $isExpired = ($product['expiry'] !== null && $product['expiry'] < $today) ? 1 : 0;
+
+            $organizedProducts[$branchName][$categoryName][] = [
+                'product_id' => $product['product_id'],
+                'product_name' => $product['product_name'],
+                'total_stock' => (float)$product['stock_qty'],
+                'total_value' => $totalValue,
+                'is_low_stock' => $isLowStock,
+                'is_expired' => $isExpired,
+            ];
+        }
+        $reports['inventory_details'] = $organizedProducts;
+
+        // Get damaged products from stock transactions
+        $startDateOnly = date('Y-m-d', strtotime($startDate));
+        $endDateOnly = date('Y-m-d', strtotime($endDate));
+        
+        $damageQuery = "
+            SELECT 
+                b.id as branch_id, 
+                b.name as branch_name,
+                p.id as product_id, 
+                p.name as product_name, 
+                COALESCE(c.name, 'N/A') as category,
+                SUM(ABS(st.quantity)) as total_damaged,
+                COUNT(st.id) as damage_count
+            FROM stock_transactions st
+            LEFT JOIN products p ON p.id = st.product_id
+            LEFT JOIN branches b ON b.id = st.branch_id
+            LEFT JOIN categories c ON c.id = p.category_id
+            WHERE st.reference_type = 'damage_report'
+            AND (
+                (st.transaction_date IS NOT NULL AND DATE(st.transaction_date) >= " . $this->db->escape($startDateOnly) . " AND DATE(st.transaction_date) <= " . $this->db->escape($endDateOnly) . ")
+                OR 
+                (st.transaction_date IS NULL AND DATE(st.created_at) >= " . $this->db->escape($startDateOnly) . " AND DATE(st.created_at) <= " . $this->db->escape($endDateOnly) . ")
+            )
+            GROUP BY b.id, b.name, p.id, p.name, c.name
+        ";
+        
+        $damageResult = $this->db->query($damageQuery);
+        $reports['damage_products'] = $damageResult->getResultArray();
+
+        return $reports;
+    }
+
+    /**
+     * Get Inventory Staff monthly reports (Inventory & Damage Products)
+     */
+    private function getInventoryStaffReports($startDate, $endDate)
+    {
+        $reports = [
+            'inventory' => [],
+            'inventory_details' => [], // Detailed product data organized by branch → category → product
+            'damage_products' => [],
+        ];
+
+        // Get inventory summary by branch - filter by products active in the month
+        // First get active product IDs for the month
+        $activeProductIdsForSummary = $this->db->query("
+            SELECT DISTINCT p.id
+            FROM products p
+            WHERE p.deleted_at IS NULL
+            AND (
+                (DATE(p.updated_at) >= ? AND DATE(p.updated_at) <= ?)
+                OR
+                p.id IN (
+                    SELECT DISTINCT st.product_id
+                    FROM stock_transactions st
+                    WHERE (
+                        (st.transaction_date IS NOT NULL AND DATE(st.transaction_date) >= ? AND DATE(st.transaction_date) <= ?)
+                        OR
+                        (st.transaction_date IS NULL AND DATE(st.created_at) >= ? AND DATE(st.created_at) <= ?)
+                    )
+                )
+            )
+        ", [$startDate, $endDate, $startDate, $endDate, $startDate, $endDate])->getResultArray();
+        
+        $activeIdsForSummary = array_column($activeProductIdsForSummary, 'id');
+        
+        if (empty($activeIdsForSummary)) {
+            $reports['inventory'] = [];
+        } else {
+            $inventoryQuery = $this->db->table('products p')
+                ->select('b.id as branch_id, b.name as branch_name,
+                         COUNT(DISTINCT p.id) as total_items,
+                         SUM(p.stock_qty) as total_stock,
+                         SUM(p.stock_qty * p.price) as total_value,
+                         COUNT(CASE WHEN p.stock_qty <= p.min_stock THEN 1 END) as low_stock_items,
+                         COUNT(CASE WHEN p.expiry IS NOT NULL AND p.expiry < CURDATE() THEN 1 END) as expired_items')
+                ->join('branches b', 'b.id = p.branch_id', 'left')
+                ->where('p.deleted_at IS NULL')
+                ->whereIn('p.id', $activeIdsForSummary)
+                ->groupBy('b.id, b.name')
+                ->get();
+
+            $reports['inventory'] = $inventoryQuery->getResultArray();
+        }
+
+        // Get detailed product data organized by branch → category → product
+        // Filter products that were updated in the month OR have stock transactions in the month
+        // Use a subquery to get product IDs that have activity in the month
+        $activeProductIdsQuery = $this->db->query("
+            SELECT DISTINCT p.id
+            FROM products p
+            WHERE p.deleted_at IS NULL
+            AND (
+                (DATE(p.updated_at) >= ? AND DATE(p.updated_at) <= ?)
+                OR
+                p.id IN (
+                    SELECT DISTINCT st.product_id
+                    FROM stock_transactions st
+                    WHERE (
+                        (st.transaction_date IS NOT NULL AND DATE(st.transaction_date) >= ? AND DATE(st.transaction_date) <= ?)
+                        OR
+                        (st.transaction_date IS NULL AND DATE(st.created_at) >= ? AND DATE(st.created_at) <= ?)
+                    )
+                )
+            )
+        ", [$startDate, $endDate, $startDate, $endDate, $startDate, $endDate]);
+        
+        $activeProductIds = [];
+        if ($activeProductIdsQuery) {
+            $results = $activeProductIdsQuery->getResultArray();
+            foreach ($results as $row) {
+                $activeProductIds[] = $row['id'];
+            }
+        }
+        
+        // If no active products found, return empty array
+        if (empty($activeProductIds)) {
+            $reports['inventory_details'] = [];
+        } else {
+            $productDetailsQuery = $this->db->table('products p')
+                ->select('b.id as branch_id, 
+                         b.name as branch_name,
+                         COALESCE(c.id, 0) as category_id,
+                         COALESCE(c.name, "Uncategorized") as category_name,
+                         p.id as product_id,
+                         p.name as product_name,
+                         p.stock_qty,
+                         p.price,
+                         p.min_stock,
+                         p.expiry,
+                         p.updated_at')
+                ->join('branches b', 'b.id = p.branch_id', 'left')
+                ->join('categories c', 'c.id = p.category_id', 'left')
+                ->where('p.deleted_at IS NULL')
+                ->whereIn('p.id', $activeProductIds)
+                ->orderBy('b.name', 'ASC')
+                ->orderBy('c.name', 'ASC')
+                ->orderBy('p.name', 'ASC')
+                ->get();
+
+            $products = $productDetailsQuery->getResultArray();
+            
+            // Organize products by branch → category → product and calculate derived values
+            $organizedProducts = [];
+            foreach ($products as $product) {
+            $branchName = $product['branch_name'] ?? 'Unknown Branch';
+            $categoryName = $product['category_name'] ?? 'Uncategorized';
+            
+            // Calculate values
+            $totalStock = (float)($product['stock_qty'] ?? 0);
+            $price = (float)($product['price'] ?? 0);
+            $totalValue = $totalStock * $price;
+            
+            // Calculate is_low_stock
+            $isLowStock = 0;
+            if (isset($product['min_stock']) && $product['min_stock'] !== null) {
+                $minStock = (float)$product['min_stock'];
+                $isLowStock = ($totalStock <= $minStock) ? 1 : 0;
+            }
+            
+            // Calculate is_expired
+            $isExpired = 0;
+            if (isset($product['expiry']) && $product['expiry'] !== null) {
+                $expiryDate = strtotime($product['expiry']);
+                $today = strtotime('today');
+                $isExpired = ($expiryDate < $today) ? 1 : 0;
+            }
+            
+            if (!isset($organizedProducts[$branchName])) {
+                $organizedProducts[$branchName] = [];
+            }
+            
+            if (!isset($organizedProducts[$branchName][$categoryName])) {
+                $organizedProducts[$branchName][$categoryName] = [];
+            }
+            
+            $organizedProducts[$branchName][$categoryName][] = [
+                'product_id' => $product['product_id'] ?? 0,
+                'product_name' => $product['product_name'] ?? 'Unknown Product',
+                'total_stock' => $totalStock,
+                'total_value' => $totalValue,
+                'is_low_stock' => $isLowStock,
+                'is_expired' => $isExpired,
+                'last_updated' => $product['updated_at'] ?? null,
+            ];
+            }
+            
+            $reports['inventory_details'] = $organizedProducts;
+        }
+
+        // Get damaged products (same as branch manager)
+        $damageQuery = $this->db->table('stock_transactions st')
+            ->select('b.id as branch_id, b.name as branch_name,
+                     p.id as product_id, p.name as product_name, 
+                     COALESCE(c.name, "N/A") as category,
+                     SUM(ABS(st.quantity)) as total_damaged,
+                     COUNT(st.id) as damage_count')
+            ->join('products p', 'p.id = st.product_id', 'left')
+            ->join('branches b', 'b.id = st.branch_id', 'left')
+            ->join('categories c', 'c.id = p.category_id', 'left')
+            ->where('st.reference_type', 'damage_report')
+            ->where('DATE(st.transaction_date) >=', $startDate)
+            ->where('DATE(st.transaction_date) <=', $endDate)
+            ->groupBy('b.id, b.name, p.id, p.name, c.name')
+            ->get();
+
+        $reports['damage_products'] = $damageQuery->getResultArray();
+
+        return $reports;
+    }
+
+    /**
+     * Get Franchise Manager monthly reports
+     */
+    private function getFranchiseManagerReports($startDate, $endDate)
+    {
+        $reports = [
+            'applications' => [],
+            'allocations' => [],
+            'royalties' => [],
+        ];
+
+        // Get franchise applications (no branch_id, use proposed_location/city instead)
+        $applicationsQuery = $this->db->table('franchise_applications fa')
+            ->select('fa.*, CONCAT(fa.proposed_location, ", ", fa.city) as branch_name')
+            ->where('DATE(fa.created_at) >=', $startDate)
+            ->where('DATE(fa.created_at) <=', $endDate)
+            ->get();
+
+        $reports['applications'] = $applicationsQuery->getResultArray();
+
+        // Get allocations (table is called supply_allocations, not product_allocations)
+        $allocationsQuery = $this->db->table('supply_allocations pa')
+            ->select('pa.*, b.name as branch_name')
+            ->join('branches b', 'b.id = pa.branch_id', 'left')
+            ->where('DATE(pa.created_at) >=', $startDate)
+            ->where('DATE(pa.created_at) <=', $endDate)
+            ->get();
+
+        $reports['allocations'] = $allocationsQuery->getResultArray();
+
+        // Get royalty payments
+        $royaltiesQuery = $this->db->table('royalty_payments rp')
+            ->select('rp.*, b.name as branch_name')
+            ->join('branches b', 'b.id = rp.branch_id', 'left')
+            ->where('rp.period_year', date('Y', strtotime($startDate)))
+            ->where('rp.period_month', date('m', strtotime($startDate)))
+            ->get();
+
+        $reports['royalties'] = $royaltiesQuery->getResultArray();
+
+        return $reports;
+    }
+
+    /**
+     * Get Logistics Coordinator monthly reports
+     */
+    private function getLogisticsCoordinatorReports($startDate, $endDate)
+    {
+        $reports = [
+            'deliveries' => [],
+            'delivery_summary' => [],
+        ];
+
+        // Get deliveries (use scheduled_date for filtering)
+        $deliveriesQuery = $this->db->table('deliveries d')
+            ->select('d.*, b.name as branch_name, po.order_number, s.name as supplier_name')
+            ->join('branches b', 'b.id = d.branch_id', 'left')
+            ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left')
+            ->join('suppliers s', 's.id = po.supplier_id', 'left')
+            ->where('DATE(d.scheduled_date) >=', $startDate)
+            ->where('DATE(d.scheduled_date) <=', $endDate)
+            ->get();
+
+        $reports['deliveries'] = $deliveriesQuery->getResultArray();
+
+        // Get delivery summary by branch (use scheduled_date for filtering)
+        $summaryQuery = $this->db->table('deliveries d')
+            ->select('b.id as branch_id, b.name as branch_name,
+                     COUNT(d.id) as total_deliveries,
+                     COUNT(CASE WHEN d.status = "delivered" OR d.status = "received" THEN 1 END) as completed_deliveries,
+                     COUNT(CASE WHEN d.status = "scheduled" THEN 1 END) as pending_deliveries,
+                     COUNT(CASE WHEN d.status = "in_transit" THEN 1 END) as in_transit_deliveries')
+            ->join('branches b', 'b.id = d.branch_id', 'left')
+            ->where('DATE(d.scheduled_date) >=', $startDate)
+            ->where('DATE(d.scheduled_date) <=', $endDate)
+            ->groupBy('b.id, b.name')
+            ->get();
+
+        $reports['delivery_summary'] = $summaryQuery->getResultArray();
+
+        return $reports;
     }
 }

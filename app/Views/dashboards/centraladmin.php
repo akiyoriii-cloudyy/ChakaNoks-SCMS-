@@ -22,6 +22,7 @@
     <!-- Professional Dashboard CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/css/dashboard-pro.css') ?>">
     
+    <!-- CRITICAL: Force users section visibility immediately -->
     <style>
         /* Ensure navigation is ALWAYS visible */
         .dashboard-sidebar,
@@ -34,6 +35,24 @@
         /* Content sections */
         .content-section {
             animation: fadeIn 0.3s ease-in;
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Ensure dashboard-content container doesn't hide children */
+        .dashboard-content {
+            position: relative;
+            min-height: 400px;
+            overflow: visible !important;
+        }
+        
+        .dashboard-content .content-section {
+            position: relative;
         }
         
         @keyframes fadeIn {
@@ -47,6 +66,8 @@
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            min-height: 200px;
+            height: auto;
         }
         
         .card-header {
@@ -140,6 +161,56 @@
             color: white;
         }
         
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-view { 
+            background: #10b981; 
+            color: white; 
+        }
+        
+        .btn-view:hover {
+            background: #059669;
+        }
+        
+        .btn-edit {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+            font-weight: 500;
+        }
+        
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .btn-edit:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+        
+        .badge-info {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
         /* Supplier selection styling */
         .supplier-option {
         transition: all 0.3s ease;
@@ -165,6 +236,7 @@
             background: #2d5016;
             border-radius: 10px;
         }
+        
   </style>
 </head>
 <body>
@@ -186,7 +258,8 @@
             <nav class="sidebar-nav">
                 <?php 
                 $currentUrl = current_url();
-                $isDashboard = strpos($currentUrl, 'centraladmin/dashboard') !== false && strpos($currentUrl, '?tab=') === false;
+                $activeTab = $activeTab ?? 'dashboard';
+                $isDashboard = ($activeTab === 'dashboard');
                 ?>
                 <a href="<?= base_url('centraladmin/dashboard') ?>" class="nav-item <?= $isDashboard ? 'active' : '' ?>">
                     <i class="fas fa-tachometer-alt"></i>
@@ -249,29 +322,33 @@
                         <p class="page-subtitle">Real-time monitoring of all branches and operations</p>
     </div>
 </div>
-                <div class="header-right">
+                <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
                     <button class="btn btn-secondary" onclick="refreshDashboard()">
                         <i class="fas fa-sync-alt"></i>
                         <span>Refresh</span>
                     </button>
                     <span class="refresh-indicator" id="lastRefresh" style="font-size: 0.8rem; color: #6b7280;">Last updated: Just now</span>
+                    <?= view('components/notifications') ?>
                 </div>
             </header>
 
             <div class="dashboard-content">
-                <!-- Welcome Banner -->
-                <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 10px; padding: 12px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15); display: inline-flex; align-items: center; gap: 12px; max-width: fit-content;">
-                    <div style="width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fas fa-check" style="font-size: 18px; color: #28a745;"></i>
-                    </div>
-                    <div>
-                        <div style="color: white; font-size: 1rem; font-weight: 700; line-height: 1.2;">Welcome to Central Office</div>
-                        <div style="color: rgba(255, 255, 255, 0.95); font-size: 0.875rem; font-weight: 500; line-height: 1.2;">Dashboard</div>
-                    </div>
-                </div>
-
                 <!-- Dashboard Content -->
-                <div class="tab-content active" id="dashboardSection" style="display: block !important;">
+                <?php 
+                $activeTab = $activeTab ?? 'dashboard';
+                ?>
+                <!-- Dashboard Section - Hidden when users tab is active -->
+                <div class="content-section <?= $activeTab === 'dashboard' ? 'active' : '' ?>" id="dashboardSection" style="<?= $activeTab === 'dashboard' ? 'display: block !important;' : 'display: none !important;' ?>">
+                    <!-- Welcome Banner -->
+                    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 10px; padding: 12px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15); display: inline-flex; align-items: center; gap: 12px; max-width: fit-content;">
+                        <div style="width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-check" style="font-size: 18px; color: #28a745;"></i>
+                        </div>
+                        <div>
+                            <div style="color: white; font-size: 1rem; font-weight: 700; line-height: 1.2;">Welcome to Central Office</div>
+                            <div style="color: rgba(255, 255, 255, 0.95); font-size: 0.875rem; font-weight: 500; line-height: 1.2;">Dashboard</div>
+                        </div>
+                    </div>
                     <!-- Key Metrics -->
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -422,8 +499,78 @@
         </div>
     </div>
 
+                    <!-- User Management Section -->
+                    <div class="content-card" style="margin-top: 2rem;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="card-title" style="margin: 0;">
+                                <i class="fas fa-users" style="color: var(--info); margin-right: 8px;"></i>
+                                User Management
+                            </h3>
+                            <button class="btn btn-primary" onclick="showCreateUserModal()" style="background: #2d5016; border: none; padding: 10px 20px; border-radius: 6px; color: white; font-weight: 500;">
+                                <i class="fas fa-plus"></i> Create User
+                            </button>
+                        </div>
+                        <div id="usersContent" style="padding: 20px 0;">
+                            <?php 
+                            // Get users data
+                            $usersData = $data['users'] ?? null;
+                            $activeUsers = $data['users']['active_users'] ?? [];
+                            $deletedUsers = $data['users']['deleted_users'] ?? [];
+                            ?>
+                            <!-- Active Users Section -->
+                            <h4 style="margin-bottom: 16px; color: #1e293b; font-weight: 600;">
+                                <i class="fas fa-users" style="color: #10b981; margin-right: 8px;"></i>
+                                Active Users (<?= count($activeUsers) ?>)
+                            </h4>
+                            <div style="overflow-x: auto;">
+                                <table class="table table-hover" style="margin-bottom: 2rem; min-width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Branch</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Users will be loaded via JavaScript pagination -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="activeUsersPagination" style="margin-top: 16px;"></div>
+
+                            <!-- Deleted Users Section -->
+                            <?php if (!empty($deletedUsers)): ?>
+                                <h4 style="margin-bottom: 16px; color: #1e293b; font-weight: 600; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+                                    <i class="fas fa-trash-restore" style="color: #ef4444; margin-right: 8px;"></i>
+                                    Deleted Users (<?= count($deletedUsers) ?>)
+                                </h4>
+                                <div style="overflow-x: auto;">
+                                    <table class="table table-hover" style="opacity: 0.7; min-width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Branch</th>
+                                                <th>Deleted At</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="deletedUsersTableBody">
+                                            <!-- Deleted users will be loaded via JavaScript pagination -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="deletedUsersPagination" style="margin-top: 16px;"></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Purchase Requests Tab -->
-                <div class="tab-content <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>" id="purchaseRequestsSection" style="<?= $activeTab === 'purchaseRequests' ? 'display: block !important;' : 'display: none !important;' ?>">
+                <div class="content-section <?= $activeTab === 'purchaseRequests' ? 'active' : '' ?>" id="purchaseRequestsSection" style="<?= $activeTab === 'purchaseRequests' ? 'display: block;' : 'display: none;' ?>">
                     <div class="content-card">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <h3 class="card-title" style="margin: 0;">Purchase Requests</h3>
@@ -454,7 +601,7 @@
                 </div>
 
                 <!-- Purchase Orders Tab -->
-                <div class="tab-content <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>" id="purchaseOrdersSection" style="<?= $activeTab === 'purchaseOrders' ? 'display: block !important;' : 'display: none !important;' ?>">
+                <div class="content-section <?= $activeTab === 'purchaseOrders' ? 'active' : '' ?>" id="purchaseOrdersSection" style="<?= $activeTab === 'purchaseOrders' ? 'display: block;' : 'display: none;' ?>">
                     <div class="content-card">
                         <div class="card-header" style="margin-bottom: 20px;">
                             <h3 class="card-title" style="margin: 0;">Purchase Orders</h3>
@@ -469,7 +616,7 @@
                 </div>
 
                 <!-- Deliveries Tab -->
-                <div class="tab-content <?= $activeTab === 'deliveries' ? 'active' : '' ?>" id="deliveriesSection" style="<?= $activeTab === 'deliveries' ? 'display: block !important;' : 'display: none !important;' ?>">
+                <div class="content-section <?= $activeTab === 'deliveries' ? 'active' : '' ?>" id="deliveriesSection" style="<?= $activeTab === 'deliveries' ? 'display: block;' : 'display: none;' ?>">
                     <div class="content-card">
                         <div class="card-header" style="margin-bottom: 20px;">
                             <h3 class="card-title" style="margin: 0;">Deliveries</h3>
@@ -484,7 +631,7 @@
                 </div>
 
                 <!-- Suppliers Tab -->
-                <div class="tab-content <?= $activeTab === 'suppliers' ? 'active' : '' ?>" id="suppliersSection" style="<?= $activeTab === 'suppliers' ? 'display: block !important;' : 'display: none !important;' ?>">
+                <div class="content-section <?= $activeTab === 'suppliers' ? 'active' : '' ?>" id="suppliersSection" style="<?= $activeTab === 'suppliers' ? 'display: block;' : 'display: none;' ?>">
                     <div class="content-card">
                         <div class="card-header" style="margin-bottom: 20px;">
                             <h3 class="card-title" style="margin: 0;">Suppliers</h3>
@@ -499,11 +646,11 @@
                 </div>
 
                 <!-- Accounts Payable Tab -->
-                <div class="tab-content <?= $activeTab === 'accountsPayable' ? 'active' : '' ?>" id="accountsPayableSection" style="<?= $activeTab === 'accountsPayable' ? 'display: block !important;' : 'display: none !important;' ?>">
+                <div class="content-section <?= $activeTab === 'accountsPayable' ? 'active' : '' ?>" id="accountsPayableSection" style="<?= $activeTab === 'accountsPayable' ? 'display: block;' : 'display: none;' ?>">
                     <div class="content-card">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <h3 class="card-title" style="margin: 0;">Accounts Payable</h3>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                                 <select id="apStatusFilter" class="form-select" style="width: auto; min-width: 150px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;">
                                     <option value="all">All Status</option>
                                     <option value="unpaid">Unpaid</option>
@@ -516,6 +663,10 @@
                                     <option value="with_invoice">With Invoice #</option>
                                     <option value="without_invoice">Without Invoice #</option>
                                 </select>
+                                <div style="display: flex; gap: 5px; align-items: center; padding: 0 5px;">
+                                    <label style="font-size: 0.9rem; color: #2d5016; font-weight: 600; white-space: nowrap;">Month:</label>
+                                    <input type="month" id="receiptMonthFilter" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.875rem; width: 140px;">
+                                </div>
                                 <button class="btn btn-sm btn-info" onclick="backfillAccountsPayable()" style="background: #17a2b8; border: none; padding: 8px 16px; border-radius: 6px; color: white;">
                                     <i class="fas fa-sync"></i> Backfill
                                 </button>
@@ -531,10 +682,29 @@
                 </div>
 
                 <!-- Reports Tab -->
-                <div class="tab-content <?= $activeTab === 'reports' ? 'active' : '' ?>" id="reportsSection" style="<?= $activeTab === 'reports' ? 'display: block !important;' : 'display: none !important;' ?>">
+                <div class="content-section <?= $activeTab === 'reports' ? 'active' : '' ?>" id="reportsSection" style="<?= $activeTab === 'reports' ? 'display: block;' : 'display: none;' ?>">
                     <div class="content-card">
-                        <div class="card-header" style="margin-bottom: 20px;">
-                            <h3 class="card-title" style="margin: 0;">Reports</h3>
+                        <div class="card-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white; padding: 20px 24px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3 class="card-title" style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 12px;">
+                                        <i class="fas fa-chart-line" style="font-size: 1.75rem;"></i>
+                                        Comprehensive Monthly Reports
+                                    </h3>
+                                    <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 0.95rem;">General reports from all departments</p>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <input type="month" id="reportsMonthFilter" class="form-control" 
+                                           style="width: 200px; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: white;"
+                                           value="<?= date('Y-m') ?>">
+                                    <button class="btn btn-light" onclick="loadReports()" style="padding: 8px 20px; border-radius: 6px; font-weight: 500;">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                    <button class="btn btn-light" onclick="printAllReports()" style="padding: 8px 20px; border-radius: 6px; font-weight: 500;">
+                                        <i class="fas fa-print"></i> Print Report
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div id="reportsContent" style="padding: 20px; min-height: 200px;">
                             <div class="text-center p-4">
@@ -1475,14 +1645,46 @@
                                 const supplierName = ap.supplier ? ap.supplier.name : 'N/A';
                                 const branchName = ap.branch ? ap.branch.name : 'N/A';
                                 const invoiceNumber = ap.invoice_number || '';
-                                const amount = parseFloat(ap.amount || 0);
-                                const paidAmount = parseFloat(ap.paid_amount || 0);
-                                const balance = parseFloat(ap.balance || 0);
+                                const amount = parseFloat(ap.amount || ap.total_amount || 0);
+                                // Check both paid_amount and amount_paid (in case of field name differences)
+                                const paidAmount = parseFloat(ap.paid_amount || ap.amount_paid || 0);
+                                const balance = parseFloat(ap.balance || (amount - paidAmount) || 0);
                                 const dueDate = ap.due_date ? new Date(ap.due_date) : null;
                                 const daysInfo = ap.days_info || '';
                                 const paymentDate = ap.payment_date ? new Date(ap.payment_date) : null;
-                                const paymentMethod = ap.payment_method || '';
+                                // Log raw payment method before formatting
+                                console.log('Raw payment_method for AP ' + ap.id + ':', ap.payment_method, 'Type:', typeof ap.payment_method);
+                                const paymentMethod = formatPaymentMethod(ap.payment_method || '');
                                 const paymentReference = ap.payment_reference || '';
+                                
+                                // Determine if payment has been made (for showing receipt/print buttons)
+                                // Show buttons if: status is paid/partial OR there's any payment amount OR payment date exists
+                                const hasPayment = paidAmount > 0 || paymentDate !== null;
+                                const isPaid = status === 'paid';
+                                const isPartial = status === 'partial';
+                                // ALWAYS show receipt buttons if there's any payment made, regardless of status
+                                const showReceiptButtons = isPaid || isPartial || hasPayment;
+                                
+                                // Force show if paidAmount > 0 (most reliable check)
+                                const forceShowReceipt = paidAmount > 0;
+                                
+                                // Debug: Log ALL accounts payable entries to see what's happening
+                                console.log('=== AP Entry Debug ===');
+                                console.log('AP ID:', ap.id);
+                                console.log('Status:', status);
+                                console.log('Paid Amount:', paidAmount);
+                                console.log('Amount:', amount);
+                                console.log('Balance:', balance);
+                                console.log('Payment Date:', paymentDate);
+                                console.log('Raw Payment Method:', ap.payment_method);
+                                console.log('Formatted Payment Method:', paymentMethod);
+                                console.log('isPaid:', isPaid);
+                                console.log('isPartial:', isPartial);
+                                console.log('hasPayment:', hasPayment);
+                                console.log('showReceiptButtons:', showReceiptButtons);
+                                console.log('forceShowReceipt:', forceShowReceipt);
+                                console.log('Full AP Object:', ap);
+                                console.log('========================');
                                 
                                 html += '<tr style="border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease;">';
                                 html += '<td style="padding: 15px; vertical-align: middle;"><strong style="color: #2d5016;">' + orderNumber + '</strong></td>';
@@ -1500,15 +1702,28 @@
                                 html += '<td style="padding: 15px; vertical-align: middle; color: ' + (balance > 0 ? '#dc3545' : '#28a745') + '; font-weight: 600;">₱' + balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle;"><span class="status-badge ' + statusClass + '" style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; text-transform: capitalize; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">' + statusText + '</span></td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentDate ? paymentDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
-                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentMethod || '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
+                                html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentMethod !== 'Not specified' ? paymentMethod : '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (paymentReference || '<span style="color: #999; font-style: italic;">-</span>') + '</td>';
                                 html += '<td style="padding: 15px; vertical-align: middle; color: #666;">' + (dueDate ? dueDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A') + '<br><small style="color: ' + (status === 'overdue' ? '#dc3545' : '#6c757d') + ';">' + daysInfo + '</small></td>';
                                 html += '<td style="padding: 15px; vertical-align: middle;"><div style="display: flex; gap: 5px; flex-wrap: wrap;">';
                                 html += '<button class="btn btn-sm btn-info viewAPBtn" data-id="' + ap.id + '" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem;"><i class="fas fa-eye"></i> View</button>';
                                 
-                                // Add payment button for unpaid/partial/overdue
-                                if (status !== 'paid') {
+                                // Add payment button for unpaid/partial/overdue (only if not fully paid)
+                                if (status !== 'paid' && balance > 0) {
                                     html += ' <button class="btn btn-sm btn-success recordPaymentBtn" data-id="' + ap.id + '" data-balance="' + balance + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px;"><i class="fas fa-money-bill-wave"></i> Pay</button>';
+                                }
+                                
+                                // Add receipt and print buttons - ALWAYS show if paidAmount > 0
+                                if (paidAmount > 0) {
+                                    console.log('✓ RENDERING RECEIPT BUTTONS FOR AP ID:', ap.id, 'Paid Amount:', paidAmount);
+                                    html += ' <button class="btn btn-sm btn-primary viewReceiptBtn" data-id="' + ap.id + '" style="background: #2d5016; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px; display: inline-block !important; visibility: visible !important; opacity: 1 !important;"><i class="fas fa-receipt"></i> Receipt</button>';
+                                    html += ' <button class="btn btn-sm btn-success printReceiptBtn" data-id="' + ap.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px; display: inline-block !important; visibility: visible !important; opacity: 1 !important;"><i class="fas fa-print"></i> Print Receipt</button>';
+                                } else if (isPaid || isPartial) {
+                                    console.log('✓ RENDERING RECEIPT BUTTONS FOR AP ID:', ap.id, 'Status:', status);
+                                    html += ' <button class="btn btn-sm btn-primary viewReceiptBtn" data-id="' + ap.id + '" style="background: #2d5016; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px; display: inline-block !important; visibility: visible !important; opacity: 1 !important;"><i class="fas fa-receipt"></i> Receipt</button>';
+                                    html += ' <button class="btn btn-sm btn-success printReceiptBtn" data-id="' + ap.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; margin-left: 5px; display: inline-block !important; visibility: visible !important; opacity: 1 !important;"><i class="fas fa-print"></i> Print Receipt</button>';
+                                } else {
+                                    console.log('✗ NOT RENDERING RECEIPT BUTTONS FOR AP ID:', ap.id, '- Paid Amount:', paidAmount, 'Status:', status);
                                 }
                                 
                                 // Add invoice update button (always show for easy access)
@@ -1710,6 +1925,18 @@
                 recordPayment(apId, balance);
             });
             
+            // View receipt handler
+            $('.viewReceiptBtn').off('click').on('click', function() {
+                const apId = $(this).data('id');
+                showReceipt(apId);
+            });
+            
+            // Print receipt handler (direct print)
+            $('.printReceiptBtn').off('click').on('click', function() {
+                const apId = $(this).data('id');
+                printReceiptDirect(apId);
+            });
+            
             // Update invoice handler
             $('.updateInvoiceBtn').off('click').on('click', function() {
                 const apId = $(this).data('id');
@@ -1798,7 +2025,7 @@
                         html += '<div><strong>Balance:</strong><br><span style="color: ' + (parseFloat(ap.balance || 0) > 0 ? '#dc3545' : '#28a745') + '; font-weight: 600;">₱' + parseFloat(ap.balance || 0).toFixed(2) + '</span></div>';
                         html += '<div><strong>Payment Status:</strong><br><span class="status-badge status-' + ap.payment_status + '">' + ap.payment_status + '</span></div>';
                         html += '<div><strong>Payment Date:</strong><br>' + (ap.payment_date ? new Date(ap.payment_date).toLocaleDateString() : 'N/A') + '</div>';
-                        html += '<div><strong>Payment Method:</strong><br>' + (ap.payment_method || 'N/A') + '</div>';
+                        html += '<div><strong>Payment Method:</strong><br>' + formatPaymentMethod(ap.payment_method || '') + '</div>';
                         html += '<div><strong>Payment Reference:</strong><br>' + (ap.payment_reference || 'N/A') + '</div>';
                         html += '</div>';
                         
@@ -1824,8 +2051,8 @@
             const paymentAmount = prompt('Enter payment amount (Balance: ₱' + parseFloat(balance).toFixed(2) + '):');
             
             if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-        return;
-    }
+                return;
+            }
 
             const paymentMethod = prompt('Enter payment method (e.g., Bank Transfer, Cash, Check):') || 'Bank Transfer';
             const paymentReference = prompt('Enter payment reference (e.g., Check #, Transaction ID):') || '';
@@ -1840,10 +2067,18 @@
                 },
                 dataType: 'json',
                 success: function(response) {
-        if (response.status === 'success') {
-                        alert('Payment recorded successfully!');
-                        loadAccountsPayable(); // Reload the list
-        } else {
+                    if (response.status === 'success') {
+                        // Small delay to ensure database is updated before reloading
+                        setTimeout(function() {
+                            loadAccountsPayable(); // Reload the list
+                        }, 300);
+                        // Show receipt after successful payment
+                        if (response.payment_transaction_id) {
+                            showReceipt(apId, response.payment_transaction_id);
+                        } else {
+                            showReceipt(apId);
+                        }
+                    } else {
                         alert('Error: ' + (response.message || 'Failed to record payment'));
                     }
                 },
@@ -1852,6 +2087,334 @@
                     alert('Error: ' + errorMsg);
                 }
             });
+        }
+        
+        function showReceipt(apId, paymentTransactionId = null) {
+            let url = '<?= base_url('accounts-payable/') ?>' + apId + '/receipt';
+            if (paymentTransactionId) {
+                url += '/' + paymentTransactionId;
+            }
+            
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.receipt) {
+                        renderReceipt(response.receipt);
+                        $('#receiptModal').modal('show');
+                    } else {
+                        alert('Error loading receipt: ' + (response.message || 'Failed to load receipt'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error loading receipt';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        function printReceiptDirect(apId, paymentTransactionId = null) {
+            let url = '<?= base_url('accounts-payable/') ?>' + apId + '/receipt';
+            if (paymentTransactionId) {
+                url += '/' + paymentTransactionId;
+            }
+            
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.receipt) {
+                        // Render receipt in a hidden container
+                        renderReceipt(response.receipt);
+                        
+                        // Wait a bit for rendering, then print
+                        setTimeout(function() {
+                            const printContent = document.getElementById('receiptContent');
+                            if (printContent) {
+                                // Create a new window for printing
+                                const printWindow = window.open('', '_blank', 'width=800,height=600');
+                                
+                                if (!printWindow) {
+                                    alert('Please allow popups to print the receipt');
+                                    return;
+                                }
+                                
+                                printWindow.document.write('<!DOCTYPE html><html><head><title>CHAKANOKS - Payment Receipt</title>');
+                                printWindow.document.write('<meta name="viewport" content="width=80mm">');
+                                printWindow.document.write('<style>');
+                                printWindow.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
+                                printWindow.document.write('html, body { width: 80mm; margin: 0; padding: 0; background: white; overflow: hidden; }');
+                                printWindow.document.write('body { font-family: "Courier New", monospace; margin: 0; padding: 0; }');
+                                printWindow.document.write('.receipt-container { max-width: 80mm; width: 80mm; min-width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-size: 10pt; line-height: 1.3; color: #000; }');
+                                printWindow.document.write('img { max-height: 30px; max-width: 30px; object-fit: contain; }');
+                                printWindow.document.write('@page { size: 80mm auto; margin: 0; width: 80mm; }');
+                                printWindow.document.write('@media print { html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; } .receipt-container { max-width: 80mm !important; width: 80mm !important; min-width: 80mm !important; padding: 10mm 5mm !important; } @page { size: 80mm auto !important; margin: 0 !important; width: 80mm !important; } }');
+                                printWindow.document.write('</style></head><body>');
+                                printWindow.document.write(printContent.innerHTML);
+                                printWindow.document.write('</body></html>');
+                                printWindow.document.close();
+                                
+                                // Trigger print after content is loaded
+                                printWindow.onload = function() {
+                                    setTimeout(function() {
+                                        printWindow.focus();
+                                        printWindow.print();
+                                        // Don't close immediately - let user interact with print dialog
+                                    }, 250);
+                                };
+                                
+                                // Fallback if onload doesn't fire
+                                setTimeout(function() {
+                                    if (printWindow.document.readyState === 'complete') {
+                                        printWindow.focus();
+                                        printWindow.print();
+                                    }
+                                }, 500);
+                            } else {
+                                alert('Receipt content not found');
+                            }
+                        }, 100);
+                    } else {
+                        alert('Error loading receipt: ' + (response.message || 'Failed to load receipt'));
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error loading receipt';
+                    alert('Error: ' + errorMsg);
+                }
+            });
+        }
+        
+        function renderReceipt(receipt) {
+            const statusClass = receipt.payment_status === 'paid' ? 'badge-success' : 
+                               receipt.payment_status === 'partial' ? 'badge-warning' : 
+                               receipt.payment_status === 'overdue' ? 'badge-danger' : 'badge-secondary';
+            const statusText = receipt.payment_status === 'paid' ? 'PAID' : 
+                              receipt.payment_status === 'partial' ? 'PARTIAL' : 
+                              receipt.payment_status === 'overdue' ? 'OVERDUE' : 'UNPAID';
+            
+            // Grocery store receipt style - narrow width (80mm/3 inches)
+            let html = '<div class="receipt-container" id="receiptContent" style="max-width: 80mm; width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-family: "Courier New", monospace; font-size: 10pt; line-height: 1.3; color: #000;">';
+            
+            // Company Header - Compact
+            html += '<div style="text-align: center; margin-bottom: 8mm; padding-bottom: 5mm; border-bottom: 1px dashed #000;">';
+            html += '<img src="<?= base_url('assets/images/529947519_1269388418065636_7025202690109522655_n.png') ?>" alt="CHAKANOKS Logo" style="max-height: 30px; max-width: 30px; height: auto; width: auto; object-fit: contain; display: block; margin: 0 auto 3mm;">';
+            html += '<div style="font-weight: bold; font-size: 14pt; letter-spacing: 1px; margin-bottom: 2mm;">CHAKANOKS</div>';
+            html += '<div style="font-size: 8pt; color: #666; margin-bottom: 3mm;">Supply Chain Management System</div>';
+            html += '<div style="font-weight: bold; font-size: 11pt; text-transform: uppercase; margin-top: 3mm;">PAYMENT RECEIPT</div>';
+            html += '</div>';
+            
+            // Invoice Information - Compact single column
+            html += '<div style="text-align: center; margin-bottom: 5mm; padding-bottom: 3mm; border-bottom: 1px dashed #000;">';
+            html += '<div style="font-weight: bold; font-size: 9pt; margin-bottom: 2mm;">INVOICE #: ' + (receipt.invoice_number || 'N/A') + '</div>';
+            html += '<div style="font-size: 8pt; margin-bottom: 1mm;">Status: <strong>' + statusText + '</strong></div>';
+            html += '</div>';
+            
+            // Supplier and Order Info
+            html += '<div style="margin-bottom: 4mm; font-size: 9pt;">';
+            html += '<div style="margin-bottom: 2mm;"><strong>Supplier:</strong> ' + (receipt.supplier ? receipt.supplier.name : 'N/A') + '</div>';
+            html += '<div style="margin-bottom: 2mm;"><strong>PO #:</strong> ' + (receipt.purchase_order ? receipt.purchase_order.order_number : 'N/A') + '</div>';
+            if (receipt.invoice_date) {
+                html += '<div style="margin-bottom: 2mm;"><strong>Invoice Date:</strong> ' + formatDate(receipt.invoice_date) + '</div>';
+            }
+            if (receipt.due_date) {
+                html += '<div style="margin-bottom: 2mm;"><strong>Due Date:</strong> ' + formatDate(receipt.due_date) + '</div>';
+            }
+            html += '</div>';
+            
+            // Payment Amounts - Compact
+            html += '<div style="text-align: center; margin-bottom: 4mm; padding: 3mm 0; border-top: 1px dashed #000; border-bottom: 1px dashed #000;">';
+            html += '<div style="margin-bottom: 2mm;"><span style="font-size: 8pt;">Total Amount:</span><br><span style="font-size: 12pt; font-weight: bold;">₱' + parseFloat(receipt.amounts.total_amount || 0).toFixed(2) + '</span></div>';
+            html += '<div style="margin-bottom: 2mm;"><span style="font-size: 8pt;">Paid Amount:</span><br><span style="font-size: 12pt; font-weight: bold; color: #28a745;">₱' + parseFloat(receipt.amounts.total_paid || 0).toFixed(2) + '</span></div>';
+            const balance = parseFloat(receipt.amounts.balance || 0);
+            html += '<div><span style="font-size: 8pt;">Balance:</span><br><span style="font-size: 12pt; font-weight: bold; color: ' + (balance > 0 ? '#dc3545' : '#28a745') + ';">₱' + balance.toFixed(2) + '</span></div>';
+            html += '</div>';
+            
+            // Payment Information - Compact
+            html += '<div style="margin-bottom: 4mm; font-size: 9pt;">';
+            html += '<div style="text-align: center; font-weight: bold; margin-bottom: 2mm; padding-bottom: 2mm; border-bottom: 1px dashed #000;">PAYMENT DETAILS</div>';
+            
+            if (receipt.all_payments && receipt.all_payments.length > 0) {
+                const latestPayment = receipt.all_payments[0];
+                html += '<div style="margin-bottom: 2mm;"><strong>Method:</strong> ' + formatPaymentMethod(latestPayment.payment_method || '') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Reference:</strong> ' + (latestPayment.payment_reference || 'N/A') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Date:</strong> ' + formatDate(latestPayment.payment_date) + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Amount:</strong> ₱' + parseFloat(latestPayment.payment_amount || 0).toFixed(2) + '</div>';
+                if (receipt.all_payments.length > 1) {
+                    html += '<div style="margin-top: 2mm; font-size: 8pt; color: #666;">Total Payments: ' + receipt.all_payments.length + ' transaction(s)</div>';
+                }
+            } else if (receipt.payment_details) {
+                html += '<div style="margin-bottom: 2mm;"><strong>Method:</strong> ' + formatPaymentMethod(receipt.payment_details.payment_method || '') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Reference:</strong> ' + (receipt.payment_details.payment_reference || 'N/A') + '</div>';
+                html += '<div style="margin-bottom: 2mm;"><strong>Date:</strong> ' + (receipt.payment_details.payment_date ? formatDate(receipt.payment_details.payment_date) : 'N/A') + '</div>';
+            }
+            html += '</div>';
+            
+            // Receipt Footer - Compact
+            html += '<div style="text-align: center; margin-top: 5mm; padding-top: 3mm; border-top: 1px dashed #000; font-size: 8pt; color: #666;">';
+            html += '<div style="margin-bottom: 1mm;">Receipt #: ' + (receipt.receipt_number || 'N/A') + '</div>';
+            html += '<div style="margin-bottom: 1mm;">Date: ' + formatDate(receipt.receipt_date) + '</div>';
+            if (receipt.recorded_by) {
+                html += '<div style="margin-bottom: 1mm;">Recorded by: ' + (receipt.recorded_by.name || 'N/A') + '</div>';
+            }
+            // Get month from filter
+            const receiptMonth = $('#receiptMonthFilter').val(); // Format: YYYY-MM
+            
+            // Get month name for display
+            let monthName = '';
+            if (receiptMonth) {
+                const [year, month] = receiptMonth.split('-');
+                monthName = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            } else {
+                const now = new Date();
+                monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+            
+            const generatedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            html += '<div style="margin-top: 3mm; font-size: 7pt;">Report Period: ' + monthName + '</div>';
+            html += '<div style="margin-top: 1mm; font-size: 7pt;">Generated: ' + generatedDate + '</div>';
+            html += '</div>';
+            
+            // Thank you message
+            html += '<div style="text-align: center; margin-top: 5mm; padding-top: 3mm; border-top: 1px dashed #000; font-size: 9pt; font-weight: bold;">';
+            html += 'Thank you for your payment!';
+            html += '</div>';
+            
+            html += '</div>';
+            
+            $('#receiptModalBody').html(html);
+        }
+        
+        function printReceipt() {
+            const printContent = document.getElementById('receiptContent');
+            if (!printContent) {
+                alert('Receipt content not found');
+                return;
+            }
+            
+            // Create a new window for printing (better approach - doesn't affect current page)
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            
+            if (!printWindow) {
+                alert('Please allow popups to print the receipt');
+                return;
+            }
+            
+            // Write the print content with narrow receipt styling (80mm thermal receipt)
+            printWindow.document.write('<!DOCTYPE html><html><head><title>CHAKANOKS - Payment Receipt</title>');
+            printWindow.document.write('<meta name="viewport" content="width=80mm">');
+            printWindow.document.write('<style>');
+            printWindow.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
+            printWindow.document.write('html, body { width: 80mm; margin: 0; padding: 0; background: white; overflow: hidden; }');
+            printWindow.document.write('body { font-family: "Courier New", monospace; margin: 0; padding: 0; }');
+            printWindow.document.write('.receipt-container { max-width: 80mm; width: 80mm; min-width: 80mm; margin: 0 auto; padding: 10mm 5mm; font-size: 10pt; line-height: 1.3; color: #000; }');
+            printWindow.document.write('img { max-height: 30px; max-width: 30px; object-fit: contain; }');
+            printWindow.document.write('@page { size: 80mm auto; margin: 0; width: 80mm; }');
+            printWindow.document.write('@media print { html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; } .receipt-container { max-width: 80mm !important; width: 80mm !important; min-width: 80mm !important; padding: 10mm 5mm !important; } @page { size: 80mm auto !important; margin: 0 !important; width: 80mm !important; } }');
+            printWindow.document.write('</style></head><body>');
+            printWindow.document.write(printContent.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            
+            // Wait for content to load, then trigger print
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                    // Don't close immediately - let user see the print dialog
+                    // printWindow.close();
+                }, 250);
+            };
+            
+            // Fallback if onload doesn't fire
+            setTimeout(function() {
+                if (printWindow.document.readyState === 'complete') {
+                    printWindow.focus();
+                    printWindow.print();
+                }
+            }, 500);
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        
+        function formatDateTime(date) {
+            return date.toLocaleString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        function formatPaymentMethod(method) {
+            // Handle null, undefined, or empty values
+            if (!method || (typeof method === 'string' && method.trim() === '')) {
+                return 'Not specified';
+            }
+            
+            // Convert to string and normalize
+            const methodStr = String(method).trim();
+            if (methodStr === '') {
+                return 'Not specified';
+            }
+            
+            // Normalize to lowercase for comparison
+            const normalizedMethod = methodStr.toLowerCase();
+            
+            // Map database ENUM values to user-friendly display format
+            const methodMap = {
+                // Database ENUM values (exact matches)
+                'cash': 'Cash',
+                'check': 'Check',
+                'bank_transfer': 'Bank Transfer',
+                'credit_card': 'Credit Card',
+                'online': 'Online Payment',
+                'other': 'Other',
+                
+                // Common variations (for backward compatibility)
+                'cheque': 'Check',
+                'bank transfer': 'Bank Transfer',
+                'banktransfer': 'Bank Transfer',
+                'bank-transfer': 'Bank Transfer',
+                'transfer': 'Bank Transfer',
+                'bank': 'Bank Transfer',
+                'credit card': 'Credit Card',
+                'creditcard': 'Credit Card',
+                'credit-card': 'Credit Card',
+                'card': 'Credit Card',
+                'online payment': 'Online Payment',
+                'onlinepayment': 'Online Payment',
+                'online-payment': 'Online Payment',
+                'paypal': 'PayPal',
+                'gcash': 'GCash',
+                'maya': 'Maya',
+                'paymaya': 'PayMaya'
+            };
+            
+            // First, check exact match
+            if (methodMap[normalizedMethod]) {
+                return methodMap[normalizedMethod];
+            }
+            
+            // If not found in map, try to match partial strings (contains)
+            for (const key in methodMap) {
+                if (normalizedMethod.includes(key) || key.includes(normalizedMethod)) {
+                    return methodMap[key];
+                }
+            }
+            
+            // If not found, capitalize first letter of each word (fallback)
+            return methodStr.split(/[\s_-]+/)
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
         }
         
         function updateInvoice(apId, currentInvoice) {
@@ -1892,28 +2455,398 @@
                 return;
             }
             
-            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading reports...</p></div>');
+            const month = $('#reportsMonthFilter').val() || new Date().toISOString().slice(0, 7);
+            contentDiv.html('<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading reports...</p></div>');
             
-            // For now, show a placeholder with useful information
-            setTimeout(function() {
-                let html = '<div class="content-card" style="padding: 40px; text-align: center;">';
-                html += '<i class="fas fa-chart-bar fa-4x" style="color: #2d5016; margin-bottom: 20px; opacity: 0.3;"></i>';
-                html += '<h4 style="color: #2d5016; margin-bottom: 10px;">Reports Dashboard</h4>';
-                html += '<p style="color: #666; margin-bottom: 30px;">Comprehensive reporting features coming soon</p>';
-                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">';
-                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Inventory Reports</h5><p style="color: #666; font-size: 0.9rem;">Stock levels, turnover, and trends</p></div>';
-                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Purchase Reports</h5><p style="color: #666; font-size: 0.9rem;">Purchase requests and orders analysis</p></div>';
-                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Supplier Reports</h5><p style="color: #666; font-size: 0.9rem;">Performance and delivery metrics</p></div>';
-                html += '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;"><h5 style="color: #2d5016;">Financial Reports</h5><p style="color: #666; font-size: 0.9rem;">Accounts payable and expenses</p></div>';
-                html += '</div>';
-                html += '</div>';
-                
-                if (contentDiv.length) {
-                    contentDiv.html(html);
-                    console.log('Reports content rendered successfully');
+            $.ajax({
+                url: '<?= base_url('centraladmin/api/monthly-reports') ?>',
+                method: 'GET',
+                data: { month: month },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        renderReports(response.reports, month);
+                    } else {
+                        contentDiv.html('<div class="alert alert-danger">Error: ' + (response.message || 'Failed to load reports') + '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error loading reports:', xhr);
+                    contentDiv.html('<div class="alert alert-danger">Error loading reports. Please try again.</div>');
                 }
-            }, 500);
+            });
         }
+        
+        function renderReports(reports, month) {
+            const contentDiv = $('#reportsContent');
+            const monthName = new Date(month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            let html = '<div style="display: flex; flex-direction: column; gap: 24px;">';
+            
+            // Branch Manager Reports Section
+            html += '<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #17a2b8;">';
+            html += '<h4 style="color: #17a2b8; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;"><i class="fas fa-building"></i> Branch Manager Reports</h4>';
+            
+            // Sales Report
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-chart-line" style="color: #10b981; margin-right: 8px;"></i>Sales Report - ' + monthName + '</h5>';
+            if (reports.branch_manager.sales && reports.branch_manager.sales.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #f8fafc;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Sales</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Transactions</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Avg Transaction</th></tr></thead><tbody>';
+                let totalSales = 0;
+                reports.branch_manager.sales.forEach(function(sale) {
+                    totalSales += parseFloat(sale.total_sales || 0);
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (sale.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #10b981;">₱' + parseFloat(sale.total_sales || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (sale.transaction_count || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">₱' + parseFloat(sale.avg_transaction || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
+                });
+                html += '<tr style="background: #f8fafc; font-weight: 700;"><td style="padding: 12px; border-top: 2px solid #e2e8f0;">Total</td>';
+                html += '<td style="padding: 12px; border-top: 2px solid #e2e8f0; color: #2d5016;">₱' + totalSales.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                html += '<td style="padding: 12px; border-top: 2px solid #e2e8f0;">-</td><td style="padding: 12px; border-top: 2px solid #e2e8f0;">-</td></tr>';
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No sales data available for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            
+            // Inventory Summary
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-warehouse" style="color: #3b82f6; margin-right: 8px;"></i>Inventory Summary - ' + monthName + '</h5>';
+            if (reports.branch_manager.inventory && reports.branch_manager.inventory.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #f8fafc;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Items</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Stock</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Value</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Low Stock</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Expired</th></tr></thead><tbody>';
+                reports.branch_manager.inventory.forEach(function(inv) {
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (inv.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (inv.total_items || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (inv.total_stock || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #10b981;">₱' + parseFloat(inv.total_value || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: ' + (inv.low_stock_items > 0 ? '#f59e0b' : '#64748b') + ';">' + (inv.low_stock_items || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: ' + (inv.expired_items > 0 ? '#ef4444' : '#64748b') + ';">' + (inv.expired_items || 0) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No inventory data available for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            
+            // Product Details (Branch → Category → Product)
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-list" style="color: #6366f1; margin-right: 8px;"></i>Product Details - ' + monthName + '</h5>';
+            if (reports.branch_manager.inventory_details && Object.keys(reports.branch_manager.inventory_details).length > 0) {
+                // Flatten the nested structure for display
+                let detailsHtml = '';
+                Object.keys(reports.branch_manager.inventory_details).sort().forEach(function(branchName) {
+                    detailsHtml += '<div style="margin-bottom: 20px;"><h6 style="color: #17a2b8; margin-bottom: 10px; font-weight: 600;">Branch: ' + branchName + '</h6>';
+                    Object.keys(reports.branch_manager.inventory_details[branchName]).sort().forEach(function(categoryName) {
+                        detailsHtml += '<div style="margin-bottom: 15px; margin-left: 20px;"><strong style="color: #64748b;">Category: ' + categoryName + '</strong>';
+                        detailsHtml += '<div style="overflow-x: auto; margin-top: 8px;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0; font-size: 0.9em;">';
+                        detailsHtml += '<thead style="background: #f8fafc;"><tr><th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">Product</th><th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">Total Stock</th><th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">Total Value</th><th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">Low Stock</th><th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">Expired</th></tr></thead><tbody>';
+                        reports.branch_manager.inventory_details[branchName][categoryName].forEach(function(product) {
+                            detailsHtml += '<tr><td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">' + (product.product_name || 'N/A') + '</td>';
+                            detailsHtml += '<td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">' + (product.total_stock || 0) + '</td>';
+                            detailsHtml += '<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #10b981;">₱' + parseFloat(product.total_value || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                            detailsHtml += '<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; color: ' + (product.is_low_stock ? '#f59e0b' : '#64748b') + ';">' + (product.is_low_stock ? 'Yes' : 'No') + '</td>';
+                            detailsHtml += '<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; color: ' + (product.is_expired ? '#ef4444' : '#64748b') + ';">' + (product.is_expired ? 'Yes' : 'No') + '</td></tr>';
+                        });
+                        detailsHtml += '</tbody></table></div></div>';
+                    });
+                    detailsHtml += '</div>';
+                });
+                html += detailsHtml;
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No product details available for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            
+            // Damage Products Report
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 8px;"></i>Damage Products Report - ' + monthName + '</h5>';
+            if (reports.branch_manager.damage_products && reports.branch_manager.damage_products.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #fef2f2;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Product</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Category</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Damaged</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Incidents</th></tr></thead><tbody>';
+                reports.branch_manager.damage_products.forEach(function(damage) {
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.product_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.category || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #ef4444; font-weight: 600;">' + (damage.total_damaged || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.damage_count || 0) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No damaged products reported for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            html += '</div>';
+            
+            // Inventory Staff Reports Section
+            html += '<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #10b981;">';
+            html += '<h4 style="color: #10b981; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;"><i class="fas fa-boxes"></i> Inventory Staff Reports</h4>';
+            
+            // Inventory Summary
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-warehouse" style="color: #3b82f6; margin-right: 8px;"></i>Inventory Summary - ' + monthName + '</h5>';
+            if (reports.inventory_staff.inventory && reports.inventory_staff.inventory.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #f8fafc;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Items</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Stock</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Value</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Low Stock</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Expired</th></tr></thead><tbody>';
+                reports.inventory_staff.inventory.forEach(function(inv) {
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (inv.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (inv.total_items || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (inv.total_stock || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #2d5016;">₱' + parseFloat(inv.total_value || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: ' + (inv.low_stock_items > 0 ? '#ef4444' : '#10b981') + ';">' + (inv.low_stock_items || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: ' + (inv.expired_items > 0 ? '#ef4444' : '#10b981') + ';">' + (inv.expired_items || 0) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No inventory data available</p>';
+            }
+            html += '</div>';
+            
+            // Damage Products Report (Inventory Staff)
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 8px;"></i>Damage Products Report - ' + monthName + '</h5>';
+            if (reports.inventory_staff.damage_products && reports.inventory_staff.damage_products.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #fef2f2;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Product</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Category</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Damaged</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Incidents</th></tr></thead><tbody>';
+                reports.inventory_staff.damage_products.forEach(function(damage) {
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.product_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.category || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #ef4444; font-weight: 600;">' + (damage.total_damaged || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (damage.damage_count || 0) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No damaged products reported for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            html += '</div>';
+            
+            // Franchise Manager Reports Section
+            html += '<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #8b5cf6;">';
+            html += '<h4 style="color: #8b5cf6; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;"><i class="fas fa-handshake"></i> Franchise Manager Reports</h4>';
+            
+            // Applications
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-file-alt" style="color: #6366f1; margin-right: 8px;"></i>Franchise Applications - ' + monthName + '</h5>';
+            if (reports.franchise_manager.applications && reports.franchise_manager.applications.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #f8fafc;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Date</th></tr></thead><tbody>';
+                reports.franchise_manager.applications.forEach(function(app) {
+                    const statusColor = app.status === 'approved' ? '#10b981' : app.status === 'rejected' ? '#ef4444' : '#f59e0b';
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (app.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;"><span style="color: ' + statusColor + '; font-weight: 600;">' + (app.status || 'N/A').toUpperCase() + '</span></td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A') + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No franchise applications for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            
+            // Royalties
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-money-bill-wave" style="color: #f59e0b; margin-right: 8px;"></i>Royalty Payments - ' + monthName + '</h5>';
+            if (reports.franchise_manager.royalties && reports.franchise_manager.royalties.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #f8fafc;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Gross Sales</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Royalty Amount</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Due</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th></tr></thead><tbody>';
+                let totalRoyalties = 0;
+                reports.franchise_manager.royalties.forEach(function(royalty) {
+                    totalRoyalties += parseFloat(royalty.total_due || 0);
+                    const statusColor = royalty.status === 'paid' ? '#10b981' : royalty.status === 'overdue' ? '#ef4444' : '#f59e0b';
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (royalty.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">₱' + parseFloat(royalty.gross_sales || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">₱' + parseFloat(royalty.royalty_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">₱' + parseFloat(royalty.total_due || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0;"><span style="color: ' + statusColor + '; font-weight: 600;">' + (royalty.status || 'N/A').toUpperCase() + '</span></td></tr>';
+                });
+                html += '<tr style="background: #f8fafc; font-weight: 700;"><td style="padding: 12px; border-top: 2px solid #e2e8f0;">Total</td>';
+                html += '<td style="padding: 12px; border-top: 2px solid #e2e8f0;">-</td><td style="padding: 12px; border-top: 2px solid #e2e8f0;">-</td>';
+                html += '<td style="padding: 12px; border-top: 2px solid #e2e8f0; color: #2d5016;">₱' + totalRoyalties.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                html += '<td style="padding: 12px; border-top: 2px solid #e2e8f0;">-</td></tr>';
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No royalty payments for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            html += '</div>';
+            
+            // Logistics Coordinator Reports Section
+            html += '<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #f59e0b;">';
+            html += '<h4 style="color: #f59e0b; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;"><i class="fas fa-truck"></i> Logistics Coordinator Reports</h4>';
+            
+            // Delivery Summary
+            html += '<div style="margin-bottom: 24px;">';
+            html += '<h5 style="color: #1e293b; margin-bottom: 12px; font-weight: 600;"><i class="fas fa-shipping-fast" style="color: #3b82f6; margin-right: 8px;"></i>Delivery Summary - ' + monthName + '</h5>';
+            if (reports.logistics_coordinator.delivery_summary && reports.logistics_coordinator.delivery_summary.length > 0) {
+                html += '<div style="overflow-x: auto;"><table class="table" style="margin-bottom: 0; border: 1px solid #e2e8f0;">';
+                html += '<thead style="background: #f8fafc;"><tr><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Branch</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Total Deliveries</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Completed</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Pending</th><th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">In Transit</th></tr></thead><tbody>';
+                reports.logistics_coordinator.delivery_summary.forEach(function(summary) {
+                    html += '<tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">' + (summary.branch_name || 'N/A') + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">' + (summary.total_deliveries || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #10b981;">' + (summary.completed_deliveries || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #f59e0b;">' + (summary.pending_deliveries || 0) + '</td>';
+                    html += '<td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #3b82f6;">' + (summary.in_transit_deliveries || 0) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else {
+                html += '<p style="color: #64748b; padding: 20px; text-align: center; background: #f8fafc; border-radius: 8px;">No delivery data for ' + monthName + '</p>';
+            }
+            html += '</div>';
+            html += '</div>';
+            
+            html += '</div>';
+            
+            contentDiv.html(html);
+        }
+        
+        function printAllReports() {
+            const month = $('#reportsMonthFilter').val() || new Date().toISOString().slice(0, 7);
+            const monthName = new Date(month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            // Fetch reports data for printing
+            $.ajax({
+                url: '<?= base_url('centraladmin/api/monthly-reports') ?>',
+                method: 'GET',
+                data: { month: month },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        generatePrintReport(response.reports, monthName);
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to load reports'));
+                    }
+                },
+                error: function() {
+                    alert('Error loading reports for printing');
+                }
+            });
+        }
+        
+        function generatePrintReport(reports, monthName) {
+            const printWindow = window.open('', '_blank');
+            const reportHTML = generateReportHTML(reports, monthName);
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        function generateReportHTML(reports, monthName) {
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <title>CHAKANOKS - Comprehensive Monthly Report - ${monthName}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2d5016; padding-bottom: 20px; }
+        .header h1 { color: #2d5016; margin: 0; }
+        .section { margin-bottom: 40px; page-break-inside: avoid; }
+        .section-title { background: #2d5016; color: white; padding: 10px; font-weight: bold; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f8f9fa; font-weight: bold; }
+        .total-row { background: #f8f9fa; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CHAKANOKS SUPPLY CHAIN MANAGEMENT SYSTEM</h1>
+        <h2>Comprehensive Monthly Report</h2>
+        <p><strong>Report Period: ${monthName}</strong></p>
+        <p>Generated: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+    </div>
+    
+    ${generateSectionHTML('Branch Manager Reports', reports.branch_manager, monthName)}
+    ${generateSectionHTML('Inventory Staff Reports', reports.inventory_staff, monthName)}
+    ${generateSectionHTML('Franchise Manager Reports', reports.franchise_manager, monthName)}
+    ${generateSectionHTML('Logistics Coordinator Reports', reports.logistics_coordinator, monthName)}
+</body>
+</html>`;
+        }
+        
+        function generateSectionHTML(title, data, monthName) {
+            let html = `<div class="section"><div class="section-title">${title} - ${monthName}</div>`;
+            
+            if (title.includes('Branch Manager')) {
+                // Sales Report
+                if (data.sales && data.sales.length > 0) {
+                    html += '<h3>Sales Report</h3><table><tr><th>Branch</th><th>Total Sales</th><th>Transactions</th><th>Avg Transaction</th></tr>';
+                    data.sales.forEach(sale => {
+                        html += `<tr><td>${sale.branch_name || 'N/A'}</td><td>₱${parseFloat(sale.total_sales || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td>${sale.transaction_count || 0}</td><td>₱${parseFloat(sale.avg_transaction || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+                // Damage Products
+                if (data.damage_products && data.damage_products.length > 0) {
+                    html += '<h3>Damage Products Report</h3><table><tr><th>Branch</th><th>Product</th><th>Category</th><th>Total Damaged</th><th>Incidents</th></tr>';
+                    data.damage_products.forEach(damage => {
+                        html += `<tr><td>${damage.branch_name || 'N/A'}</td><td>${damage.product_name || 'N/A'}</td><td>${damage.category || 'N/A'}</td><td>${damage.total_damaged || 0}</td><td>${damage.damage_count || 0}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+            } else if (title.includes('Inventory Staff')) {
+                // Inventory Summary
+                if (data.inventory && data.inventory.length > 0) {
+                    html += '<h3>Inventory Summary</h3><table><tr><th>Branch</th><th>Total Items</th><th>Total Stock</th><th>Total Value</th><th>Low Stock</th><th>Expired</th></tr>';
+                    data.inventory.forEach(inv => {
+                        html += `<tr><td>${inv.branch_name || 'N/A'}</td><td>${inv.total_items || 0}</td><td>${inv.total_stock || 0}</td><td>₱${parseFloat(inv.total_value || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td>${inv.low_stock_items || 0}</td><td>${inv.expired_items || 0}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+                // Damage Products
+                if (data.damage_products && data.damage_products.length > 0) {
+                    html += '<h3>Damage Products Report</h3><table><tr><th>Branch</th><th>Product</th><th>Category</th><th>Total Damaged</th><th>Incidents</th></tr>';
+                    data.damage_products.forEach(damage => {
+                        html += `<tr><td>${damage.branch_name || 'N/A'}</td><td>${damage.product_name || 'N/A'}</td><td>${damage.category || 'N/A'}</td><td>${damage.total_damaged || 0}</td><td>${damage.damage_count || 0}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+            } else if (title.includes('Franchise Manager')) {
+                // Applications
+                if (data.applications && data.applications.length > 0) {
+                    html += '<h3>Franchise Applications</h3><table><tr><th>Branch</th><th>Status</th><th>Date</th></tr>';
+                    data.applications.forEach(app => {
+                        html += `<tr><td>${app.branch_name || 'N/A'}</td><td>${(app.status || 'N/A').toUpperCase()}</td><td>${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A'}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+                // Royalties
+                if (data.royalties && data.royalties.length > 0) {
+                    html += '<h3>Royalty Payments</h3><table><tr><th>Branch</th><th>Gross Sales</th><th>Royalty Amount</th><th>Total Due</th><th>Status</th></tr>';
+                    data.royalties.forEach(royalty => {
+                        html += `<tr><td>${royalty.branch_name || 'N/A'}</td><td>₱${parseFloat(royalty.gross_sales || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td>₱${parseFloat(royalty.royalty_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td>₱${parseFloat(royalty.total_due || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td>${(royalty.status || 'N/A').toUpperCase()}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+            } else if (title.includes('Logistics Coordinator')) {
+                // Delivery Summary
+                if (data.delivery_summary && data.delivery_summary.length > 0) {
+                    html += '<h3>Delivery Summary</h3><table><tr><th>Branch</th><th>Total Deliveries</th><th>Completed</th><th>Pending</th><th>In Transit</th></tr>';
+                    data.delivery_summary.forEach(summary => {
+                        html += `<tr><td>${summary.branch_name || 'N/A'}</td><td>${summary.total_deliveries || 0}</td><td>${summary.completed_deliveries || 0}</td><td>${summary.pending_deliveries || 0}</td><td>${summary.in_transit_deliveries || 0}</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Load reports on page load if reports tab is active
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab');
+            if (activeTab === 'reports') {
+                loadReports();
+            }
+            
+            // Auto-load when month filter changes
+            $('#reportsMonthFilter').on('change', function() {
+                loadReports();
+            });
+        });
 
         // Filter change handlers
         $(document).on('change', '#apStatusFilter', function() {
@@ -1924,21 +2857,44 @@
             loadAccountsPayable();
         });
         
-        // Initialize
+        // Initialize dashboard
         $(document).ready(function() {
-            console.log('=== DASHBOARD INITIALIZATION START ===');
-            console.log('jQuery loaded:', typeof $ !== 'undefined');
+            // Initialize month filter with current month
+            const today = new Date();
+            const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
             
-            // Load data for active tab
+            $('#receiptMonthFilter').val(monthStr);
+            
+            // Show/hide sections based on active tab (Like System Administrator)
+            const activeTab = '<?= $activeTab ?? 'dashboard' ?>';
+            
+            // Hide all sections first
+            $('.content-section').removeClass('active').hide();
+            
+            // Show the appropriate section based on active tab
+            if (activeTab === 'dashboard') {
+                $('#dashboardSection').addClass('active').show();
+            } else if (activeTab === 'purchaseRequests') {
+                $('#purchaseRequestsSection').addClass('active').show();
+            } else if (activeTab === 'purchaseOrders') {
+                $('#purchaseOrdersSection').addClass('active').show();
+            } else if (activeTab === 'deliveries') {
+                $('#deliveriesSection').addClass('active').show();
+            } else if (activeTab === 'suppliers') {
+                $('#suppliersSection').addClass('active').show();
+            } else if (activeTab === 'accountsPayable') {
+                $('#accountsPayableSection').addClass('active').show();
+            } else if (activeTab === 'reports') {
+                $('#reportsSection').addClass('active').show();
+            }
+            
+            // Load tab data for sections
             loadTabData();
             
             // Filter change handlers
             $(document).on('change', '#requestStatusFilter, #requestPriorityFilter', function() {
-                console.log('Filter changed, reloading requests');
                 loadPendingRequests();
             });
-            
-            console.log('=== DASHBOARD INITIALIZATION COMPLETE ===');
         });
 </script>
     
@@ -2071,5 +3027,657 @@
             </div>
         </div>
     </div>
+
+    <!-- Payment Receipt Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white;">
+                    <h5 class="modal-title" id="receiptModalLabel">
+                        <i class="fas fa-receipt"></i> Payment Receipt
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="receiptModalBody" style="padding: 0;">
+                    <!-- Receipt content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receiptContent, #receiptContent * {
+                visibility: visible;
+            }
+            #receiptContent {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        .receipt-container {
+            padding: 30px;
+            background: white;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 3px solid #2d5016;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .receipt-header h2 {
+            color: #2d5016;
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .receipt-header p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .receipt-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .receipt-info-section h4 {
+            color: #2d5016;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+        
+        .receipt-info-section p {
+            margin: 5px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .receipt-details {
+            margin: 30px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .receipt-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .receipt-details th {
+            background: #2d5016;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .receipt-details td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .receipt-details tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .receipt-totals {
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .receipt-totals table {
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+        }
+        
+        .receipt-totals td {
+            padding: 8px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .receipt-totals .total-row {
+            background: #f3f4f6;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .receipt-totals .total-label {
+            text-align: right;
+            color: #2d5016;
+        }
+        
+        .receipt-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .payment-status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-unpaid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <select class="form-select" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="superadmin">Super Admin</option>
+                                <option value="central_admin">Central Admin</option>
+                                <option value="branch_manager">Branch Manager</option>
+                                <option value="staff">Staff</option>
+                                <option value="franchise_manager">Franchise Manager</option>
+                                <option value="logistics_coordinator">Logistics Coordinator</option>
+                                <option value="inventory_staff">Inventory Staff</option>
+                                <option value="system_admin">System Administrator</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Branch (Optional)</label>
+                            <select class="form-select" name="branch_id">
+                                <option value="">None</option>
+                                <?php
+                                $branchModel = new \App\Models\BranchModel();
+                                foreach ($branchModel->findAll() as $branch):
+                                ?>
+                                    <option value="<?= $branch['id'] ?>"><?= esc($branch['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCreateUser()">Create User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border: none; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); overflow: hidden;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white; padding: 20px 24px; border-bottom: none;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-edit" style="font-size: 1.2rem;"></i>
+                        </div>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 600; font-size: 1.25rem;">Edit User</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.8;"></button>
+                </div>
+                <div class="modal-body" style="padding: 28px 24px; background: #f8fafc;">
+                    <form id="editUserForm">
+                        <input type="hidden" name="user_id" id="edit_user_id">
+                        <div class="mb-4">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-envelope" style="color: #3b82f6; font-size: 0.9rem;"></i>
+                                Email Address
+                            </label>
+                            <input type="email" class="form-control" name="email" id="edit_email" required 
+                                   style="border-radius: 8px; border: 1.5px solid #e2e8f0; padding: 10px 14px; transition: all 0.3s ease;"
+                                   onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                                   onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-lock" style="color: #10b981; font-size: 0.9rem;"></i>
+                                Password
+                            </label>
+                            <input type="password" class="form-control" name="password" id="edit_password"
+                                   style="border-radius: 8px; border: 1.5px solid #e2e8f0; padding: 10px 14px; transition: all 0.3s ease;"
+                                   onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.1)'"
+                                   onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'"
+                                   placeholder="Leave blank to keep current password">
+                            <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem; color: #64748b;">
+                                <i class="fas fa-info-circle" style="margin-right: 4px;"></i>Leave blank to keep current password
+                            </small>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-user-tag" style="color: #8b5cf6; font-size: 0.9rem;"></i>
+                                Role
+                            </label>
+                            <select class="form-select" name="role" id="edit_role" required
+                                    style="border-radius: 8px; border: 1.5px solid #e2e8f0; padding: 10px 14px; transition: all 0.3s ease; background-color: white;"
+                                    onfocus="this.style.borderColor='#8b5cf6'; this.style.boxShadow='0 0 0 3px rgba(139, 92, 246, 0.1)'"
+                                    onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                                <option value="">Select Role</option>
+                                <option value="superadmin">Super Admin</option>
+                                <option value="central_admin">Central Admin</option>
+                                <option value="branch_manager">Branch Manager</option>
+                                <option value="staff">Staff</option>
+                                <option value="franchise_manager">Franchise Manager</option>
+                                <option value="logistics_coordinator">Logistics Coordinator</option>
+                                <option value="inventory_staff">Inventory Staff</option>
+                                <option value="system_admin">System Administrator</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-building" style="color: #f59e0b; font-size: 0.9rem;"></i>
+                                Branch <span style="font-weight: 400; color: #64748b; font-size: 0.9rem;">(Optional)</span>
+                            </label>
+                            <select class="form-select" name="branch_id" id="edit_branch_id"
+                                    style="border-radius: 8px; border: 1.5px solid #e2e8f0; padding: 10px 14px; transition: all 0.3s ease; background-color: white;"
+                                    onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245, 158, 11, 0.1)'"
+                                    onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                                <option value="">None</option>
+                                <?php
+                                $branchModel = new \App\Models\BranchModel();
+                                foreach ($branchModel->findAll() as $branch):
+                                ?>
+                                    <option value="<?= $branch['id'] ?>"><?= esc($branch['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="padding: 20px 24px; background: white; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" 
+                            style="border-radius: 8px; padding: 10px 20px; font-weight: 500; border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.3s ease;"
+                            onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1'"
+                            onmouseout="this.style.background='white'; this.style.borderColor='#e2e8f0'">
+                        <i class="fas fa-times" style="margin-right: 6px;"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitEditUser()"
+                            style="border-radius: 8px; padding: 10px 24px; font-weight: 600; background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); border: none; box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3); transition: all 0.3s ease;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(45, 80, 22, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(45, 80, 22, 0.3)'">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i>Update User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User Management Pagination
+        const userPaginationState = {
+            active: { data: <?= json_encode($activeUsers ?? []) ?>, currentPage: 1 },
+            deleted: { data: <?= json_encode($deletedUsers ?? []) ?>, currentPage: 1 }
+        };
+        
+        function paginateUsers(array, page, perPage) {
+            const totalItems = array.length;
+            const totalPages = Math.ceil(totalItems / perPage);
+            const startIndex = (page - 1) * perPage;
+            const endIndex = startIndex + perPage;
+            return {
+                data: array.slice(startIndex, endIndex),
+                currentPage: page,
+                totalPages: totalPages,
+                totalItems: totalItems,
+                perPage: perPage
+            };
+        }
+        
+        function generateUserPaginationControls(type, currentPage, totalPages, totalItems) {
+            if (totalPages <= 1) return '';
+            let html = '<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8fafc; border-radius: 8px;">';
+            html += '<div style="color: #64748b; font-size: 0.875rem;">Showing ' + ((currentPage - 1) * 10 + 1) + ' to ' + Math.min(currentPage * 10, totalItems) + ' of ' + totalItems + ' entries</div>';
+            html += '<div style="display: flex; gap: 8px;">';
+            if (currentPage > 1) {
+                html += '<button onclick="changeUserPage(\'' + type + '\', ' + (currentPage - 1) + ')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 4px; cursor: pointer;">Previous</button>';
+            }
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += '<button onclick="changeUserPage(\'' + type + '\', ' + i + ')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: ' + (i === currentPage ? '#2d5016' : 'white') + '; color: ' + (i === currentPage ? 'white' : '#1e293b') + '; border-radius: 4px; cursor: pointer; font-weight: ' + (i === currentPage ? '600' : '400') + ';">' + i + '</button>';
+            }
+            if (currentPage < totalPages) {
+                html += '<button onclick="changeUserPage(\'' + type + '\', ' + (currentPage + 1) + ')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 4px; cursor: pointer;">Next</button>';
+            }
+            html += '</div></div>';
+            return html;
+        }
+        
+        function renderUsers(type) {
+            const state = userPaginationState[type];
+            const paginated = paginateUsers(state.data, state.currentPage, 10);
+            const tbodyId = type === 'active' ? 'usersTableBody' : 'deletedUsersTableBody';
+            const paginationId = type === 'active' ? 'activeUsersPagination' : 'deletedUsersPagination';
+            const tbody = document.getElementById(tbodyId);
+            const paginationDiv = document.getElementById(paginationId);
+            
+            if (!tbody) return;
+            
+            let html = '';
+            if (paginated.data.length === 0) {
+                html = '<tr><td colspan="' + (type === 'active' ? '5' : '6') + '" style="text-align: center; padding: 40px; color: #64748b;"><i class="fas fa-users" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; display: block;"></i><p style="margin: 0; font-size: 1rem; font-weight: 500;">No ' + type + ' users found</p></td></tr>';
+            } else {
+                paginated.data.forEach(function(user) {
+                    html += '<tr' + (type === 'deleted' ? ' style="background-color: #fef2f2;"' : '') + '>';
+                    html += '<td>' + user.id + '</td>';
+                    html += '<td>' + (type === 'deleted' ? '<del style="color: #64748b;">' + user.email + '</del>' : user.email) + '</td>';
+                    html += '<td><span class="badge badge-info"' + (type === 'deleted' ? ' style="opacity: 0.7;"' : '') + '>' + user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + '</span></td>';
+                    html += '<td>' + (user.branch_name || 'N/A') + '</td>';
+                    if (type === 'deleted') {
+                        html += '<td>' + (user.deleted_at ? new Date(user.deleted_at).toLocaleString() : 'N/A') + '</td>';
+                    }
+                    html += '<td>';
+                    if (type === 'active') {
+                        html += '<button class="btn-action btn-edit" onclick="editUser(' + user.id + ')" style="margin-right: 5px;"><i class="fas fa-edit"></i> Edit</button>';
+                        <?php if (isset($me['user_id'])): ?>
+                        if (user.id != <?= $me['user_id'] ?>) {
+                            const isProtected = user.role === 'system_admin' || (user.role === 'central_admin' && (user.branch_name || '') === 'Central Office');
+                            if (isProtected) {
+                                html += '<span style="color: #64748b; font-size: 0.875rem; font-style: italic;">Protected</span>';
+                            } else {
+                                html += '<button class="btn-action btn-delete" onclick="deleteUser(' + user.id + ')" style="background: #dc3545; color: white;"><i class="fas fa-trash"></i> Delete</button>';
+                            }
+                        } else {
+                            html += '<span style="color: #64748b; font-size: 0.875rem;">Current User</span>';
+                        }
+                        <?php endif; ?>
+                    } else {
+                        html += '<button class="btn-action btn-view" onclick="restoreUser(' + user.id + ')" style="background: #10b981; color: white;"><i class="fas fa-undo"></i> Restore</button>';
+                    }
+                    html += '</td></tr>';
+                });
+            }
+            tbody.innerHTML = html;
+            if (paginationDiv) {
+                paginationDiv.innerHTML = generateUserPaginationControls(type, paginated.currentPage, paginated.totalPages, paginated.totalItems);
+            }
+        }
+        
+        function changeUserPage(type, page) {
+            userPaginationState[type].currentPage = page;
+            renderUsers(type);
+        }
+        
+        // Initialize pagination on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderUsers('active');
+            <?php if (!empty($deletedUsers)): ?>
+            renderUsers('deleted');
+            <?php endif; ?>
+        });
+        
+        // User Management Functions
+        function showCreateUserModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+            modal.show();
+        }
+
+        function submitCreateUser() {
+            const form = document.getElementById('createUserForm');
+            const formData = new FormData(form);
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[onclick="submitCreateUser()"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Creating...';
+            
+            fetch('<?= base_url('centraladmin/create-user') ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                
+                if (data.status === 'success') {
+                    alert('User created successfully');
+                    bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+                    form.reset();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                alert('Error creating user: ' + error);
+            });
+        }
+
+        function editUser(userId) {
+            // Fetch user data
+            fetch('<?= base_url('centraladmin/get-user/') ?>' + userId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const user = data.user;
+                        document.getElementById('edit_user_id').value = user.id;
+                        document.getElementById('edit_email').value = user.email || '';
+                        document.getElementById('edit_role').value = user.role || '';
+                        document.getElementById('edit_branch_id').value = user.branch_id || '';
+                        document.getElementById('edit_password').value = '';
+                        
+                        // Check if user is protected (system_admin or central_admin in Central Office)
+                        const roleSelect = document.getElementById('edit_role');
+                        const roleContainer = roleSelect.closest('.mb-4');
+                        const isProtected = user.role === 'system_admin' || 
+                                          (user.role === 'central_admin' && user.branch_name === 'Central Office');
+                        
+                        if (isProtected) {
+                            roleSelect.disabled = true;
+                            roleSelect.style.backgroundColor = '#f1f5f9';
+                            roleSelect.style.borderColor = '#cbd5e1';
+                            roleSelect.style.cursor = 'not-allowed';
+                            roleSelect.style.color = '#64748b';
+                            roleSelect.style.opacity = '0.8';
+                            
+                            // Remove existing protection note if any
+                            const existingNote = roleContainer.querySelector('.protection-note');
+                            if (existingNote) {
+                                existingNote.remove();
+                            }
+                            
+                            // Add enhanced protection note
+                            const note = document.createElement('div');
+                            note.className = 'protection-note';
+                            note.style.cssText = 'margin-top: 8px; padding: 10px 12px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 3px solid #f59e0b; border-radius: 6px; display: flex; align-items: center; gap: 8px;';
+                            note.innerHTML = '<i class="fas fa-shield-alt" style="color: #f59e0b; font-size: 0.9rem;"></i><span style="color: #92400e; font-size: 0.875rem; font-weight: 500;">Role cannot be changed for protected accounts.</span>';
+                            roleContainer.appendChild(note);
+                        } else {
+                            roleSelect.disabled = false;
+                            roleSelect.style.backgroundColor = 'white';
+                            roleSelect.style.borderColor = '#e2e8f0';
+                            roleSelect.style.cursor = 'pointer';
+                            roleSelect.style.color = '#1e293b';
+                            roleSelect.style.opacity = '1';
+                            
+                            // Remove protection note if exists
+                            const existingNote = roleContainer.querySelector('.protection-note');
+                            if (existingNote) {
+                                existingNote.remove();
+                            }
+                        }
+                        
+                        // Handle branch protection for protected users
+                        const branchSelect = document.getElementById('edit_branch_id');
+                        const branchContainer = branchSelect.closest('.mb-4');
+                        
+                        if (isProtected) {
+                            branchSelect.disabled = true;
+                            branchSelect.style.backgroundColor = '#f1f5f9';
+                            branchSelect.style.borderColor = '#cbd5e1';
+                            branchSelect.style.cursor = 'not-allowed';
+                            branchSelect.style.color = '#64748b';
+                            branchSelect.style.opacity = '0.8';
+                            
+                            // Remove existing protection note if any
+                            const existingBranchNote = branchContainer.querySelector('.protection-note-branch');
+                            if (existingBranchNote) {
+                                existingBranchNote.remove();
+                            }
+                            
+                            // Add enhanced protection note for branch
+                            const branchNote = document.createElement('div');
+                            branchNote.className = 'protection-note-branch';
+                            branchNote.style.cssText = 'margin-top: 8px; padding: 10px 12px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 3px solid #f59e0b; border-radius: 6px; display: flex; align-items: center; gap: 8px;';
+                            branchNote.innerHTML = '<i class="fas fa-shield-alt" style="color: #f59e0b; font-size: 0.9rem;"></i><span style="color: #92400e; font-size: 0.875rem; font-weight: 500;">Branch cannot be changed for protected accounts.</span>';
+                            branchContainer.appendChild(branchNote);
+                        } else {
+                            branchSelect.disabled = false;
+                            branchSelect.style.backgroundColor = 'white';
+                            branchSelect.style.borderColor = '#e2e8f0';
+                            branchSelect.style.cursor = 'pointer';
+                            branchSelect.style.color = '#1e293b';
+                            branchSelect.style.opacity = '1';
+                            
+                            // Remove protection note if exists
+                            const existingBranchNote = branchContainer.querySelector('.protection-note-branch');
+                            if (existingBranchNote) {
+                                existingBranchNote.remove();
+                            }
+                        }
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                        modal.show();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error loading user: ' + error);
+                });
+        }
+
+        function submitEditUser() {
+            const form = document.getElementById('editUserForm');
+            const formData = new FormData(form);
+            const userId = formData.get('user_id');
+            
+            // Remove password if empty
+            if (!formData.get('password')) {
+                formData.delete('password');
+            }
+            
+            fetch('<?= base_url('centraladmin/update-user/') ?>' + userId, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('User updated successfully');
+                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error updating user: ' + error);
+            });
+        }
+
+        function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user? You can restore it later.')) {
+                return;
+            }
+            
+            fetch('<?= base_url('centraladmin/delete-user/') ?>' + userId, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('User deleted successfully. You can restore it from the deleted users section.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error deleting user: ' + error);
+            });
+        }
+
+        function restoreUser(userId) {
+            if (!confirm('Are you sure you want to restore this user?')) {
+                return;
+            }
+            
+            fetch('<?= base_url('centraladmin/restore-user/') ?>' + userId, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('User restored successfully');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error restoring user: ' + error);
+            });
+        }
+    </script>
+
 </body>
 </html>

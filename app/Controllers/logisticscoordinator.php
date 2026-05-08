@@ -892,6 +892,87 @@ class LogisticsCoordinator extends BaseController
     }
 
     /**
+     * Get monthly deliveries for report
+     */
+    public function getMonthlyDeliveries()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['logistics_coordinator', 'central_admin', 'superadmin'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        try {
+            $month = $this->request->getGet('month'); // Format: YYYY-MM
+            
+            if (!$month) {
+                // Use current month if not specified
+                $month = date('Y-m');
+            }
+            
+            // Parse month
+            list($year, $monthNum) = explode('-', $month);
+            $startDate = $year . '-' . $monthNum . '-01 00:00:00';
+            $endDate = date('Y-m-t 23:59:59', strtotime($startDate));
+            
+            // Get deliveries for the month with branch and supplier information
+            $deliveries = $this->db->table('deliveries d')
+                ->select('d.*, b.name as branch_name, b.address as branch_address, s.name as supplier_name, po.order_number')
+                ->join('branches b', 'b.id = d.branch_id', 'left')
+                ->join('suppliers s', 's.id = d.supplier_id', 'left')
+                ->join('purchase_orders po', 'po.id = d.purchase_order_id', 'left')
+                ->where('DATE(d.created_at) >=', date('Y-m-d', strtotime($startDate)))
+                ->where('DATE(d.created_at) <=', date('Y-m-d', strtotime($endDate)))
+                ->orderBy('b.name', 'ASC')
+                ->orderBy('d.created_at', 'ASC')
+                ->get()
+                ->getResultArray();
+            
+            // Format deliveries
+            $formattedDeliveries = [];
+            foreach ($deliveries as $delivery) {
+                $formattedDeliveries[] = [
+                    'id' => $delivery['id'],
+                    'delivery_number' => $delivery['delivery_number'] ?? 'N/A',
+                    'branch_name' => $delivery['branch_name'] ?? 'N/A',
+                    'branch_address' => $delivery['branch_address'] ?? 'N/A',
+                    'supplier_name' => $delivery['supplier_name'] ?? 'N/A',
+                    'order_number' => $delivery['order_number'] ?? 'N/A',
+                    'status' => $delivery['status'] ?? 'N/A',
+                    'scheduled_date' => $delivery['scheduled_date'] ?? 'N/A',
+                    'actual_delivery_date' => $delivery['actual_delivery_date'] ?? null,
+                    'driver_name' => $delivery['driver_name'] ?? 'N/A',
+                    'vehicle_info' => $delivery['vehicle_info'] ?? 'N/A',
+                    'created_at' => $delivery['created_at'] ?? 'N/A',
+                ];
+            }
+            
+            // Get user info for "Prepared by"
+            $userId = $session->get('user_id') ?? $session->get('id');
+            $userEmail = $session->get('email');
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'deliveries' => $formattedDeliveries,
+                'month' => $month,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'count' => count($formattedDeliveries),
+                'user' => [
+                    'id' => $userId,
+                    'email' => $userEmail
+                ]
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching monthly deliveries: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error fetching monthly deliveries: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Get deliveries for a specific week (for calendar view)
      */
     public function getWeekDeliveries()

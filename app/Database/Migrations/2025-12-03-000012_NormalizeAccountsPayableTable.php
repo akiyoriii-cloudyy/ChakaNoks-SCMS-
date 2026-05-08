@@ -60,7 +60,7 @@ class NormalizeAccountsPayableTable extends Migration
             ");
         }
         
-        // Refresh field list again
+        //Refresh field list again
         $fieldsAfter = $this->db->getFieldNames('accounts_payable');
         
         // Add payment_status if it doesn't exist

@@ -126,14 +126,37 @@
             const maxStock = parseInt(item.max_stock || 0, 10);
             const unit = item.unit || 'pcs';
             
+            // Check if item is deleted
+            const isDeleted = item.deleted_at && item.deleted_at !== null && item.deleted_at !== '';
+            const deletedStyle = isDeleted ? 'opacity: 0.6; background-color: #f9f9f9;' : '';
+            
+            // Action buttons - show delete if not deleted, show restore if deleted
+            let actionButtons = '';
+            if (isDeleted) {
+                actionButtons = `
+                    <button class="btn btn-sm btn-success restoreBtn" data-id="${item.id}" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-right: 5px;" title="Restore item">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                `;
+            } else {
+                actionButtons = `
+                    <button class="btn btn-sm btn-info viewBtn" data-id="${item.id}" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-right: 5px;" title="View item">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn btn-sm btn-danger deleteBtn" data-id="${item.id}" data-name="${item.name || 'this item'}" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;" title="Delete item">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                `;
+            }
+            
             return `
-            <tr data-id="${item.id}" data-branch="${item.branch_id || ''}" data-status="${status}" data-date="${item.date || ''}" data-stockqty="${stockQty}" data-unit="${unit}" data-expiry="${item.expiry || ''}">
-                <td><div class="cell-title" style="font-weight: 600; color: #2d5016;">${item.name || 'N/A'}</div><div class="cell-sub" style="color: #6b7280; font-size: 0.875rem;">${item.category || 'N/A'}</div></td>
+            <tr data-id="${item.id}" data-branch="${item.branch_id || ''}" data-status="${status}" data-date="${item.date || ''}" data-stockqty="${stockQty}" data-unit="${unit}" data-expiry="${item.expiry || ''}" style="${deletedStyle}">
+                <td><div class="cell-title" style="font-weight: 600; color: ${isDeleted ? '#999' : '#2d5016'};">${item.name || 'N/A'}${isDeleted ? ' <span style="color: #dc3545; font-size: 0.75rem;">(Deleted)</span>' : ''}</div><div class="cell-sub" style="color: #6b7280; font-size: 0.875rem;">${item.category || 'N/A'}</div></td>
                 <td style="font-weight: 500;">${item.branch_label || item.branch_name || 'N/A'}</td>
-                <td><div class="cell-title" style="font-weight: 600; color: #2d5016;">${stockQty.toLocaleString()} ${unit}</div><div class="cell-sub" style="color: #6b7280; font-size: 0.875rem;">Min: ${minStock.toLocaleString()} / Max: ${maxStock.toLocaleString()}</div></td>
+                <td><div class="cell-title" style="font-weight: 600; color: ${isDeleted ? '#999' : '#2d5016'};">${stockQty.toLocaleString()} ${unit}</div><div class="cell-sub" style="color: #6b7280; font-size: 0.875rem;">Min: ${minStock.toLocaleString()} / Max: ${maxStock.toLocaleString()}</div></td>
                 <td>${statusBadge}</td>
                 <td style="color: #6b7280;">${item.updated_ago || 'Unknown'}</td>
-                <td class="right"><button class="btn btn-sm btn-info viewBtn" data-id="${item.id}" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">View</button></td>
+                <td class="right" style="display: flex; gap: 5px; justify-content: flex-end;">${actionButtons}</td>
             </tr>
             `;
         }).join("");
@@ -348,10 +371,29 @@
     $('#addClose2')?.addEventListener("click", () => addModal.hidden = true);
 
     // --------- VIEW ITEM DETAILS ---------
-    function openViewModal(itemId) {
-        const item = ITEMS.find(x => x.id == itemId);
+    // Make openViewModal globally accessible for barcode scanner
+    window.openViewModal = function(itemId) {
+        let item = ITEMS.find(x => x.id == itemId);
+        
+        // If item not found in ITEMS array, try to fetch it
         if (!item) {
-            alert('Item not found');
+            // Try to fetch item data from server
+            fetch(baseUrl + 'staff/api/get-item/' + itemId)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success' && data.item) {
+                        // Add item to ITEMS array
+                        ITEMS.push(data.item);
+                        // Recursively call openViewModal with the fetched item
+                        window.openViewModal(itemId);
+                    } else {
+                        alert('Item not found');
+                    }
+                })
+                .catch(e => {
+                    console.error('Error fetching item:', e);
+                    alert('Error loading item details');
+                });
             return;
         }
 
@@ -368,6 +410,10 @@
         const viewUpdated = $('#viewUpdated');
         const viewExpiry = $('#viewExpiry');
         const viewPrice = $('#viewPrice');
+        const viewBarcode = $('#viewBarcode');
+        const viewBarcodeLabel = $('#viewBarcodeLabel');
+        const viewBarcodeGenerate = $('#viewBarcodeGenerate');
+        const btnGenerateBarcode = $('#btnGenerateBarcode');
         
         if (viewItemTitle) viewItemTitle.textContent = item.name || 'N/A';
         if (viewCategory) viewCategory.textContent = item.category || 'N/A';
@@ -384,6 +430,21 @@
         
         if (viewUpdated) viewUpdated.textContent = item.updated_ago || 'Unknown';
         if (viewExpiry) viewExpiry.textContent = item.expiry || 'N/A';
+        
+        // Update barcode display
+        if (viewBarcode) {
+            if (item.barcode && item.barcode.trim() !== '') {
+                viewBarcode.textContent = item.barcode;
+                viewBarcode.style.color = '#2d5016';
+                if (viewBarcodeLabel) viewBarcodeLabel.textContent = 'Scan this barcode to view item details';
+                if (viewBarcodeGenerate) viewBarcodeGenerate.style.display = 'none';
+            } else {
+                viewBarcode.textContent = 'No barcode assigned';
+                viewBarcode.style.color = '#999';
+                if (viewBarcodeLabel) viewBarcodeLabel.textContent = 'Generate a barcode for this item';
+                if (viewBarcodeGenerate) viewBarcodeGenerate.style.display = 'block';
+            }
+        }
 
         const updateStockContainer = $('#updateStockContainer');
         const updateStockInput = $('#updateStockInput');
@@ -398,8 +459,108 @@
     }
 
     document.addEventListener('click', e => {
-        if (e.target.classList.contains('viewBtn')) openViewModal(e.target.dataset.id);
+        if (e.target.classList.contains('viewBtn') || e.target.closest('.viewBtn')) {
+            const btn = e.target.closest('.viewBtn') || e.target;
+            openViewModal(btn.dataset.id);
+        }
+        
+        // Handle delete button
+        if (e.target.classList.contains('deleteBtn') || e.target.closest('.deleteBtn')) {
+            const btn = e.target.closest('.deleteBtn') || e.target;
+            const itemId = btn.dataset.id;
+            const itemName = btn.dataset.name || 'this item';
+            
+            if (confirm(`Are you sure you want to delete "${itemName}"? This action can be undone by restoring the item.`)) {
+                deleteItem(itemId);
+            }
+        }
+        
+        // Handle restore button
+        if (e.target.classList.contains('restoreBtn') || e.target.closest('.restoreBtn')) {
+            const btn = e.target.closest('.restoreBtn') || e.target;
+            const itemId = btn.dataset.id;
+            
+            if (confirm('Are you sure you want to restore this item?')) {
+                restoreItem(itemId);
+            }
+        }
     });
+    
+    // Delete item function
+    function deleteItem(itemId) {
+        const btn = document.querySelector(`.deleteBtn[data-id="${itemId}"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+        }
+        
+        fetch(baseUrl + 'staff/api/delete-item/' + itemId, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Item deleted successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete item'));
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+                }
+            }
+        })
+        .catch(e => {
+            console.error('Delete error:', e);
+            alert('Error deleting item: ' + e.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+            }
+        });
+    }
+    
+    // Restore item function
+    function restoreItem(itemId) {
+        const btn = document.querySelector(`.restoreBtn[data-id="${itemId}"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restoring...';
+        }
+        
+        fetch(baseUrl + 'staff/api/restore-item/' + itemId, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Item restored successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to restore item'));
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-undo"></i> Restore';
+                }
+            }
+        })
+        .catch(e => {
+            console.error('Restore error:', e);
+            alert('Error restoring item: ' + e.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-undo"></i> Restore';
+            }
+        });
+    }
 
     $('#viewClose')?.addEventListener('click', () => {
         if (viewModal) {
@@ -602,6 +763,49 @@
                 alert(msg);
             })
             .catch(e => alert('Error: ' + e.message));
+    });
+    
+    // Generate Barcode button
+    $('#btnGenerateBarcode')?.addEventListener('click', () => {
+        const id = viewModal?.dataset?.currentId;
+        if (!id) return alert('Item ID not found');
+        
+        const btn = $('#btnGenerateBarcode');
+        const originalText = btn?.textContent;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        }
+        
+        fetch(baseUrl + 'staff/api/generate-barcode/' + id, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Barcode generated successfully: ' + data.barcode);
+                // Reload items to get updated barcode
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to generate barcode'));
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText || '<i class="fas fa-qrcode"></i> Generate Barcode';
+                }
+            }
+        })
+        .catch(e => {
+            console.error('Barcode generation error:', e);
+            alert('Error generating barcode: ' + e.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText || '<i class="fas fa-qrcode"></i> Generate Barcode';
+            }
+        });
     });
 
     // Print Report button

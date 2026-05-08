@@ -6,6 +6,7 @@ use App\Models\ProductModel;
 use App\Models\StockTransactionModel;
 use App\Models\BranchModel;
 use App\Models\CategoryModel;
+use App\Libraries\NotificationService;
 use Config\Database;
 use Exception;
 
@@ -15,6 +16,8 @@ class Staff extends BaseController
     protected $model;
     protected $stockTransactionModel;
     protected $branchModel;
+    protected $notificationService;
+    protected $deliveryModel;
 
     public function __construct()
     {
@@ -22,6 +25,8 @@ class Staff extends BaseController
         $this->model = new ProductModel();
         $this->stockTransactionModel = new StockTransactionModel();
         $this->branchModel = new BranchModel();
+        $this->notificationService = new NotificationService();
+        $this->deliveryModel = new \App\Models\DeliveryModel();
     }
 
     public function index()
@@ -151,6 +156,540 @@ class Staff extends BaseController
         ]);
     }
 
+    /**
+     * Get monthly items for report generation
+     */
+    public function getMonthlyItems()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Not authorized'
+            ]);
+        }
+        
+        try {
+            $month = $this->request->getGet('month'); // Format: YYYY-MM
+            
+            if (!$month) {
+                // Use current month if not specified
+                $month = date('Y-m');
+            }
+            
+            // Parse month
+            list($year, $monthNum) = explode('-', $month);
+            $startDate = $year . '-' . $monthNum . '-01 00:00:00';
+            $endDate = date('Y-m-t 23:59:59', strtotime($startDate));
+            
+            // Get branch scope
+            $role = $session->get('role');
+            $branchId = $session->get('branch_id');
+            $enforceBranchScope = !in_array($role, ['central_admin', 'superadmin']);
+            
+            // Get branch information
+            $branchInfo = null;
+            if ($branchId) {
+                $branchModel = new \App\Models\BranchModel();
+                $branchInfo = $branchModel->find($branchId);
+            }
+            
+            // Build query - Get ALL products (not just created in that month)
+            $builder = $this->db->table('products')
+                ->select('products.*, categories.name AS category, branches.name AS branch_name, branches.address AS branch_address')
+                ->join('categories', 'categories.id = products.category_id', 'left')
+                ->join('branches', 'branches.id = products.branch_id', 'left')
+                ->where('products.deleted_at IS NULL'); // Exclude deleted products
+            
+            // Enforce branch scope if needed
+            if ($enforceBranchScope && $branchId) {
+                $builder->where('products.branch_id', $branchId);
+            }
+            
+            $items = $builder->orderBy('categories.name', 'ASC')
+                ->orderBy('products.name', 'ASC')
+                ->get()
+                ->getResultArray();
+            
+            // Format items and calculate stock in/out for the month
+            $formattedItems = [];
+            foreach ($items as $item) {
+                $productId = $item['id'];
+                
+                // Get stock in transactions for the month
+                // Use COALESCE to check transaction_date first, then created_at if transaction_date is NULL
+                $stockInQuery = "
+                    SELECT SUM(quantity) as total_stock_in 
+                    FROM stock_transactions 
+                    WHERE product_id = ? 
+                    AND transaction_type = 'stock_in'
+                    AND (
+                        (transaction_date IS NOT NULL AND DATE(transaction_date) >= ? AND DATE(transaction_date) <= ?)
+                        OR 
+                        (transaction_date IS NULL AND DATE(created_at) >= ? AND DATE(created_at) <= ?)
+                    )
+                ";
+                
+                $stockInResult = $this->db->query($stockInQuery, [
+                    $productId,
+                    date('Y-m-d', strtotime($startDate)),
+                    date('Y-m-d', strtotime($endDate)),
+                    date('Y-m-d', strtotime($startDate)),
+                    date('Y-m-d', strtotime($endDate))
+                ])->getRowArray();
+                
+                $stockIn = (int)($stockInResult['total_stock_in'] ?? 0);
+                
+                // Get stock out transactions for the month
+                // Use COALESCE to check transaction_date first, then created_at if transaction_date is NULL
+                $stockOutQuery = "
+                    SELECT SUM(quantity) as total_stock_out 
+                    FROM stock_transactions 
+                    WHERE product_id = ? 
+                    AND transaction_type = 'stock_out'
+                    AND (
+                        (transaction_date IS NOT NULL AND DATE(transaction_date) >= ? AND DATE(transaction_date) <= ?)
+                        OR 
+                        (transaction_date IS NULL AND DATE(created_at) >= ? AND DATE(created_at) <= ?)
+                    )
+                ";
+                
+                $stockOutResult = $this->db->query($stockOutQuery, [
+                    $productId,
+                    date('Y-m-d', strtotime($startDate)),
+                    date('Y-m-d', strtotime($endDate)),
+                    date('Y-m-d', strtotime($startDate)),
+                    date('Y-m-d', strtotime($endDate))
+                ])->getRowArray();
+                
+                $stockOut = (int)($stockOutResult['total_stock_out'] ?? 0);
+                
+                // Check if product was updated in this month
+                $productUpdatedInMonth = false;
+                if (isset($item['updated_at']) && $item['updated_at']) {
+                    $updatedDate = date('Y-m-d', strtotime($item['updated_at']));
+                    $startDateOnly = date('Y-m-d', strtotime($startDate));
+                    $endDateOnly = date('Y-m-d', strtotime($endDate));
+                    $productUpdatedInMonth = ($updatedDate >= $startDateOnly && $updatedDate <= $endDateOnly);
+                }
+                
+                // Include items that have transactions in this month OR were updated in this month
+                // This ensures the report shows all products with activity in the selected month
+                if ($stockIn > 0 || $stockOut > 0 || $productUpdatedInMonth) {
+                    $formattedItems[] = [
+                        'id' => $item['id'],
+                        'name' => $item['name'],
+                        'category' => $item['category'] ?? 'N/A',
+                        'stock_qty' => (int)($item['stock_qty'] ?? 0),
+                        'min_stock' => (int)($item['min_stock'] ?? 0),
+                        'max_stock' => (int)($item['max_stock'] ?? 0),
+                        'unit' => $item['unit'] ?? 'N/A',
+                        'price' => (float)($item['price'] ?? 0),
+                        'branch_name' => $item['branch_name'] ?? 'N/A',
+                        'branch_address' => $item['branch_address'] ?? 'N/A',
+                        'stock_in' => $stockIn,
+                        'stock_out' => $stockOut,
+                        'created_at' => $item['created_at'],
+                        'updated_at' => $item['updated_at'],
+                        'last_updated' => $item['updated_at'] // Add for display in report
+                    ];
+                }
+            }
+            
+            // Get user info for notification
+            $userId = $session->get('user_id') ?? $session->get('id');
+            $userEmail = $session->get('email');
+            
+            // Log for debugging
+            log_message('info', "Monthly report for month {$month}: Found " . count($formattedItems) . " products with activity (transactions or updates). Date range: {$startDate} to {$endDate}");
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'items' => $formattedItems,
+                'month' => $month,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'count' => count($formattedItems),
+                'branch' => $branchInfo ? [
+                    'id' => $branchInfo['id'],
+                    'name' => $branchInfo['name'] ?? 'N/A',
+                    'address' => $branchInfo['address'] ?? 'N/A',
+                    'code' => $branchInfo['code'] ?? 'N/A'
+                ] : null,
+                'user' => [
+                    'id' => $userId,
+                    'email' => $userEmail
+                ]
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching monthly items: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error fetching monthly items: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Delete an inventory item (soft delete)
+     */
+    public function deleteItem($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Not authorized'
+            ]);
+        }
+        
+        if (!$id) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Item ID is required'
+            ]);
+        }
+        
+        try {
+            $item = $this->model->find($id);
+            
+            if (!$item) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Item not found'
+                ]);
+            }
+            
+            // Check branch access
+            $role = $session->get('role');
+            $branchId = $session->get('branch_id');
+            $enforceBranchScope = !in_array($role, ['central_admin', 'superadmin']);
+            
+            if ($enforceBranchScope && $branchId && (int)$item['branch_id'] !== (int)$branchId) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Not authorized to delete this item'
+                ]);
+            }
+            
+            // Soft delete - set deleted_at timestamp
+            $this->model->update($id, [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+            
+            log_message('info', "Item {$id} soft deleted by user {$session->get('user_id')}");
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Item deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error deleting item: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error deleting item: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Restore a deleted inventory item
+     */
+    public function restoreItem($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Not authorized'
+            ]);
+        }
+        
+        if (!$id) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Item ID is required'
+            ]);
+        }
+        
+        try {
+            $item = $this->model->find($id);
+            
+            if (!$item) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Item not found'
+                ]);
+            }
+            
+            // Check branch access
+            $role = $session->get('role');
+            $branchId = $session->get('branch_id');
+            $enforceBranchScope = !in_array($role, ['central_admin', 'superadmin']);
+            
+            if ($enforceBranchScope && $branchId && (int)$item['branch_id'] !== (int)$branchId) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Not authorized to restore this item'
+                ]);
+            }
+            
+            // Restore - clear deleted_at timestamp
+            $this->model->update($id, [
+                'deleted_at' => null
+            ]);
+            
+            log_message('info', "Item {$id} restored by user {$session->get('user_id')}");
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Item restored successfully'
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error restoring item: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error restoring item: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Get single item by ID (for barcode scanner)
+     */
+    public function getItem($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Not authorized'
+            ]);
+        }
+        
+        if (!$id) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Item ID is required'
+            ]);
+        }
+        
+        try {
+            // Get item with all related data
+            $item = $this->db->table('products p')
+                ->select('p.*, b.name AS branch_name, b.code AS branch_code, b.address AS branch_location, c.name AS category')
+                ->join('branches b', 'b.id = p.branch_id', 'left')
+                ->join('categories c', 'c.id = p.category_id', 'left')
+                ->where('p.id', $id)
+                ->where('p.deleted_at IS NULL') // Exclude deleted items
+                ->get()
+                ->getRowArray();
+            
+            if (!$item) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Item not found'
+                ]);
+            }
+            
+            // Check branch access
+            $role = $session->get('role');
+            $branchId = $session->get('branch_id');
+            $enforceBranchScope = !in_array($role, ['central_admin', 'superadmin']);
+            
+            if ($enforceBranchScope && $branchId && (int)$item['branch_id'] !== (int)$branchId) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Not authorized to view this item'
+                ]);
+            }
+            
+            // Process item data similar to getInventory
+            $item['status'] = $this->model->calculateStatus($item);
+            $item = $this->model->processTimestamps($item);
+            $item['stock_qty'] = (int)($item['stock_qty'] ?? 0);
+            $item['min_stock'] = (int)($item['min_stock'] ?? 0);
+            $item['max_stock'] = (int)($item['max_stock'] ?? 0);
+            $item['price'] = (float)($item['price'] ?? 0);
+            $item['branch_label'] = $item['branch_name'] ?? ($item['branch_code'] ?? 'Unassigned');
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'item' => $item
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching item: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error fetching item: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Generate barcode for an item if it doesn't have one
+     */
+    public function generateBarcode($id = null)
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Not authorized'
+            ]);
+        }
+        
+        if (!$id) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Item ID is required'
+            ]);
+        }
+        
+        try {
+            $item = $this->model->find($id);
+            
+            if (!$item) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Item not found'
+                ]);
+            }
+            
+            // Check branch access
+            $role = $session->get('role');
+            $branchId = $session->get('branch_id');
+            $enforceBranchScope = !in_array($role, ['central_admin', 'superadmin']);
+            
+            if ($enforceBranchScope && $branchId && (int)$item['branch_id'] !== (int)$branchId) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Not authorized to generate barcode for this item'
+                ]);
+            }
+            
+            // Check if barcode already exists
+            if (!empty($item['barcode']) && trim($item['barcode']) !== '') {
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Item already has a barcode',
+                    'barcode' => $item['barcode']
+                ]);
+            }
+            
+            // Generate unique barcode: PROD-{ID}-{TIMESTAMP}
+            $barcode = 'PROD-' . str_pad($id, 6, '0', STR_PAD_LEFT) . '-' . date('YmdHis');
+            
+            // Ensure uniqueness
+            $existing = $this->db->table('products')
+                ->where('barcode', $barcode)
+                ->get()
+                ->getRowArray();
+            
+            if ($existing) {
+                // If exists, add random suffix
+                $barcode = $barcode . '-' . rand(1000, 9999);
+            }
+            
+            // Update item with barcode using direct database update to avoid allowedFields restriction
+            $updateResult = $this->db->table('products')
+                ->where('id', $id)
+                ->update([
+                    'barcode' => $barcode,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            
+            if ($updateResult === false) {
+                $error = $this->db->error();
+                log_message('error', 'Failed to update barcode: ' . json_encode($error));
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to update barcode: ' . ($error['message'] ?? 'Unknown error')
+                ]);
+            }
+            
+            log_message('info', "Barcode generated for item {$id}: {$barcode}");
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Barcode generated successfully',
+                'barcode' => $barcode
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error generating barcode: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error generating barcode: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Notify central admin when monthly report is generated
+     */
+    public function notifyReportGenerated()
+    {
+        $session = session();
+        
+        if (!$session->get('logged_in')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Not authorized'
+            ]);
+        }
+        
+        try {
+            $branchId = $this->request->getPost('branch_id');
+            $branchName = $this->request->getPost('branch_name') ?? 'Unknown Branch';
+            $branchAddress = $this->request->getPost('branch_address') ?? 'N/A';
+            $month = $this->request->getPost('month') ?? date('F Y');
+            $itemCount = $this->request->getPost('item_count') ?? 0;
+            
+            $userId = $session->get('user_id') ?? $session->get('id');
+            $userEmail = $session->get('email') ?? 'Unknown User';
+            
+            // Create notification for central admin
+            $notificationData = [
+                'user_id' => null, // Broadcast to all central admins
+                'role' => 'central_admin',
+                'type' => 'info',
+                'title' => 'Monthly Inventory Report Generated',
+                'message' => "Branch: {$branchName} ({$branchAddress}) has generated a monthly inventory report for {$month}. Total items: {$itemCount}. Generated by: {$userEmail}",
+                'link' => base_url('staff/dashboard'),
+                'related_table' => 'branches',
+                'related_id' => $branchId
+            ];
+            
+            $notificationId = $this->notificationService->notify($notificationData, false, false);
+            
+            if ($notificationId) {
+                log_message('info', "Monthly report notification created for branch {$branchName} (ID: {$branchId})");
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Notification sent to central admin',
+                    'notification_id' => $notificationId
+                ]);
+            } else {
+                log_message('warning', "Failed to create monthly report notification for branch {$branchName}");
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to create notification'
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error creating report notification: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Error creating notification: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
     /**
      * Inventory AJAX API: return items for purchase request form and other consumers
      */
@@ -322,6 +861,7 @@ class Staff extends BaseController
         $now = date('Y-m-d H:i:s');
         $payload = [
             'name'           => $name,
+            'barcode'        => $this->request->getPost('barcode') ?: null,
             'category_id'   => $categoryId,
             'unit'          => $this->request->getPost('unit') ?? 'pcs',
             'price'         => (float)($this->request->getPost('price') ?? 0),
@@ -354,6 +894,13 @@ class Staff extends BaseController
             $insertId = $this->db->insertID();
 
             $product = $this->model->find($insertId);
+            
+            // Get branch name for notification
+            $branch = $this->branchModel->find($branchId);
+            $product['branch_name'] = $branch['name'] ?? 'Unknown Branch';
+            
+            // Send notification
+            $this->notificationService->notifyProductUpdate('created', $product, $userId);
 
             return $this->response->setJSON([
                 'status'  => 'success',
@@ -434,7 +981,21 @@ class Staff extends BaseController
             'updated_at' => date('Y-m-d H:i:s')
         ]);
 
-        if ($ok) return $this->response->setJSON(['status' => 'success', 'stock_qty' => $newQty]);
+        if ($ok) {
+            // Check for low stock after update
+            $updatedProduct = $this->model->find((int)$id);
+            $branch = $this->branchModel->find($updatedProduct['branch_id']);
+            $updatedProduct['branch_name'] = $branch['name'] ?? 'Unknown Branch';
+            
+            if ($updatedProduct['min_stock'] > 0 && $newQty <= $updatedProduct['min_stock']) {
+                $this->notificationService->notifyLowStock($updatedProduct);
+            }
+            
+            // Notify about stock update
+            $this->notificationService->notifyProductUpdate('updated', $updatedProduct, $session->get('user_id'));
+            
+            return $this->response->setJSON(['status' => 'success', 'stock_qty' => $newQty]);
+        }
 
         $err = $this->db->error();
         return $this->response->setJSON(['status' => 'error', 'error' => $err['message'] ?? 'Update failed']);
@@ -648,6 +1209,58 @@ class Staff extends BaseController
     }
 
     /**
+     * Get branches for transfer (only 5 specific branches: LANANG, AGDAO, BUHANGIN, TORIL, MATINA)
+     * Excludes current branch and Toril if user is Toril branch manager
+     */
+    public function getTransferBranches()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in') || !in_array($session->get('role'), ['inventorystaff', 'inventory_staff', 'branch_manager', 'manager'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Not authorized']);
+        }
+
+        try {
+            $currentBranchId = $session->get('branch_id');
+            
+            // Get current branch info to check if it's Toril
+            $currentBranch = null;
+            if ($currentBranchId) {
+                $currentBranch = $this->branchModel->find($currentBranchId);
+            }
+            
+            // Only include these 5 specific branches (excluding franchise branches)
+            $allowedBranchCodes = ['LANANG', 'AGDAO', 'BUHANGIN', 'TORIL', 'MATINA'];
+            
+            // Build query to get only the allowed branches
+            $builder = $this->branchModel
+                ->whereIn('code', $allowedBranchCodes)
+                ->where('franchise_type', 'company_owned') // Ensure only company-owned branches
+                ->orderBy('name', 'ASC');
+            
+            // Exclude current branch
+            if ($currentBranchId) {
+                $builder->where('id !=', $currentBranchId);
+            }
+            
+            // If current branch is Toril, exclude Toril from the list
+            if ($currentBranch && strtoupper($currentBranch['code'] ?? '') === 'TORIL') {
+                $builder->where('code !=', 'TORIL');
+            }
+            
+            $branches = $builder->findAll();
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'branches' => $branches
+            ]);
+        } catch (Exception $e) {
+            log_message('error', 'Error getting transfer branches: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error loading branches']);
+        }
+    }
+
+    /**
      * Record stock out
      */
     public function recordStockOut()
@@ -663,9 +1276,15 @@ class Staff extends BaseController
         $quantity = (int)($this->request->getPost('quantity') ?? 0);
         $reason = $this->request->getPost('reason') ?? 'other';
         $notes = $this->request->getPost('notes') ?? '';
+        $transferBranchId = $this->request->getPost('transfer_branch_id') ? (int)$this->request->getPost('transfer_branch_id') : null;
 
         if ($productId <= 0 || $quantity <= 0) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid product or quantity']);
+        }
+
+        // If reason is transfer, validate transfer branch
+        if (stripos($reason, 'transfer') !== false && !$transferBranchId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Please select a branch to transfer to']);
         }
 
         // Verify product belongs to branch
@@ -683,9 +1302,23 @@ class Staff extends BaseController
         }
 
         $userId = $session->get('user_id') ?? $session->get('id');
-        $finalNotes = $reason . ($notes ? ': ' . $notes : '');
+        
+        // Build notes with transfer branch info if applicable
+        $finalNotes = $reason;
+        $transferBranch = null;
+        if ($transferBranchId) {
+            $transferBranch = $this->branchModel->find($transferBranchId);
+            $transferBranchName = $transferBranch ? $transferBranch['name'] : 'Unknown Branch';
+            $finalNotes .= ' to ' . $transferBranchName;
+        }
+        if ($notes) {
+            $finalNotes .= ($finalNotes ? ': ' : '') . $notes;
+        }
 
-        // Record STOCK-OUT transaction
+        // Start database transaction for transfer
+        $this->db->transStart();
+
+        // Record STOCK-OUT transaction at source branch
         $stockOutRecorded = $this->stockTransactionModel->recordStockOut(
             $productId,
             $quantity,
@@ -695,14 +1328,89 @@ class Staff extends BaseController
             $finalNotes
         );
 
-        if ($stockOutRecorded) {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Stock out recorded successfully'
-            ]);
+        if (!$stockOutRecorded) {
+            $this->db->transRollback();
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record stock out']);
         }
 
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record stock out']);
+        // If this is a transfer, create stock in at destination branch
+        if ($transferBranchId && $transferBranch) {
+            // Find or create product at destination branch
+            $destinationProduct = $this->db->table('products')
+                ->where('name', $product['name'])
+                ->where('branch_id', $transferBranchId)
+                ->where('deleted_at IS NULL')
+                ->get()
+                ->getRowArray();
+
+            $destinationProductId = null;
+            
+            if ($destinationProduct) {
+                // Product exists at destination branch, use it
+                $destinationProductId = (int)$destinationProduct['id'];
+            } else {
+                // Create new product at destination branch
+                $newProductData = [
+                    'name' => $product['name'],
+                    'branch_id' => $transferBranchId,
+                    'category_id' => $product['category_id'] ?? null,
+                    'price' => $product['price'] ?? 0,
+                    'stock_qty' => 0, // Will be updated by stock-in
+                    'unit' => $product['unit'] ?? 'pcs',
+                    'min_stock' => $product['min_stock'] ?? 0,
+                    'max_stock' => $product['max_stock'] ?? 0,
+                    'barcode' => $product['barcode'] ?? null,
+                    'expiry' => $product['expiry'] ?? null,
+                    'status' => 'active',
+                    'created_by' => $userId,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $insertResult = $this->db->table('products')->insert($newProductData);
+                if (!$insertResult) {
+                    $this->db->transRollback();
+                    $error = $this->db->error();
+                    log_message('error', 'Failed to create product at destination branch: ' . json_encode($error));
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to create product at destination branch']);
+                }
+
+                $destinationProductId = $this->db->insertID();
+            }
+
+            // Record STOCK-IN transaction at destination branch
+            $transferNotes = 'Transfer from ' . ($this->branchModel->find($branchId)['name'] ?? 'Unknown Branch');
+            if ($notes) {
+                $transferNotes .= ': ' . $notes;
+            }
+
+            $stockInRecorded = $this->stockTransactionModel->recordStockIn(
+                $destinationProductId,
+                $quantity,
+                null, // reference_id
+                'branch_transfer', // reference_type
+                $userId, // created_by
+                $product['expiry'] ?? null
+            );
+
+            if (!$stockInRecorded) {
+                $this->db->transRollback();
+                log_message('error', 'Failed to record stock in at destination branch');
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record stock in at destination branch']);
+            }
+        }
+
+        // Complete transaction
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Transaction failed']);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => $transferBranchId ? 'Stock transferred successfully' : 'Stock out recorded successfully'
+        ]);
     }
 
     /**
@@ -774,24 +1482,31 @@ class Staff extends BaseController
 
             $formattedDeliveries = [];
             foreach ($deliveries as $delivery) {
-                $formattedDeliveries[] = [
-                    'id' => $delivery['id'],
-                    'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
-                    'purchase_order' => [
-                        'id' => $delivery['purchase_order_id'],
-                        'order_number' => $delivery['order_number'] ?? 'N/A',
-                    ],
-                    'supplier' => [
-                        'id' => $delivery['supplier_id'],
-                        'name' => $delivery['supplier_name'] ?? 'N/A',
-                    ],
-                    'status' => $delivery['status'] ?? 'scheduled',
-                    'scheduled_date' => $delivery['scheduled_date'],
-                    'actual_delivery_date' => $delivery['actual_delivery_date'],
-                    'driver_name' => $delivery['driver_name'],
-                    'vehicle_info' => $delivery['vehicle_info'],
-                    'notes' => $delivery['notes'],
-                ];
+                // Use trackDelivery to get full details including payment status
+                $deliveryDetails = $this->deliveryModel->trackDelivery($delivery['id']);
+                if ($deliveryDetails) {
+                    $formattedDeliveries[] = $deliveryDetails;
+                } else {
+                    // Fallback to basic data if trackDelivery fails
+                    $formattedDeliveries[] = [
+                        'id' => $delivery['id'],
+                        'delivery_number' => $delivery['delivery_number'] ?? ('DLV-' . str_pad($delivery['id'], 5, '0', STR_PAD_LEFT)),
+                        'purchase_order' => [
+                            'id' => $delivery['purchase_order_id'],
+                            'order_number' => $delivery['order_number'] ?? 'N/A',
+                        ],
+                        'supplier' => [
+                            'id' => $delivery['supplier_id'],
+                            'name' => $delivery['supplier_name'] ?? 'N/A',
+                        ],
+                        'status' => $delivery['status'] ?? 'scheduled',
+                        'scheduled_date' => $delivery['scheduled_date'],
+                        'actual_delivery_date' => $delivery['actual_delivery_date'],
+                        'driver_name' => $delivery['driver_name'],
+                        'vehicle_info' => $delivery['vehicle_info'],
+                        'notes' => $delivery['notes'],
+                    ];
+                }
             }
 
             return $this->response->setJSON([
